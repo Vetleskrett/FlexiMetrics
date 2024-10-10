@@ -11,4 +11,13 @@ public class AppDbContext : DbContext
     }
 
     public DbSet<Course> Courses { get; set; }
+    public DbSet<Team> Teams { get; set; }
+
+    protected override void OnModelCreating(ModelBuilder modelBuilder)
+    {
+        base.OnModelCreating(modelBuilder);
+        modelBuilder.Entity<Team>()
+                    .HasIndex(t => t.TeamId)
+                    .IsUnique();
+    }
 }
