@@ -45,7 +45,7 @@
 		</div>
 
 		<Button
-			class="flex h-9 flex-row justify-between gap-2 bg-[#2EB275] pl-2 pr-3 hover:bg-[#259663]"
+			class="bg-button-green hover:bg-button-green-hover flex h-9 flex-row justify-between gap-2 pl-2 pr-3"
 		>
 			<Plus />
 			<p>New</p>
