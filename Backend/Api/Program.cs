@@ -1,8 +1,6 @@
 using Api.Courses;
 using FluentValidation;
 using Database;
-using Api.Templates;
-using Database.Models;
 using Api.Teams;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -12,7 +10,7 @@ builder.AddServiceDefaults();
 builder.AddNpgsqlDbContext<AppDbContext>("postgresdb");
 
 builder.Services.AddScoped<ICourseService, CourseService>();
-builder.Services.AddScoped<TeamService>();
+builder.Services.AddScoped<ITeamService, TeamService>();
 
 builder.Services.AddValidatorsFromAssemblyContaining<Program>();
 

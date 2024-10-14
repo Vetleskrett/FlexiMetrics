@@ -17,7 +17,7 @@ public class AppDbContext : DbContext
     {
         base.OnModelCreating(modelBuilder);
         modelBuilder.Entity<Team>()
-                    .HasIndex(t => t.TeamId)
+                    .HasIndex(t => new { t.TeamId, t.CourseId })
                     .IsUnique();
     }
 }

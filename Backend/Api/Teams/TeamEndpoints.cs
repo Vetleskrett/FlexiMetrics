@@ -9,7 +9,7 @@ namespace Api.Teams
         {
             var group = app.MapGroup("teams").WithTags("Teams");
 
-            group.MapGet("/", async (TeamService teamService) =>
+            group.MapGet("/", async (ITeamService teamService) =>
             {
                 var teams = await teamService.GetAll();
                 var teamsResponse = teams.MapToResponse();
@@ -19,7 +19,7 @@ namespace Api.Teams
             .WithName("GetAllTeams")
             .WithSummary("Get all teams");
 
-            group.MapGet("/{id:guid}", async (TeamService teamService, Guid id) =>
+            group.MapGet("/{id:guid}", async (ITeamService teamService, Guid id) =>
             {
                 var result = await teamService.GetById(id);
                 if (result is not null)
@@ -35,7 +35,7 @@ namespace Api.Teams
             .WithName("GetTeam")
             .WithSummary("Get team by id");
 
-            group.MapPost("/", async (TeamService teamService, CreateTeamRequest request) =>
+            group.MapPost("/", async (ITeamService teamService, CreateTeamRequest request) =>
             {
                 var team = request.MapToCourse();
                 var result = await teamService.Create(team);
@@ -55,7 +55,7 @@ namespace Api.Teams
             .WithName("CreateTeam")
             .WithSummary("Create new team");
 
-            group.MapPut("/{id:guid}", async (TeamService teamService, Guid id, UpdateTeamRequest request) =>
+            group.MapPut("/{id:guid}", async (ITeamService teamService, Guid id, UpdateTeamRequest request) =>
             {
                 var team = request.MapToCourse(id);
                 var result = await teamService.Update(team);
@@ -80,7 +80,7 @@ namespace Api.Teams
             .WithName("UpdateTeam")
             .WithSummary("Update team by id");
 
-            group.MapDelete("/{id:guid}", async (TeamService teamService, Guid id) =>
+            group.MapDelete("/{id:guid}", async (ITeamService teamService, Guid id) =>
             {
                 var deleted = await teamService.DeleteById(id);
                 return deleted ? Results.Ok() : Results.NotFound();
