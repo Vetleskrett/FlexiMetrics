@@ -15,6 +15,13 @@ const config: Config = {
 		},
 		extend: {
 			colors: {
+				button: {
+					green: {
+						DEFAULT: "#2EB275",
+						hover: "#259663"
+					}
+				},
+
 				border: "hsl(var(--border) / <alpha-value>)",
 				input: "hsl(var(--input) / <alpha-value>)",
 				ring: "hsl(var(--ring) / <alpha-value>)",
