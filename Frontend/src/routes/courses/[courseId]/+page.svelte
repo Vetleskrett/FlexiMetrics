@@ -1,17 +1,15 @@
 <script lang="ts">
-	import type { PageData } from './$types';
 	import { page } from '$app/stores';
-	import AssignmentsCard from '../../../components/AssignmentsCard.svelte';
-	import StudentsCard from '../../../components/StudentsCard.svelte';
-	import type { Student, Teacher, Team } from '../../../types';
+	import AssignmentsCard from 'src/components/AssignmentsCard.svelte';
+	import StudentsCard from 'src/components/StudentsCard.svelte';
+	import type { Student, Teacher, Team } from 'src/types';
 	import EllipsisVertical from 'lucide-svelte/icons/ellipsis-vertical';
 	import Pencil from 'lucide-svelte/icons/pencil';
 	import Trash2 from 'lucide-svelte/icons/trash-2';
 	import * as DropdownMenu from '$lib/components/ui/dropdown-menu';
-	import TeamsCard from '../../../components/TeamsCard.svelte';
-	import TeachersCard from '../../../components/TeachersCard.svelte';
-
-	export let data: PageData;
+	import TeamsCard from 'src/components/TeamsCard.svelte';
+	import TeachersCard from 'src/components/TeachersCard.svelte';
+	import * as Breadcrumb from '$lib/components/ui/breadcrumb/index.js';
 
 	const courseId = $page.params.courseId;
 
@@ -28,24 +26,28 @@
 			id: '1',
 			name: 'Assignment 1',
 			due: '18.09.2024',
+			individual: false,
 			published: true
 		},
 		{
 			id: '2',
 			name: 'Assignment 2',
 			due: '08.10.2024',
+			individual: false,
 			published: true
 		},
 		{
 			id: '3',
 			name: 'Assignment 3',
 			due: '18.10.2024',
+			individual: false,
 			published: false
 		},
 		{
 			id: '4',
 			name: 'Assignment 4',
 			due: '08.11.2024',
+			individual: false,
 			published: false
 		}
 	];
@@ -81,7 +83,18 @@
 	];
 </script>
 
-<div class="m-auto mt-16 flex w-max flex-col items-center justify-center gap-12">
+<div class="m-auto mt-4 flex w-max flex-col items-center justify-center gap-10">
+	<Breadcrumb.Root class="self-start">
+		<Breadcrumb.List>
+			<Breadcrumb.Item>
+				<Breadcrumb.Link href="/courses">Courses</Breadcrumb.Link>
+			</Breadcrumb.Item>
+			<Breadcrumb.Separator />
+			<Breadcrumb.Item>
+				<Breadcrumb.Page>{course.code} - {course.name}</Breadcrumb.Page>
+			</Breadcrumb.Item>
+		</Breadcrumb.List>
+	</Breadcrumb.Root>
 	<div class="flex w-full items-center justify-between">
 		<div class="flex items-center">
 			<img

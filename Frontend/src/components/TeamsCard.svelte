@@ -1,5 +1,5 @@
 <script lang="ts">
-	import type { Team } from '../types.js';
+	import type { Team } from 'src/types.js';
 	import * as Card from '$lib/components/ui/card/index.js';
 
 	export let teams: Team[], courseId: string;
@@ -20,7 +20,7 @@
 				<Card.Title class="m-0 ml-2 text-2xl">Teams</Card.Title>
 			</div>
 		</Card.Header>
-		<Card.Content class="p-0 pb-3 pt-3">
+		<Card.Content class="p-0 py-3">
 			<h1 class="m-auto text-center text-5xl font-semibold">{count}</h1>
 		</Card.Content>
 	</a>
