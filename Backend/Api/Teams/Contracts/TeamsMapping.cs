@@ -5,7 +5,7 @@ namespace Api.Teams.Contracts
 {
     public static class TeamsMapping
     {
-        public static Team MapToCourse(this CreateTeamRequest request)
+        public static Team MapToTeam(this CreateTeamRequest request)
         {
             return new Team
             {
@@ -15,7 +15,7 @@ namespace Api.Teams.Contracts
             };
         }
 
-        public static Team MapToCourse(this UpdateTeamRequest request, Guid id)
+        public static Team MapToTeam(this UpdateTeamRequest request, Guid id)
         {
             return new Team
             {

@@ -37,7 +37,7 @@ namespace Api.Teams
 
             group.MapPost("/", async (ITeamService teamService, CreateTeamRequest request) =>
             {
-                var team = request.MapToCourse();
+                var team = request.MapToTeam();
                 var result = await teamService.Create(team);
 
                 return result.Match
@@ -57,7 +57,7 @@ namespace Api.Teams
 
             group.MapPut("/{id:guid}", async (ITeamService teamService, Guid id, UpdateTeamRequest request) =>
             {
-                var team = request.MapToCourse(id);
+                var team = request.MapToTeam(id);
                 var result = await teamService.Update(team);
 
                 return result.Match
