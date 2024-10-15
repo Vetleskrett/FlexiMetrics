@@ -19,6 +19,10 @@ const config: Config = {
 					green: {
 						DEFAULT: "#2EB275",
 						hover: "#259663"
+					},
+					blue: {
+						DEFAULT: "#0078D4",
+						hover: "#0068b9"
 					}
 				},
 

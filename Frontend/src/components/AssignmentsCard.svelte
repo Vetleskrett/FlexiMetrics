@@ -1,5 +1,5 @@
 <script lang="ts">
-	import type { Assignment } from '../types.ts';
+	import type { Assignment } from 'src/types.ts';
 	import { Button } from '$lib/components/ui/button/index.js';
 	import * as Card from '$lib/components/ui/card/index.js';
 	import { Separator } from '$lib/components/ui/separator/index.js';

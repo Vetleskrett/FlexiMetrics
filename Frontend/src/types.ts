@@ -2,6 +2,7 @@ export type Assignment = {
     id: string;
     name: string;
     due: string;
+    individual: boolean;
     published: boolean;
 }
 
@@ -18,5 +19,16 @@ export type Teacher = {
 
 export type Team = {
     id: string;
-    students: Student[]
+    students: Student[];
+}
+
+export type DeliveryField = {
+    id: string;
+    name: string;
+    type: string;
+}
+
+export type Analyzer = {
+    id: string;
+    name: string;
 }
