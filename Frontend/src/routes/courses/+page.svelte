@@ -1,32 +1,9 @@
 <script lang="ts">
-	import { Button } from '$lib/components/ui/button/index.js';
 	import * as Card from '$lib/components/ui/card/index.js';
 	import { Separator } from '$lib/components/ui/separator/index.js';
 	import Plus from 'lucide-svelte/icons/plus';
-
-	const courses = [
-		{
-			id: '1',
-			code: 'TDT101',
-			name: 'Programmering',
-			year: 2024,
-			semester: 'Autumn'
-		},
-		{
-			id: '2',
-			code: 'TDT102',
-			name: 'Databaser',
-			year: 2024,
-			semester: 'Autumn'
-		},
-		{
-			id: '3',
-			code: 'TDT103',
-			name: 'Nettverk',
-			year: 2024,
-			semester: 'Autumn'
-		}
-	];
+	import CustomButton from 'src/components/CustomButton.svelte';
+	import { courses } from 'src/mockData';
 </script>
 
 <Card.Root class="m-auto mt-16 w-[700px] overflow-hidden p-0">
@@ -41,13 +18,10 @@
 			<Card.Title class="ml-4 text-3xl">Courses</Card.Title>
 		</div>
 
-		<Button
-			href="courses/new"
-			class="flex h-9 flex-row justify-between gap-2 bg-button-green pl-2 pr-3 hover:bg-button-green-hover"
-		>
+		<CustomButton href="courses/new" color="green">
 			<Plus />
 			<p>New</p>
-		</Button>
+		</CustomButton>
 	</Card.Header>
 	<Card.Content class="p-0">
 		<div class="flex flex-col">

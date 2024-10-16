@@ -33,11 +33,12 @@
 		/>
 		<h2>Overview</h2>
 	</MenuRow>
+
 	<MenuRow href="/courses/{courseId}/assignments/{assignmentId}/deliveries">
 		<img
 			width="24"
 			height="24"
-			src="https://img.icons8.com/fluency/480/metamorphose.png"
+			src="https://img.icons8.com/fluency/480/pass.png"
 			alt="knowledge-sharing"
 		/>
 		<h2>Deliveries</h2>

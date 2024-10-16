@@ -1,85 +1,20 @@
 <script lang="ts">
 	import { page } from '$app/stores';
-	import type { Analyzer, DeliveryField, Student, Team } from 'src/types';
 	import EllipsisVertical from 'lucide-svelte/icons/ellipsis-vertical';
 	import Pencil from 'lucide-svelte/icons/pencil';
 	import Trash2 from 'lucide-svelte/icons/trash-2';
 	import ArrowUpFromLine from 'lucide-svelte/icons/arrow-up-from-line';
 	import * as DropdownMenu from '$lib/components/ui/dropdown-menu';
-	import Button from '$lib/components/ui/button/button.svelte';
 	import * as Breadcrumb from '$lib/components/ui/breadcrumb/index.js';
 	import DeliveriesSubmittedCard from 'src/components/DeliveriesSubmittedCard.svelte';
 	import AssignmentInformationCard from 'src/components/AssignmentInformationCard.svelte';
 	import DeliveryFormatCard from 'src/components/DeliveryFormatCard.svelte';
 	import AnalyzersCard from 'src/components/AnalyzersCard.svelte';
+	import { course, assignment, deliveryFields, teams, analyzers } from 'src/mockData';
+	import CustomButton from 'src/components/CustomButton.svelte';
 
 	const courseId = $page.params.courseId;
 	const assignmentId = $page.params.assignmentId;
-
-	const course = {
-		id: '1',
-		code: 'TDT101',
-		name: 'Programmering',
-		year: 2024,
-		semester: 'Autumn'
-	};
-
-	const assignment = {
-		id: '1',
-		name: 'Assignment 1',
-		due: '18.09.2024',
-		individual: false,
-		published: false
-	};
-	const students: Student[] = [];
-
-	for (let i = 1; i <= 196; i++) {
-		students.push({
-			id: i.toString(),
-			email: 'ola@ntnu.no'
-		});
-	}
-
-	const teams: Team[] = [];
-	for (let i = 1; i <= 49; i++) {
-		teams.push({
-			id: i.toString(),
-			students: []
-		});
-	}
-
-	const deliveryFields: DeliveryField[] = [
-		{
-			id: '1',
-			name: 'Team Name',
-			type: 'String'
-		},
-		{
-			id: '2',
-			name: 'Source Code',
-			type: 'File'
-		},
-		{
-			id: '3',
-			name: 'Url',
-			type: 'String'
-		}
-	];
-
-	const analyzers: Analyzer[] = [
-		{
-			id: '1',
-			name: 'Git Analyzer'
-		},
-		{
-			id: '2',
-			name: 'Lighthouse Analyzer'
-		},
-		{
-			id: '3',
-			name: 'Code Analyzer'
-		}
-	];
 </script>
 
 <div class="m-auto mt-4 flex w-max flex-col items-center justify-center gap-10">
@@ -113,12 +48,10 @@
 		</div>
 
 		<div class="flex items-center gap-2">
-			<Button
-				class="flex h-9 flex-row justify-between gap-2 bg-button-blue pl-3 pr-3 hover:bg-button-blue-hover"
-			>
+			<CustomButton color="blue">
 				<ArrowUpFromLine size="20" />
 				<p>Publish</p>
-			</Button>
+			</CustomButton>
 			<DropdownMenu.Root>
 				<DropdownMenu.Trigger>
 					<EllipsisVertical size={32} />
@@ -136,13 +69,13 @@
 			</DropdownMenu.Root>
 		</div>
 	</div>
-	<div class="flex flex-row gap-8">
-		<div class="flex w-[700px] flex-col gap-8">
+	<div class="flex w-[1080px] flex-row gap-8">
+		<div class="flex w-3/5 flex-col gap-8">
 			<DeliveryFormatCard {deliveryFields} {assignmentId} {courseId} />
 			<AnalyzersCard {analyzers} {assignmentId} {courseId} />
 		</div>
 
-		<div class="flex w-[400px] flex-col gap-8">
+		<div class="flex w-2/5 flex-col gap-8">
 			<AssignmentInformationCard {assignment} />
 			<DeliveriesSubmittedCard deliveriesSubmitted={32} numTeams={teams.length} />
 		</div>

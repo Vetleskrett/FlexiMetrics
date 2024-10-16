@@ -1,9 +1,9 @@
 <script lang="ts">
 	import type { Assignment } from 'src/types.ts';
-	import { Button } from '$lib/components/ui/button/index.js';
 	import * as Card from '$lib/components/ui/card/index.js';
 	import { Separator } from '$lib/components/ui/separator/index.js';
 	import Plus from 'lucide-svelte/icons/plus';
+	import CustomButton from './CustomButton.svelte';
 
 	export let assignments: Assignment[], courseId: string;
 </script>
@@ -20,13 +20,10 @@
 			<Card.Title class="ml-4 text-3xl">Assignments</Card.Title>
 		</div>
 
-		<Button
-			href="/courses/{courseId}/assignments/new"
-			class="flex h-9 flex-row justify-between gap-2 bg-button-green pl-2 pr-3 hover:bg-button-green-hover"
-		>
+		<CustomButton href="/courses/{courseId}/assignments/new" color="green">
 			<Plus />
 			<p>New</p>
-		</Button>
+		</CustomButton>
 	</Card.Header>
 	<Card.Content class="p-0">
 		<div class="flex flex-col">

@@ -36,6 +36,7 @@
 	"type": "module",
 	"dependencies": {
 		"clsx": "^2.1.1",
+		"svelte-headless-table": "^0.18.2",
 		"tailwind-merge": "^2.5.3",
 		"tailwind-variants": "^0.2.1"
 	}

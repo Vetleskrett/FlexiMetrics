@@ -28,6 +28,16 @@ export type DeliveryField = {
     type: string;
 }
 
+export type FieldDelivery = {
+    fieldId: string;
+    value: any;
+}
+
+export type Delivery = {
+    teamId: string;
+    fields: Map<string, any>;
+}
+
 export type Analyzer = {
     id: string;
     name: string;
