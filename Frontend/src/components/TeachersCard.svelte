@@ -6,7 +6,8 @@
 	import Pencil from 'lucide-svelte/icons/pencil';
 	import * as DropdownMenu from '$lib/components/ui/dropdown-menu';
 
-	export let teachers: Teacher[], courseId: string;
+	export let teachers: Teacher[];
+	export let courseId: string;
 </script>
 
 <Card.Root class="w-full overflow-hidden p-0">

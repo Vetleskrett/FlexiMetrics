@@ -5,7 +5,9 @@
 	import Plus from 'lucide-svelte/icons/plus';
 	import CustomButton from './CustomButton.svelte';
 
-	export let analyzers: Analyzer[], assignmentId: string, courseId: string;
+	export let analyzers: Analyzer[];
+	export let assignmentId: string;
+	export let courseId: string;
 </script>
 
 <Card.Root class="w-full overflow-hidden p-0">

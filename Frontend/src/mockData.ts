@@ -103,57 +103,169 @@ export const deliveryFields: DeliveryField[] = [
         id: '3',
         name: 'Url',
         type: 'String'
+    },
+    {
+        id: '4',
+        name: 'Number',
+        type: 'Integer'
+    },
+    {
+        id: '5',
+        name: 'True / False',
+        type: 'Boolean'
     }
 ];
 
 export const deliveries: Delivery[] = [
     {
         teamId: '1',
-        fields: new Map([
-            ['1', 'Weather app'],
-            ['2', 'team1.zip'],
-            ['3', 'http://team1.ntnu.no']
-        ])
+        fields: [
+            {
+                fieldId: '1',
+                value: 'Weather app'
+            },
+            {
+                fieldId: '2',
+                value: 'team1.zip'
+            },
+            {
+                fieldId: '3',
+                value: 'http://team1.ntnu.no'
+            },
+            {
+                fieldId: '4',
+                value: 17
+            },
+            {
+                fieldId: '5',
+                value: true
+            }
+        ]
     },
     {
         teamId: '2',
-        fields: new Map([
-            ['1', 'Snake Game'],
-            ['2', 'team2.zip'],
-            ['3', 'http://team2.ntnu.no']
-        ])
+        fields: [
+            {
+                fieldId: '1',
+                value: 'Snake Game'
+            },
+            {
+                fieldId: '2',
+                value: 'team2.zip'
+            },
+            {
+                fieldId: '3',
+                value: 'http://team2.ntnu.no'
+            },
+            {
+                fieldId: '4',
+                value: 65
+            },
+            {
+                fieldId: '5',
+                value: true
+            }
+        ]
     },
     {
         teamId: '3',
-        fields: new Map([
-            ['1', 'Tic Tac Toe'],
-            ['2', 'team3.zip'],
-            ['3', 'http://team3.ntnu.no']
-        ])
+        fields: [
+            {
+                fieldId: '1',
+                value: 'Tic Tac Toe'
+            },
+            {
+                fieldId: '2',
+                value: 'team3.zip'
+            },
+            {
+                fieldId: '3',
+                value: 'http://team3.ntnu.no'
+            },
+            {
+                fieldId: '4',
+                value: 12
+            },
+            {
+                fieldId: '5',
+                value: false
+            }
+        ]
     },
     {
         teamId: '4',
-        fields: new Map([
-            ['1', 'Sudoku'],
-            ['2', 'team4.zip'],
-            ['3', 'http://team4.ntnu.no']
-        ])
+        fields: [
+            {
+                fieldId: '1',
+                value: 'Sudoku'
+            },
+            {
+                fieldId: '2',
+                value: 'team4.zip'
+            },
+            {
+                fieldId: '3',
+                value: 'http://team4.ntnu.no'
+            },
+            {
+                fieldId: '4',
+                value: 84
+            },
+            {
+                fieldId: '5',
+                value: true
+            }
+        ]
     },
     {
         teamId: '5',
-        fields: new Map([
-            ['1', 'Music app'],
-            ['2', 'team5.zip'],
-            ['3', 'http://team5.ntnu.no']
-        ])
+        fields: [
+            {
+                fieldId: '1',
+                value: 'Music app'
+            },
+            {
+                fieldId: '2',
+                value: 'team5.zip'
+            },
+            {
+                fieldId: '3',
+                value: 'http://team5.ntnu.no'
+            },
+            {
+                fieldId: '4',
+                value: 44
+            },
+            {
+                fieldId: '5',
+                value: false
+            }
+        ]
     },
     {
         teamId: '6',
-        fields: new Map([
-            ['1', 'Quiz Game'],
-            ['2', 'team6.zip'],
-            ['3', 'http://team6.ntnu.no']
-        ])
+        fields: [
+            {
+                fieldId: '1',
+                value: 'Quiz Game'
+            },
+            {
+                fieldId: '2',
+                value: 'team6.zip'
+            },
+            {
+                fieldId: '3',
+                value: 'http://team6.ntnu.no'
+            },
+            {
+                fieldId: '4',
+                value: 35
+            },
+            {
+                fieldId: '5',
+                value: false
+            }
+        ]
     }
 ];
 

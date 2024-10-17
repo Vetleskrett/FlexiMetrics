@@ -2,7 +2,8 @@
 	import type { Team } from 'src/types.js';
 	import * as Card from '$lib/components/ui/card/index.js';
 
-	export let teams: Team[], courseId: string;
+	export let teams: Team[];
+	export let courseId: string;
 
 	const count = teams.length;
 </script>

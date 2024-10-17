@@ -1,7 +1,8 @@
 <script lang="ts">
 	import * as Card from '$lib/components/ui/card/index.js';
 
-	export let deliveriesSubmitted: number, numTeams: number;
+	export let deliveriesSubmitted: number;
+	export let numTeams: number;
 </script>
 
 <Card.Root class="w-full overflow-hidden p-5">

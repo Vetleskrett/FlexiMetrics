@@ -8,7 +8,9 @@
 	import Plus from 'lucide-svelte/icons/plus';
 	import CustomButton from './CustomButton.svelte';
 
-	export let deliveryFields: DeliveryField[], assignmentId: string, courseId: string;
+	export let deliveryFields: DeliveryField[];
+	export let assignmentId: string;
+	export let courseId: string;
 </script>
 
 <Card.Root class="w-full overflow-hidden p-0">

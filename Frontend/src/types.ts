@@ -22,10 +22,12 @@ export type Team = {
     students: Student[];
 }
 
+export type DeliveryFieldType = 'String' | 'Integer' | 'Boolean' | 'File';
+
 export type DeliveryField = {
     id: string;
     name: string;
-    type: string;
+    type: DeliveryFieldType;
 }
 
 export type FieldDelivery = {
@@ -35,7 +37,7 @@ export type FieldDelivery = {
 
 export type Delivery = {
     teamId: string;
-    fields: Map<string, any>;
+    fields: FieldDelivery[];
 }
 
 export type Analyzer = {

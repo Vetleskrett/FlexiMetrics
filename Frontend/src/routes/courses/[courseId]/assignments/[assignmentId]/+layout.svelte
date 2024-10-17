@@ -1,26 +1,11 @@
 <script lang="ts">
 	import 'src/app.css';
 	import { page } from '$app/stores';
-	import type { Analyzer } from 'src/types';
 	import MenuRow from 'src/components/MenuRow.svelte';
+	import { analyzers } from 'src/mockData';
 
 	const courseId = $page.params.courseId;
 	const assignmentId = $page.params.assignmentId;
-
-	const analyzers: Analyzer[] = [
-		{
-			id: '1',
-			name: 'Git Analyzer'
-		},
-		{
-			id: '2',
-			name: 'Lighthouse Analyzer'
-		},
-		{
-			id: '3',
-			name: 'Code Analyzer'
-		}
-	];
 </script>
 
 <div class="fixed flex h-full w-60 flex-row flex-col items-start bg-white pt-12">
