@@ -2,7 +2,8 @@
 	import type { Student } from 'src/types.ts';
 	import * as Card from '$lib/components/ui/card/index.js';
 
-	export let students: Student[], courseId: string;
+	export let students: Student[];
+	export let courseId: string;
 
 	const count = students.length;
 </script>

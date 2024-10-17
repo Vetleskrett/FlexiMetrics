@@ -22,10 +22,22 @@ export type Team = {
     students: Student[];
 }
 
+export type DeliveryFieldType = 'String' | 'Integer' | 'Boolean' | 'File';
+
 export type DeliveryField = {
     id: string;
     name: string;
-    type: string;
+    type: DeliveryFieldType;
+}
+
+export type FieldDelivery = {
+    fieldId: string;
+    value: any;
+}
+
+export type Delivery = {
+    teamId: string;
+    fields: FieldDelivery[];
 }
 
 export type Analyzer = {
