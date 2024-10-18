@@ -1,12 +1,25 @@
 <script lang="ts">
 	import { page } from '$app/stores';
 	import * as Breadcrumb from '$lib/components/ui/breadcrumb/index.js';
+	import * as DropdownMenu from '$lib/components/ui/dropdown-menu';
+
 	import { course, assignment, analyzerOutput, analyzer } from 'src/mockData';
 	import AnalyzerOutputCard from 'src/components/AnalyzerOutputCard.svelte';
+	import EllipsisVertical from 'lucide-svelte/icons/ellipsis-vertical';
+	import Pencil from 'lucide-svelte/icons/pencil';
+	import Trash2 from 'lucide-svelte/icons/trash-2';
+	import Play from 'lucide-svelte/icons/play';
+	import X from 'lucide-svelte/icons/x';
+	import CustomButton from 'src/components/CustomButton.svelte';
 
 	const courseId = $page.params.courseId;
 	const assignmentId = $page.params.assignmentId;
 	const analyzerId = $page.params.analyzerId;
+
+	let isRunning = false;
+
+	const onCancel = () => (isRunning = false);
+	const onRun = () => (isRunning = true);
 </script>
 
 <div class="m-auto mt-4 flex w-max flex-col items-center justify-center gap-10">
@@ -38,6 +51,36 @@
 				alt="knowledge-sharing"
 			/>
 			<h1 class="ml-4 text-4xl font-semibold">{analyzer.name}</h1>
+		</div>
+		<div class="flex items-center gap-2">
+			{#if isRunning}
+				<CustomButton color="red" on:click={onCancel}>
+					<X size="20" />
+					<p>Cancel</p>
+				</CustomButton>
+			{:else}
+				<CustomButton color="blue" on:click={onRun}>
+					<Play size="20" />
+					<p>Run</p>
+				</CustomButton>
+			{/if}
+			<DropdownMenu.Root>
+				<DropdownMenu.Trigger>
+					<EllipsisVertical size={32} />
+				</DropdownMenu.Trigger>
+				<DropdownMenu.Content>
+					<DropdownMenu.Item
+						href="/courses/{courseId}/assignments/{assignmentId}/analyzers/{analyzerId}/edit"
+					>
+						<Pencil class="h-4" />
+						<p>Edit analyzer</p>
+					</DropdownMenu.Item>
+					<DropdownMenu.Item>
+						<Trash2 class="h-4" />
+						<p>Delete analyzer</p>
+					</DropdownMenu.Item>
+				</DropdownMenu.Content>
+			</DropdownMenu.Root>
 		</div>
 	</div>
 

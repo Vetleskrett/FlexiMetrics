@@ -3,37 +3,53 @@
 	import * as Table from '$lib/components/ui/table';
 	import * as DropdownMenu from '$lib/components/ui/dropdown-menu';
 	import ArrowUpDown from 'lucide-svelte/icons/arrow-up-down';
-	import ChevronDown from 'lucide-svelte/icons/chevron-down';
+	import Filter from 'lucide-svelte/icons/filter';
+	import List from 'lucide-svelte/icons/list';
 	import { Button } from 'src/lib/components/ui/button';
-	import { Input } from '$lib/components/ui/input';
 	import type { AnalyzerOutput } from 'src/types';
-	import { createTable, Render, Subscribe } from 'svelte-headless-table';
-	import { addTableFilter, addSortBy, addHiddenColumns } from 'svelte-headless-table/plugins';
+	import { createRender, createTable, Render, Subscribe } from 'svelte-headless-table';
+	import { addColumnFilters, addSortBy, addHiddenColumns } from 'svelte-headless-table/plugins';
 	import { readable } from 'svelte/store';
+	import StringFilter from './filters/StringFilter.svelte';
+	import CustomButton from './CustomButton.svelte';
+	import StringCell from './cells/StringCell.svelte';
 
 	export let analyzerOutput: AnalyzerOutput;
 
-	const outputTypes = new Map<string, string>(
-		analyzerOutput.fields.map((field) => [field.id, field.type])
-	);
-
 	const table = createTable(readable(analyzerOutput.teamOutputs), {
 		sort: addSortBy(),
-		filter: addTableFilter({
-			fn: ({ filterValue, value }) => value.toLowerCase().includes(filterValue.toLowerCase())
-		}),
-		hide: addHiddenColumns()
+		hide: addHiddenColumns(),
+		filter: addColumnFilters()
 	});
+
+	const stringFilterFn = ({ filterValue, value }: { filterValue: string; value: any }) =>
+		value.toString().toLowerCase().includes(filterValue.toLowerCase());
 
 	const columns = table.createColumns([
 		table.column({
+			id: 'Team',
 			accessor: (teamOutput) => teamOutput.teamId,
-			header: 'Team'
+			header: 'Team',
+			plugins: {
+				filter: {
+					fn: stringFilterFn,
+					render: ({ filterValue }) => createRender(StringFilter, { filterValue })
+				}
+			},
+			cell: ({ value }) => createRender(StringCell, { value })
 		}),
-		...analyzerOutput.fields.map((field) =>
+		...analyzerOutput.fields.map((field, i) =>
 			table.column({
+				id: i.toString(),
 				accessor: (teamOutput) => teamOutput.values.get(field.id),
-				header: field.name
+				header: field.name,
+				plugins: {
+					filter: {
+						fn: stringFilterFn,
+						render: ({ filterValue }) => createRender(StringFilter, { filterValue })
+					}
+				},
+				cell: ({ value }) => createRender(StringCell, { value })
 			})
 		)
 	]);
@@ -41,40 +57,53 @@
 	const { headerRows, pageRows, tableAttrs, tableBodyAttrs, pluginStates, flatColumns } =
 		table.createViewModel(columns);
 
-	const { filterValue } = pluginStates.filter;
 	const { hiddenColumnIds } = pluginStates.hide;
-
-	const ids = flatColumns.map((col) => col.id);
-	let hideForId = Object.fromEntries(ids.map((id) => [id, true]));
-
-	$: $hiddenColumnIds = Object.entries(hideForId)
-		.filter(([, hide]) => !hide)
+	let showColumnForId = Object.fromEntries(flatColumns.map((col) => [col.id, true]));
+	$: $hiddenColumnIds = Object.entries(showColumnForId)
+		.filter(([, show]) => !show)
 		.map(([id]) => id);
 
-	const hidableColumns = analyzerOutput.fields.map((field) => field.name);
+	let showFilterForId = Object.fromEntries(flatColumns.map((col) => [col.id, false]));
 </script>
 
-<Card.Root class="w-[1080px] overflow-hidden p-0">
-	<Card.Header class="flex flex-row items-center justify-end gap-8 py-4">
-		<Input class="max-w-sm" placeholder="Filter" type="text" bind:value={$filterValue} />
-		<DropdownMenu.Root>
-			<DropdownMenu.Trigger asChild let:builder>
-				<Button variant="outline" builders={[builder]}>
-					Show/hide columns <ChevronDown class="ml-2 h-4 w-4" />
-				</Button>
-			</DropdownMenu.Trigger>
-			<DropdownMenu.Content>
-				{#each flatColumns as col}
-					{#if hidableColumns.includes(col.id)}
-						<DropdownMenu.CheckboxItem bind:checked={hideForId[col.id]}>
-							{col.header}
+<Card.Root class="w-[1080px] overflow-hidden">
+	<Card.Header class="p-4">
+		<div class="flex flex-row items-start justify-end gap-4">
+			<DropdownMenu.Root>
+				<DropdownMenu.Trigger asChild let:builder>
+					<CustomButton color="outline" builders={[builder]}>
+						<List class="h-4 w-4" />
+						<p>Show/hide columns</p>
+					</CustomButton>
+				</DropdownMenu.Trigger>
+				<DropdownMenu.Content>
+					{#each analyzerOutput.fields as field, id}
+						<DropdownMenu.CheckboxItem bind:checked={showColumnForId[id]}>
+							{field.name}
 						</DropdownMenu.CheckboxItem>
-					{/if}
-				{/each}
-			</DropdownMenu.Content>
-		</DropdownMenu.Root>
+					{/each}
+				</DropdownMenu.Content>
+			</DropdownMenu.Root>
+			<DropdownMenu.Root>
+				<DropdownMenu.Trigger asChild let:builder>
+					<CustomButton color="outline" builders={[builder]}>
+						<Filter class="h-4 w-4" />
+						<p>Filter</p>
+					</CustomButton>
+				</DropdownMenu.Trigger>
+				<DropdownMenu.Content>
+					{#each analyzerOutput.fields as field, id}
+						{#if showColumnForId[id]}
+							<DropdownMenu.CheckboxItem bind:checked={showFilterForId[id]}>
+								{field.name}
+							</DropdownMenu.CheckboxItem>
+						{/if}
+					{/each}
+				</DropdownMenu.Content>
+			</DropdownMenu.Root>
+		</div>
 	</Card.Header>
-	<Card.Content class="p-0">
+	<Card.Content class="p-0 ">
 		<Table.Root {...$tableAttrs}>
 			<Table.Header>
 				{#each $headerRows as headerRow}
@@ -83,10 +112,15 @@
 							{#each headerRow.cells as cell (cell.id)}
 								<Subscribe attrs={cell.attrs()} let:attrs props={cell.props()} let:props>
 									<Table.Head {...attrs} class="px-2 font-bold text-black">
-										<Button variant="ghost" on:click={props.sort.toggle}>
-											<Render of={cell.render()} />
-											<ArrowUpDown class={'ml-2 h-4 w-4'} />
-										</Button>
+										<div class="flex h-full flex-col items-start justify-end gap-2">
+											{#if props.filter?.render && showFilterForId[cell.id]}
+												<Render of={props.filter.render} />
+											{/if}
+											<Button variant="ghost" on:click={props.sort.toggle}>
+												<Render of={cell.render()} />
+												<ArrowUpDown class="ml-2 h-4 w-4 " />
+											</Button>
+										</div>
 									</Table.Head>
 								</Subscribe>
 							{/each}

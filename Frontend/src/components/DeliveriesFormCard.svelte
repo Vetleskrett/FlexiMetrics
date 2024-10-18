@@ -94,11 +94,13 @@
 											bind:value={fieldValue.value}
 										/>
 									{:else if type == 'Boolean'}
-										<Checkbox
-											class="m-auto  rounded-[0.25rem]"
-											on:click={() => onChange(delivery.teamId, fieldValue)}
-											bind:checked={fieldValue.value}
-										/>
+										<div class="flex justify-center">
+											<Checkbox
+												class="rounded-[0.25rem]"
+												on:click={() => onChange(delivery.teamId, fieldValue)}
+												bind:checked={fieldValue.value}
+											/>
+										</div>
 									{:else if type == 'File'}
 										<a
 											href="TODO: add url here"
