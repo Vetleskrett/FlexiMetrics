@@ -7,7 +7,7 @@
 	import Undo2 from 'lucide-svelte/icons/undo-2';
 	import { Separator } from 'src/lib/components/ui/separator';
 	import CustomButton from 'src/components/CustomButton.svelte';
-	import type { Delivery, DeliveryField, FieldDelivery } from 'src/types';
+	import type { Delivery, DeliveryField, DeliveryFieldValue } from 'src/types';
 	import { Checkbox } from 'src/lib/components/ui/checkbox';
 
 	export let deliveryFields: DeliveryField[];
@@ -21,11 +21,11 @@
 	let deliveries: Delivery[] = structuredClone(originalDeliveries);
 	let isAnyChanges = false;
 
-	const teamsChanges = new Map<string, Map<string, FieldDelivery>>(
-		deliveries.map((delivery) => [delivery.teamId, new Map<string, FieldDelivery>()])
+	const teamsChanges = new Map<string, Map<string, DeliveryFieldValue>>(
+		deliveries.map((delivery) => [delivery.teamId, new Map<string, DeliveryFieldValue>()])
 	);
 
-	const onChange = (teamId: string, field: FieldDelivery) => {
+	const onChange = (teamId: string, field: DeliveryFieldValue) => {
 		isAnyChanges = true;
 		teamsChanges.get(teamId)?.set(field.fieldId, field);
 	};
@@ -77,27 +77,27 @@
 							<Table.Cell>
 								{delivery.teamId}
 							</Table.Cell>
-							{#each delivery.fields as field (field.fieldId)}
-								{@const type = deliveryTypes.get(field.fieldId)}
+							{#each delivery.values as fieldValue (fieldValue.fieldId)}
+								{@const type = deliveryTypes.get(fieldValue.fieldId)}
 								<Table.Cell>
 									{#if type == 'String'}
 										<Input
 											type="text"
-											on:change={() => onChange(delivery.teamId, field)}
-											bind:value={field.value}
+											on:change={() => onChange(delivery.teamId, fieldValue)}
+											bind:value={fieldValue.value}
 										/>
 									{:else if type == 'Integer'}
 										<Input
 											type="number"
 											class="w-24"
-											on:change={() => onChange(delivery.teamId, field)}
-											bind:value={field.value}
+											on:change={() => onChange(delivery.teamId, fieldValue)}
+											bind:value={fieldValue.value}
 										/>
 									{:else if type == 'Boolean'}
 										<Checkbox
 											class="m-auto  rounded-[0.25rem]"
-											on:click={() => onChange(delivery.teamId, field)}
-											bind:checked={field.value}
+											on:click={() => onChange(delivery.teamId, fieldValue)}
+											bind:checked={fieldValue.value}
 										/>
 									{:else if type == 'File'}
 										<a
@@ -106,19 +106,19 @@
 											class="flex items-center text-blue-500"
 										>
 											<ArrowDownToline size="20" />
-											{field.value}
+											{fieldValue.value}
 										</a>
 									{:else}
-										{field.value}
+										{fieldValue.value}
 									{/if}
 								</Table.Cell>
 								{#if type == 'File'}
 									<Table.Cell>
 										<input
-											bind:files={field.value}
+											bind:files={fieldValue.value}
 											type="file"
 											class="flex h-10 w-48 rounded-sm border border-input bg-white px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
-											on:change={() => onChange(delivery.teamId, field)}
+											on:change={() => onChange(delivery.teamId, fieldValue)}
 										/>
 									</Table.Cell>
 								{/if}

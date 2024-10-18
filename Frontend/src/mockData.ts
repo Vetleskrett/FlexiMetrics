@@ -1,4 +1,4 @@
-import type { Analyzer, Delivery, DeliveryField, Student, Teacher, Team } from "./types";
+import type { Analyzer, Delivery, DeliveryField, Student, Teacher, Team, AnalyzerOutput } from "./types";
 
 export const courses = [
     {
@@ -119,7 +119,7 @@ export const deliveryFields: DeliveryField[] = [
 export const deliveries: Delivery[] = [
     {
         teamId: '1',
-        fields: [
+        values: [
             {
                 fieldId: '1',
                 value: 'Weather app'
@@ -144,7 +144,7 @@ export const deliveries: Delivery[] = [
     },
     {
         teamId: '2',
-        fields: [
+        values: [
             {
                 fieldId: '1',
                 value: 'Snake Game'
@@ -169,7 +169,7 @@ export const deliveries: Delivery[] = [
     },
     {
         teamId: '3',
-        fields: [
+        values: [
             {
                 fieldId: '1',
                 value: 'Tic Tac Toe'
@@ -194,7 +194,7 @@ export const deliveries: Delivery[] = [
     },
     {
         teamId: '4',
-        fields: [
+        values: [
             {
                 fieldId: '1',
                 value: 'Sudoku'
@@ -219,7 +219,7 @@ export const deliveries: Delivery[] = [
     },
     {
         teamId: '5',
-        fields: [
+        values: [
             {
                 fieldId: '1',
                 value: 'Music app'
@@ -244,7 +244,7 @@ export const deliveries: Delivery[] = [
     },
     {
         teamId: '6',
-        fields: [
+        values: [
             {
                 fieldId: '1',
                 value: 'Quiz Game'
@@ -283,3 +283,147 @@ export const analyzers: Analyzer[] = [
         name: 'Code Analyzer'
     }
 ];
+
+export const analyzer: Analyzer = analyzers[0];
+
+export const analyzerOutput: AnalyzerOutput = {
+    fields: [
+        {
+            id: '1',
+            name: 'Project Title',
+            type: 'String'
+        },
+        {
+            id: '2',
+            name: 'Report',
+            type: 'File'
+        },
+        {
+            id: '3',
+            name: 'Members',
+            type: 'List'
+        },
+        {
+            id: '4',
+            name: 'Json output',
+            type: 'Json'
+        },
+        {
+            id: '5',
+            name: 'Issues closed',
+            type: 'Range',
+            min: 0,
+            max: 100
+        }
+    ],
+    teamOutputs: [
+        {
+            teamId: '1',
+            values: new Map<string, any>([
+                ['1', 'Weather app'],
+                ['2', 'team1.html'],
+                ['3', ['Ola Nordmann, Ola Nordmann, Ola Nordmann']],
+                ['4', 
+                    `
+                    {
+                        “commits”: 34,
+                        “issues”: 11,
+                        “contributors”: 3,
+                        “stars”: 1
+                    }
+                    `],
+                ['5', 78],
+            ])
+        },
+        {
+            teamId: '2',
+            values: new Map<string, any>([
+                ['1', 'Snake Game'],
+                ['2', 'team2.html'],
+                ['3', ['Ola Nordmann, Ola Nordmann, Ola Nordmann']],
+                ['4', 
+                    `
+                    {
+                        “commits”: 34,
+                        “issues”: 11,
+                        “contributors”: 3,
+                        “stars”: 1
+                    }
+                    `],
+                ['5', 34],
+            ])
+        },
+        {
+            teamId: '3',
+            values: new Map<string, any>([
+                ['1', 'Tic Tac Toe'],
+                ['2', 'team3.html'],
+                ['3', ['Ola Nordmann, Ola Nordmann, Ola Nordmann']],
+                ['4', 
+                    `
+                    {
+                        “commits”: 34,
+                        “issues”: 11,
+                        “contributors”: 3,
+                        “stars”: 1
+                    }
+                    `],
+                ['5', 100],
+            ])
+        },
+        {
+            teamId: '4',
+            values: new Map<string, any>([
+                ['1', 'Sudoku'],
+                ['2', 'team4.html'],
+                ['3', ['Ola Nordmann, Ola Nordmann, Ola Nordmann']],
+                ['4', 
+                    `
+                    {
+                        “commits”: 34,
+                        “issues”: 11,
+                        “contributors”: 3,
+                        “stars”: 1
+                    }
+                    `],
+                ['5', 12],
+            ])
+        },
+        {
+            teamId: '5',
+            values: new Map<string, any>([
+                ['1', 'Music app'],
+                ['2', 'team5.html'],
+                ['3', ['Ola Nordmann, Ola Nordmann, Ola Nordmann']],
+                ['4', 
+                    `
+                    {
+                        “commits”: 34,
+                        “issues”: 11,
+                        “contributors”: 3,
+                        “stars”: 1
+                    }
+                    `],
+                ['5', 50],
+            ])
+        },
+        {
+            teamId: '6',
+            values: new Map<string, any>([
+                ['1', 'Quiz Game'],
+                ['2', 'team6.html'],
+                ['3', ['Ola Nordmann, Ola Nordmann, Ola Nordmann']],
+                ['4', 
+                    `
+                    {
+                        “commits”: 34,
+                        “issues”: 11,
+                        “contributors”: 3,
+                        “stars”: 1
+                    }
+                    `],
+                ['5', 89],
+            ])
+        }
+    ]
+}

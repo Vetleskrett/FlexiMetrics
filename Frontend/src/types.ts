@@ -22,25 +22,48 @@ export type Team = {
     students: Student[];
 }
 
-export type DeliveryFieldType = 'String' | 'Integer' | 'Boolean' | 'File';
-
 export type DeliveryField = {
     id: string;
     name: string;
-    type: DeliveryFieldType;
+    type: 'String' | 'Integer' | 'Boolean' | 'File';
 }
 
-export type FieldDelivery = {
+export type DeliveryFieldValue = {
     fieldId: string;
     value: any;
 }
 
 export type Delivery = {
     teamId: string;
-    fields: FieldDelivery[];
+    values: DeliveryFieldValue[];
 }
 
 export type Analyzer = {
     id: string;
     name: string;
+}
+
+export type AnalyzerField = {
+    id: string;
+    name: string;
+} &
+(
+    {
+        type: 'String' | 'Integer' | 'Boolean' | 'File' | 'List' | 'Json';
+    } |
+    {
+        type: 'Range';
+        min: number;
+        max: number;
+    }
+)
+
+export type AnalyzerTeamOutput = {
+    teamId: string;
+    values: Map<string, any>;
+}
+
+export type AnalyzerOutput = {
+    fields: AnalyzerField[];
+    teamOutputs: AnalyzerTeamOutput[];
 }

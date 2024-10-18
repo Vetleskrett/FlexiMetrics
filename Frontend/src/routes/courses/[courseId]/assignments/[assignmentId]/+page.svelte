@@ -48,10 +48,12 @@
 		</div>
 
 		<div class="flex items-center gap-2">
-			<CustomButton color="blue">
-				<ArrowUpFromLine size="20" />
-				<p>Publish</p>
-			</CustomButton>
+			{#if !assignment.published}
+				<CustomButton color="blue">
+					<ArrowUpFromLine size="20" />
+					<p>Publish</p>
+				</CustomButton>
+			{/if}
 			<DropdownMenu.Root>
 				<DropdownMenu.Trigger>
 					<EllipsisVertical size={32} />
