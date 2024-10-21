@@ -6,7 +6,7 @@
 	import ArrowUpFromLine from 'lucide-svelte/icons/arrow-up-from-line';
 	import * as DropdownMenu from '$lib/components/ui/dropdown-menu';
 	import * as Breadcrumb from '$lib/components/ui/breadcrumb/index.js';
-	import DeliveriesSubmittedCard from 'src/components/DeliveriesSubmittedCard.svelte';
+	import CompletedTotalCard from 'src/components/CompletedTotalCard.svelte';
 	import AssignmentInformationCard from 'src/components/AssignmentInformationCard.svelte';
 	import DeliveryFormatCard from 'src/components/DeliveryFormatCard.svelte';
 	import AnalyzersCard from 'src/components/AnalyzersCard.svelte';
@@ -77,7 +77,7 @@
 
 		<div class="flex w-2/5 flex-col gap-8">
 			<AssignmentInformationCard {assignment} />
-			<DeliveriesSubmittedCard deliveriesSubmitted={32} numTeams={teams.length} />
+			<CompletedTotalCard completed={32} total={teams.length} headline={"Deliveries Submitted"} />
 		</div>
 	</div>
 </div>
