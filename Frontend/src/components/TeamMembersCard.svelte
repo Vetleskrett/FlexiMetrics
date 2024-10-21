@@ -3,8 +3,8 @@
 	import * as Card from '$lib/components/ui/card/index.js';
 	import { Separator } from '$lib/components/ui/separator/index.js';
 	import Ellipsis from 'lucide-svelte/icons/ellipsis';
-    import * as DropdownMenu from '$lib/components/ui/dropdown-menu';
-    import Trash2 from 'lucide-svelte/icons/trash-2';
+	import * as DropdownMenu from '$lib/components/ui/dropdown-menu';
+	import Trash2 from 'lucide-svelte/icons/trash-2';
 
 	export let students: Student[];
 </script>
@@ -22,31 +22,31 @@
 		</div>
 	</Card.Header>
 	<Card.Content class="p-0">
-        <div class="flex flex-col">
+		<div class="flex flex-col">
 			<div class="flex items-center px-6 text-sm font-bold">
 				<h1 class="w-2/3">Name</h1>
 				<h1 class="w-2/3">Mail</h1>
-                <div class="w-1/4"></div>
+				<div class="w-1/4"></div>
 			</div>
 			{#each students as student}
-                <Separator class="w-full" />
-                <div class="flex items-center px-6 py-4 ">
-                    <h1 class="w-2/3">{student.name}</h1>
-                    <h1 class="w-2/3">{student.email}</h1>
-                    <div class="w-1/4">
-                        <DropdownMenu.Root>
-                            <DropdownMenu.Trigger>
-                                <Ellipsis/>
-                            </DropdownMenu.Trigger>
-                            <DropdownMenu.Content>
-                                <DropdownMenu.Item>
-                                    <Trash2 class="h-4" />
-                                    <p>Remove member</p>
-                                </DropdownMenu.Item>
-                            </DropdownMenu.Content>
-                        </DropdownMenu.Root>
-                    </div>
-                </div>
+				<Separator class="w-full" />
+				<div class="flex items-center px-6 py-4">
+					<h1 class="w-2/3">{student.name}</h1>
+					<h1 class="w-2/3">{student.email}</h1>
+					<div class="w-1/4">
+						<DropdownMenu.Root>
+							<DropdownMenu.Trigger>
+								<Ellipsis />
+							</DropdownMenu.Trigger>
+							<DropdownMenu.Content>
+								<DropdownMenu.Item>
+									<Trash2 class="h-4" />
+									<p>Remove member</p>
+								</DropdownMenu.Item>
+							</DropdownMenu.Content>
+						</DropdownMenu.Root>
+					</div>
+				</div>
 			{/each}
 		</div>
 	</Card.Content>

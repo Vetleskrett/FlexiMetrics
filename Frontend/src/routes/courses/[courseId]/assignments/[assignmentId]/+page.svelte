@@ -79,7 +79,7 @@
 
 		<div class="flex w-2/5 flex-col gap-8">
 			<AssignmentInformationCard {assignment} />
-			<CompletedTotalCard completed={32} total={teams.length} headline={"Deliveries Submitted"} />
+			<CompletedTotalCard completed={32} total={teams.length} headline={'Deliveries Submitted'} />
 		</div>
 	</div>
 </div>

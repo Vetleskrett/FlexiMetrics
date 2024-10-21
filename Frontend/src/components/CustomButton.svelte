@@ -37,7 +37,7 @@
 		{builders}
 		{href}
 		size="sm"
-		class="bg-button-red hover:bg-button-red-hover flex flex-row justify-between gap-2 px-3"
+		class="flex flex-row justify-between gap-2 bg-button-red px-3 hover:bg-button-red-hover"
 		on:click
 		on:keydown
 	>
