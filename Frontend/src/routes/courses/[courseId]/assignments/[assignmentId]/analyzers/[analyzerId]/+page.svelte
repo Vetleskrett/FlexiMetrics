@@ -11,6 +11,7 @@
 	import Play from 'lucide-svelte/icons/play';
 	import X from 'lucide-svelte/icons/x';
 	import CustomButton from 'src/components/CustomButton.svelte';
+	import AnalyzerRunningCard from 'src/components/AnalyzerRunningCard.svelte';
 
 	const courseId = $page.params.courseId;
 	const assignmentId = $page.params.assignmentId;
@@ -83,6 +84,10 @@
 			</DropdownMenu.Root>
 		</div>
 	</div>
+
+	{#if isRunning}
+		<AnalyzerRunningCard />
+	{/if}
 
 	<AnalyzerOutputCard {analyzerOutput} />
 </div>

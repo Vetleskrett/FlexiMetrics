@@ -2,17 +2,20 @@
 	import * as Card from '$lib/components/ui/card/index.js';
 	import * as Table from '$lib/components/ui/table';
 	import * as DropdownMenu from '$lib/components/ui/dropdown-menu';
-	import ArrowUpDown from 'lucide-svelte/icons/arrow-up-down';
+	import ChevronDown from 'lucide-svelte/icons/chevron-down';
+	import ChevronUp from 'lucide-svelte/icons/chevron-up';
+	import ChevronsUpDown from 'lucide-svelte/icons/chevrons-up-down';
 	import Filter from 'lucide-svelte/icons/filter';
 	import List from 'lucide-svelte/icons/list';
 	import { Button } from 'src/lib/components/ui/button';
-	import type { AnalyzerOutput } from 'src/types';
-	import { createRender, createTable, Render, Subscribe } from 'svelte-headless-table';
+	import { Label } from 'src/lib/components/ui/label';
+	import type { AnalyzerOutput, AnalyzerOutputVersion } from 'src/types';
+	import { createTable, Render, Subscribe } from 'svelte-headless-table';
 	import { addColumnFilters, addSortBy, addHiddenColumns } from 'svelte-headless-table/plugins';
 	import { readable } from 'svelte/store';
-	import StringFilter from './filters/StringFilter.svelte';
 	import CustomButton from './CustomButton.svelte';
-	import StringCell from './cells/StringCell.svelte';
+	import { getFilter } from './filters/filters';
+	import { getCell } from './cells/cells';
 
 	export let analyzerOutput: AnalyzerOutput;
 
@@ -22,21 +25,12 @@
 		filter: addColumnFilters()
 	});
 
-	const stringFilterFn = ({ filterValue, value }: { filterValue: string; value: any }) =>
-		value.toString().toLowerCase().includes(filterValue.toLowerCase());
-
 	const columns = table.createColumns([
 		table.column({
 			id: 'Team',
 			accessor: (teamOutput) => teamOutput.teamId,
 			header: 'Team',
-			plugins: {
-				filter: {
-					fn: stringFilterFn,
-					render: ({ filterValue }) => createRender(StringFilter, { filterValue })
-				}
-			},
-			cell: ({ value }) => createRender(StringCell, { value })
+			cell: getCell({ id: 'Team', name: 'Team', type: 'String' })
 		}),
 		...analyzerOutput.fields.map((field, i) =>
 			table.column({
@@ -44,12 +38,9 @@
 				accessor: (teamOutput) => teamOutput.values.get(field.id),
 				header: field.name,
 				plugins: {
-					filter: {
-						fn: stringFilterFn,
-						render: ({ filterValue }) => createRender(StringFilter, { filterValue })
-					}
+					filter: getFilter(field.type)
 				},
-				cell: ({ value }) => createRender(StringCell, { value })
+				cell: getCell(field)
 			})
 		)
 	]);
@@ -64,43 +55,94 @@
 		.map(([id]) => id);
 
 	let showFilterForId = Object.fromEntries(flatColumns.map((col) => [col.id, false]));
+
+	const { sortKeys } = pluginStates.sort;
+	let sortColumn: { id: string; order: 'asc' | 'desc' | undefined } | undefined = undefined;
+	sortKeys.subscribe((value) => (sortColumn = value.length > 0 ? value[0] : undefined));
+
+	let currentVersion = analyzerOutput.currentVersion;
+	const onVersionChange = (version: AnalyzerOutputVersion) => {
+		currentVersion = version;
+	};
 </script>
 
-<Card.Root class="w-[1080px] overflow-hidden">
-	<Card.Header class="p-4">
-		<div class="flex flex-row items-start justify-end gap-4">
+<Card.Root class="w-[1080px]">
+	<Card.Header class="px-4 py-2">
+		<div class="flex items-end justify-between">
 			<DropdownMenu.Root>
 				<DropdownMenu.Trigger asChild let:builder>
-					<CustomButton color="outline" builders={[builder]}>
-						<List class="h-4 w-4" />
-						<p>Show/hide columns</p>
-					</CustomButton>
+					<Label>
+						<p class="mb-[1px] ml-2 text-xs">Version</p>
+						<CustomButton color="outline" builders={[builder]}>
+							<p class="text-start font-normal text-black">
+								{currentVersion.datetime.toLocaleString(undefined, {
+									dateStyle: 'long',
+									timeStyle: 'short'
+								})}
+							</p>
+							<ChevronDown class="h-4 w-4 text-black" />
+						</CustomButton>
+					</Label>
 				</DropdownMenu.Trigger>
 				<DropdownMenu.Content>
-					{#each analyzerOutput.fields as field, id}
-						<DropdownMenu.CheckboxItem bind:checked={showColumnForId[id]}>
-							{field.name}
-						</DropdownMenu.CheckboxItem>
+					{#each analyzerOutput.versions as version, id}
+						<DropdownMenu.Item on:click={() => onVersionChange(version)}>
+							<p>
+								{version.datetime.toLocaleString(undefined, {
+									dateStyle: 'long',
+									timeStyle: 'short'
+								})}
+							</p>
+						</DropdownMenu.Item>
 					{/each}
 				</DropdownMenu.Content>
 			</DropdownMenu.Root>
-			<DropdownMenu.Root>
-				<DropdownMenu.Trigger asChild let:builder>
-					<CustomButton color="outline" builders={[builder]}>
-						<Filter class="h-4 w-4" />
-						<p>Filter</p>
-					</CustomButton>
-				</DropdownMenu.Trigger>
-				<DropdownMenu.Content>
-					{#each analyzerOutput.fields as field, id}
-						{#if showColumnForId[id]}
-							<DropdownMenu.CheckboxItem bind:checked={showFilterForId[id]}>
+			<div class="flex items-start gap-4">
+				<DropdownMenu.Root>
+					<DropdownMenu.Trigger asChild let:builder>
+						<CustomButton color="outline" builders={[builder]}>
+							<List class="h-4 w-4" />
+							<p>Show/hide columns</p>
+						</CustomButton>
+					</DropdownMenu.Trigger>
+					<DropdownMenu.Content>
+						{#each analyzerOutput.fields as field, id}
+							<DropdownMenu.CheckboxItem
+								bind:checked={showColumnForId[id]}
+								on:click={(e) => {
+									e.preventDefault();
+									showColumnForId[id] = !showColumnForId[id];
+								}}
+							>
 								{field.name}
 							</DropdownMenu.CheckboxItem>
-						{/if}
-					{/each}
-				</DropdownMenu.Content>
-			</DropdownMenu.Root>
+						{/each}
+					</DropdownMenu.Content>
+				</DropdownMenu.Root>
+				<DropdownMenu.Root>
+					<DropdownMenu.Trigger asChild let:builder>
+						<CustomButton color="outline" builders={[builder]}>
+							<Filter class="h-4 w-4" />
+							<p>Filter</p>
+						</CustomButton>
+					</DropdownMenu.Trigger>
+					<DropdownMenu.Content>
+						{#each analyzerOutput.fields as field, id}
+							{#if showColumnForId[id]}
+								<DropdownMenu.CheckboxItem
+									bind:checked={showFilterForId[id]}
+									on:click={(e) => {
+										e.preventDefault();
+										showFilterForId[id] = !showFilterForId[id];
+									}}
+								>
+									{field.name}
+								</DropdownMenu.CheckboxItem>
+							{/if}
+						{/each}
+					</DropdownMenu.Content>
+				</DropdownMenu.Root>
+			</div>
 		</div>
 	</Card.Header>
 	<Card.Content class="p-0 ">
@@ -118,7 +160,14 @@
 											{/if}
 											<Button variant="ghost" on:click={props.sort.toggle}>
 												<Render of={cell.render()} />
-												<ArrowUpDown class="ml-2 h-4 w-4 " />
+
+												{#if sortColumn?.id == cell.id && sortColumn?.order == 'asc'}
+													<ChevronUp class="ml-2 h-4 w-4" />
+												{:else if sortColumn?.id == cell.id && sortColumn?.order == 'desc'}
+													<ChevronDown class="ml-2 h-4 w-4" />
+												{:else}
+													<ChevronsUpDown class="ml-2 h-4 w-4" />
+												{/if}
 											</Button>
 										</div>
 									</Table.Head>

@@ -287,6 +287,28 @@ export const analyzers: Analyzer[] = [
 export const analyzer: Analyzer = analyzers[0];
 
 export const analyzerOutput: AnalyzerOutput = {
+    versions: [
+        {
+            id: '1',
+            datetime: new Date(2024, 3, 21, 17, 26, 12)
+        },
+        {
+            id: '2',
+            datetime: new Date(2024, 2, 8, 15, 32, 8)
+        },
+        {
+            id: '3',
+            datetime: new Date(2024, 1, 5, 8, 5, 44)
+        },
+        {
+            id: '4',
+            datetime: new Date(2024, 0, 1, 12, 43, 34)
+        }
+    ],
+    currentVersion: {
+        id: '1',
+        datetime: new Date(2024, 3, 21, 17, 26, 12)
+    },
     fields: [
         {
             id: '1',
@@ -312,7 +334,6 @@ export const analyzerOutput: AnalyzerOutput = {
             id: '5',
             name: 'Issues closed',
             type: 'Range',
-            min: 0,
             max: 100
         }
     ],
@@ -322,14 +343,14 @@ export const analyzerOutput: AnalyzerOutput = {
             values: new Map<string, any>([
                 ['1', 'Weather app'],
                 ['2', 'team1.html'],
-                ['3', ['Ola Nordmann, Ola Nordmann, Ola Nordmann']],
+                ['3', ['Ola Nordmann', 'Ola Nordmann', 'Ola Nordmann']],
                 ['4', 
                     `
                     {
-                        “commits”: 34,
-                        “issues”: 11,
-                        “contributors”: 3,
-                        “stars”: 1
+                        "commits": 34,
+                        "issues": 11,
+                        "contributors": 3,
+                        "stars": 1
                     }
                     `],
                 ['5', 78],
@@ -340,14 +361,14 @@ export const analyzerOutput: AnalyzerOutput = {
             values: new Map<string, any>([
                 ['1', 'Snake Game'],
                 ['2', 'team2.html'],
-                ['3', ['Ola Nordmann, Ola Nordmann, Ola Nordmann']],
+                ['3', ['Ola Nordmann', 'Ola Nordmann', 'Ola Nordmann']],
                 ['4', 
                     `
                     {
-                        “commits”: 34,
-                        “issues”: 11,
-                        “contributors”: 3,
-                        “stars”: 1
+                        "commits": 34,
+                        "issues": 11,
+                        "contributors": 3,
+                        "stars": 1
                     }
                     `],
                 ['5', 34],
@@ -358,14 +379,14 @@ export const analyzerOutput: AnalyzerOutput = {
             values: new Map<string, any>([
                 ['1', 'Tic Tac Toe'],
                 ['2', 'team3.html'],
-                ['3', ['Ola Nordmann, Ola Nordmann, Ola Nordmann']],
+                ['3', ['Ola Nordmann', 'Ola Nordmann', 'Ola Nordmann']],
                 ['4', 
                     `
                     {
-                        “commits”: 34,
-                        “issues”: 11,
-                        “contributors”: 3,
-                        “stars”: 1
+                        "commits": 34,
+                        "issues": 11,
+                        "contributors": 3,
+                        "stars": 1
                     }
                     `],
                 ['5', 100],
@@ -376,14 +397,14 @@ export const analyzerOutput: AnalyzerOutput = {
             values: new Map<string, any>([
                 ['1', 'Sudoku'],
                 ['2', 'team4.html'],
-                ['3', ['Ola Nordmann, Ola Nordmann, Ola Nordmann']],
+                ['3', ['Ola Nordmann', 'Ola Nordmann', 'Ola Nordmann']],
                 ['4', 
                     `
                     {
-                        “commits”: 34,
-                        “issues”: 11,
-                        “contributors”: 3,
-                        “stars”: 1
+                        "commits": 34,
+                        "issues": 11,
+                        "contributors": 3,
+                        "stars": 1
                     }
                     `],
                 ['5', 12],
@@ -394,14 +415,14 @@ export const analyzerOutput: AnalyzerOutput = {
             values: new Map<string, any>([
                 ['1', 'Music app'],
                 ['2', 'team5.html'],
-                ['3', ['Ola Nordmann, Ola Nordmann, Ola Nordmann']],
+                ['3', ['Ola Nordmann', 'Ola Nordmann', 'Ola Nordmann']],
                 ['4', 
                     `
                     {
-                        “commits”: 34,
-                        “issues”: 11,
-                        “contributors”: 3,
-                        “stars”: 1
+                        "commits": 34,
+                        "issues": 11,
+                        "contributors": 3,
+                        "stars": 1
                     }
                     `],
                 ['5', 50],
@@ -412,14 +433,14 @@ export const analyzerOutput: AnalyzerOutput = {
             values: new Map<string, any>([
                 ['1', 'Quiz Game'],
                 ['2', 'team6.html'],
-                ['3', ['Ola Nordmann, Ola Nordmann, Ola Nordmann']],
+                ['3', ['Ola Nordmann', 'Ola Nordmann', 'Ola Nordmann']],
                 ['4', 
                     `
                     {
-                        “commits”: 34,
-                        “issues”: 11,
-                        “contributors”: 3,
-                        “stars”: 1
+                        "commits": 34,
+                        "issues": 11,
+                        "contributors": 3,
+                        "stars": 1
                     }
                     `],
                 ['5', 89],

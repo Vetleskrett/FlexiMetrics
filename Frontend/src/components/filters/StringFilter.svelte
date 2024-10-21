@@ -1,8 +1,11 @@
 <script lang="ts">
 	import { Input } from 'src/lib/components/ui/input';
-	import type { Readable, Writable } from 'svelte/store';
+	import { onDestroy } from 'svelte';
+	import type { Writable } from 'svelte/store';
 
 	export let filterValue: Writable<string>;
+
+	onDestroy(() => filterValue.set(''));
 </script>
 
 <Input
