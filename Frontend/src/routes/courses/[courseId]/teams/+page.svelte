@@ -19,30 +19,30 @@
 		year: 2024,
 		semester: 'Autumn'
 	};
-    const students : Student[] = [
-        {
-            id : "abc",
-			name: "Ola Nordmann",
-            email: "OlaNordmann@ntnu.no"
-        },
-        {
-            id : "abc",
-			name: "Ola Nordmann",
-            email: "OlaNordmann@ntnu.no"
-        },
-        {
-            id : "abc",
-			name: "Ola Nordmann",
-            email: "OlaNordmann@ntnu.no"
-        },
-    ]
+	const students: Student[] = [
+		{
+			id: 'abc',
+			name: 'Ola Nordmann',
+			email: 'OlaNordmann@ntnu.no'
+		},
+		{
+			id: 'abc',
+			name: 'Ola Nordmann',
+			email: 'OlaNordmann@ntnu.no'
+		},
+		{
+			id: 'abc',
+			name: 'Ola Nordmann',
+			email: 'OlaNordmann@ntnu.no'
+		}
+	];
 
 	const teams: Team[] = [];
 	for (let i = 1; i <= 10; i++) {
 		teams.push({
 			id: i.toString(),
 			students: students,
-            complete: Math.floor(Math.random() * 100)
+			complete: Math.floor(Math.random() * 100)
 		});
 	}
 </script>
@@ -57,20 +57,15 @@
 			<Breadcrumb.Item>
 				<Breadcrumb.Link href="/courses/{courseId}">{course.code} - {course.name}</Breadcrumb.Link>
 			</Breadcrumb.Item>
-            <Breadcrumb.Separator />
-            <Breadcrumb.Item>
+			<Breadcrumb.Separator />
+			<Breadcrumb.Item>
 				<Breadcrumb.Page>Teams</Breadcrumb.Page>
 			</Breadcrumb.Item>
 		</Breadcrumb.List>
 	</Breadcrumb.Root>
 	<div class="flex w-full items-center justify-between">
 		<div class="flex items-center">
-			<img
-				width="60"
-				height="60"
-				src="https://img.icons8.com/fluency/480/group.png"
-				alt="group"
-			/>
+			<img width="60" height="60" src="https://img.icons8.com/fluency/480/group.png" alt="group" />
 			<div>
 				<h1 class="ml-4 text-4xl font-semibold">Teams</h1>
 			</div>
@@ -92,9 +87,14 @@
 		<div class="flex w-[700px] flex-col gap-8">
 			<AllTeamCard {teams} {courseId} />
 		</div>
-        <div class="flex w-[400px] flex-col gap-8">
-			<SimpleAddCard headline="Add Teams" actionString="Add" inputString="Number of Teams" inputType="Number"/>
-			<AddTeamMembersCard/>
+		<div class="flex w-[400px] flex-col gap-8">
+			<SimpleAddCard
+				headline="Add Teams"
+				actionString="Add"
+				inputString="Number of Teams"
+				inputType="Number"
+			/>
+			<AddTeamMembersCard />
 		</div>
 	</div>
 </div>

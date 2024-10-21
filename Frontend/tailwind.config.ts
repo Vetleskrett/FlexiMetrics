@@ -16,6 +16,10 @@ const config: Config = {
 		extend: {
 			colors: {
 				button: {
+					red: {
+						DEFAULT: "#E82A39",
+						hover: "#CC2331"
+					},
 					green: {
 						DEFAULT: "#2EB275",
 						hover: "#259663"

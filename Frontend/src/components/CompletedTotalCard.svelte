@@ -9,12 +9,7 @@
 <Card.Root class="w-full overflow-hidden p-5">
 	<Card.Header class="m-0 p-0">
 		<div class="flex items-center">
-			<img
-				width="40"
-				height="40"
-				src="https://img.icons8.com/fluency/480/pass.png"
-				alt="pass"
-			/>
+			<img width="40" height="40" src="https://img.icons8.com/fluency/480/pass.png" alt="pass" />
 			<Card.Title class="m-0 ml-2 text-2xl">{headline}</Card.Title>
 		</div>
 	</Card.Header>

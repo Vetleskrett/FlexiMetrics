@@ -31,25 +31,56 @@ export type Team = {
     complete: number | null | undefined;
 }
 
-export type DeliveryFieldType = 'String' | 'Integer' | 'Boolean' | 'File';
-
 export type DeliveryField = {
     id: string;
     name: string;
-    type: DeliveryFieldType;
+    type: 'String' | 'Integer' | 'Boolean' | 'File';
 }
 
-export type FieldDelivery = {
+export type DeliveryFieldValue = {
     fieldId: string;
     value: any;
 }
 
 export type Delivery = {
     teamId: string;
-    fields: FieldDelivery[];
+    values: DeliveryFieldValue[];
 }
 
 export type Analyzer = {
     id: string;
     name: string;
+}
+
+export type AnalyzerFieldType = 'String' | 'Integer' | 'Boolean' | 'File' | 'List' | 'Json' | 'Range';
+
+export type AnalyzerField = {
+    id: string;
+    name: string;
+} &
+(
+    {
+        type: 'String' | 'Integer' | 'Boolean' | 'File' | 'List' | 'Json';
+    } |
+    {
+        type: 'Range';
+        max: number;
+    }
+)
+
+export type AnalyzerTeamOutput = {
+    teamId: string;
+    values: Map<string, any>;
+}
+
+export type AnalyzerOutputVersion = {
+    id: string;
+    datetime: Date;
+}
+
+export type AnalyzerOutput = {
+    versions: AnalyzerOutputVersion[];
+    currentVersion: AnalyzerOutputVersion;
+    fields: AnalyzerField[];
+    teamOutputs: AnalyzerTeamOutput[];
 }

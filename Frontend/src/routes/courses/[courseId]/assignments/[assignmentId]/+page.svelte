@@ -48,10 +48,12 @@
 		</div>
 
 		<div class="flex items-center gap-2">
-			<CustomButton color="blue">
-				<ArrowUpFromLine size="20" />
-				<p>Publish</p>
-			</CustomButton>
+			{#if !assignment.published}
+				<CustomButton color="blue">
+					<ArrowUpFromLine size="20" />
+					<p>Publish</p>
+				</CustomButton>
+			{/if}
 			<DropdownMenu.Root>
 				<DropdownMenu.Trigger>
 					<EllipsisVertical size={32} />
@@ -77,7 +79,7 @@
 
 		<div class="flex w-2/5 flex-col gap-8">
 			<AssignmentInformationCard {assignment} />
-			<CompletedTotalCard completed={32} total={teams.length} headline={"Deliveries Submitted"} />
+			<CompletedTotalCard completed={32} total={teams.length} headline={'Deliveries Submitted'} />
 		</div>
 	</div>
 </div>
