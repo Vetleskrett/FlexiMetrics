@@ -6,8 +6,16 @@ export type Assignment = {
     published: boolean;
 }
 
+export type AssignmentTeam = {
+    id: string;
+    name: string;
+    due: string;
+    completed: boolean;
+}
+
 export type Student = {
     id: string;
+    name: string;
     email: string;
 }
 
@@ -20,6 +28,7 @@ export type Teacher = {
 export type Team = {
     id: string;
     students: Student[];
+    complete: number | null | undefined;
 }
 
 export type DeliveryField = {

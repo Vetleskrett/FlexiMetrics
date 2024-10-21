@@ -63,7 +63,8 @@ export const students: Student[] = [];
 for (let i = 1; i <= 196; i++) {
     students.push({
         id: i.toString(),
-        email: 'ola@ntnu.no'
+        email: 'ola@ntnu.no',
+        name: 'ola',
     });
 }
 
@@ -71,7 +72,8 @@ export const teams: Team[] = [];
 for (let i = 1; i <= 49; i++) {
     teams.push({
         id: i.toString(),
-        students: []
+        students: [],
+        complete: 2
     });
 }
 
