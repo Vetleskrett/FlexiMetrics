@@ -2,12 +2,15 @@ var builder = DistributedApplication.CreateBuilder(args);
 
 var postgresdb = builder.AddPostgres("postgres")
     .WithDataVolume()
+    .WithPgAdmin()
     .AddDatabase("postgresdb");
 
-builder.AddProject<Projects.Api>("api")
-    .WithReference(postgresdb);
+var migrationService = builder.AddProject<Projects.MigrationService>("migrationservice")
+    .WithReference(postgresdb)
+    .WaitFor(postgresdb);
 
-builder.AddProject<Projects.MigrationService>("migrationservice")
-    .WithReference(postgresdb);
+builder.AddProject<Projects.Api>("api")
+    .WithReference(postgresdb)
+    .WaitForCompletion(migrationService);
 
 builder.Build().Run();

@@ -1,10 +1,7 @@
-﻿using Database.Models;
+﻿namespace Api.Teams.Contracts;
 
-namespace Api.Teams.Contracts
+public class UpdateTeamRequest
 {
-    public class UpdateTeamRequest
-    {
-        public required Guid CourseId { get; init; }
-        public required int TeamId { get; init; }
-    }
+    public required Guid CourseId { get; init; }
+    public required int TeamId { get; init; }
 }

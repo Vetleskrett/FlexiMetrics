@@ -1,43 +1,41 @@
-﻿using Api.Courses.Contracts;
-using Database.Models;
+﻿using Database.Models;
 
-namespace Api.Teams.Contracts
+namespace Api.Teams.Contracts;
+
+public static class TeamsMapping
 {
-    public static class TeamsMapping
+    public static Team MapToTeam(this CreateTeamRequest request)
     {
-        public static Team MapToTeam(this CreateTeamRequest request)
+        return new Team
         {
-            return new Team
-            {
-                Id = Guid.NewGuid(),
-                CourseId = request.CourseId,
-                TeamId = request.TeamId,
-            };
-        }
+            Id = Guid.NewGuid(),
+            CourseId = request.CourseId,
+            TeamNr = request.TeamNr,
+        };
+    }
 
-        public static Team MapToTeam(this UpdateTeamRequest request, Guid id)
+    public static Team MapToTeam(this UpdateTeamRequest request, Guid id)
+    {
+        return new Team
         {
-            return new Team
-            {
-                Id = id,
-                CourseId = request.CourseId,
-                TeamId = request.TeamId,
-            };
-        }
+            Id = id,
+            CourseId = request.CourseId,
+            TeamNr = request.TeamId,
+        };
+    }
 
-        public static TeamResponse MapToResponse(this Team team)
+    public static TeamResponse MapToResponse(this Team team)
+    {
+        return new TeamResponse
         {
-            return new TeamResponse
-            {
-                Id = team.Id,
-                CourseId = team.CourseId,
-                TeamId = team.TeamId,
-            };
-        }
+            Id = team.Id,
+            CourseId = team.CourseId,
+            TeamNr = team.TeamNr,
+        };
+    }
 
-        public static IEnumerable<TeamResponse> MapToResponse(this IEnumerable<Team> teams)
-        {
-            return teams.Select(team => team.MapToResponse());
-        }
+    public static IEnumerable<TeamResponse> MapToResponse(this IEnumerable<Team> teams)
+    {
+        return teams.Select(team => team.MapToResponse());
     }
 }

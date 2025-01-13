@@ -1,87 +1,89 @@
 ﻿using Database.Models;
 
-namespace Api.Assignments.Contracts
+namespace Api.Assignments.Contracts;
+
+public static class AssignmentMapping
 {
-    public static class AssignmentMapping
+    public static Assignment MapToAssignment(this CreateAssignmentRequest request)
     {
-        public static Assignment MapToAssignment(this CreateAssignmentRequest request)
+        return new Assignment
         {
-            return new Assignment
-            {
-                Id = Guid.NewGuid(),
-                CourseId = request.CourseId,
-                DueDate = request.DueDate,
-                Name = request.Name,
-            };
-        }
+            Id = Guid.NewGuid(),
+            CourseId = request.CourseId,
+            DueDate = request.DueDate,
+            Name = request.Name,
+        };
+    }
 
-        public static Assignment MapToAssignment(this UpdateAssignmentRequest request, Guid id)
+    public static Assignment MapToAssignment(this UpdateAssignmentRequest request, Guid id)
+    {
+        return new Assignment
         {
-            return new Assignment
-            {
-                Id = id,
-                CourseId = request.CourseId,
-                DueDate = request.DueDate,
-                Name = request.Name,
-            };
-        }
+            Id = id,
+            CourseId = request.CourseId,
+            DueDate = request.DueDate,
+            Name = request.Name,
+        };
+    }
 
-        public static AssignmentResponse MapToResponse(this Assignment assignment)
+    public static AssignmentResponse MapToResponse(this Assignment assignment)
+    {
+        return new AssignmentResponse
         {
-            return new AssignmentResponse
-            {
-                Id = assignment.Id,
-                Name = assignment.Name,
-                DueDate = assignment.DueDate,
-                CourseId = assignment.CourseId,
-            };
-        }
+            Id = assignment.Id,
+            Name = assignment.Name,
+            DueDate = assignment.DueDate,
+            CourseId = assignment.CourseId,
+        };
+    }
 
-        public static IEnumerable<AssignmentResponse> MapToResponse(this IEnumerable<Assignment> assignments)
-        {
-            return assignments.Select(assignment => assignment.MapToResponse());
-        }
+    public static IEnumerable<AssignmentResponse> MapToResponse(this IEnumerable<Assignment> assignments)
+    {
+        return assignments.Select(assignment => assignment.MapToResponse());
+    }
 
 
-        public static AssignmentResponse MapToResponse(this Assignment assignment, IEnumerable<AssignmentVariable> assignmentVariables)
+    public static AssignmentResponse MapToResponse(this Assignment assignment, IEnumerable<AssignmentField> assignmentFields)
+    {
+        return new AssignmentResponse
         {
-            return new AssignmentResponse
-            {
-                Id = assignment.Id,
-                Name = assignment.Name,
-                DueDate = assignment.DueDate,
-                CourseId = assignment.CourseId,
-                Variables = assignmentVariables.MapToResponse(),
-            };
-        }
+            Id = assignment.Id,
+            Name = assignment.Name,
+            DueDate = assignment.DueDate,
+            CourseId = assignment.CourseId,
+            Fields = assignmentFields.MapToResponse().ToList(),
+        };
+    }
 
-        public static AssignmentVariable MapToAssignmentVariable(this AssignmentVariableContract request)
+    public static AssignmentField MapToAssignmentField(this AssignmentFieldRequest request)
+    {
+        return new AssignmentField
         {
-            return new AssignmentVariable
-            {
-                Id = Guid.NewGuid(),
-                Type = request.Type,
-                Name = request.Name
-            };
-        }
+            Id = Guid.NewGuid(),
+            Type = request.Type,
+            Name = request.Name,
+            AssignmentId = request.AssignmentId,
+        };
+    }
 
-        public static IEnumerable<AssignmentVariable> MapToAssignmentVariable(this IEnumerable<AssignmentVariableContract> variables)
-        {
-            return variables.Select(variable => variable.MapToAssignmentVariable());
-        }
+    public static IEnumerable<AssignmentField> MapToAssignmentField(this IEnumerable<AssignmentFieldRequest> fields)
+    {
+        return fields.Select(field => field.MapToAssignmentField());
+    }
 
-        public static AssignmentVariableContract MapToResponse(this AssignmentVariable variable)
+    public static AssignmentFieldResponse MapToResponse(this AssignmentField field)
+    {
+        return new AssignmentFieldResponse
         {
-            return new AssignmentVariableContract
-            {
-                Name = variable.Name,
-                Type = variable.Type,
-            };
-        }
+            Id = field.Id,
+            Name = field.Name,
+            Type = field.Type,
+            AssignmentId = field.AssignmentId,
+        };
+    }
 
-        public static IEnumerable<AssignmentVariableContract> MapToResponse(this IEnumerable<AssignmentVariable> variables)
-        {
-            return variables.Select(variable => variable.MapToResponse());
-        }
+    public static IEnumerable<AssignmentFieldResponse> MapToResponse(this IEnumerable<AssignmentField> fields)
+    {
+        return fields.Select(field => field.MapToResponse());
     }
 }

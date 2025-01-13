@@ -4,106 +4,104 @@ using Database;
 using Database.Models;
 using FluentValidation;
 using Microsoft.EntityFrameworkCore;
-using System.Threading.Tasks;
 
-namespace Api.Assignments
+namespace Api.Assignments;
+
+public interface IAssignmentService
 {
-    public interface IAssignmentService
+    Task<IEnumerable<Assignment>> GetAll();
+    Task<Assignment?> GetById(Guid id);
+    Task<(Assignment, IEnumerable<AssignmentField>)?> GetByIdWithFields(Guid id);
+    Task<Result<(Assignment, IEnumerable<AssignmentField>), ValidationFailed>> Create(Assignment assignment, List<AssignmentField> fields);
+    Task<Result<(Assignment, IEnumerable<AssignmentField>)?, ValidationFailed>> Update(Assignment assignment, List<AssignmentField>? fields);
+    Task<bool> DeleteById(Guid id);
+}
+public class AssignmentService : IAssignmentService
+{
+    protected readonly AppDbContext _dbContext;
+    protected readonly IValidator<Assignment> _validator;
+
+    public AssignmentService(AppDbContext dbContext, IValidator<Assignment> validator)
     {
-        Task<IEnumerable<Assignment>> GetAll();
-        Task<Assignment?> GetById(Guid id);
-        Task<(Assignment, IEnumerable<AssignmentVariable>)?> GetByIdWithVariables(Guid id);
-        Task<Result<(Assignment, IEnumerable<AssignmentVariable>), ValidationFailed>> Create(Assignment assignment, List<AssignmentVariable> variables);
-        Task<Result<(Assignment, IEnumerable<AssignmentVariable>)?, ValidationFailed>> Update(Assignment assignment, List<AssignmentVariable>? variables);
-        Task<bool> DeleteById(Guid id);
+        _dbContext = dbContext;
+        _validator = validator;
     }
-    public class AssignmentService : IAssignmentService
+    public async Task<IEnumerable<Assignment>> GetAll()
     {
-        protected readonly AppDbContext _dbContext;
-        protected readonly IValidator<Assignment> _validator;
+        return await _dbContext.Assignments.AsNoTracking().ToListAsync();
+    }
 
-        public AssignmentService(AppDbContext dbContext, IValidator<Assignment> validator)
+    public async Task<Assignment?> GetById(Guid id)
+    {
+        return await _dbContext.Assignments.FindAsync(id);
+    }
+
+    public async Task<(Assignment, IEnumerable<AssignmentField>)?> GetByIdWithFields(Guid id)
+    {
+        var assignment = await _dbContext.Assignments.FindAsync(id);
+        var fields = await _dbContext.AssignmentFields.AsNoTracking().Where(x => x.AssignmentId == id).ToListAsync();
+        return assignment == null || fields == null ? null : (assignment, fields);
+    }
+
+    public async Task<Result<(Assignment, IEnumerable<AssignmentField>), ValidationFailed>> Create(Assignment assignment, List<AssignmentField> fields)
+    {
+        var validationResult = await _validator.ValidateAsync(assignment);
+        if (!validationResult.IsValid)
         {
-            _dbContext = dbContext;
-            _validator = validator;
+            return new ValidationFailed(validationResult.Errors);
         }
-        public async Task<IEnumerable<Assignment>> GetAll()
+        try
         {
-            return await _dbContext.Assignments.AsNoTracking().ToListAsync();
+            _dbContext.Assignments.Add(assignment);
+            fields.ForEach(x => x.AssignmentId = assignment.Id);
+            _dbContext.AssignmentFields.AddRange(fields);
+            await _dbContext.SaveChangesAsync();
+        }
+        catch (Exception)
+        {
+            // Find out what to do
+            return new ValidationFailed([]);
         }
 
-        public async Task<Assignment?> GetById(Guid id)
+        return (assignment, fields);
+    }
+
+    public async Task<Result<(Assignment, IEnumerable<AssignmentField>)?, ValidationFailed>> Update(Assignment assignment, List<AssignmentField>? fields)
+    {
+        var validationResult = await _validator.ValidateAsync(assignment);
+        if (!validationResult.IsValid)
         {
-            return await _dbContext.Assignments.FindAsync(id);
+            return new ValidationFailed(validationResult.Errors);
         }
 
-        public async Task<(Assignment, IEnumerable<AssignmentVariable>)?> GetByIdWithVariables(Guid id)
+        var result = 0;
+        try
         {
-            var assignment = await _dbContext.Assignments.FindAsync(id);
-            var variables = await _dbContext.AssignmentVariables.AsNoTracking().Where(x => x.AssignmentId == id).ToListAsync(); 
-            return assignment == null || variables == null ? null : (assignment, variables);
-        }
-
-        public async Task<Result<(Assignment, IEnumerable<AssignmentVariable>), ValidationFailed>> Create(Assignment assignment, List<AssignmentVariable> variables)
-        {
-            var validationResult = await _validator.ValidateAsync(assignment);
-            if (!validationResult.IsValid)
+            _dbContext.Assignments.Update(assignment);
+            var oldFields = await _dbContext.AssignmentFields.AsNoTracking().Where(x => x.AssignmentId == assignment.Id).ToListAsync();
+            if (fields != null)
             {
-                return new ValidationFailed(validationResult.Errors);
+                _dbContext.AssignmentFields.RemoveRange(oldFields);
+                fields.ForEach(x => x.AssignmentId = assignment.Id);
+                _dbContext.AssignmentFields.AddRange(fields);
             }
-            try
+            else
             {
-                _dbContext.Assignments.Add(assignment);
-                variables.ForEach(x => x.AssignmentId = assignment.Id);
-                _dbContext.AssignmentVariables.AddRange(variables);
-                await _dbContext.SaveChangesAsync();
+                fields = oldFields;
             }
-            catch (Exception)
-            {
-                // Find out what to do
-                return new ValidationFailed([]);
-            }
-
-            return (assignment, variables);
+            result = await _dbContext.SaveChangesAsync();
         }
-
-        public async Task<Result<(Assignment, IEnumerable<AssignmentVariable>)?, ValidationFailed>> Update(Assignment assignment, List<AssignmentVariable>? variables)
+        catch (Exception)
         {
-            var validationResult = await _validator.ValidateAsync(assignment);
-            if (!validationResult.IsValid)
-            {
-                return new ValidationFailed(validationResult.Errors);
-            }
-
-            var result = 0;
-            try
-            {
-                _dbContext.Assignments.Update(assignment);
-                var old_variables = await _dbContext.AssignmentVariables.AsNoTracking().Where(x => x.AssignmentId == assignment.Id).ToListAsync();
-                if (variables != null) 
-                {
-                    _dbContext.AssignmentVariables.RemoveRange(old_variables);
-                    variables.ForEach(x => x.AssignmentId = assignment.Id);
-                    _dbContext.AssignmentVariables.AddRange(variables);
-                }
-                else
-                {
-                    variables = old_variables;
-                }
-                result = await _dbContext.SaveChangesAsync();
-            }
-            catch (Exception)
-            {
-                // Find out what to do
-                return new ValidationFailed([]);
-            }
-            return result > 0 ? (assignment, variables) : default;
+            // Find out what to do
+            return new ValidationFailed([]);
         }
+        return result > 0 ? (assignment, fields) : default;
+    }
 
-        public async Task<bool> DeleteById(Guid id)
-        {
-            var result = await _dbContext.Assignments.Where(x => x.Id == id).ExecuteDeleteAsync();
-            return result > 0;
-        }
+    public async Task<bool> DeleteById(Guid id)
+    {
+        var result = await _dbContext.Assignments.Where(x => x.Id == id).ExecuteDeleteAsync();
+        return result > 0;
     }
 }

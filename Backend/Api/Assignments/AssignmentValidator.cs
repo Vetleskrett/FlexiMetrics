@@ -1,20 +1,19 @@
 ﻿using Database.Models;
 using FluentValidation;
 
-namespace Api.Assignments
+namespace Api.Assignments;
+
+public class AssignmentValidator : AbstractValidator<Assignment>
 {
-    public class AssignmentValidator : AbstractValidator<Assignment>
+    public AssignmentValidator()
     {
-        public AssignmentValidator()
-        {
-            RuleFor(x => x.Id)
-                .NotEmpty();
+        RuleFor(x => x.Id)
+            .NotEmpty();
 
-            RuleFor(x => x.CourseId)
-                .NotEmpty();
+        RuleFor(x => x.CourseId)
+            .NotEmpty();
 
-            RuleFor(x => x.Name)
-                .NotEmpty();
-        }
+        RuleFor(x => x.Name)
+            .NotEmpty();
     }
 }
