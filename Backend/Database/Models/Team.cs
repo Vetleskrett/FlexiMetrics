@@ -1,14 +1,13 @@
-﻿using Microsoft.EntityFrameworkCore;
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
 
-namespace Database.Models
+namespace Database.Models;
+
+public class Team
 {
-    public class Team
-    {
-        [Key]
-        public required Guid Id { get; set; }
-        // Maybe this should be string to make it more flexible?
-        public required int TeamId { get; set; }
-        public required Guid CourseId { get; set; }
-    }
+    [Key]
+    public required Guid Id { get; set; }
+    public required int TeamNr { get; set; }
+    public required Guid CourseId { get; set; }
+    public Course? Course { get; set; }
+    public List<User>? Students { get; set; }
 }

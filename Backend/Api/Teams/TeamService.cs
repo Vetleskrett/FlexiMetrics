@@ -5,83 +5,82 @@ using Database.Models;
 using FluentValidation;
 using Microsoft.EntityFrameworkCore;
 
-namespace Api.Teams
+namespace Api.Teams;
+
+public interface ITeamService
 {
-    public interface ITeamService
+    Task<IEnumerable<Team>> GetAll();
+    Task<Team?> GetById(Guid id);
+    Task<Result<Team, ValidationFailed>> Create(Team team);
+    Task<Result<Team?, ValidationFailed>> Update(Team team);
+    Task<bool> DeleteById(Guid id);
+}
+public class TeamService : ITeamService
+{
+    protected readonly AppDbContext _dbContext;
+    protected readonly IValidator<Team> _validator;
+
+    public TeamService(AppDbContext dbContext, IValidator<Team> validator)
     {
-        Task<IEnumerable<Team>> GetAll();
-        Task<Team?> GetById(Guid id);
-        Task<Result<Team, ValidationFailed>> Create(Team team);
-        Task<Result<Team?, ValidationFailed>> Update(Team team);
-        Task<bool> DeleteById(Guid id);
+        _dbContext = dbContext;
+        _validator = validator;
     }
-    public class TeamService : ITeamService
+    public async Task<IEnumerable<Team>> GetAll()
     {
-        protected readonly AppDbContext _dbContext;
-        protected readonly IValidator<Team> _validator;
+        return await _dbContext.Teams.AsNoTracking().ToListAsync();
+    }
 
-        public TeamService(AppDbContext dbContext, IValidator<Team> validator)
+    public async Task<Team?> GetById(Guid id)
+    {
+        return await _dbContext.Teams.FindAsync(id);
+    }
+
+    public async Task<Result<Team, ValidationFailed>> Create(Team team)
+    {
+        var validationResult = await _validator.ValidateAsync(team);
+        if (!validationResult.IsValid)
         {
-            _dbContext = dbContext;
-            _validator = validator;
+            return new ValidationFailed(validationResult.Errors);
         }
-        public async Task<IEnumerable<Team>> GetAll()
+        try
         {
-            return await _dbContext.Teams.AsNoTracking().ToListAsync();
+            _dbContext.Teams.Add(team);
+            await _dbContext.SaveChangesAsync();
         }
-
-        public async Task<Team?> GetById(Guid id)
+        catch (Exception)
         {
-            return await _dbContext.Teams.FindAsync(id);
-        }
-
-        public async Task<Result<Team, ValidationFailed>> Create(Team team)
-        {
-            var validationResult = await _validator.ValidateAsync(team);
-            if (!validationResult.IsValid)
-            {
-                return new ValidationFailed(validationResult.Errors);
-            }
-            try
-            {
-                _dbContext.Teams.Add(team);
-                await _dbContext.SaveChangesAsync();
-            }
-            catch (Exception)
-            {
-                // Find out what to do
-                return new ValidationFailed([]);
-            }
-
-            return team;
+            // Find out what to do
+            return new ValidationFailed([]);
         }
 
-        public async Task<Result<Team?, ValidationFailed>> Update(Team team)
-        {
-            var validationResult = await _validator.ValidateAsync(team);
-            if (!validationResult.IsValid)
-            {
-                return new ValidationFailed(validationResult.Errors);
-            }
+        return team;
+    }
 
-            var result = 0;
-            try
-            {
-                _dbContext.Teams.Update(team);
-                result = await _dbContext.SaveChangesAsync();
-            }
-            catch (Exception)
-            {
-                // Find out what to do
-                return new ValidationFailed([]);
-            }
-            return result > 0 ? team : default;
+    public async Task<Result<Team?, ValidationFailed>> Update(Team team)
+    {
+        var validationResult = await _validator.ValidateAsync(team);
+        if (!validationResult.IsValid)
+        {
+            return new ValidationFailed(validationResult.Errors);
         }
 
-        public async Task<bool> DeleteById(Guid id)
+        var result = 0;
+        try
         {
-            var result = await _dbContext.Teams.Where(x => x.Id == id).ExecuteDeleteAsync();
-            return result > 0;
+            _dbContext.Teams.Update(team);
+            result = await _dbContext.SaveChangesAsync();
         }
+        catch (Exception)
+        {
+            // Find out what to do
+            return new ValidationFailed([]);
+        }
+        return result > 0 ? team : default;
+    }
+
+    public async Task<bool> DeleteById(Guid id)
+    {
+        var result = await _dbContext.Teams.Where(x => x.Id == id).ExecuteDeleteAsync();
+        return result > 0;
     }
 }

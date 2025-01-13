@@ -1,20 +1,19 @@
 ﻿using Database.Models;
 using FluentValidation;
 
-namespace Api.Teams
+namespace Api.Teams;
+
+public class TeamValidator : AbstractValidator<Team>
 {
-    public class TeamValidator : AbstractValidator<Team>
+    public TeamValidator()
     {
-        public TeamValidator()
-        {
-            RuleFor(x => x.Id)
-                .NotEmpty();
+        RuleFor(x => x.Id)
+            .NotEmpty();
 
-            RuleFor(x => x.CourseId)
-                .NotEmpty();
+        RuleFor(x => x.CourseId)
+            .NotEmpty();
 
-            RuleFor(x => x.TeamId)
-                .NotEmpty();
-        }
+        RuleFor(x => x.TeamNr)
+            .NotEmpty();
     }
 }

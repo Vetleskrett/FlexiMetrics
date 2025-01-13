@@ -10,20 +10,29 @@ public class AppDbContext : DbContext
 
     }
 
+    public DbSet<User> Users { get; set; }
     public DbSet<Course> Courses { get; set; }
     public DbSet<Team> Teams { get; set; }
     public DbSet<Assignment> Assignments { get; set; }
-
-    public DbSet<AssignmentVariable> AssignmentVariables { get; set; }
+    public DbSet<AssignmentField> AssignmentFields { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
-        modelBuilder.Entity<Team>()
-                    .HasIndex(t => new { t.TeamId, t.CourseId })
-                    .IsUnique();
-        modelBuilder.Entity<Assignment>()
-                    .HasIndex(a => new { a.Name, a.CourseId })
-                    .IsUnique();
+
+        modelBuilder.Entity<User>()
+            .HasIndex(u => u.Email)
+            .IsUnique();
+
+        var course = modelBuilder.Entity<Course>();
+        course.HasMany(c => c.Teachers).WithMany();
+        course.HasMany(c => c.Students).WithMany();
+        course.HasMany(c => c.Teams).WithOne(t => t.Course);
+
+        modelBuilder.Entity<Team>().HasMany(t => t.Students).WithMany();
+
+        var assignment = modelBuilder.Entity<Assignment>();
+        assignment.HasOne(a => a.Course);
+        assignment.HasMany(a => a.Fields).WithOne(f => f.Assignment);
     }
 }
