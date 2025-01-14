@@ -1,6 +1,7 @@
-﻿using Database.Models;
+﻿using Api.Courses.Contracts;
+using Database.Models;
 
-namespace Api.Courses.Contracts;
+namespace Api.Courses;
 
 public static class CourseMapping
 {
@@ -9,8 +10,10 @@ public static class CourseMapping
         return new Course
         {
             Id = Guid.NewGuid(),
-            Title = request.Title,
             Code = request.Code,
+            Name = request.Name,
+            Year = request.Year,
+            Semester = request.Semester,
         };
     }
 
@@ -19,8 +22,10 @@ public static class CourseMapping
         return new Course
         {
             Id = id,
-            Title = request.Title,
             Code = request.Code,
+            Name = request.Name,
+            Year = request.Year,
+            Semester = request.Semester,
         };
     }
 
@@ -29,8 +34,10 @@ public static class CourseMapping
         return new CourseResponse
         {
             Id = course.Id,
-            Title = course.Title,
             Code = course.Code,
+            Name = course.Name,
+            Year = course.Year,
+            Semester = course.Semester,
         };
     }
 

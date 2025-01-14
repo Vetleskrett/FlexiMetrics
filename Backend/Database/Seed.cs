@@ -1,7 +1,6 @@
 ﻿using Bogus;
 using Database.Models;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Primitives;
 
 namespace Database;
 
@@ -15,15 +14,14 @@ public static class Seed
             .UseSeed(SEED)
             .RuleFor(x => x.Id, f => f.Random.Guid())
             .RuleFor(x => x.Email, f => f.Person.Email)
-            .RuleFor(x => x.Name, f => f.Person.FullName)
-            .RuleFor(x => x.Role, f => f.Random.Enum<Role>());
+            .RuleFor(x => x.Name, f => f.Person.FullName); ;
 
         var students = userFaker
             .RuleFor(x => x.Role, f => Role.Student)
             .Generate(100);
 
         var teachers = userFaker
-            .RuleFor(x => x.Role, f => Role.Student)
+            .RuleFor(x => x.Role, f => Role.Teacher)
             .Generate(10);
 
         await AddRangeIfNotExists(dbContext, students);
@@ -32,8 +30,10 @@ public static class Seed
         var courses = new Faker<Course>()
             .UseSeed(SEED)
             .RuleFor(x => x.Id, f => f.Random.Guid())
-            .RuleFor(x => x.Title, f => f.PickRandom(COURSES))
-            .RuleFor(x => x.Code, f => "TDT" + f.Random.Number(100, 999))
+            .RuleFor(x => x.Code, f => "TDT" + f.Random.Number(1000, 9999))
+            .RuleFor(x => x.Name, f => f.PickRandom(COURSES))
+            .RuleFor(x => x.Year, f => 2025)
+            .RuleFor(x => x.Semester, f => Semester.Spring)
             .RuleFor(x => x.Teachers, f => f.Random.ListItems(teachers, 3))
             .RuleFor(x => x.Students, f => f.Random.ListItems(students, 30))
             .Generate(10);

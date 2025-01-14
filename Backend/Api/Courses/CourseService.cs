@@ -4,15 +4,18 @@ using FluentValidation;
 using Microsoft.EntityFrameworkCore;
 using Database.Models;
 using Database;
+using Api.Courses.Contracts;
 
 namespace Api.Courses;
 
 public interface ICourseService
 {
-    Task<IEnumerable<Course>> GetAll();
-    Task<Course?> GetById(Guid id);
-    Task<Result<Course, ValidationFailed>> Create(Course course);
-    Task<Result<Course?, ValidationFailed>> Update(Course course);
+    Task<IEnumerable<CourseResponse>> GetAll();
+    Task<IEnumerable<CourseResponse>> GetAllByTeacherId(Guid teacherId);
+    Task<IEnumerable<CourseResponse>> GetAllByStudentId(Guid studentId);
+    Task<CourseFullResponse?> GetById(Guid id);
+    Task<Result<CourseResponse, ValidationFailed>> Create(CreateCourseRequest request);
+    Task<Result<CourseResponse?, ValidationFailed>> Update(UpdateCourseRequest request, Guid id);
     Task<bool> DeleteById(Guid id);
 }
 
@@ -27,18 +30,60 @@ public class CourseService : ICourseService
         _validator = validator;
     }
 
-    public async Task<IEnumerable<Course>> GetAll()
+    public async Task<IEnumerable<CourseResponse>> GetAll()
     {
-        return await _dbContext.Courses.AsNoTracking().ToListAsync();
+        var courses = await _dbContext.Courses.AsNoTracking().ToListAsync();
+        return courses.MapToResponse();
     }
 
-    public async Task<Course?> GetById(Guid id)
+    public async Task<IEnumerable<CourseResponse>> GetAllByTeacherId(Guid teacherId)
     {
-        return await _dbContext.Courses.FindAsync(id);
+        var courses = await _dbContext.Courses
+            .Where(c => c.Teachers!.Any(s => s.Id == teacherId))
+            .AsNoTracking()
+            .ToListAsync();
+        return courses.MapToResponse();
     }
 
-    public async Task<Result<Course, ValidationFailed>> Create(Course course)
+    public async Task<IEnumerable<CourseResponse>> GetAllByStudentId(Guid studentId)
     {
+        var courses = await _dbContext.Courses
+            .Where(c => c.Students!.Any(s => s.Id == studentId))
+            .AsNoTracking()
+            .ToListAsync();
+        return courses.MapToResponse();
+    }
+
+    public async Task<CourseFullResponse?> GetById(Guid id)
+    {
+        var course = await _dbContext.Courses
+            .Include(c => c.Teachers)
+            .Select(course =>
+                new CourseFullResponse
+                {
+                    Id = course.Id,
+                    Code = course.Code,
+                    Name = course.Name,
+                    Year = course.Year,
+                    Semester = course.Semester,
+                    NumStudents = course.Students!.Count,
+                    NumTeams = course.Teams!.Count,
+                    Teachers = course.Teachers!.Select(t => new TeacherResponse
+                    {
+                        Id = t.Id,
+                        Email = t.Email,
+                        Name = t.Name,
+                    }).ToList(),
+                }
+            )
+            .FirstOrDefaultAsync(c => c.Id == id);
+
+        return course;
+    }
+
+    public async Task<Result<CourseResponse, ValidationFailed>> Create(CreateCourseRequest request)
+    {
+        var course = request.MapToCourse();
         var validationResult = await _validator.ValidateAsync(course);
         if (!validationResult.IsValid)
         {
@@ -48,11 +93,12 @@ public class CourseService : ICourseService
         _dbContext.Courses.Add(course);
         await _dbContext.SaveChangesAsync();
 
-        return course;
+        return course.MapToResponse();
     }
 
-    public async Task<Result<Course?, ValidationFailed>> Update(Course course)
+    public async Task<Result<CourseResponse?, ValidationFailed>> Update(UpdateCourseRequest request, Guid id)
     {
+        var course = request.MapToCourse(id);
         var validationResult = await _validator.ValidateAsync(course);
         if (!validationResult.IsValid)
         {
@@ -60,8 +106,9 @@ public class CourseService : ICourseService
         }
 
         _dbContext.Courses.Update(course);
-        var result = await _dbContext.SaveChangesAsync();
-        return result > 0 ? course : default;
+        var numEntriesUpdated = await _dbContext.SaveChangesAsync();
+
+        return numEntriesUpdated > 0 ? course.MapToResponse() : default;
     }
 
     public async Task<bool> DeleteById(Guid id)

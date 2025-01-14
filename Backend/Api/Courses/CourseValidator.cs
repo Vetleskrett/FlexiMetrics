@@ -10,10 +10,16 @@ public class CourseValidator : AbstractValidator<Course>
         RuleFor(x => x.Id)
             .NotEmpty();
 
-        RuleFor(x => x.Title)
+        RuleFor(x => x.Name)
             .NotEmpty();
 
         RuleFor(x => x.Code)
             .NotEmpty();
+
+        RuleFor(x => x.Year)
+            .NotEmpty();
+
+        RuleFor(x => x.Semester)
+            .IsInEnum();
     }
 }
