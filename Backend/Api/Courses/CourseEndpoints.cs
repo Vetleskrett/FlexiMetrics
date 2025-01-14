@@ -1,4 +1,5 @@
-﻿using Api.Courses.Contracts;
+﻿using Api.Courses;
+using Api.Courses.Contracts;
 using Api.Validation;
 
 namespace Api.Courses;
@@ -7,47 +8,63 @@ public static class CourseEndpoints
 {
     public static void MapCourseEndpoints(this WebApplication app)
     {
-        var group = app.MapGroup("courses").WithTags("Courses");
+        var group = app.MapGroup("").WithTags("Courses");
 
-        group.MapGet("/", async (ICourseService courseService) =>
+        group.MapGet("courses", async (ICourseService courseService) =>
         {
             var courses = await courseService.GetAll();
-            var coursesResponse = courses.MapToResponse();
-            return Results.Ok(coursesResponse);
+            return Results.Ok(courses);
         })
         .Produces<IEnumerable<CourseResponse>>()
         .WithName("GetAllCourses")
         .WithSummary("Get all courses");
 
-        group.MapGet("/{id:guid}", async (ICourseService courseService, Guid id) =>
+        group.MapGet("teacher/{teacherId:guid}/courses", async (ICourseService courseService, Guid teacherId) =>
         {
-            var result = await courseService.GetById(id);
-            if (result is not null)
+            var courses = await courseService.GetAllByTeacherId(teacherId);
+            return Results.Ok(courses);
+        })
+        .Produces<IEnumerable<CourseResponse>>()
+        .WithName("GetAllCoursesByTeacherId")
+        .WithSummary("Get all courses by teacher id");
+
+        group.MapGet("student/{studentId:guid}/courses", async (ICourseService courseService, Guid studentId) =>
+        {
+            var courses = await courseService.GetAllByStudentId(studentId);
+            return Results.Ok(courses);
+        })
+        .Produces<IEnumerable<CourseResponse>>()
+        .WithName("GetAllCoursesByStudentId")
+        .WithSummary("Get all courses by student id");
+
+        group.MapGet("courses/{id:guid}", async (ICourseService courseService, Guid id) =>
+        {
+            var course = await courseService.GetById(id);
+            if (course is not null)
             {
-                return Results.Ok(result.MapToResponse());
+                return Results.Ok(course);
             }
             else
             {
                 return Results.NotFound();
             }
         })
-        .Produces<CourseResponse>()
+        .Produces<CourseFullResponse>()
         .WithName("GetCourse")
         .WithSummary("Get course by id");
 
-        group.MapPost("/", async (ICourseService courseService, CreateCourseRequest request) =>
+        group.MapPost("courses", async (ICourseService courseService, CreateCourseRequest request) =>
         {
-            var course = request.MapToCourse();
-            var result = await courseService.Create(course);
+            var result = await courseService.Create(request);
 
             return result.Match
             (
                 course => Results.CreatedAtRoute
-                    (
-                        "GetCourse",
-                        new { id = course.Id },
-                        course.MapToResponse()
-                    ),
+                (
+                    "GetCourse",
+                    new { id = course.Id },
+                    course
+                ),
                 failed => Results.BadRequest(failed.MapToResponse())
             );
         })
@@ -55,24 +72,13 @@ public static class CourseEndpoints
         .WithName("CreateCourse")
         .WithSummary("Create new course");
 
-        group.MapPut("/{id:guid}", async (ICourseService courseService, Guid id, UpdateCourseRequest request) =>
+        group.MapPut("courses/{id:guid}", async (ICourseService courseService, Guid id, UpdateCourseRequest request) =>
         {
-            var course = request.MapToCourse(id);
-            var result = await courseService.Update(course);
+            var result = await courseService.Update(request, id);
 
             return result.Match
             (
-                course =>
-                {
-                    if (course is not null)
-                    {
-                        return Results.Ok(course.MapToResponse());
-                    }
-                    else
-                    {
-                        return Results.NotFound();
-                    }
-                },
+                course => course is not null ? Results.Ok(course) : Results.NotFound(),
                 failed => Results.BadRequest(failed.MapToResponse())
             );
         })
@@ -80,7 +86,7 @@ public static class CourseEndpoints
         .WithName("UpdateCourse")
         .WithSummary("Update course by id");
 
-        group.MapDelete("/{id:guid}", async (ICourseService courseService, Guid id) =>
+        group.MapDelete("courses/{id:guid}", async (ICourseService courseService, Guid id) =>
         {
             var deleted = await courseService.DeleteById(id);
             return deleted ? Results.Ok() : Results.NotFound();
