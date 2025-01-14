@@ -62,7 +62,6 @@ public static class AssignmentMapping
             Id = Guid.NewGuid(),
             Type = request.Type,
             Name = request.Name,
-            AssignmentId = request.AssignmentId,
         };
     }
 
@@ -78,7 +77,6 @@ public static class AssignmentMapping
             Id = field.Id,
             Name = field.Name,
             Type = field.Type,
-            AssignmentId = field.AssignmentId,
         };
     }
 

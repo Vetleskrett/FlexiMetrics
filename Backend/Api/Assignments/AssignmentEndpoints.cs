@@ -19,6 +19,16 @@ public static class AssignmentEndpoints
         .WithName("GetAllAssignments")
         .WithSummary("Get all assignments");
 
+        group.MapGet("/course/{courseId:guid}", async (IAssignmentService assignmentService, Guid courseId) =>
+        {
+            var courses = await assignmentService.GetAllByCourse(courseId);
+            var coursesResponse = courses.MapToResponse();
+            return Results.Ok(coursesResponse);
+        })
+        .Produces<IEnumerable<AssignmentResponse>>()
+        .WithName("GetAllAssignmentsByCourse")
+        .WithSummary("Get all assignments by course");
+
         group.MapGet("/{id:guid}", async (IAssignmentService assignmentService, Guid id) =>
         {
             var result = await assignmentService.GetById(id);

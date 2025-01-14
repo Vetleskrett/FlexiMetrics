@@ -10,6 +10,7 @@ namespace Api.Assignments;
 public interface IAssignmentService
 {
     Task<IEnumerable<Assignment>> GetAll();
+    Task<IEnumerable<Assignment>> GetAllByCourse(Guid courseId);
     Task<Assignment?> GetById(Guid id);
     Task<(Assignment, IEnumerable<AssignmentField>)?> GetByIdWithFields(Guid id);
     Task<Result<(Assignment, IEnumerable<AssignmentField>), ValidationFailed>> Create(Assignment assignment, List<AssignmentField> fields);
@@ -29,6 +30,11 @@ public class AssignmentService : IAssignmentService
     public async Task<IEnumerable<Assignment>> GetAll()
     {
         return await _dbContext.Assignments.AsNoTracking().ToListAsync();
+    }
+
+    public async Task<IEnumerable<Assignment>> GetAllByCourse(Guid CourseId)
+    {
+        return await _dbContext.Assignments.Where(x => x.CourseId == CourseId).ToListAsync();
     }
 
     public async Task<Assignment?> GetById(Guid id)
