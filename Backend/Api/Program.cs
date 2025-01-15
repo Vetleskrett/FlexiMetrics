@@ -19,6 +19,15 @@ builder.Services.AddValidatorsFromAssemblyContaining<Program>();
 
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowCors",
+        builder => builder
+            .WithOrigins("http://localhost:5173", "https://localhost:5173")
+            .SetIsOriginAllowedToAllowWildcardSubdomains()
+            .AllowAnyMethod()
+            .AllowAnyHeader());
+});
 
 builder.Services.ConfigureHttpJsonOptions(options =>
 {
@@ -40,5 +49,6 @@ app.UseHttpsRedirection();
 app.MapCourseEndpoints();
 app.MapTeamEndpoints();
 app.MapAssignmentEndpoints();
+app.UseCors("AllowCors");
 
 app.Run();
