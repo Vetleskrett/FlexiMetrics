@@ -48,7 +48,7 @@ public static class TeamEndpoints
                         new { id = team.Id },
                         team.MapToResponse()
                     ),
-                failed => Results.BadRequest(failed.MapToResponse())
+                failure => Results.BadRequest(failure)
             );
         })
         .Produces<TeamResponse>()
@@ -73,7 +73,7 @@ public static class TeamEndpoints
                         return Results.NotFound();
                     }
                 },
-                failed => Results.BadRequest(failed.MapToResponse())
+                failure => Results.BadRequest(failure)
             );
         })
         .Produces<TeamResponse>()

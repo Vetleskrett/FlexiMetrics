@@ -1,4 +1,4 @@
-﻿namespace Api.Utils;
+﻿namespace Api.Validation;
 
 public readonly struct Result<TValue, TError>
 {

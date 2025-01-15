@@ -5,11 +5,11 @@ namespace Api.Validation;
 
 public static class ValidationMapping
 {
-    public static ValidationFailureResponse MapToResponse(this IEnumerable<ValidationFailure> validationFailures)
+    public static ValidationResponse MapToResponse(this IEnumerable<ValidationFailure> failures)
     {
-        return new ValidationFailureResponse
+        return new ValidationResponse
         {
-            Errors = validationFailures.Select(x => new ValidationResponse
+            Errors = failures.Select(x => new ValidationError
             {
                 PropertyName = x.PropertyName,
                 Message = x.ErrorMessage
@@ -17,15 +17,11 @@ public static class ValidationMapping
         };
     }
 
-    public static ValidationFailureResponse MapToResponse(this ValidationFailed failed)
+    public static ValidationResponse MapToResponse(this ValidationError error)
     {
-        return new ValidationFailureResponse
+        return new ValidationResponse
         {
-            Errors = failed.Errors.Select(x => new ValidationResponse
-            {
-                PropertyName = x.PropertyName,
-                Message = x.ErrorMessage
-            })
+            Errors = [error]
         };
     }
 }

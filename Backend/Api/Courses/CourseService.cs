@@ -1,10 +1,11 @@
-﻿using Api.Utils;
-using Api.Validation;
+﻿using Api.Validation;
 using FluentValidation;
 using Microsoft.EntityFrameworkCore;
 using Database.Models;
 using Database;
 using Api.Courses.Contracts;
+using Api.Teachers.Contracts;
+using Movies.Api.Contracts.Responses;
 
 namespace Api.Courses;
 
@@ -14,8 +15,8 @@ public interface ICourseService
     Task<IEnumerable<CourseResponse>> GetAllByTeacherId(Guid teacherId);
     Task<IEnumerable<CourseResponse>> GetAllByStudentId(Guid studentId);
     Task<CourseFullResponse?> GetById(Guid id);
-    Task<Result<CourseResponse, ValidationFailed>> Create(CreateCourseRequest request);
-    Task<Result<CourseResponse?, ValidationFailed>> Update(UpdateCourseRequest request, Guid id);
+    Task<Result<CourseResponse, ValidationResponse>> Create(CreateCourseRequest request);
+    Task<Result<CourseResponse?, ValidationResponse>> Update(UpdateCourseRequest request, Guid id);
     Task<bool> DeleteById(Guid id);
 }
 
@@ -81,13 +82,13 @@ public class CourseService : ICourseService
         return course;
     }
 
-    public async Task<Result<CourseResponse, ValidationFailed>> Create(CreateCourseRequest request)
+    public async Task<Result<CourseResponse, ValidationResponse>> Create(CreateCourseRequest request)
     {
         var course = request.MapToCourse();
         var validationResult = await _validator.ValidateAsync(course);
         if (!validationResult.IsValid)
         {
-            return new ValidationFailed(validationResult.Errors);
+            return validationResult.Errors.MapToResponse();
         }
 
         _dbContext.Courses.Add(course);
@@ -96,13 +97,13 @@ public class CourseService : ICourseService
         return course.MapToResponse();
     }
 
-    public async Task<Result<CourseResponse?, ValidationFailed>> Update(UpdateCourseRequest request, Guid id)
+    public async Task<Result<CourseResponse?, ValidationResponse>> Update(UpdateCourseRequest request, Guid id)
     {
         var course = request.MapToCourse(id);
         var validationResult = await _validator.ValidateAsync(course);
         if (!validationResult.IsValid)
         {
-            return new ValidationFailed(validationResult.Errors);
+            return validationResult.Errors.MapToResponse();
         }
 
         _dbContext.Courses.Update(course);

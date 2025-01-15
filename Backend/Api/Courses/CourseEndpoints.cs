@@ -65,7 +65,7 @@ public static class CourseEndpoints
                     new { id = course.Id },
                     course
                 ),
-                failed => Results.BadRequest(failed.MapToResponse())
+                failure => Results.BadRequest(failure)
             );
         })
         .Produces<CourseResponse>()
@@ -79,7 +79,7 @@ public static class CourseEndpoints
             return result.Match
             (
                 course => course is not null ? Results.Ok(course) : Results.NotFound(),
-                failed => Results.BadRequest(failed.MapToResponse())
+                failure => Results.BadRequest(failure)
             );
         })
         .Produces<CourseResponse>()
