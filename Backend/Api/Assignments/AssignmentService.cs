@@ -1,9 +1,9 @@
-﻿using Api.Utils;
-using Api.Validation;
+﻿using Api.Validation;
 using Database;
 using Database.Models;
 using FluentValidation;
 using Microsoft.EntityFrameworkCore;
+using Movies.Api.Contracts.Responses;
 
 namespace Api.Assignments;
 
@@ -13,8 +13,8 @@ public interface IAssignmentService
     Task<IEnumerable<Assignment>> GetAllByCourse(Guid courseId);
     Task<Assignment?> GetById(Guid id);
     Task<(Assignment, IEnumerable<AssignmentField>)?> GetByIdWithFields(Guid id);
-    Task<Result<(Assignment, IEnumerable<AssignmentField>), ValidationFailed>> Create(Assignment assignment, List<AssignmentField> fields);
-    Task<Result<(Assignment, IEnumerable<AssignmentField>)?, ValidationFailed>> Update(Assignment assignment, List<AssignmentField>? fields);
+    Task<Result<(Assignment, IEnumerable<AssignmentField>), ValidationResponse>> Create(Assignment assignment, List<AssignmentField> fields);
+    Task<Result<(Assignment, IEnumerable<AssignmentField>)?, ValidationResponse>> Update(Assignment assignment, List<AssignmentField>? fields);
     Task<bool> DeleteById(Guid id);
 }
 public class AssignmentService : IAssignmentService
@@ -49,59 +49,44 @@ public class AssignmentService : IAssignmentService
         return assignment == null || fields == null ? null : (assignment, fields);
     }
 
-    public async Task<Result<(Assignment, IEnumerable<AssignmentField>), ValidationFailed>> Create(Assignment assignment, List<AssignmentField> fields)
+    public async Task<Result<(Assignment, IEnumerable<AssignmentField>), ValidationResponse>> Create(Assignment assignment, List<AssignmentField> fields)
     {
         var validationResult = await _validator.ValidateAsync(assignment);
         if (!validationResult.IsValid)
         {
-            return new ValidationFailed(validationResult.Errors);
+            return validationResult.Errors.MapToResponse();
         }
-        try
-        {
-            _dbContext.Assignments.Add(assignment);
-            fields.ForEach(x => x.AssignmentId = assignment.Id);
-            _dbContext.AssignmentFields.AddRange(fields);
-            await _dbContext.SaveChangesAsync();
-        }
-        catch (Exception)
-        {
-            // Find out what to do
-            return new ValidationFailed([]);
-        }
+
+        _dbContext.Assignments.Add(assignment);
+        fields.ForEach(x => x.AssignmentId = assignment.Id);
+        _dbContext.AssignmentFields.AddRange(fields);
+        await _dbContext.SaveChangesAsync();
 
         return (assignment, fields);
     }
 
-    public async Task<Result<(Assignment, IEnumerable<AssignmentField>)?, ValidationFailed>> Update(Assignment assignment, List<AssignmentField>? fields)
+    public async Task<Result<(Assignment, IEnumerable<AssignmentField>)?, ValidationResponse>> Update(Assignment assignment, List<AssignmentField>? fields)
     {
         var validationResult = await _validator.ValidateAsync(assignment);
         if (!validationResult.IsValid)
         {
-            return new ValidationFailed(validationResult.Errors);
+            return validationResult.Errors.MapToResponse();
         }
 
-        var result = 0;
-        try
+        _dbContext.Assignments.Update(assignment);
+        var oldFields = await _dbContext.AssignmentFields.AsNoTracking().Where(x => x.AssignmentId == assignment.Id).ToListAsync();
+        if (fields != null)
         {
-            _dbContext.Assignments.Update(assignment);
-            var oldFields = await _dbContext.AssignmentFields.AsNoTracking().Where(x => x.AssignmentId == assignment.Id).ToListAsync();
-            if (fields != null)
-            {
-                _dbContext.AssignmentFields.RemoveRange(oldFields);
-                fields.ForEach(x => x.AssignmentId = assignment.Id);
-                _dbContext.AssignmentFields.AddRange(fields);
-            }
-            else
-            {
-                fields = oldFields;
-            }
-            result = await _dbContext.SaveChangesAsync();
+            _dbContext.AssignmentFields.RemoveRange(oldFields);
+            fields.ForEach(x => x.AssignmentId = assignment.Id);
+            _dbContext.AssignmentFields.AddRange(fields);
         }
-        catch (Exception)
+        else
         {
-            // Find out what to do
-            return new ValidationFailed([]);
+            fields = oldFields;
         }
+        var result = await _dbContext.SaveChangesAsync();
+
         return result > 0 ? (assignment, fields) : default;
     }
 

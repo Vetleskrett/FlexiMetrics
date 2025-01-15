@@ -1,9 +1,9 @@
-﻿using Api.Utils;
-using Api.Validation;
+﻿using Api.Validation;
 using Database;
 using Database.Models;
 using FluentValidation;
 using Microsoft.EntityFrameworkCore;
+using Movies.Api.Contracts.Responses;
 
 namespace Api.Teams;
 
@@ -11,10 +11,11 @@ public interface ITeamService
 {
     Task<IEnumerable<Team>> GetAll();
     Task<Team?> GetById(Guid id);
-    Task<Result<Team, ValidationFailed>> Create(Team team);
-    Task<Result<Team?, ValidationFailed>> Update(Team team);
+    Task<Result<Team, ValidationResponse>> Create(Team team);
+    Task<Result<Team?, ValidationResponse>> Update(Team team);
     Task<bool> DeleteById(Guid id);
 }
+
 public class TeamService : ITeamService
 {
     protected readonly AppDbContext _dbContext;
@@ -35,46 +36,31 @@ public class TeamService : ITeamService
         return await _dbContext.Teams.FindAsync(id);
     }
 
-    public async Task<Result<Team, ValidationFailed>> Create(Team team)
+    public async Task<Result<Team, ValidationResponse>> Create(Team team)
     {
         var validationResult = await _validator.ValidateAsync(team);
         if (!validationResult.IsValid)
         {
-            return new ValidationFailed(validationResult.Errors);
+            return validationResult.Errors.MapToResponse();
         }
-        try
-        {
-            _dbContext.Teams.Add(team);
-            await _dbContext.SaveChangesAsync();
-        }
-        catch (Exception)
-        {
-            // Find out what to do
-            return new ValidationFailed([]);
-        }
+
+        _dbContext.Teams.Add(team);
+        await _dbContext.SaveChangesAsync();
 
         return team;
     }
 
-    public async Task<Result<Team?, ValidationFailed>> Update(Team team)
+    public async Task<Result<Team?, ValidationResponse>> Update(Team team)
     {
         var validationResult = await _validator.ValidateAsync(team);
         if (!validationResult.IsValid)
         {
-            return new ValidationFailed(validationResult.Errors);
+            return validationResult.Errors.MapToResponse();
         }
 
-        var result = 0;
-        try
-        {
-            _dbContext.Teams.Update(team);
-            result = await _dbContext.SaveChangesAsync();
-        }
-        catch (Exception)
-        {
-            // Find out what to do
-            return new ValidationFailed([]);
-        }
+        _dbContext.Teams.Update(team);
+        var result = await _dbContext.SaveChangesAsync();
+
         return result > 0 ? team : default;
     }
 

@@ -75,7 +75,7 @@ public static class AssignmentEndpoints
                         new { id = assignment.Item1.Id },
                         assignment.Item1.MapToResponse(assignment.Item2)
                     ),
-                failed => Results.BadRequest(failed.MapToResponse())
+                failure => Results.BadRequest(failure)
             );
         })
         .Produces<AssignmentResponse>()
@@ -101,7 +101,7 @@ public static class AssignmentEndpoints
                         return Results.NotFound();
                     }
                 },
-                failed => Results.BadRequest(failed.MapToResponse())
+                failure => Results.BadRequest(failure)
             );
         })
         .Produces<AssignmentResponse>()

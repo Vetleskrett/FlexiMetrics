@@ -4,6 +4,8 @@ using Database;
 using Api.Teams;
 using Api.Assignments;
 using System.Text.Json.Serialization;
+using Api.Teachers;
+using Api.Students;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -12,6 +14,8 @@ builder.AddServiceDefaults();
 builder.AddNpgsqlDbContext<AppDbContext>("postgresdb");
 
 builder.Services.AddScoped<ICourseService, CourseService>();
+builder.Services.AddScoped<ITeacherService, TeacherService>();
+builder.Services.AddScoped<IStudentService, StudentService>();
 builder.Services.AddScoped<ITeamService, TeamService>();
 builder.Services.AddScoped<IAssignmentService, AssignmentService>();
 
@@ -38,6 +42,8 @@ if (app.Environment.IsDevelopment())
 app.UseHttpsRedirection();
 
 app.MapCourseEndpoints();
+app.MapTeacherEndpoints();
+app.MapStudentEndpoints();
 app.MapTeamEndpoints();
 app.MapAssignmentEndpoints();
 

@@ -2,7 +2,5 @@
 
 public class ValidationResponse
 {
-    public required string PropertyName { get; init; }
-
-    public required string Message { get; init; }
+    public required IEnumerable<ValidationError> Errors { get; init; }
 }
