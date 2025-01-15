@@ -1,3 +1,22 @@
+
+export type Course ={
+    id: string;
+    name: string;
+    code: string;
+    year: number;
+    semester: Semester;
+}
+
+enum Semester{
+    Spring = "Spring",
+    Fall = "Fall",
+}
+
+export enum Role {
+    Teacher = 0,
+    Student = 1,
+}
+
 export type Assignment = {
     id: string;
     name: string;
