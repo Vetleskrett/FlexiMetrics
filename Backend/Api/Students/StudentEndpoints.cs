@@ -17,7 +17,7 @@ public static class StudentEndpoints
         .WithName("GetAllStudentsByCourseId")
         .WithSummary("Get all students by course id");
 
-        group.MapPost("courses/{courseId:guid}/students", async (IStudentService studentService, Guid courseId, AddStudentsRequest request) =>
+        group.MapPost("courses/{courseId:guid}/students", async (IStudentService studentService, Guid courseId, AddStudentsToCourseRequest request) =>
         {
             var added = await studentService.AddToCourse(courseId, request);
             return added ? Results.Ok() : Results.NotFound();

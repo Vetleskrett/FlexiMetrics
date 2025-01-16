@@ -10,7 +10,7 @@ namespace Api.Students;
 public interface IStudentService
 {
     Task<IEnumerable<StudentResponse>?> GetAllByCourseId(Guid courseId);
-    Task<bool> AddToCourse(Guid courseId, AddStudentsRequest request);
+    Task<bool> AddToCourse(Guid courseId, AddStudentsToCourseRequest request);
     Task<Result<bool, ValidationResponse>> RemoveFromCourse(Guid courseId, Guid studentId);
 }
 
@@ -33,7 +33,7 @@ public class StudentService : IStudentService
         return course?.Students?.MapToStudentResponse();
     }
 
-    public async Task<bool> AddToCourse(Guid courseId, AddStudentsRequest request)
+    public async Task<bool> AddToCourse(Guid courseId, AddStudentsToCourseRequest request)
     {
         var course = await _dbContext.Courses
             .Include(c => c.Students)
@@ -59,7 +59,7 @@ public class StudentService : IStudentService
                 Role = Role.Student,
             })
             .ToList();
-        await _dbContext.Users.AddRangeAsync(unregisteredUsers);
+        _dbContext.Users.AddRange(unregisteredUsers);
 
         course.Students!.AddRange(registeredUsers);
         course.Students!.AddRange(unregisteredUsers);
@@ -80,13 +80,12 @@ public class StudentService : IStudentService
             return false;
         }
 
-        var user = course.Students!.FirstOrDefault(t => t.Id == studentId);
-        if (user is null)
+        var removed = course.Students!.RemoveAll(t => t.Id == studentId);
+        if (removed == 0)
         {
             return false;
         }
 
-        course.Students!.Remove(user);
         await _dbContext.SaveChangesAsync();
         return true;
     }

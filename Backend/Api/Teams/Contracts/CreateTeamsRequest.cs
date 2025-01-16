@@ -1,7 +1,7 @@
 ﻿namespace Api.Teams.Contracts;
 
-public class CreateTeamRequest
+public class CreateTeamsRequest
 {
     public required Guid CourseId { get; init; }
-    public required int TeamNr { get; init; }
+    public required int NumTeams { get; init; }
 }

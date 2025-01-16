@@ -40,14 +40,7 @@ public static class CourseEndpoints
         group.MapGet("courses/{id:guid}", async (ICourseService courseService, Guid id) =>
         {
             var course = await courseService.GetById(id);
-            if (course is not null)
-            {
-                return Results.Ok(course);
-            }
-            else
-            {
-                return Results.NotFound();
-            }
+            return course is not null ? Results.Ok(course) : Results.NotFound();
         })
         .Produces<CourseFullResponse>()
         .WithName("GetCourse")
