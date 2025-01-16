@@ -1,5 +1,4 @@
 ﻿using Api.Teams.Contracts;
-using Api.Validation;
 
 namespace Api.Teams;
 
@@ -7,82 +6,76 @@ public static class TeamEndpoints
 {
     public static void MapTeamEndpoints(this WebApplication app)
     {
-        var group = app.MapGroup("teams").WithTags("Teams");
+        var group = app.MapGroup("").WithTags("Teams");
 
-        group.MapGet("/", async (ITeamService teamService) =>
+        group.MapGet("teams", async (ITeamService teamService) =>
         {
             var teams = await teamService.GetAll();
-            var teamsResponse = teams.MapToResponse();
-            return Results.Ok(teamsResponse);
+            return Results.Ok(teams);
         })
         .Produces<IEnumerable<TeamResponse>>()
         .WithName("GetAllTeams")
         .WithSummary("Get all teams");
 
-        group.MapGet("/{id:guid}", async (ITeamService teamService, Guid id) =>
+        group.MapGet("courses/{courseId:guid}/teams", async (ITeamService teamService, Guid courseId) =>
         {
-            var result = await teamService.GetById(id);
-            if (result is not null)
-            {
-                return Results.Ok(result.MapToResponse());
-            }
-            else
-            {
-                return Results.NotFound();
-            }
+            var teams = await teamService.GetAllByCourseId(courseId);
+            return Results.Ok(teams);
+        })
+        .Produces<IEnumerable<TeamResponse>>()
+        .WithName("GetAllTeamsByCourseId")
+        .WithSummary("Get all teams by course id");
+
+        group.MapGet("teams/{id:guid}", async (ITeamService teamService, Guid id) =>
+        {
+            var team = await teamService.GetById(id);
+            return team is not null ? Results.Ok(team) : Results.NotFound();
         })
         .Produces<TeamResponse>()
         .WithName("GetTeam")
         .WithSummary("Get team by id");
 
-        group.MapPost("/", async (ITeamService teamService, CreateTeamRequest request) =>
+        group.MapPost("teams", async (ITeamService teamService, CreateTeamsRequest request) =>
         {
-            var team = request.MapToTeam();
-            var result = await teamService.Create(team);
-
-            return result.Match
+            var teams = await teamService.Create(request);
+            return Results.CreatedAtRoute
             (
-                team => Results.CreatedAtRoute
-                    (
-                        "GetCourse",
-                        new { id = team.Id },
-                        team.MapToResponse()
-                    ),
-                failure => Results.BadRequest(failure)
+                "GetAllTeamsByCourseId",
+                new { courseId = request.CourseId },
+                teams
             );
         })
-        .Produces<TeamResponse>()
-        .WithName("CreateTeam")
-        .WithSummary("Create new team");
+        .Produces<IEnumerable<TeamResponse>>()
+        .WithName("CreateTeams")
+        .WithSummary("Create new teams");
 
-        group.MapPut("/{id:guid}", async (ITeamService teamService, Guid id, UpdateTeamRequest request) =>
+        group.MapPost("teams/bulk", async (ITeamService teamService, BulkAddStudentToTeamsRequest request) =>
         {
-            var team = request.MapToTeam(id);
-            var result = await teamService.Update(team);
-
-            return result.Match
-            (
-                team =>
-                {
-                    if (team is not null)
-                    {
-                        return Results.Ok(team.MapToResponse());
-                    }
-                    else
-                    {
-                        return Results.NotFound();
-                    }
-                },
-                failure => Results.BadRequest(failure)
-            );
+            var added = await teamService.BulkAddToTeam(request);
+            return added ? Results.Ok() : Results.NotFound();
         })
-        .Produces<TeamResponse>()
-        .WithName("UpdateTeam")
-        .WithSummary("Update team by id");
+        .WithName("BulkAddStudentToTeams")
+        .WithSummary("Bulk add student to teams");
 
-        group.MapDelete("/{id:guid}", async (ITeamService teamService, Guid id) =>
+        group.MapPost("teams/{teamId:guid}/students", async (ITeamService teamService, Guid teamId, AddStudentToTeamRequest request) =>
         {
-            var deleted = await teamService.DeleteById(id);
+            var added = await teamService.AddToTeam(teamId, request);
+            return added ? Results.Ok() : Results.NotFound();
+        })
+        .WithName("AddStudentToTeam")
+        .WithSummary("Add student to team");
+
+        group.MapPost("teams/{teamId:guid}/students/{studentId:guid}", async (ITeamService teamService, Guid teamId, Guid studentId) =>
+        {
+            var added = await teamService.RemoveFromTeam(teamId, studentId);
+            return added ? Results.Ok() : Results.NotFound();
+        })
+        .WithName("RemoveStudentFromTeam")
+        .WithSummary("Remove student from team");
+
+        group.MapDelete("teams/{teamId:guid}", async (ITeamService teamService, Guid teamId) =>
+        {
+            var deleted = await teamService.DeleteById(teamId);
             return deleted ? Results.Ok() : Results.NotFound();
         })
         .WithName("DeleteTeam")

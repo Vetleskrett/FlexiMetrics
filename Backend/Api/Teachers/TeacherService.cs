@@ -62,12 +62,6 @@ public class TeacherService : ITeacherService
             return false;
         }
 
-        var user = course.Teachers!.FirstOrDefault(t => t.Id == teacherId);
-        if (user is null)
-        {
-            return false;
-        }
-
         if (course.Teachers!.Count == 1)
         {
             return new ValidationError
@@ -77,7 +71,12 @@ public class TeacherService : ITeacherService
             }.MapToResponse();
         }
 
-        course.Teachers!.Remove(user);
+        var removed = course.Teachers!.RemoveAll(t => t.Id == teacherId);
+        if (removed == 0)
+        {
+            return false;
+        }
+
         await _dbContext.SaveChangesAsync();
         return true;
     }
