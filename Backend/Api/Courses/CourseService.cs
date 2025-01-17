@@ -99,7 +99,16 @@ public class CourseService : ICourseService
 
     public async Task<Result<CourseResponse?, ValidationResponse>> Update(UpdateCourseRequest request, Guid id)
     {
-        var course = request.MapToCourse(id);
+        var course = await _dbContext.Courses
+            .AsNoTracking()
+            .FirstOrDefaultAsync(x => x.Id == id);
+        if (course is null)
+        {
+            return default;
+        }
+
+        course = request.MapToCourse(id);
+
         var validationResult = await _validator.ValidateAsync(course);
         if (!validationResult.IsValid)
         {

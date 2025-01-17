@@ -10,11 +10,11 @@ public static class StudentEndpoints
 
         group.MapGet("courses/{courseId:guid}/students", async (IStudentService studentService, Guid courseId) =>
         {
-            var courses = await studentService.GetAllByCourseId(courseId);
+            var courses = await studentService.GetAllByCourse(courseId);
             return courses is not null ? Results.Ok(courses) : Results.NotFound();
         })
         .Produces<IEnumerable<StudentResponse>>()
-        .WithName("GetAllStudentsByCourseId")
+        .WithName("GetAllStudentsByCourse")
         .WithSummary("Get all students by course id");
 
         group.MapPost("courses/{courseId:guid}/students", async (IStudentService studentService, Guid courseId, AddStudentsToCourseRequest request) =>

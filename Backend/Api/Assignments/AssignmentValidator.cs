@@ -10,10 +10,17 @@ public class AssignmentValidator : AbstractValidator<Assignment>
         RuleFor(x => x.Id)
             .NotEmpty();
 
-        RuleFor(x => x.CourseId)
+        RuleFor(x => x.Name)
             .NotEmpty();
 
-        RuleFor(x => x.Name)
+        RuleFor(x => x.DueDate)
+            .NotEmpty();
+
+        RuleFor(x => x.CollabrotationType)
+            .NotEmpty()
+            .IsInEnum();
+
+        RuleFor(x => x.CourseId)
             .NotEmpty();
     }
 }

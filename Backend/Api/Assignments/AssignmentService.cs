@@ -1,4 +1,5 @@
-﻿using Api.Validation;
+﻿using Api.Assignments.Contracts;
+using Api.Validation;
 using Database;
 using Database.Models;
 using FluentValidation;
@@ -9,64 +10,77 @@ namespace Api.Assignments;
 
 public interface IAssignmentService
 {
-    Task<IEnumerable<Assignment>> GetAll();
-    Task<IEnumerable<Assignment>> GetAllByCourse(Guid courseId);
-    Task<Assignment?> GetById(Guid id);
-    Task<(Assignment, IEnumerable<AssignmentField>)?> GetByIdWithFields(Guid id);
-    Task<Result<(Assignment, IEnumerable<AssignmentField>), ValidationResponse>> Create(Assignment assignment, List<AssignmentField> fields);
-    Task<Result<(Assignment, IEnumerable<AssignmentField>)?, ValidationResponse>> Update(Assignment assignment, List<AssignmentField>? fields);
+    Task<IEnumerable<AssignmentResponse>> GetAll();
+    Task<IEnumerable<AssignmentResponse>> GetAllByCourse(Guid courseId);
+    Task<AssignmentResponse?> GetById(Guid id);
+    Task<Result<AssignmentResponse, ValidationResponse>> Create(CreateAssignmentRequest request);
+    Task<Result<AssignmentResponse?, ValidationResponse>> Update(UpdateAssignmentRequest request, Guid id);
     Task<bool> DeleteById(Guid id);
 }
+
 public class AssignmentService : IAssignmentService
 {
-    protected readonly AppDbContext _dbContext;
-    protected readonly IValidator<Assignment> _validator;
+    private readonly AppDbContext _dbContext;
+    private readonly IValidator<Assignment> _validator;
 
     public AssignmentService(AppDbContext dbContext, IValidator<Assignment> validator)
     {
         _dbContext = dbContext;
         _validator = validator;
     }
-    public async Task<IEnumerable<Assignment>> GetAll()
+
+    public async Task<IEnumerable<AssignmentResponse>> GetAll()
     {
-        return await _dbContext.Assignments.AsNoTracking().ToListAsync();
+        var assignments = await _dbContext.Assignments
+            .AsNoTracking()
+            .ToListAsync();
+        return assignments.MapToResponse();
     }
 
-    public async Task<IEnumerable<Assignment>> GetAllByCourse(Guid CourseId)
+    public async Task<IEnumerable<AssignmentResponse>> GetAllByCourse(Guid CourseId)
     {
-        return await _dbContext.Assignments.Where(x => x.CourseId == CourseId).ToListAsync();
+        var assignments = await _dbContext.Assignments
+            .Where(x => x.CourseId == CourseId)
+            .ToListAsync();
+        return assignments.MapToResponse();
     }
 
-    public async Task<Assignment?> GetById(Guid id)
-    {
-        return await _dbContext.Assignments.FindAsync(id);
-    }
-
-    public async Task<(Assignment, IEnumerable<AssignmentField>)?> GetByIdWithFields(Guid id)
+    public async Task<AssignmentResponse?> GetById(Guid id)
     {
         var assignment = await _dbContext.Assignments.FindAsync(id);
-        var fields = await _dbContext.AssignmentFields.AsNoTracking().Where(x => x.AssignmentId == id).ToListAsync();
-        return assignment == null || fields == null ? null : (assignment, fields);
+        return assignment?.MapToResponse();
     }
 
-    public async Task<Result<(Assignment, IEnumerable<AssignmentField>), ValidationResponse>> Create(Assignment assignment, List<AssignmentField> fields)
+    public async Task<Result<AssignmentResponse, ValidationResponse>> Create(CreateAssignmentRequest request)
     {
+        var assignment = request.MapToAssignment();
+
         var validationResult = await _validator.ValidateAsync(assignment);
         if (!validationResult.IsValid)
         {
             return validationResult.Errors.MapToResponse();
         }
 
+        _dbContext.AssignmentFields.AddRange(assignment.Fields!);
         _dbContext.Assignments.Add(assignment);
-        fields.ForEach(x => x.AssignmentId = assignment.Id);
-        _dbContext.AssignmentFields.AddRange(fields);
+
         await _dbContext.SaveChangesAsync();
 
-        return (assignment, fields);
+        return assignment.MapToResponse();
     }
 
-    public async Task<Result<(Assignment, IEnumerable<AssignmentField>)?, ValidationResponse>> Update(Assignment assignment, List<AssignmentField>? fields)
+    public async Task<Result<AssignmentResponse?, ValidationResponse>> Update(UpdateAssignmentRequest request, Guid id)
     {
+        var assignment = await _dbContext.Assignments
+            .AsNoTracking()
+            .FirstOrDefaultAsync(x => x.Id == id);
+        if (assignment is null)
+        {
+            return default;
+        }
+
+        assignment = request.MapToAssignment(assignment.Id, assignment.CourseId);
+
         var validationResult = await _validator.ValidateAsync(assignment);
         if (!validationResult.IsValid)
         {
@@ -74,20 +88,9 @@ public class AssignmentService : IAssignmentService
         }
 
         _dbContext.Assignments.Update(assignment);
-        var oldFields = await _dbContext.AssignmentFields.AsNoTracking().Where(x => x.AssignmentId == assignment.Id).ToListAsync();
-        if (fields != null)
-        {
-            _dbContext.AssignmentFields.RemoveRange(oldFields);
-            fields.ForEach(x => x.AssignmentId = assignment.Id);
-            _dbContext.AssignmentFields.AddRange(fields);
-        }
-        else
-        {
-            fields = oldFields;
-        }
-        var result = await _dbContext.SaveChangesAsync();
+        await _dbContext.SaveChangesAsync();
 
-        return result > 0 ? (assignment, fields) : default;
+        return assignment.MapToResponse();
     }
 
     public async Task<bool> DeleteById(Guid id)

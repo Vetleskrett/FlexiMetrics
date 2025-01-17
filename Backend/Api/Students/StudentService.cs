@@ -9,7 +9,7 @@ namespace Api.Students;
 
 public interface IStudentService
 {
-    Task<IEnumerable<StudentResponse>?> GetAllByCourseId(Guid courseId);
+    Task<IEnumerable<StudentResponse>?> GetAllByCourse(Guid courseId);
     Task<bool> AddToCourse(Guid courseId, AddStudentsToCourseRequest request);
     Task<Result<bool, ValidationResponse>> RemoveFromCourse(Guid courseId, Guid studentId);
 }
@@ -23,7 +23,7 @@ public class StudentService : IStudentService
         _dbContext = dbContext;
     }
 
-    public async Task<IEnumerable<StudentResponse>?> GetAllByCourseId(Guid courseId)
+    public async Task<IEnumerable<StudentResponse>?> GetAllByCourse(Guid courseId)
     {
         var course = await _dbContext
             .Courses

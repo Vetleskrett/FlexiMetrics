@@ -9,7 +9,7 @@ namespace Api.Teams;
 public interface ITeamService
 {
     Task<IEnumerable<TeamResponse>> GetAll();
-    Task<IEnumerable<TeamResponse>> GetAllByCourseId(Guid courseId);
+    Task<IEnumerable<TeamResponse>> GetAllByCourse(Guid courseId);
     Task<TeamResponse?> GetById(Guid id);
     Task<IEnumerable<TeamResponse>> Create(CreateTeamsRequest request);
     Task<bool> BulkAddToTeam(BulkAddStudentToTeamsRequest request);
@@ -20,13 +20,11 @@ public interface ITeamService
 
 public class TeamService : ITeamService
 {
-    protected readonly AppDbContext _dbContext;
-    protected readonly IValidator<Team> _validator;
+    private readonly AppDbContext _dbContext;
 
-    public TeamService(AppDbContext dbContext, IValidator<Team> validator)
+    public TeamService(AppDbContext dbContext)
     {
         _dbContext = dbContext;
-        _validator = validator;
     }
 
     public async Task<IEnumerable<TeamResponse>> GetAll()
@@ -38,7 +36,7 @@ public class TeamService : ITeamService
         return teams.MapToResponse();
     }
 
-    public async Task<IEnumerable<TeamResponse>> GetAllByCourseId(Guid courseId)
+    public async Task<IEnumerable<TeamResponse>> GetAllByCourse(Guid courseId)
     {
         var teams = await _dbContext.Teams
             .Where(t => t.CourseId == courseId)
@@ -202,7 +200,6 @@ public class TeamService : ITeamService
 
         await _dbContext.SaveChangesAsync();
         return true;
-
     }
 
     public async Task<bool> DeleteById(Guid id)

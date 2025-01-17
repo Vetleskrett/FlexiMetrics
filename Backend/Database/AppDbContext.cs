@@ -32,7 +32,7 @@ public class AppDbContext : DbContext
         modelBuilder.Entity<Team>().HasMany(t => t.Students).WithMany();
 
         var assignment = modelBuilder.Entity<Assignment>();
-        assignment.HasOne(a => a.Course);
+        assignment.HasOne(a => a.Course).WithMany();
         assignment.HasMany(a => a.Fields).WithOne(f => f.Assignment);
     }
 }
