@@ -6,6 +6,7 @@ using Api.Assignments;
 using System.Text.Json.Serialization;
 using Api.Teachers;
 using Api.Students;
+using Api.AssignmentFields;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -18,6 +19,7 @@ builder.Services.AddScoped<ITeacherService, TeacherService>();
 builder.Services.AddScoped<IStudentService, StudentService>();
 builder.Services.AddScoped<ITeamService, TeamService>();
 builder.Services.AddScoped<IAssignmentService, AssignmentService>();
+builder.Services.AddScoped<IAssignmentFieldService, AssignmentFieldService>();
 
 builder.Services.AddValidatorsFromAssemblyContaining<Program>();
 
@@ -50,11 +52,13 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
+app.UseCors("AllowCors");
+
 app.MapCourseEndpoints();
 app.MapTeacherEndpoints();
 app.MapStudentEndpoints();
 app.MapTeamEndpoints();
 app.MapAssignmentEndpoints();
-app.UseCors("AllowCors");
+app.MapAssignmentFieldEndpoints();
 
 app.Run();

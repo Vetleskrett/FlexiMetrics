@@ -1,8 +1,8 @@
 ﻿using Database.Models;
 
-namespace Api.Assignments.Contracts;
+namespace Api.AssignmentFields.Contracts;
 
-public class AssignmentFieldRequest
+public class UpdateAssignmentFieldRequest
 {
     public required AssignmentDataType Type { get; set; }
     public required string Name { get; set; }

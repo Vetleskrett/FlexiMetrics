@@ -2,12 +2,12 @@
 
 namespace Database.Models;
 
-public class AssignmentField
+public class AssignmentField : IModel
 {
     [Key]
     public required Guid Id { get; set; }
+    public required Guid AssignmentId { get; set; }
+    public Assignment? Assignment { get; set; }
     public required AssignmentDataType Type { get; set; }
     public required string Name { get; set; }
-    public Guid AssignmentId { get; set; }
-    public Assignment? Assignment { get; set; }
 }

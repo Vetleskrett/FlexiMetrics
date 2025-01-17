@@ -2,7 +2,7 @@
 
 namespace Database.Models;
 
-public class User
+public class User : IModel
 {
     [Key]
     public required Guid Id { get; set; }

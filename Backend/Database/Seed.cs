@@ -50,7 +50,6 @@ public static class Seed
             {
                 return teamFaker
                     .RuleFor(x => x.TeamNr, f => index + 1)
-                    .RuleFor(x => x.Course, f => course)
                     .RuleFor(x => x.CourseId, f => course.Id)
                     .RuleFor(x => x.Students, f => students.ToList())
                     .Generate();
@@ -69,13 +68,12 @@ public static class Seed
             return assignmentFaker
                 .RuleFor(x => x.Name, f => f.PickRandom(ASSIGNMENTS))
                 .RuleFor(x => x.DueDate, f => f.Date.Between(new DateTime(2024, 1, 1, 0, 0, 0, DateTimeKind.Utc), new DateTime(2024, 6, 1, 0, 0, 0, DateTimeKind.Utc)))
+                .RuleFor(x => x.Published, f => f.Random.Bool())
+                .RuleFor(x => x.CollabrotationType, f => f.Random.Enum<CollabrotationType>())
                 .RuleFor(x => x.CourseId, f => course.Id)
-                .RuleFor(x => x.Course, f => course)
                 .GenerateBetween(2, 5);
         })
         .SelectMany(x => x);
-
-        await AddRangeIfNotExists(dbContext, assignments);
 
         var assignmentFieldFaker = new Faker<AssignmentField>()
             .UseSeed(SEED)
@@ -83,27 +81,29 @@ public static class Seed
 
         var assignmentFields = assignments.Select(assignment =>
         {
-            return assignmentFieldFaker
+            var fields = assignmentFieldFaker
                 .RuleFor(x => x.Type, f => f.Random.Enum<AssignmentDataType>())
                 .RuleFor(x => x.Name, f => f.System.FileName().Split(".")[0])
                 .RuleFor(x => x.AssignmentId, f => assignment.Id)
-                .RuleFor(x => x.Assignment, f => assignment)
                 .GenerateBetween(2, 5);
+            assignment.Fields = fields;
+            return fields;
         })
         .SelectMany(x => x);
 
+        await AddRangeIfNotExists(dbContext, assignments);
         await AddRangeIfNotExists(dbContext, assignmentFields);
 
         await dbContext.SaveChangesAsync();
     }
 
-    private static async Task AddRangeIfNotExists<T>(DbContext dbContext, IEnumerable<T> items) where T : class
+    private static async Task AddRangeIfNotExists<T>(DbContext dbContext, IEnumerable<T> items) where T : class, IModel
     {
         var set = dbContext.Set<T>();
 
         foreach (var item in items)
         {
-            var contains = await set.ContainsAsync(item);
+            var contains = await set.Where(x => x.Id == item.Id).AnyAsync();
             if (!contains)
             {
                 set.Add(item);

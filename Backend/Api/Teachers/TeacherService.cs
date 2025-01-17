@@ -8,7 +8,7 @@ namespace Api.Teachers;
 
 public interface ITeacherService
 {
-    Task<IEnumerable<TeacherResponse>?> GetAllByCourseId(Guid courseId);
+    Task<IEnumerable<TeacherResponse>?> GetAllByCourse(Guid courseId);
     Task<bool> AddToCourse(Guid courseId, AddStudentRequest request);
     Task<Result<bool, ValidationResponse>> RemoveFromCourse(Guid courseId, Guid teacherId);
 }
@@ -22,7 +22,7 @@ public class TeacherService : ITeacherService
         _dbContext = dbContext;
     }
 
-    public async Task<IEnumerable<TeacherResponse>?> GetAllByCourseId(Guid courseId)
+    public async Task<IEnumerable<TeacherResponse>?> GetAllByCourse(Guid courseId)
     {
         var course = await _dbContext
             .Courses
@@ -62,6 +62,12 @@ public class TeacherService : ITeacherService
             return false;
         }
 
+        var user = course.Teachers!.FirstOrDefault(t => t.Id == teacherId);
+        if (user is null)
+        {
+            return false;
+        }
+
         if (course.Teachers!.Count == 1)
         {
             return new ValidationError
@@ -71,12 +77,7 @@ public class TeacherService : ITeacherService
             }.MapToResponse();
         }
 
-        var removed = course.Teachers!.RemoveAll(t => t.Id == teacherId);
-        if (removed == 0)
-        {
-            return false;
-        }
-
+        course.Teachers!.Remove(user);
         await _dbContext.SaveChangesAsync();
         return true;
     }

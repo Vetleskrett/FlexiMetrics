@@ -19,11 +19,11 @@ public static class TeamEndpoints
 
         group.MapGet("courses/{courseId:guid}/teams", async (ITeamService teamService, Guid courseId) =>
         {
-            var teams = await teamService.GetAllByCourseId(courseId);
+            var teams = await teamService.GetAllByCourse(courseId);
             return Results.Ok(teams);
         })
         .Produces<IEnumerable<TeamResponse>>()
-        .WithName("GetAllTeamsByCourseId")
+        .WithName("GetAllTeamsByCourse")
         .WithSummary("Get all teams by course id");
 
         group.MapGet("teams/{id:guid}", async (ITeamService teamService, Guid id) =>
@@ -40,7 +40,7 @@ public static class TeamEndpoints
             var teams = await teamService.Create(request);
             return Results.CreatedAtRoute
             (
-                "GetAllTeamsByCourseId",
+                "GetAllTeamsByCourse",
                 new { courseId = request.CourseId },
                 teams
             );
