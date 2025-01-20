@@ -1,5 +1,5 @@
 <script lang="ts">
-	import type { DeliveryField } from 'src/types.js';
+	import type { AssignmentField } from 'src/types.js';
 	import * as Card from '$lib/components/ui/card/index.js';
 	import { Separator } from '$lib/components/ui/separator/index.js';
 	import Ellipsis from 'lucide-svelte/icons/ellipsis';
@@ -9,7 +9,7 @@
 	import CustomButton from './CustomButton.svelte';
 	import * as Table from '$lib/components/ui/table';
 
-	export let deliveryFields: DeliveryField[];
+	export let assignmentFields: AssignmentField[];
 	export let assignmentId: string;
 	export let courseId: string;
 </script>
@@ -43,13 +43,13 @@
 				</Table.Row>
 			</Table.Header>
 			<Table.Body>
-				{#each deliveryFields as deliveryField}
+				{#each assignmentFields as assignmentField}
 					<Table.Row class="text-base">
 						<Table.Cell class="px-6">
-							{deliveryField.name}
+							{assignmentField.name}
 						</Table.Cell>
 						<Table.Cell class="px-6">
-							{deliveryField.type}
+							{assignmentField.type}
 						</Table.Cell>
 						<Table.Cell class="flex justify-end px-6">
 							<DropdownMenu.Root>

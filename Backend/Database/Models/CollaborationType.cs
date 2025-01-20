@@ -1,6 +1,6 @@
 ﻿namespace Database.Models;
 
-public enum CollabrotationType
+public enum CollaborationType
 {
     Individual,
     Teams

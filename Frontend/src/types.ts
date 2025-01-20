@@ -25,7 +25,7 @@ export type Assignment = {
     name: string;
     dueDate: string;
     published: boolean;
-    collaberationType : string;
+    collaborationType : string;
     courseId : string;
 }
 
@@ -54,7 +54,7 @@ export type Team = {
     complete: number | null | undefined;
 }
 
-export type DeliveryField = {
+export type AssignmentField = {
     id: string;
     name: string;
     type: 'String' | 'Integer' | 'Boolean' | 'File';

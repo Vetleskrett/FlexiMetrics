@@ -10,11 +10,33 @@
 	import AssignmentInformationCard from 'src/components/AssignmentInformationCard.svelte';
 	import DeliveryFormatCard from 'src/components/DeliveryFormatCard.svelte';
 	import AnalyzersCard from 'src/components/AnalyzersCard.svelte';
-	import { course, assignment, deliveryFields, teams, analyzers } from 'src/mockData';
 	import CustomButton from 'src/components/CustomButton.svelte';
+	import { onMount } from 'svelte';
+	import { getCourse, getAssignment, getAssignmentFields } from 'src/api';
+	import { analyzers } from 'src/mockData';
+	import type { Assignment, Course, AssignmentField, Analyzer } from 'src/types';
+	import { Role } from 'src/types';
 
 	const courseId = $page.params.courseId;
 	const assignmentId = $page.params.assignmentId;
+
+	let course : Course;
+	let assignment : Assignment;
+	let assignmentFields: AssignmentField[] = []
+	let teams : number;
+	//let analyzers: Analyzer[] = []
+
+	onMount(async () => {
+		try{
+			course = await getCourse(courseId);
+			assignment = await getAssignment(assignmentId);
+			assignmentFields = await getAssignmentFields(assignmentId)
+			teams = course.numTeams ?? 0;
+		}
+		catch(error){
+			console.error("Something went wrong!")
+		}
+	})
 </script>
 
 <div class="m-auto mt-4 flex w-max flex-col items-center justify-center gap-10">
@@ -25,11 +47,11 @@
 			</Breadcrumb.Item>
 			<Breadcrumb.Separator />
 			<Breadcrumb.Item>
-				<Breadcrumb.Link href="/courses/{courseId}">{course.code} - {course.name}</Breadcrumb.Link>
+				<Breadcrumb.Link href="/courses/{courseId}">{course?.code} - {course?.name}</Breadcrumb.Link>
 			</Breadcrumb.Item>
 			<Breadcrumb.Separator />
 			<Breadcrumb.Item>
-				<Breadcrumb.Page>{assignment.name}</Breadcrumb.Page>
+				<Breadcrumb.Page>{assignment?.name}</Breadcrumb.Page>
 			</Breadcrumb.Item>
 		</Breadcrumb.List>
 	</Breadcrumb.Root>
@@ -41,14 +63,14 @@
 				src="https://img.icons8.com/fluency/480/edit-text-file.png"
 				alt="knowledge-sharing"
 			/>
-			<h1 class="ml-4 text-4xl font-semibold">{assignment.name}</h1>
-			{#if !assignment.published}
+			<h1 class="ml-4 text-4xl font-semibold">{assignment?.name}</h1>
+			{#if !assignment?.published}
 				<p class="ml-4 text-2xl font-semibold text-gray-500">DRAFT</p>
 			{/if}
 		</div>
 
 		<div class="flex items-center gap-2">
-			{#if !assignment.published}
+			{#if !assignment?.published}
 				<CustomButton color="blue">
 					<ArrowUpFromLine size="20" />
 					<p>Publish</p>
@@ -73,13 +95,13 @@
 	</div>
 	<div class="flex w-[1080px] flex-row gap-8">
 		<div class="flex w-3/5 flex-col gap-8">
-			<DeliveryFormatCard {deliveryFields} {assignmentId} {courseId} />
+			<DeliveryFormatCard {assignmentFields} {assignmentId} {courseId} />
 			<AnalyzersCard {analyzers} {assignmentId} {courseId} />
 		</div>
 
 		<div class="flex w-2/5 flex-col gap-8">
 			<AssignmentInformationCard {assignment} />
-			<CompletedTotalCard completed={32} total={teams.length} headline={'Deliveries Submitted'} />
+			<CompletedTotalCard completed={0} total={teams} headline={'Deliveries Submitted'} />
 		</div>
 	</div>
 </div>

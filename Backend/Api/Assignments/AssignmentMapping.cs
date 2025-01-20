@@ -15,7 +15,7 @@ public static class AssignmentMapping
             DueDate = request.DueDate,
             Name = request.Name,
             Published = request.Published,
-            CollabrotationType = request.CollabrotationType,
+            CollaborationType = request.CollaborationType,
             CourseId = request.CourseId,
             Fields = request.Fields.MapToAssignmentField().ToList(),
         };
@@ -29,7 +29,7 @@ public static class AssignmentMapping
             DueDate = request.DueDate,
             Name = request.Name,
             Published = request.Published,
-            CollabrotationType = request.CollabrotationType,
+            CollaborationType = request.CollaborationType,
             CourseId = courseId,
         };
     }
@@ -42,7 +42,7 @@ public static class AssignmentMapping
             Name = assignment.Name,
             DueDate = assignment.DueDate,
             Published = assignment.Published,
-            CollabrotationType = assignment.CollabrotationType,
+            CollaborationType = assignment.CollaborationType,
             CourseId = assignment.CourseId,
         };
     }
