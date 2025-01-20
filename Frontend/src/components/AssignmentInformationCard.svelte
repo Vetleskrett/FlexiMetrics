@@ -5,20 +5,21 @@
 
 	export let assignment: Assignment;
 
-	const rows = [
+	$: rows = [
 		{
 			label: 'Due',
-			value: assignment.due
+			value: assignment?.dueDate.split("T")[0]
 		},
 		{
-			label: 'Individual or Teams',
-			value: assignment.individual ? 'Individual' : 'Teams'
+			label: 'Collaberation Type',
+			value: assignment?.collaborationType
 		},
 		{
 			label: 'Published',
-			value: assignment.published ? 'Yes' : 'No'
+			value: assignment?.published ? 'Yes' : 'No'
 		}
 	];
+	console.log(rows)
 </script>
 
 <Card.Root class="w-full overflow-hidden p-0">

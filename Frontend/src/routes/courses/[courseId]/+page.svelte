@@ -12,7 +12,7 @@
 	import { onMount } from 'svelte';
 	import type { Course, Assignment, Teacher } from 'src/types';
 	import { Role } from 'src/types';
-	import { getCourse, getAssignment } from 'src/api';
+	import { getCourse, getAssignments } from 'src/api';
 	import { userRole } from 'src/store';
 
 
@@ -27,9 +27,9 @@
 	onMount(async () => {
 		try{
 			course = await getCourse(courseId);
-			assignments = await getAssignment(courseId);
+			assignments = await getAssignments(courseId);
 			students = course.numStudents ?? 0;
-			teams = course.numStudents ?? 0;
+			teams = course.numTeams ?? 0;
 			teachers = course.teachers ?? []
 		}
 		catch(error){
