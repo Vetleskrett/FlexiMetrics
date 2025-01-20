@@ -1,9 +1,10 @@
-import type { Course } from "./types";
+import { assignments } from "./mockData";
+import type { Course, Assignment } from "./types";
 const API_BASE_URL = 'https://localhost:7255';
 
-export async function getCourses() : Promise<Course[]> {
+async function getApiCall(url:string){
   try {
-    const response = await fetch(`${API_BASE_URL}/courses`);
+    const response = await fetch(`${API_BASE_URL + url}`);
     if (!response.ok) {
       throw new Error('Network response was not ok');
     }
@@ -13,4 +14,16 @@ export async function getCourses() : Promise<Course[]> {
     console.error('Error fetching data:', error);
     throw error;
   }
+}
+
+export async function getCourses() : Promise<Course[]> {
+  return getApiCall("/courses")
+}
+
+export async function getCourse(courseId: string) : Promise<Course> {
+  return getApiCall(`/courses/${courseId}`)
+}
+
+export async function getAssignment(courseId: string) : Promise<Assignment[]> {
+  return getApiCall(`/course/${courseId}/assignments`)
 }

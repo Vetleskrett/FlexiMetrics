@@ -41,7 +41,7 @@
 						{/if}
 					</div>
 
-					<p class="font-semibold text-gray-500">{assignment.due}</p>
+					<p class="font-semibold text-gray-500">{assignment.dueDate.split("T")[0]}</p> <!--Find a better solution than this has format 00-00-00T23.55-->
 				</a>
 			{/each}
 		</div>

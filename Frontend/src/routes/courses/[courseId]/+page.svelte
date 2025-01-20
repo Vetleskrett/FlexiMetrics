@@ -9,9 +9,33 @@
 	import TeamsCard from 'src/components/TeamsCard.svelte';
 	import TeachersCard from 'src/components/TeachersCard.svelte';
 	import * as Breadcrumb from '$lib/components/ui/breadcrumb/index.js';
-	import { course, assignments, teachers, students, teams } from 'src/mockData';
+	import { onMount } from 'svelte';
+	import type { Course, Assignment, Teacher } from 'src/types';
+	import { Role } from 'src/types';
+	import { getCourse, getAssignment } from 'src/api';
+	import { userRole } from 'src/store';
+
 
 	const courseId = $page.params.courseId;
+
+	let course : Course;
+	let assignments : Assignment[] = []
+	let teachers : Teacher[] = []
+	let students : number;
+	let teams : number;
+
+	onMount(async () => {
+		try{
+			course = await getCourse(courseId);
+			assignments = await getAssignment(courseId);
+			students = course.numStudents ?? 0;
+			teams = course.numStudents ?? 0;
+			teachers = course.teachers ?? []
+		}
+		catch(error){
+			console.error("Something went wrong!")
+		}
+	})
 </script>
 
 <div class="m-auto mt-4 flex w-max flex-col items-center justify-center gap-10">
@@ -22,7 +46,7 @@
 			</Breadcrumb.Item>
 			<Breadcrumb.Separator />
 			<Breadcrumb.Item>
-				<Breadcrumb.Page>{course.code} - {course.name}</Breadcrumb.Page>
+				<Breadcrumb.Page>{course?.code || "loading"} - {course?.name || 'loading'}</Breadcrumb.Page>
 			</Breadcrumb.Item>
 		</Breadcrumb.List>
 	</Breadcrumb.Root>
@@ -35,8 +59,8 @@
 				alt="knowledge-sharing"
 			/>
 			<div>
-				<h1 class="ml-4 text-4xl font-semibold">{course.code} - {course.name}</h1>
-				<p class="ml-4 font-semibold text-gray-500">{course.year} {course.semester}</p>
+				<h1 class="ml-4 text-4xl font-semibold">{course?.code || 'loading'} - {course?.name || 'loading'}</h1>
+				<p class="ml-4 font-semibold text-gray-500">{course?.year || 'loading'} {course?.semester || 'loading'}</p>
 			</div>
 		</div>
 
@@ -62,10 +86,12 @@
 		</div>
 
 		<div class="flex w-2/5 flex-col gap-8">
+			{#if $userRole == Role.Teacher}
 			<div class="flex flex-row gap-8">
 				<StudentsCard {students} {courseId} />
 				<TeamsCard {teams} {courseId} />
 			</div>
+			{/if}
 			<TeachersCard {teachers} {courseId} />
 		</div>
 	</div>
