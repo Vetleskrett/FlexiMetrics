@@ -51,6 +51,7 @@ export type Teacher = {
 export type Team = {
     id: string;
     students: Student[];
+    teamNr: number;
     complete: number | null | undefined;
 }
 
@@ -106,4 +107,9 @@ export type AnalyzerOutput = {
     currentVersion: AnalyzerOutputVersion;
     fields: AnalyzerField[];
     teamOutputs: AnalyzerTeamOutput[];
+}
+
+export type CreateTeams = {
+    courseId: string;
+    numTeams: number;
 }

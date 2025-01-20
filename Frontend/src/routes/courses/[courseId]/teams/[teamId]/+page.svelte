@@ -40,6 +40,7 @@
 
 	const team: Team = {
 		id: '1',
+		teamNr: 1,
 		students: students,
 		complete: Math.floor(Math.random() * 5)
 	};
