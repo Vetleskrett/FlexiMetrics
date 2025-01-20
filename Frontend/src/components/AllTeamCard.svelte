@@ -19,7 +19,7 @@
 				<Separator class="w-full" />
 				<a href="/courses/{courseId}/teams/{team.id}" class="hover:bg-blue-50">
 					<div class="flex items-center px-6 py-4">
-						<h1 class="w-1/2">{team.id}</h1>
+						<h1 class="w-1/2">{team.teamNr}</h1>
 						<div class="w-1/2">
 							{#each team.students as student}
 								<h1>{student.email}</h1>

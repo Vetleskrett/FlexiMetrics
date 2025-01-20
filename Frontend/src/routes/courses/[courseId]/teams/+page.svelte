@@ -1,49 +1,44 @@
 <script lang="ts">
 	import { page } from '$app/stores';
 	import AllTeamCard from 'src/components/AllTeamCard.svelte';
-	import type { Team, Student } from 'src/types';
+	import type { Team, Course } from 'src/types';
 	import EllipsisVertical from 'lucide-svelte/icons/ellipsis-vertical';
 	import Trash2 from 'lucide-svelte/icons/trash-2';
 	import * as DropdownMenu from '$lib/components/ui/dropdown-menu';
 	import * as Breadcrumb from '$lib/components/ui/breadcrumb/index.js';
 	import AddTeamMembersCard from 'src/components/AddTeamMembersCard.svelte';
 	import SimpleAddCard from 'src/components/SimpleAddCard.svelte';
-	import TeamAssignmentsCard from 'src/components/TeamAssignmentsCard.svelte';
+	import { getCourse, getTeams, postTeams } from 'src/api';
+	import { onMount } from 'svelte';
 
 	const courseId = $page.params.courseId;
 
-	const course = {
-		id: '1',
-		code: 'TDT101',
-		name: 'Programmering',
-		year: 2024,
-		semester: 'Autumn'
-	};
-	const students: Student[] = [
-		{
-			id: 'abc',
-			name: 'Ola Nordmann',
-			email: 'OlaNordmann@ntnu.no'
-		},
-		{
-			id: 'abc',
-			name: 'Ola Nordmann',
-			email: 'OlaNordmann@ntnu.no'
-		},
-		{
-			id: 'abc',
-			name: 'Ola Nordmann',
-			email: 'OlaNordmann@ntnu.no'
-		}
-	];
+	let course : Course;
+	let teams : Team[] = []
 
-	const teams: Team[] = [];
-	for (let i = 1; i <= 10; i++) {
-		teams.push({
-			id: i.toString(),
-			students: students,
-			complete: Math.floor(Math.random() * 100)
-		});
+	onMount(async () => {
+		try{
+			course = await getCourse(courseId);
+			teams = await getTeams(courseId);
+		}
+		catch(error){
+			console.error("Something went wrong!")
+		}
+	})
+	async function addTeams(input: number){
+		if (input && input > 0){
+			try{
+				await postTeams(
+					{
+						courseId: courseId,
+						numTeams: input,
+					});
+				teams = await getTeams(courseId);
+				}
+			catch(error){
+				console.error("Something went wrong!")
+			}
+		}
 	}
 </script>
 
@@ -55,7 +50,7 @@
 			</Breadcrumb.Item>
 			<Breadcrumb.Separator />
 			<Breadcrumb.Item>
-				<Breadcrumb.Link href="/courses/{courseId}">{course.code} - {course.name}</Breadcrumb.Link>
+				<Breadcrumb.Link href="/courses/{courseId}">{course?.code} - {course?.name}</Breadcrumb.Link>
 			</Breadcrumb.Item>
 			<Breadcrumb.Separator />
 			<Breadcrumb.Item>
@@ -93,6 +88,7 @@
 				actionString="Add"
 				inputString="Number of Teams"
 				inputType="Number"
+				addFunction={addTeams}
 			/>
 			<AddTeamMembersCard />
 		</div>
