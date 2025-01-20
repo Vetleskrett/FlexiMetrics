@@ -73,7 +73,7 @@ public static class Seed
                 .RuleFor(x => x.CourseId, f => course.Id)
                 .GenerateBetween(2, 5);
         })
-        .SelectMany(x => x);
+        .SelectMany(x => x).ToList();
 
         var assignmentFieldFaker = new Faker<AssignmentField>()
             .UseSeed(SEED)
@@ -90,7 +90,6 @@ public static class Seed
             return fields;
         })
         .SelectMany(x => x);
-
         await AddRangeIfNotExists(dbContext, assignments);
         await AddRangeIfNotExists(dbContext, assignmentFields);
 
