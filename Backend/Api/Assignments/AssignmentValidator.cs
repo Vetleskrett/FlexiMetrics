@@ -16,7 +16,7 @@ public class AssignmentValidator : AbstractValidator<Assignment>
         RuleFor(x => x.DueDate)
             .NotEmpty();
 
-        RuleFor(x => x.CollabrotationType)
+        RuleFor(x => x.CollaborationType)
             .NotEmpty()
             .IsInEnum();
 
