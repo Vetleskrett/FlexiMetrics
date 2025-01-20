@@ -1,10 +1,13 @@
 
-export type Course ={
+export type Course = {
     id: string;
     name: string;
     code: string;
     year: number;
     semester: Semester;
+    numStudents: number | null | undefined
+    numTeams: number | null | undefined
+    teachers: Teacher[] | null | undefined
 }
 
 enum Semester{
@@ -20,9 +23,10 @@ export enum Role {
 export type Assignment = {
     id: string;
     name: string;
-    due: string;
-    individual: boolean;
+    dueDate: string;
     published: boolean;
+    collaberationType : string;
+    courseId : string;
 }
 
 export type AssignmentTeam = {
