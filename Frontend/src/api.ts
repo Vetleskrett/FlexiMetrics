@@ -1,9 +1,10 @@
-import type { Course } from "./types";
+import { assignments } from "./mockData";
+import type { Course, Assignment, AssignmentField, Team, CreateTeams } from "./types";
 const API_BASE_URL = 'https://localhost:7255';
 
-export async function getCourses() : Promise<Course[]> {
+async function getApiCall(url:string){
   try {
-    const response = await fetch(`${API_BASE_URL}/courses`);
+    const response = await fetch(`${API_BASE_URL + url}`);
     if (!response.ok) {
       throw new Error('Network response was not ok');
     }
@@ -13,4 +14,50 @@ export async function getCourses() : Promise<Course[]> {
     console.error('Error fetching data:', error);
     throw error;
   }
+}
+
+async function postApiCall(url:string, payload: any){
+  try {
+    const response = await fetch(`${API_BASE_URL + url}`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', },
+      body: JSON.stringify(payload)
+    });
+    if (!response.ok) {
+      throw new Error('Network response was not ok');
+    }
+    const data = await response.json();
+    return data;
+  } catch (error) {
+    console.error('Error fetching data:', error);
+    throw error;
+  }
+}
+
+export async function getCourses() : Promise<Course[]> {
+  return getApiCall("/courses")
+}
+
+export async function getCourse(courseId: string) : Promise<Course> {
+  return getApiCall(`/courses/${courseId}`)
+}
+
+export async function getAssignments(courseId: string) : Promise<Assignment[]> {
+  return getApiCall(`/course/${courseId}/assignments`)
+}
+
+export async function getAssignment(assignmentId: string): Promise<Assignment> {
+  return getApiCall(`/assignments/${assignmentId}`)
+}
+
+export async function getAssignmentFields(assignmentId: string): Promise<AssignmentField[]> {
+  return getApiCall(`/assignments/${assignmentId}/fields`)
+}
+
+export async function getTeams(courseId: string): Promise<Team[]> {
+  return getApiCall(`/courses/${courseId}/teams`)
+}
+
+export async function postTeams(payload: CreateTeams) {
+  return postApiCall("/teams", payload)
 }

@@ -129,11 +129,11 @@ public static class Seed
                 .RuleFor(x => x.Name, f => f.PickRandom(ASSIGNMENTS))
                 .RuleFor(x => x.DueDate, f => f.Date.Between(new DateTime(2024, 1, 1, 0, 0, 0, DateTimeKind.Utc), new DateTime(2024, 6, 1, 0, 0, 0, DateTimeKind.Utc)))
                 .RuleFor(x => x.Published, f => f.Random.Bool())
-                .RuleFor(x => x.CollabrotationType, f => f.Random.Enum<CollabrotationType>())
+                .RuleFor(x => x.CollaborationType, f => f.Random.Enum<CollaborationType>())
                 .RuleFor(x => x.CourseId, f => course.Id)
                 .GenerateBetween(2, 5);
         })
-        .SelectMany(x => x);
+        .SelectMany(x => x).ToList();
 
         await AddRangeIfNotExists
         (

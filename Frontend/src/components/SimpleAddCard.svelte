@@ -4,7 +4,13 @@
 	import Plus from 'lucide-svelte/icons/plus';
 	import Button from '$lib/components/ui/button/button.svelte';
 
-	export let headline: string, inputString: string, inputType: string, actionString: string;
+	export let headline: string, inputString: string, inputType: string, actionString: string, addFunction: (input: any) => void;
+	let input: any;
+
+	function handleInput(thisInput: Event){
+		input = (thisInput.target as HTMLInputElement).value;
+	}
+
 </script>
 
 <Card.Root class="w-full overflow-hidden p-0">
@@ -25,10 +31,12 @@
 						class="mr-2 h-9 rounded-md border-2 border-black p-2"
 						placeholder={inputString}
 						type={inputType}
+						on:input={handleInput}
 					/>
 				</div>
 				<Button
 					class="mt-auto flex h-9 flex-row justify-between gap-2 bg-button-green pl-2 pr-3 hover:bg-button-green-hover"
+					on:click={() => addFunction(input)}
 				>
 					<Plus />
 					<p>{actionString}</p>

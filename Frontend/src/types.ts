@@ -1,10 +1,13 @@
 
-export type Course ={
+export type Course = {
     id: string;
     name: string;
     code: string;
     year: number;
     semester: Semester;
+    numStudents: number | null | undefined
+    numTeams: number | null | undefined
+    teachers: Teacher[] | null | undefined
 }
 
 enum Semester{
@@ -20,9 +23,10 @@ export enum Role {
 export type Assignment = {
     id: string;
     name: string;
-    due: string;
-    individual: boolean;
+    dueDate: string;
     published: boolean;
+    collaborationType : string;
+    courseId : string;
 }
 
 export type AssignmentTeam = {
@@ -47,10 +51,11 @@ export type Teacher = {
 export type Team = {
     id: string;
     students: Student[];
+    teamNr: number;
     complete: number | null | undefined;
 }
 
-export type DeliveryField = {
+export type AssignmentField = {
     id: string;
     name: string;
     type: 'String' | 'Integer' | 'Boolean' | 'File';
@@ -102,4 +107,9 @@ export type AnalyzerOutput = {
     currentVersion: AnalyzerOutputVersion;
     fields: AnalyzerField[];
     teamOutputs: AnalyzerTeamOutput[];
+}
+
+export type CreateTeams = {
+    courseId: string;
+    numTeams: number;
 }
