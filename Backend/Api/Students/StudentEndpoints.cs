@@ -11,7 +11,7 @@ public static class StudentEndpoints
         group.MapGet("courses/{courseId:guid}/students", async (IStudentService studentService, Guid courseId) =>
         {
             var courses = await studentService.GetAllByCourse(courseId);
-            return courses is not null ? Results.Ok(courses) : Results.NotFound();
+            return Results.Ok(courses);
         })
         .Produces<IEnumerable<StudentResponse>>()
         .WithName("GetAllStudentsByCourse")
@@ -27,12 +27,8 @@ public static class StudentEndpoints
 
         group.MapDelete("courses/{courseId:guid}/students/{studentId:guid}", async (IStudentService studentService, Guid courseId, Guid studentId) =>
         {
-            var result = await studentService.RemoveFromCourse(courseId, studentId);
-            return result.Match
-            (
-                deleted => deleted ? Results.Ok() : Results.NotFound(),
-                failure => Results.BadRequest(failure)
-            );
+            var removed = await studentService.RemoveFromCourse(courseId, studentId);
+            return removed ? Results.Ok() : Results.NotFound();
         })
         .WithName("RemoveStudentFromCourse")
         .WithSummary("Remove student from course");

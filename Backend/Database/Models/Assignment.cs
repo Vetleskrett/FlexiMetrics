@@ -2,7 +2,7 @@
 
 namespace Database.Models;
 
-public class Assignment : IModel
+public class Assignment
 {
     [Key]
     public required Guid Id { get; set; }

@@ -84,7 +84,6 @@ public class TeamService : ITeamService
     public async Task<bool> BulkAddToTeam(BulkAddStudentToTeamsRequest request)
     {
         var course = await _dbContext.Courses
-            .Include(c => c.Students)
             .Include(c => c.Teams)!
             .ThenInclude(t => t.Students)
             .FirstOrDefaultAsync(c => c.Id == request.CourseId);
@@ -139,9 +138,15 @@ public class TeamService : ITeamService
             var teamMembers = teamRequest.Emails
                 .Select(email => emailToUser[email])
                 .ToList();
-
-            course.Students!.AddRange(teamMembers);
             team.Students.AddRange(teamMembers);
+
+            var courseStudents = teamMembers
+                .Select(student => new CourseStudent
+                {
+                    CourseId = request.CourseId,
+                    StudentId = student.Id,
+                });
+            _dbContext.CourseStudents.AddRange(courseStudents);
         }
 
         await _dbContext.SaveChangesAsync();
@@ -152,8 +157,6 @@ public class TeamService : ITeamService
     {
         var team = await _dbContext.Teams
             .Include(t => t.Students)
-            .Include(t => t.Course)
-            .ThenInclude(c => c!.Students)
             .FirstOrDefaultAsync(t => t.Id == teamId);
 
         if (team is null)
@@ -161,7 +164,7 @@ public class TeamService : ITeamService
             return false;
         }
 
-        var user = await _dbContext.Users.FirstOrDefaultAsync(t => t.Email == request.Email);
+        var user = await _dbContext.Users.FirstOrDefaultAsync(u => u.Email == request.Email);
         if (user is null)
         {
             user = new User
@@ -173,9 +176,21 @@ public class TeamService : ITeamService
             };
             _dbContext.Users.Add(user);
         }
-
-        team.Course!.Students!.Add(user);
         team.Students.Add(user);
+
+        var inCourse = await _dbContext.CourseStudents
+            .Where(x => x.CourseId == team.CourseId && x.StudentId == user.Id)
+            .AnyAsync();
+
+        if (!inCourse)
+        {
+            _dbContext.CourseStudents.Add(new CourseStudent
+            {
+                CourseId = team.CourseId,
+                StudentId = user.Id,
+            });
+        }
+
         await _dbContext.SaveChangesAsync();
 
         return true;
