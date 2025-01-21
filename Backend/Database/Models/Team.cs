@@ -2,7 +2,7 @@
 
 namespace Database.Models;
 
-public class Team : IModel
+public class Team
 {
     [Key]
     public required Guid Id { get; set; }

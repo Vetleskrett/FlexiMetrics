@@ -1,6 +1,7 @@
 ﻿using Api.Teachers.Contracts;
 using Api.Validation;
 using Database;
+using Database.Models;
 using Microsoft.EntityFrameworkCore;
 using Movies.Api.Contracts.Responses;
 
@@ -9,7 +10,7 @@ namespace Api.Teachers;
 public interface ITeacherService
 {
     Task<IEnumerable<TeacherResponse>?> GetAllByCourse(Guid courseId);
-    Task<bool> AddToCourse(Guid courseId, AddStudentRequest request);
+    Task<bool> AddToCourse(Guid courseId, AddTeacherRequest request);
     Task<Result<bool, ValidationResponse>> RemoveFromCourse(Guid courseId, Guid teacherId);
 }
 
@@ -24,51 +25,45 @@ public class TeacherService : ITeacherService
 
     public async Task<IEnumerable<TeacherResponse>?> GetAllByCourse(Guid courseId)
     {
-        var course = await _dbContext
-            .Courses
-            .Include(c => c.Teachers)
-            .FirstOrDefaultAsync(c => c.Id == courseId);
+        var teachers = await _dbContext.CourseTeachers
+            .AsNoTracking()
+            .Include(x => x.Teacher)
+            .Where(x => x.CourseId == courseId)
+            .Select(x => x.Teacher)
+            .ToListAsync();
 
-        return course?.Teachers?.MapToTeacherResponse();
+        return teachers!.MapToTeacherResponse();
     }
 
-    public async Task<bool> AddToCourse(Guid courseId, AddStudentRequest request)
+    public async Task<bool> AddToCourse(Guid courseId, AddTeacherRequest request)
     {
         var user = await _dbContext.Users
             .FirstOrDefaultAsync(u => u.Email == request.Email);
 
-        var course = await _dbContext.Courses
-            .Include(c => c.Teachers)
-            .FirstOrDefaultAsync(c => c.Id == courseId);
+        var course = await _dbContext.Courses.FindAsync(courseId);
 
         if (user is null || course is null)
         {
             return false;
         }
 
-        course.Teachers!.Add(user);
+        _dbContext.CourseTeachers.Add(new CourseTeacher
+        {
+            CourseId = courseId,
+            TeacherId = user.Id
+        });
         await _dbContext.SaveChangesAsync();
+
         return true;
     }
 
     public async Task<Result<bool, ValidationResponse>> RemoveFromCourse(Guid courseId, Guid teacherId)
     {
-        var course = await _dbContext.Courses
-            .Include(c => c.Teachers)
-            .FirstOrDefaultAsync(c => c.Id == courseId);
+        var numTeachers = await _dbContext.CourseTeachers
+            .Where(x => x.CourseId == courseId)
+            .CountAsync();
 
-        if (course is null)
-        {
-            return false;
-        }
-
-        var user = course.Teachers!.FirstOrDefault(t => t.Id == teacherId);
-        if (user is null)
-        {
-            return false;
-        }
-
-        if (course.Teachers!.Count == 1)
+        if (numTeachers <= 1)
         {
             return new ValidationError
             {
@@ -77,8 +72,10 @@ public class TeacherService : ITeacherService
             }.MapToResponse();
         }
 
-        course.Teachers!.Remove(user);
-        await _dbContext.SaveChangesAsync();
-        return true;
+        var numDeleted = await _dbContext.CourseTeachers
+            .Where(x => x.CourseId == courseId && x.TeacherId == teacherId)
+            .ExecuteDeleteAsync();
+
+        return numDeleted > 0;
     }
 }

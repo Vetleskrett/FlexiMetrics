@@ -39,45 +39,53 @@ public class CourseService : ICourseService
 
     public async Task<IEnumerable<CourseResponse>> GetAllByTeacherId(Guid teacherId)
     {
-        var courses = await _dbContext.Courses
-            .Where(c => c.Teachers!.Any(s => s.Id == teacherId))
+        var courses = await _dbContext.CourseTeachers
             .AsNoTracking()
+            .Where(x => x.TeacherId == teacherId)
+            .Include(x => x.Course)
+            .Select(x => x.Course)
             .ToListAsync();
-        return courses.MapToResponse();
+
+        return courses!.MapToResponse();
     }
 
     public async Task<IEnumerable<CourseResponse>> GetAllByStudentId(Guid studentId)
     {
-        var courses = await _dbContext.Courses
-            .Where(c => c.Students!.Any(s => s.Id == studentId))
-            .AsNoTracking()
+        var courses = await _dbContext.CourseStudents
+            .Include(x => x.Course)
+            .Where(x => x.StudentId == studentId)
+            .Select(x => x.Course!)
             .ToListAsync();
+
         return courses.MapToResponse();
     }
 
     public async Task<CourseFullResponse?> GetById(Guid id)
     {
         var course = await _dbContext.Courses
-            .Include(c => c.Teachers)
-            .Select(course =>
-                new CourseFullResponse
-                {
-                    Id = course.Id,
-                    Code = course.Code,
-                    Name = course.Name,
-                    Year = course.Year,
-                    Semester = course.Semester,
-                    NumStudents = course.Students!.Count,
-                    NumTeams = course.Teams!.Count,
-                    Teachers = course.Teachers!.Select(t => new TeacherResponse
+            .Where(course => course.Id == id)
+            .Select(course => new CourseFullResponse
+            {
+                Id = course.Id,
+                Code = course.Code,
+                Name = course.Name,
+                Year = course.Year,
+                Semester = course.Semester,
+                NumStudents = _dbContext.CourseStudents
+                    .Where(ct => ct.CourseId == course.Id)
+                    .Count(),
+                NumTeams = course.Teams != null ? course.Teams.Count : 0,
+                Teachers = _dbContext.CourseTeachers
+                    .Where(ct => ct.CourseId == course.Id)
+                    .Select(ct => new TeacherResponse
                     {
-                        Id = t.Id,
-                        Email = t.Email,
-                        Name = t.Name,
-                    }).ToList(),
-                }
-            )
-            .FirstOrDefaultAsync(c => c.Id == id);
+                        Id = ct.TeacherId,
+                        Email = ct.Teacher!.Email,
+                        Name = ct.Teacher.Name
+                    })
+                    .ToList()
+            })
+            .FirstOrDefaultAsync();
 
         return course;
     }

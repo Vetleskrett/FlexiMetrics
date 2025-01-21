@@ -24,8 +24,12 @@ public static class Seed
             .RuleFor(x => x.Role, f => Role.Teacher)
             .Generate(10);
 
-        await AddRangeIfNotExists(dbContext, students);
-        await AddRangeIfNotExists(dbContext, teachers);
+        await AddRangeIfNotExists
+        (
+            students.Union(teachers),
+            user => dbContext.Set<User>().AnyAsync(x => x.Id == user.Id),
+            user => dbContext.Set<User>().Add(user)
+        );
 
         var courses = new Faker<Course>()
             .UseSeed(SEED)
@@ -34,11 +38,58 @@ public static class Seed
             .RuleFor(x => x.Name, f => f.PickRandom(COURSES))
             .RuleFor(x => x.Year, f => 2025)
             .RuleFor(x => x.Semester, f => Semester.Spring)
-            .RuleFor(x => x.Teachers, f => f.Random.ListItems(teachers, 3))
-            .RuleFor(x => x.Students, f => f.Random.ListItems(students, 30))
             .Generate(10);
 
-        await AddRangeIfNotExists(dbContext, courses);
+        await AddRangeIfNotExists
+        (
+            courses,
+            course => dbContext.Set<Course>().AnyAsync(x => x.Id == course.Id),
+            course => dbContext.Set<Course>().Add(course)
+        );
+
+        var courseTeacherFaker = new Faker<CourseTeacher>()
+            .UseSeed(SEED);
+
+        var courseTeachers = courses.Select(course =>
+        {
+            return courseTeacherFaker
+                .RuleFor(x => x.CourseId, f => course.Id)
+                .RuleFor(x => x.TeacherId, f => f.PickRandom(teachers).Id)
+                .GenerateForever()
+                .DistinctBy(x => x.TeacherId)
+                .Take(3);
+        })
+        .SelectMany(x => x);
+
+        await AddRangeIfNotExists
+        (
+            courseTeachers,
+            courseTeacher => dbContext.Set<CourseTeacher>()
+                .AnyAsync(x => x.CourseId == courseTeacher.CourseId && x.TeacherId == courseTeacher.TeacherId),
+            courseTeacher => dbContext.Set<CourseTeacher>().Add(courseTeacher)
+        );
+
+        var courseStudentFaker = new Faker<CourseStudent>()
+            .UseSeed(SEED);
+
+        var courseStudents = courses.Select(course =>
+        {
+            return courseStudentFaker
+                .RuleFor(x => x.CourseId, f => course.Id)
+                .RuleFor(x => x.StudentId, f => f.PickRandom(students).Id)
+                .GenerateForever()
+                .DistinctBy(x => x.StudentId)
+                .Take(30);
+        })
+        .SelectMany(x => x);
+
+        await AddRangeIfNotExists
+        (
+            courseStudents,
+            courseStudent => dbContext.Set<CourseStudent>()
+                .AnyAsync(x => x.CourseId == courseStudent.CourseId && x.StudentId == courseStudent.StudentId),
+            courseStudent => dbContext.Set<CourseStudent>().Add(courseStudent)
+        );
 
         var teamFaker = new Faker<Team>()
             .UseSeed(SEED)
@@ -46,7 +97,11 @@ public static class Seed
 
         var teams = courses.Select(course =>
         {
-            return course.Students!.Chunk(3).Select((students, index) =>
+            var studentsInCourse = courseStudents
+                .Where(x => x.CourseId == course.Id)
+                .Select(x => students.First(s => s.Id == x.StudentId));
+
+            return studentsInCourse.Chunk(3).Select((students, index) =>
             {
                 return teamFaker
                     .RuleFor(x => x.TeamNr, f => index + 1)
@@ -57,7 +112,12 @@ public static class Seed
         })
         .SelectMany(x => x);
 
-        await AddRangeIfNotExists(dbContext, teams);
+        await AddRangeIfNotExists
+        (
+            teams,
+            team => dbContext.Set<Team>().AnyAsync(x => x.Id == team.Id),
+            team => dbContext.Set<Team>().Add(team)
+        );
 
         var assignmentFaker = new Faker<Assignment>()
             .UseSeed(SEED)
@@ -75,37 +135,45 @@ public static class Seed
         })
         .SelectMany(x => x).ToList();
 
+        await AddRangeIfNotExists
+        (
+            assignments,
+            assignment => dbContext.Set<Assignment>().AnyAsync(x => x.Id == assignment.Id),
+            assignment => dbContext.Set<Assignment>().Add(assignment)
+        );
+
         var assignmentFieldFaker = new Faker<AssignmentField>()
             .UseSeed(SEED)
             .RuleFor(x => x.Id, f => f.Random.Guid());
 
         var assignmentFields = assignments.Select(assignment =>
         {
-            var fields = assignmentFieldFaker
+            return assignmentFieldFaker
                 .RuleFor(x => x.Type, f => f.Random.Enum<AssignmentDataType>())
                 .RuleFor(x => x.Name, f => f.System.FileName().Split(".")[0])
-                .RuleFor(x => x.AssignmentId, f => assignment.Id)
+                .RuleFor(x => x.Assignment, f => assignment)
                 .GenerateBetween(2, 5);
-            assignment.Fields = fields;
-            return fields;
         })
         .SelectMany(x => x);
-        await AddRangeIfNotExists(dbContext, assignments);
-        await AddRangeIfNotExists(dbContext, assignmentFields);
+
+        await AddRangeIfNotExists
+        (
+            assignmentFields,
+            field => dbContext.Set<AssignmentField>().AnyAsync(x => x.Id == field.Id),
+            field => dbContext.Set<AssignmentField>().Add(field)
+        );
 
         await dbContext.SaveChangesAsync();
     }
 
-    private static async Task AddRangeIfNotExists<T>(DbContext dbContext, IEnumerable<T> items) where T : class, IModel
+    private static async Task AddRangeIfNotExists<T>(IEnumerable<T> items, Func<T, Task<bool>> containsItem, Action<T> addItem)
     {
-        var set = dbContext.Set<T>();
-
         foreach (var item in items)
         {
-            var contains = await set.Where(x => x.Id == item.Id).AnyAsync();
+            var contains = await containsItem(item);
             if (!contains)
             {
-                set.Add(item);
+                addItem(item);
             }
         }
     }

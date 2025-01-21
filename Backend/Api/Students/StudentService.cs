@@ -1,17 +1,15 @@
 ﻿using Api.Students.Contracts;
-using Api.Validation;
 using Database;
 using Database.Models;
 using Microsoft.EntityFrameworkCore;
-using Movies.Api.Contracts.Responses;
 
 namespace Api.Students;
 
 public interface IStudentService
 {
-    Task<IEnumerable<StudentResponse>?> GetAllByCourse(Guid courseId);
+    Task<IEnumerable<StudentResponse>> GetAllByCourse(Guid courseId);
     Task<bool> AddToCourse(Guid courseId, AddStudentsToCourseRequest request);
-    Task<Result<bool, ValidationResponse>> RemoveFromCourse(Guid courseId, Guid studentId);
+    Task<bool> RemoveFromCourse(Guid courseId, Guid studentId);
 }
 
 public class StudentService : IStudentService
@@ -23,34 +21,33 @@ public class StudentService : IStudentService
         _dbContext = dbContext;
     }
 
-    public async Task<IEnumerable<StudentResponse>?> GetAllByCourse(Guid courseId)
+    public async Task<IEnumerable<StudentResponse>> GetAllByCourse(Guid courseId)
     {
-        var course = await _dbContext
-            .Courses
-            .Include(c => c.Students)
-            .FirstOrDefaultAsync(c => c.Id == courseId);
+        var students = await _dbContext.CourseStudents
+            .Include(c => c.Student)
+            .Where(x => x.CourseId == courseId)
+            .Select(x => x.Student!)
+            .ToListAsync();
 
-        return course?.Students?.MapToStudentResponse();
+        return students.MapToStudentResponse();
     }
 
     public async Task<bool> AddToCourse(Guid courseId, AddStudentsToCourseRequest request)
     {
-        var course = await _dbContext.Courses
-            .Include(c => c.Students)
-            .FirstOrDefaultAsync(c => c.Id == courseId);
-
+        var course = await _dbContext.Courses.FindAsync(courseId);
         if (course is null)
         {
             return false;
         }
 
-        var registeredUsers = await _dbContext.Users
+        var existingUsers = await _dbContext.Users
             .Where(u => request.Emails.Contains(u.Email))
             .ToListAsync();
-        var registeredEmails = registeredUsers.Select(u => u.Email);
+        var existingUsersEmails = existingUsers.Select(u => u.Email);
+        var existingUsersIds = existingUsers.Select(u => u.Id);
 
-        var unregisteredUsers = request.Emails
-            .Except(registeredEmails)
+        var newUsers = request.Emails
+            .Except(existingUsersEmails)
             .Select(email => new User
             {
                 Id = Guid.NewGuid(),
@@ -59,34 +56,35 @@ public class StudentService : IStudentService
                 Role = Role.Student,
             })
             .ToList();
-        _dbContext.Users.AddRange(unregisteredUsers);
+        _dbContext.Users.AddRange(newUsers);
 
-        course.Students!.AddRange(registeredUsers);
-        course.Students!.AddRange(unregisteredUsers);
+        var alreadyInCourse = await _dbContext.CourseStudents
+            .Where(x => existingUsersIds.Contains(x.StudentId))
+            .Select(x => x.StudentId)
+            .ToListAsync();
+
+        var courseStudents = existingUsersIds
+            .Except(alreadyInCourse)
+            .Union(newUsers.Select(x => x.Id))
+            .Select(studentId => new CourseStudent
+            {
+                CourseId = courseId,
+                StudentId = studentId,
+            });
+
+        _dbContext.CourseStudents.AddRange(courseStudents);
 
         await _dbContext.SaveChangesAsync();
 
         return true;
     }
 
-    public async Task<Result<bool, ValidationResponse>> RemoveFromCourse(Guid courseId, Guid studentId)
+    public async Task<bool> RemoveFromCourse(Guid courseId, Guid studentId)
     {
-        var course = await _dbContext.Courses
-            .Include(c => c.Students)
-            .FirstOrDefaultAsync(c => c.Id == courseId);
+        var removed = await _dbContext.CourseStudents
+            .Where(x => x.CourseId == courseId && x.StudentId == studentId)
+            .ExecuteDeleteAsync();
 
-        if (course is null)
-        {
-            return false;
-        }
-
-        var removed = course.Students!.RemoveAll(t => t.Id == studentId);
-        if (removed == 0)
-        {
-            return false;
-        }
-
-        await _dbContext.SaveChangesAsync();
-        return true;
+        return removed > 0;
     }
 }

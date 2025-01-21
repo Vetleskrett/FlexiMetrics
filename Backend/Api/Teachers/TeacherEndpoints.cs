@@ -17,7 +17,7 @@ public static class TeacherEndpoints
         .WithName("GetAllTeachersByCourse")
         .WithSummary("Get all teachers by course id");
 
-        group.MapPost("courses/{courseId:guid}/teachers", async (ITeacherService teacherService, Guid courseId, AddStudentRequest request) =>
+        group.MapPost("courses/{courseId:guid}/teachers", async (ITeacherService teacherService, Guid courseId, AddTeacherRequest request) =>
         {
             var added = await teacherService.AddToCourse(courseId, request);
             return added ? Results.Ok() : Results.NotFound();
