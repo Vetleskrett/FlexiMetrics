@@ -59,7 +59,8 @@ public static class Seed
                 .DistinctBy(x => x.TeacherId)
                 .Take(3);
         })
-        .SelectMany(x => x);
+        .SelectMany(x => x)
+        .ToList();
 
         await AddRangeIfNotExists
         (
@@ -81,7 +82,8 @@ public static class Seed
                 .DistinctBy(x => x.StudentId)
                 .Take(30);
         })
-        .SelectMany(x => x);
+        .SelectMany(x => x)
+        .ToList();
 
         await AddRangeIfNotExists
         (
@@ -110,7 +112,8 @@ public static class Seed
                     .Generate();
             });
         })
-        .SelectMany(x => x);
+        .SelectMany(x => x)
+        .ToList();
 
         await AddRangeIfNotExists
         (
@@ -133,7 +136,8 @@ public static class Seed
                 .RuleFor(x => x.CourseId, f => course.Id)
                 .GenerateBetween(2, 5);
         })
-        .SelectMany(x => x).ToList();
+        .SelectMany(x => x)
+        .ToList();
 
         await AddRangeIfNotExists
         (
@@ -151,16 +155,107 @@ public static class Seed
             return assignmentFieldFaker
                 .RuleFor(x => x.Type, f => f.Random.Enum<AssignmentDataType>())
                 .RuleFor(x => x.Name, f => f.System.FileName().Split(".")[0])
-                .RuleFor(x => x.Assignment, f => assignment)
+                .RuleFor(x => x.AssignmentId, f => assignment.Id)
                 .GenerateBetween(2, 5);
         })
-        .SelectMany(x => x);
+        .SelectMany(x => x)
+        .ToList();
 
         await AddRangeIfNotExists
         (
             assignmentFields,
             field => dbContext.Set<AssignmentField>().AnyAsync(x => x.Id == field.Id),
             field => dbContext.Set<AssignmentField>().Add(field)
+        );
+
+        var studentDeliveryFaker = new Faker<StudentDelivery>()
+            .UseSeed(SEED)
+            .RuleFor(x => x.Id, f => f.Random.Guid());
+
+        var teamDeliveryFaker = new Faker<TeamDelivery>()
+            .UseSeed(SEED + 1)
+            .RuleFor(x => x.Id, f => f.Random.Guid());
+
+        var deliveries = courses.Select(course =>
+        {
+            var studentsInCourse = courseStudents
+                .Where(x => x.CourseId == course.Id)
+                .Select(x => students.First(s => s.Id == x.StudentId))
+                .ToList();
+
+            var teamsInCourse = teams
+                .Where(x => x.CourseId == course.Id)
+                .ToList();
+
+            return assignments
+                .Where(a => a.CourseId == course.Id)
+                .Select(assignment =>
+                {
+                    var isIndividual = assignment.CollaborationType == CollaborationType.Individual;
+
+                    if (isIndividual)
+                    {
+                        return studentsInCourse.Select(student =>
+                        {
+                            return studentDeliveryFaker
+                                .RuleFor(x => x.AssignmentId, assignment.Id)
+                                .RuleFor(x => x.StudentId, student.Id)
+                                .Generate();
+                        })
+                        .ToList<Delivery>();
+                    }
+                    else
+                    {
+                        return teamsInCourse.Select(team =>
+                        {
+                            return teamDeliveryFaker
+                                .RuleFor(x => x.AssignmentId, assignment.Id)
+                                .RuleFor(x => x.TeamId, team.Id)
+                                .Generate();
+                        })
+                        .ToList<Delivery>();
+                    }
+                })
+                .SelectMany(x => x);
+        })
+        .SelectMany(x => x)
+        .ToList();
+
+        await AddRangeIfNotExists
+        (
+            deliveries,
+            delivery => dbContext.Set<Delivery>().AnyAsync(x => x.Id == delivery.Id),
+            delivery => dbContext.Set<Delivery>().Add(delivery)
+        );
+
+        var deliveryFieldFaker = new Faker<DeliveryField>()
+            .UseSeed(SEED)
+            .RuleFor(x => x.Id, f => f.Random.Guid())
+            .RuleFor(x => x.Value, f => f.Lorem.Sentence());
+
+        var deliveryFields = deliveries.Select(delivery =>
+        {
+            var fieldsInAssignment = assignmentFields
+                .Where(f => f.AssignmentId == delivery.AssignmentId)
+                .ToList();
+
+            return fieldsInAssignment.Select(field =>
+            {
+                return deliveryFieldFaker
+                    .RuleFor(f => f.DeliveryId, delivery.Id)
+                    .RuleFor(f => f.AssignmentFieldId, field.Id)
+                    .Generate();
+            });
+
+        })
+        .SelectMany(x => x)
+        .ToList();
+
+        await AddRangeIfNotExists
+        (
+            deliveryFields,
+            field => dbContext.Set<DeliveryField>().AnyAsync(x => x.Id == field.Id),
+            field => dbContext.Set<DeliveryField>().Add(field)
         );
 
         await dbContext.SaveChangesAsync();

@@ -17,6 +17,8 @@ public class AppDbContext : DbContext
     public DbSet<Team> Teams { get; set; }
     public DbSet<Assignment> Assignments { get; set; }
     public DbSet<AssignmentField> AssignmentFields { get; set; }
+    public DbSet<Delivery> Deliveries { get; set; }
+    public DbSet<DeliveryField> DeliveryFields { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -42,5 +44,28 @@ public class AppDbContext : DbContext
         var assignment = modelBuilder.Entity<Assignment>();
         assignment.HasOne(a => a.Course).WithMany();
         assignment.HasMany(a => a.Fields).WithOne(f => f.Assignment);
+
+        var delivery = modelBuilder.Entity<Delivery>();
+        delivery.HasOne(d => d.Assignment).WithMany();
+        delivery.HasMany(d => d.Fields).WithOne(f => f.Delivery);
+
+        var studentDelivery = modelBuilder.Entity<StudentDelivery>();
+        studentDelivery.HasOne(d => d.Student).WithMany();
+        studentDelivery.HasIndex(d => new
+        {
+            d.AssignmentId,
+            d.StudentId,
+        }).IsUnique();
+
+        var teamDelivery = modelBuilder.Entity<TeamDelivery>();
+        teamDelivery.HasOne(d => d.Team).WithMany();
+        teamDelivery.HasIndex(d => new
+        {
+            d.AssignmentId,
+            d.TeamId,
+        }).IsUnique();
+
+        modelBuilder.Entity<DeliveryField>()
+            .HasOne(f => f.AssignmentField).WithMany();
     }
 }

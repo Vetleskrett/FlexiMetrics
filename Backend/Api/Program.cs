@@ -7,6 +7,7 @@ using System.Text.Json.Serialization;
 using Api.Teachers;
 using Api.Students;
 using Api.AssignmentFields;
+using Api.Deliveries;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -20,6 +21,7 @@ builder.Services.AddScoped<IStudentService, StudentService>();
 builder.Services.AddScoped<ITeamService, TeamService>();
 builder.Services.AddScoped<IAssignmentService, AssignmentService>();
 builder.Services.AddScoped<IAssignmentFieldService, AssignmentFieldService>();
+builder.Services.AddScoped<IDeliveryService, DeliveryService>();
 
 builder.Services.AddValidatorsFromAssemblyContaining<Program>();
 
@@ -60,5 +62,6 @@ app.MapStudentEndpoints();
 app.MapTeamEndpoints();
 app.MapAssignmentEndpoints();
 app.MapAssignmentFieldEndpoints();
+app.MapDeliveryEndpoints();
 
 app.Run();
