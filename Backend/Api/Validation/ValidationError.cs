@@ -1,4 +1,4 @@
-﻿namespace Movies.Api.Contracts.Responses;
+﻿namespace Api.Validation;
 
 public class ValidationError
 {

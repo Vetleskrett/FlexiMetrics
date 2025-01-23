@@ -10,5 +10,5 @@ public class CreateDeliveryRequest
 public class CreateDeliveryFieldRequest
 {
     public required Guid AssignmentFieldId { get; init; }
-    public required string Value { get; init; }
+    public required object Value { get; init; }
 }

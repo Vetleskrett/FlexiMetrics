@@ -5,7 +5,6 @@ using Database.Models;
 using Database;
 using Api.Courses.Contracts;
 using Api.Teachers.Contracts;
-using Movies.Api.Contracts.Responses;
 
 namespace Api.Courses;
 

@@ -4,7 +4,6 @@ using Microsoft.EntityFrameworkCore;
 using Database.Models;
 using Database;
 using Api.Deliveries.Contracts;
-using Movies.Api.Contracts.Responses;
 
 namespace Api.Deliveries;
 
@@ -15,7 +14,7 @@ public interface IDeliveryService
     Task<DeliveryResponse?> GetByStudentAssignment(Guid studentId, Guid assignmentId);
     Task<DeliveryResponse?> GetByTeamAssignment(Guid teamId, Guid assignmentId);
     Task<IEnumerable<DeliveryResponse>?> GetAllByAssignment(Guid assignmentId);
-    Task<Result<DeliveryResponse, ValidationResponse>> Create(CreateDeliveryRequest request);
+    Task<Result<DeliveryResponse?, ValidationResponse>> Create(CreateDeliveryRequest request);
     Task<Result<DeliveryResponse?, ValidationResponse>> Update(UpdateDeliveryRequest request, Guid id);
     Task<bool> DeleteById(Guid id);
 }
@@ -90,7 +89,7 @@ public class DeliveryService : IDeliveryService
         }
     }
 
-    public async Task<Result<DeliveryResponse, ValidationResponse>> Create(CreateDeliveryRequest request)
+    public async Task<Result<DeliveryResponse?, ValidationResponse>> Create(CreateDeliveryRequest request)
     {
         var assignment = await _dbContext.Assignments
             .Include(a => a.Fields)
@@ -98,11 +97,7 @@ public class DeliveryService : IDeliveryService
 
         if (assignment is null)
         {
-            return new ValidationError
-            {
-                Message = "Could not find assignment",
-                PropertyName = nameof(request.AssignmentId),
-            }.MapToResponse();
+            return default;
         }
 
         var isIndividual = assignment.CollaborationType == CollaborationType.Individual;

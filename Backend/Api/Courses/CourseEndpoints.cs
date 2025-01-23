@@ -1,6 +1,4 @@
-﻿using Api.Courses;
-using Api.Courses.Contracts;
-using Api.Validation;
+﻿using Api.Courses.Contracts;
 
 namespace Api.Courses;
 

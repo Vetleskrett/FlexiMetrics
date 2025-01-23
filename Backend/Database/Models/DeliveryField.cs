@@ -1,4 +1,7 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using Bogus.Bson;
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
+using System.Text.Json;
 
 namespace Database.Models;
 
@@ -10,5 +13,12 @@ public class DeliveryField
     public Delivery? Delivery { get; set; }
     public required Guid AssignmentFieldId { get; set; }
     public AssignmentField? AssignmentField { get; set; }
-    public required string Value { get; set; }
+    public JsonDocument? JsonValue { get; set; }
+
+    [NotMapped]
+    public required object Value
+    {
+        get => JsonSerializer.Deserialize<object>(JsonValue!)!;
+        set => JsonValue = JsonSerializer.SerializeToDocument(value);
+    }
 }

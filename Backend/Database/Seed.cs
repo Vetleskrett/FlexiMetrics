@@ -17,11 +17,11 @@ public static class Seed
             .RuleFor(x => x.Name, f => f.Person.FullName); ;
 
         var students = userFaker
-            .RuleFor(x => x.Role, f => Role.Student)
+            .RuleFor(x => x.Role, Role.Student)
             .Generate(100);
 
         var teachers = userFaker
-            .RuleFor(x => x.Role, f => Role.Teacher)
+            .RuleFor(x => x.Role, Role.Teacher)
             .Generate(10);
 
         await AddRangeIfNotExists
@@ -36,8 +36,8 @@ public static class Seed
             .RuleFor(x => x.Id, f => f.Random.Guid())
             .RuleFor(x => x.Code, f => "TDT" + f.Random.Number(1000, 9999))
             .RuleFor(x => x.Name, f => f.PickRandom(COURSES))
-            .RuleFor(x => x.Year, f => 2025)
-            .RuleFor(x => x.Semester, f => Semester.Spring)
+            .RuleFor(x => x.Year, 2025)
+            .RuleFor(x => x.Semester, Semester.Spring)
             .Generate(10);
 
         await AddRangeIfNotExists
@@ -53,7 +53,7 @@ public static class Seed
         var courseTeachers = courses.Select(course =>
         {
             return courseTeacherFaker
-                .RuleFor(x => x.CourseId, f => course.Id)
+                .RuleFor(x => x.CourseId, course.Id)
                 .RuleFor(x => x.TeacherId, f => f.PickRandom(teachers).Id)
                 .GenerateForever()
                 .DistinctBy(x => x.TeacherId)
@@ -76,7 +76,7 @@ public static class Seed
         var courseStudents = courses.Select(course =>
         {
             return courseStudentFaker
-                .RuleFor(x => x.CourseId, f => course.Id)
+                .RuleFor(x => x.CourseId, course.Id)
                 .RuleFor(x => x.StudentId, f => f.PickRandom(students).Id)
                 .GenerateForever()
                 .DistinctBy(x => x.StudentId)
@@ -106,9 +106,9 @@ public static class Seed
             return studentsInCourse.Chunk(3).Select((students, index) =>
             {
                 return teamFaker
-                    .RuleFor(x => x.TeamNr, f => index + 1)
-                    .RuleFor(x => x.CourseId, f => course.Id)
-                    .RuleFor(x => x.Students, f => students.ToList())
+                    .RuleFor(x => x.TeamNr, index + 1)
+                    .RuleFor(x => x.CourseId, course.Id)
+                    .RuleFor(x => x.Students, students.ToList())
                     .Generate();
             });
         })
@@ -133,7 +133,7 @@ public static class Seed
                 .RuleFor(x => x.DueDate, f => f.Date.Between(new DateTime(2024, 1, 1, 0, 0, 0, DateTimeKind.Utc), new DateTime(2024, 6, 1, 0, 0, 0, DateTimeKind.Utc)))
                 .RuleFor(x => x.Published, f => f.Random.Bool())
                 .RuleFor(x => x.CollaborationType, f => f.Random.Enum<CollaborationType>())
-                .RuleFor(x => x.CourseId, f => course.Id)
+                .RuleFor(x => x.CourseId, course.Id)
                 .GenerateBetween(2, 5);
         })
         .SelectMany(x => x)
@@ -155,7 +155,7 @@ public static class Seed
             return assignmentFieldFaker
                 .RuleFor(x => x.Type, f => f.Random.Enum<AssignmentDataType>())
                 .RuleFor(x => x.Name, f => f.System.FileName().Split(".")[0])
-                .RuleFor(x => x.AssignmentId, f => assignment.Id)
+                .RuleFor(x => x.AssignmentId, assignment.Id)
                 .GenerateBetween(2, 5);
         })
         .SelectMany(x => x)
@@ -230,8 +230,7 @@ public static class Seed
 
         var deliveryFieldFaker = new Faker<DeliveryField>()
             .UseSeed(SEED)
-            .RuleFor(x => x.Id, f => f.Random.Guid())
-            .RuleFor(x => x.Value, f => f.Lorem.Sentence());
+            .RuleFor(x => x.Id, f => f.Random.Guid());
 
         var deliveryFields = deliveries.Select(delivery =>
         {
@@ -244,9 +243,19 @@ public static class Seed
                 return deliveryFieldFaker
                     .RuleFor(f => f.DeliveryId, delivery.Id)
                     .RuleFor(f => f.AssignmentFieldId, field.Id)
+                    .RuleFor(f => f.Value, f =>
+                    {
+                        return field.Type switch
+                        {
+                            AssignmentDataType.String => f.Lorem.Sentence(),
+                            AssignmentDataType.Integer => f.Random.Int(0, 100),
+                            AssignmentDataType.Double => f.Random.Double(0, 100),
+                            AssignmentDataType.Boolean => f.Random.Bool(),
+                            _ => f.Lorem.Sentence()
+                        };
+                    })
                     .Generate();
             });
-
         })
         .SelectMany(x => x)
         .ToList();

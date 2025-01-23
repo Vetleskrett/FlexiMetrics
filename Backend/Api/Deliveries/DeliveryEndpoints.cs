@@ -62,12 +62,12 @@ public static class DeliveryEndpoints
 
             return result.Match
             (
-                delivery => Results.CreatedAtRoute
+                delivery => delivery is not null ? Results.CreatedAtRoute
                 (
                     "GetDelivery",
                     new { id = delivery.Id },
                     delivery
-                ),
+                ) : Results.NotFound(),
                 failure => Results.BadRequest(failure)
             );
         })

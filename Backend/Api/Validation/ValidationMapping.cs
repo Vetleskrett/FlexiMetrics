@@ -1,5 +1,4 @@
 ﻿using FluentValidation.Results;
-using Movies.Api.Contracts.Responses;
 
 namespace Api.Validation;
 

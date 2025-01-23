@@ -3,7 +3,6 @@ using Api.Validation;
 using Database.Models;
 using Database;
 using FluentValidation;
-using Movies.Api.Contracts.Responses;
 using Microsoft.EntityFrameworkCore;
 using Api.Assignments;
 

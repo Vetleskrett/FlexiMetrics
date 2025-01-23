@@ -19,13 +19,6 @@ public class DeliveryValidator : AbstractValidator<Delivery>
         RuleFor(x => x.Fields)
             .NotEmpty();
 
-        RuleForEach(x => x.Fields)
-            .Must((delivery, field) =>
-            {
-                return delivery.Assignment!.Fields!.Any(f => f.Id == field.AssignmentFieldId);
-            })
-            .WithMessage("Delivery field must match assignment field from the assignment");
-
         RuleFor(x => x.Fields)
             .Must((delivery, fields) =>
             {
@@ -39,5 +32,25 @@ public class DeliveryValidator : AbstractValidator<Delivery>
                 return fields!.DistinctBy(f => f.AssignmentFieldId).Count() == fields!.Count;
             })
             .WithMessage("Delivery can only contain one delivery field per assignment field");
+
+        RuleForEach(x => x.Fields)
+            .Must((delivery, field) =>
+            {
+                var assignmentField = delivery.Assignment!.Fields!.FirstOrDefault(f => f.Id == field.AssignmentFieldId);
+                if (assignmentField is null)
+                {
+                    return false;
+                }
+
+                return assignmentField.Type switch
+                {
+                    AssignmentDataType.String => field.Value.GetType() == typeof(string),
+                    AssignmentDataType.Integer => field.Value.GetType() == typeof(int),
+                    AssignmentDataType.Double => field.Value.GetType() == typeof(double),
+                    AssignmentDataType.Boolean => field.Value.GetType() == typeof(bool),
+                    _ => false,
+                };
+            })
+            .WithMessage("Delivery field must match assignment field from the assignment");
     }
 }

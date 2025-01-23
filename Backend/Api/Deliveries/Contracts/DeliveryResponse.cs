@@ -13,5 +13,5 @@ public class DeliveryFieldResponse
 {
     public required Guid Id { get; init; }
     public required Guid AssignmentFieldId { get; init; }
-    public required string Value { get; init; }
+    public required object Value { get; init; }
 }

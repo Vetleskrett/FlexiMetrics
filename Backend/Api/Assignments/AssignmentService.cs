@@ -4,7 +4,6 @@ using Database;
 using Database.Models;
 using FluentValidation;
 using Microsoft.EntityFrameworkCore;
-using Movies.Api.Contracts.Responses;
 
 namespace Api.Assignments;
 
