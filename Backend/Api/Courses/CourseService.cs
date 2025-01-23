@@ -5,15 +5,14 @@ using Database.Models;
 using Database;
 using Api.Courses.Contracts;
 using Api.Teachers.Contracts;
-using Movies.Api.Contracts.Responses;
 
 namespace Api.Courses;
 
 public interface ICourseService
 {
     Task<IEnumerable<CourseResponse>> GetAll();
-    Task<IEnumerable<CourseResponse>> GetAllByTeacherId(Guid teacherId);
-    Task<IEnumerable<CourseResponse>> GetAllByStudentId(Guid studentId);
+    Task<IEnumerable<CourseResponse>> GetAllByTeacher(Guid teacherId);
+    Task<IEnumerable<CourseResponse>> GetAllByStudent(Guid studentId);
     Task<CourseFullResponse?> GetById(Guid id);
     Task<Result<CourseResponse, ValidationResponse>> Create(CreateCourseRequest request);
     Task<Result<CourseResponse?, ValidationResponse>> Update(UpdateCourseRequest request, Guid id);
@@ -37,7 +36,7 @@ public class CourseService : ICourseService
         return courses.MapToResponse();
     }
 
-    public async Task<IEnumerable<CourseResponse>> GetAllByTeacherId(Guid teacherId)
+    public async Task<IEnumerable<CourseResponse>> GetAllByTeacher(Guid teacherId)
     {
         var courses = await _dbContext.CourseTeachers
             .AsNoTracking()
@@ -49,7 +48,7 @@ public class CourseService : ICourseService
         return courses!.MapToResponse();
     }
 
-    public async Task<IEnumerable<CourseResponse>> GetAllByStudentId(Guid studentId)
+    public async Task<IEnumerable<CourseResponse>> GetAllByStudent(Guid studentId)
     {
         var courses = await _dbContext.CourseStudents
             .Include(x => x.Course)

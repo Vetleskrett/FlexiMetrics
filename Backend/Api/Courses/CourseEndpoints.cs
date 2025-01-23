@@ -1,6 +1,4 @@
-﻿using Api.Courses;
-using Api.Courses.Contracts;
-using Api.Validation;
+﻿using Api.Courses.Contracts;
 
 namespace Api.Courses;
 
@@ -21,20 +19,20 @@ public static class CourseEndpoints
 
         group.MapGet("teacher/{teacherId:guid}/courses", async (ICourseService courseService, Guid teacherId) =>
         {
-            var courses = await courseService.GetAllByTeacherId(teacherId);
+            var courses = await courseService.GetAllByTeacher(teacherId);
             return Results.Ok(courses);
         })
         .Produces<IEnumerable<CourseResponse>>()
-        .WithName("GetAllCoursesByTeacherId")
+        .WithName("GetAllCoursesByTeacher")
         .WithSummary("Get all courses by teacher id");
 
         group.MapGet("student/{studentId:guid}/courses", async (ICourseService courseService, Guid studentId) =>
         {
-            var courses = await courseService.GetAllByStudentId(studentId);
+            var courses = await courseService.GetAllByStudent(studentId);
             return Results.Ok(courses);
         })
         .Produces<IEnumerable<CourseResponse>>()
-        .WithName("GetAllCoursesByStudentId")
+        .WithName("GetAllCoursesByStudent")
         .WithSummary("Get all courses by student id");
 
         group.MapGet("courses/{id:guid}", async (ICourseService courseService, Guid id) =>

@@ -3,7 +3,6 @@ using Api.Validation;
 using Database;
 using Database.Models;
 using Microsoft.EntityFrameworkCore;
-using Movies.Api.Contracts.Responses;
 
 namespace Api.Teachers;
 
