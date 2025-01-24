@@ -113,3 +113,15 @@ export type CreateTeams = {
     courseId: string;
     numTeams: number;
 }
+export type AddStudentsToCourse = {
+    emails: string[],
+}
+
+export type AddStudentsToTeams = {
+    courseId: string,
+    teams: StudentToTeam[],
+}
+export type StudentToTeam = {
+    teamNr: number,
+    emails: string[],
+}
