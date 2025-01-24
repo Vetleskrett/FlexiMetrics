@@ -108,6 +108,7 @@
 				actionString="Add"
 				inputString="Email"
 				inputType="String"
+				addFunction = { () => {}}
 			/>
 			<CompletedTotalCard
 				completed={team.complete ?? 0}

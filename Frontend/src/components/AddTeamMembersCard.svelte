@@ -1,10 +1,20 @@
 <script lang="ts">
-	import type { Team } from 'src/types.js';
 	import * as Card from '$lib/components/ui/card/index.js';
-	import { Separator } from '$lib/components/ui/separator/index.js';
-	import { Progress } from '$lib/components/ui/progress/index.js';
 	import Plus from 'lucide-svelte/icons/plus';
 	import Button from '$lib/components/ui/button/button.svelte';
+
+	export let addFunction: (input: string, file: File | null) => void;
+	let teamInput: string = "";
+	let file: File | null;
+    let fileInput: HTMLInputElement;
+
+    function handleFileUpload(event: Event): void
+    {
+        const input = event.target as HTMLInputElement;
+        file = input.files ? input.files[0] : null;
+    }
+
+    function openFileExplorer() { fileInput.click(); }
 </script>
 
 <Card.Root class="w-full overflow-hidden p-0">
@@ -21,17 +31,20 @@
 				<b>teamNumber, email, email, ...</b><br />
 				<br />
 				Copy and Paste, Drag and Drop file, or
-				<a href="#" class="text-blue-500 hover:text-blue-700">Browse Files</a>
+				<a on:click={openFileExplorer} href="#" class="text-blue-500 hover:text-blue-700">Browse Files</a>
+                <input bind:this={fileInput} type="file" on:change={handleFileUpload} style="display: none;" />
 			</p>
 			<textarea
 				class="mb-5 mt-5 h-64 w-2/3 border-2 border-dotted border-gray-500"
-				placeholder="1,abc@email.com,def@email.com,ghi@email.com 
+				placeholder="1,abc@email.com,def@email.com,ghi@email.com
 2,jkl@email.com, mno@email.com"
+				bind:value={teamInput}
 			/><!-- Find better solution for placeholder with multiple lines? -->
 			<Button
 				class="mb-5 flex h-9 flex-row justify-between gap-2 bg-button-green pl-2 pr-3 hover:bg-button-green-hover"
+				on:click={() => addFunction(teamInput, file)}
 			>
-				<Plus />
+				<Plus/>
 				<p>Add</p>
 			</Button>
 		</div>
