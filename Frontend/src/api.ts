@@ -1,5 +1,5 @@
-import { assignments } from "./mockData";
-import type { Course, Assignment, AssignmentField, Team, CreateTeams } from "./types";
+import { assignments, course } from "./mockData";
+import type { Course, Assignment, AssignmentField, Team, CreateTeams, Student, AddStudentsToCourse, AddStudentsToTeams } from "./types";
 const API_BASE_URL = 'https://localhost:7255';
 
 async function getApiCall(url:string){
@@ -26,8 +26,7 @@ async function postApiCall(url:string, payload: any){
     if (!response.ok) {
       throw new Error('Network response was not ok');
     }
-    const data = await response.json();
-    return data;
+    return;
   } catch (error) {
     console.error('Error fetching data:', error);
     throw error;
@@ -60,4 +59,15 @@ export async function getTeams(courseId: string): Promise<Team[]> {
 
 export async function postTeams(payload: CreateTeams) {
   return postApiCall("/teams", payload)
+}
+
+export async function getStudents(courseId: string): Promise<Student[]> {
+  return getApiCall(`/courses/${courseId}/students`)
+}
+
+export async function postStudentsCourse(courseId: string, emails: AddStudentsToCourse) {
+  return postApiCall(`/courses/${courseId}/students`, emails)
+}
+export async function postStudentsTeam(teams: AddStudentsToTeams) {
+  return postApiCall(`/teams/bulk`, teams)
 }

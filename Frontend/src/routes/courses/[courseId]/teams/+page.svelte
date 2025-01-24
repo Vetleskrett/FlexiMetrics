@@ -1,14 +1,14 @@
 <script lang="ts">
 	import { page } from '$app/stores';
 	import AllTeamCard from 'src/components/AllTeamCard.svelte';
-	import type { Team, Course } from 'src/types';
+	import type { Team, Course, AddStudentsToTeams, StudentToTeam } from 'src/types';
 	import EllipsisVertical from 'lucide-svelte/icons/ellipsis-vertical';
 	import Trash2 from 'lucide-svelte/icons/trash-2';
 	import * as DropdownMenu from '$lib/components/ui/dropdown-menu';
 	import * as Breadcrumb from '$lib/components/ui/breadcrumb/index.js';
 	import AddTeamMembersCard from 'src/components/AddTeamMembersCard.svelte';
 	import SimpleAddCard from 'src/components/SimpleAddCard.svelte';
-	import { getCourse, getTeams, postTeams } from 'src/api';
+	import { getCourse, getTeams, postStudentsTeam, postTeams } from 'src/api';
 	import { onMount } from 'svelte';
 
 	const courseId = $page.params.courseId;
@@ -40,6 +40,50 @@
 			}
 		}
 	}
+
+	async function addTeamMembers(input: string, file: File | null){
+		if (file){
+			input = await file.text()
+		}
+		console.log(input)
+		const allTeams : StudentToTeam[] = []
+        const newTeams = input.split("\n")
+        for (const team of newTeams){
+            const rawInfo = team.split(",")
+            if (!checkInfo(rawInfo)){
+                console.warn("Something is wrong with the input")
+                return
+            }
+			const info = rawInfo.map(i => i.trim())
+            allTeams.push({teamNr: Number(info[0].trim()), emails: info.slice(1)})
+        }
+		console.log(allTeams)
+		try
+		{
+			await postStudentsTeam(
+				{
+					courseId: courseId,
+					teams: allTeams,
+				});
+			teams = await getTeams(courseId);
+			}
+		catch(error){
+				console.error("Something went wrong!")
+		}
+    }
+
+    function checkInfo(info: string[]): boolean {
+        // Add additional checks if needed
+		if (info.length < 2 || isNaN(Number(info[0].trim()))){
+			return false
+		}
+        for (const i of info.slice(1)){
+            if (i.trim().length < 1){
+                return false
+            }
+        }
+        return true
+    }
 </script>
 
 <div class="m-auto mt-4 flex w-max flex-col items-center justify-center gap-10">
@@ -90,7 +134,7 @@
 				inputType="Number"
 				addFunction={addTeams}
 			/>
-			<AddTeamMembersCard />
+			<AddTeamMembersCard addFunction={addTeamMembers}/>
 		</div>
 	</div>
 </div>
