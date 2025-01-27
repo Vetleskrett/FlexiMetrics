@@ -7,7 +7,7 @@
 </script>
 
 <Card.Root class="w-full overflow-hidden p-5 hover:bg-blue-50">
-	<a href="/courses/{courseId}/teams">
+	<a href="/teacher/courses/{courseId}/teams">
 		<Card.Header class="m-0 p-0">
 			<div class="flex items-center">
 				<img

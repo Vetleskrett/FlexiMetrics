@@ -1,14 +1,12 @@
 <script lang="ts">
-	import type { Student } from 'src/types.ts';
 	import * as Card from '$lib/components/ui/card/index.js';
 
 	export let students: number;
 	export let courseId: string;
-
 </script>
 
 <Card.Root class="w-full overflow-hidden p-5 hover:bg-blue-50">
-	<a href="/courses/{courseId}/students">
+	<a href="/teacher/courses/{courseId}/students">
 		<Card.Header class="m-0 p-0">
 			<div class="flex items-center">
 				<img

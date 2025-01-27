@@ -61,15 +61,17 @@
 	<Breadcrumb.Root class="self-start">
 		<Breadcrumb.List>
 			<Breadcrumb.Item>
-				<Breadcrumb.Link href="/courses">Courses</Breadcrumb.Link>
+				<Breadcrumb.Link href="/teacher/courses">Courses</Breadcrumb.Link>
 			</Breadcrumb.Item>
 			<Breadcrumb.Separator />
 			<Breadcrumb.Item>
-				<Breadcrumb.Link href="/courses/{courseId}">{course.code} - {course.name}</Breadcrumb.Link>
+				<Breadcrumb.Link href="/teacher/courses/{courseId}"
+					>{course.code} - {course.name}</Breadcrumb.Link
+				>
 			</Breadcrumb.Item>
 			<Breadcrumb.Separator />
 			<Breadcrumb.Item>
-				<Breadcrumb.Link href="/courses/{courseId}/teams">Teams</Breadcrumb.Link>
+				<Breadcrumb.Link href="/teacher/courses/{courseId}/teams">Teams</Breadcrumb.Link>
 			</Breadcrumb.Item>
 			<Breadcrumb.Separator />
 			<Breadcrumb.Item>
@@ -108,7 +110,7 @@
 				actionString="Add"
 				inputString="Email"
 				inputType="String"
-				addFunction = { () => {}}
+				addFunction={() => {}}
 			/>
 			<CompletedTotalCard
 				completed={team.complete ?? 0}

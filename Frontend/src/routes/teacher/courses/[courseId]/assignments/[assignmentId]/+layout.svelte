@@ -9,7 +9,7 @@
 </script>
 
 <div class="fixed flex h-full w-60 flex-row flex-col items-start bg-white pt-12">
-	<MenuRow href="/courses/{courseId}/assignments/{assignmentId}">
+	<MenuRow href="/teacher/courses/{courseId}/assignments/{assignmentId}">
 		<img
 			width="24"
 			height="24"
@@ -19,7 +19,7 @@
 		<h2>Overview</h2>
 	</MenuRow>
 
-	<MenuRow href="/courses/{courseId}/assignments/{assignmentId}/deliveries">
+	<MenuRow href="/teacher/courses/{courseId}/assignments/{assignmentId}/deliveries">
 		<img
 			width="24"
 			height="24"
@@ -40,7 +40,7 @@
 	</div>
 
 	{#each analyzers as analyzer}
-		<MenuRow href="/courses/{courseId}/assignments/{assignmentId}/analyzers/{analyzer.id}">
+		<MenuRow href="/teacher/courses/{courseId}/assignments/{assignmentId}/analyzers/{analyzer.id}">
 			<h2>{analyzer.name}</h2>
 		</MenuRow>
 	{/each}

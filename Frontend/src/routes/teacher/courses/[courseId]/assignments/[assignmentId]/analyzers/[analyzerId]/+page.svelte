@@ -27,14 +27,16 @@
 	<Breadcrumb.Root class="self-start">
 		<Breadcrumb.List>
 			<Breadcrumb.Item>
-				<Breadcrumb.Link href="/courses">Courses</Breadcrumb.Link>
+				<Breadcrumb.Link href="/teacher/courses">Courses</Breadcrumb.Link>
 			</Breadcrumb.Item>
 			<Breadcrumb.Separator />
 			<Breadcrumb.Item>
-				<Breadcrumb.Link href="/courses/{courseId}">{course.code} - {course.name}</Breadcrumb.Link>
+				<Breadcrumb.Link href="/teacher/courses/{courseId}"
+					>{course.code} - {course.name}</Breadcrumb.Link
+				>
 			</Breadcrumb.Item>
 			<Breadcrumb.Separator />
-			<Breadcrumb.Link href="/courses/{courseId}/assignments/{assignment.id}">
+			<Breadcrumb.Link href="/teacher/courses/{courseId}/assignments/{assignmentId}">
 				{assignment.name}
 			</Breadcrumb.Link>
 			<Breadcrumb.Separator />

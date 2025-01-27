@@ -12,67 +12,64 @@
 
 	const courseId = $page.params.courseId;
 
-	let course : Course;
-	let students : Student[] = []
+	let course: Course;
+	let students: Student[] = [];
 
-	async function addStudents (input: string, file: File | null){
-		if (file){
-			input = await file.text()
+	async function addStudents(input: string, file: File | null) {
+		if (file) {
+			input = await file.text();
 		}
-		const studentEmails = handleInput(input)
-        try{
-			if(studentEmails)
-			{
-				await postStudentsCourse(courseId, {emails: studentEmails})
+		const studentEmails = handleInput(input);
+		try {
+			if (studentEmails) {
+				await postStudentsCourse(courseId, { emails: studentEmails });
 				students = await getStudents(courseId);
 			}
-        }
-		catch(error){
-			console.error("Something went wrong!")
+		} catch (error) {
+			console.error('Something went wrong!');
 		}
-    }
-
-	function handleInput(studentInput: string){
-		const input = studentInput.split(",")
-        for (const student of input){
-            if (!checkStudent(student)){
-                console.warn("Something is wrong with the input")
-                return
-            }
-        }
-		return input
 	}
 
-    function checkStudent(email: string): boolean {
-        // Add additional checks if needed
-        if (email.trim().length < 1)
-        {
-            return false
-        }
-        return true
-    }
+	function handleInput(studentInput: string) {
+		const input = studentInput.split(',');
+		for (const student of input) {
+			if (!checkStudent(student)) {
+				console.warn('Something is wrong with the input');
+				return;
+			}
+		}
+		return input;
+	}
+
+	function checkStudent(email: string): boolean {
+		// Add additional checks if needed
+		if (email.trim().length < 1) {
+			return false;
+		}
+		return true;
+	}
 
 	onMount(async () => {
-		try{
+		try {
 			course = await getCourse(courseId);
 			students = await getStudents(courseId);
+		} catch (error) {
+			console.error('Something went wrong!');
 		}
-		catch(error){
-			console.error("Something went wrong!")
-		}
-	})
-
+	});
 </script>
 
 <div class="m-auto mt-4 flex w-max flex-col items-center justify-center gap-10">
 	<Breadcrumb.Root class="self-start">
 		<Breadcrumb.List>
 			<Breadcrumb.Item>
-				<Breadcrumb.Link href="/courses">Courses</Breadcrumb.Link>
+				<Breadcrumb.Link href="/teacher/courses">Courses</Breadcrumb.Link>
 			</Breadcrumb.Item>
 			<Breadcrumb.Separator />
 			<Breadcrumb.Item>
-				<Breadcrumb.Link href="/courses/{courseId}">{course?.code} - {course?.name}</Breadcrumb.Link>
+				<Breadcrumb.Link href="/teacher/courses/{courseId}"
+					>{course?.code} - {course?.name}</Breadcrumb.Link
+				>
 			</Breadcrumb.Item>
 			<Breadcrumb.Separator />
 			<Breadcrumb.Item>
@@ -102,10 +99,10 @@
 	</div>
 	<div class="flex flex-row gap-8">
 		<div class="flex w-[700px] flex-col gap-8">
-			<AllStudentsCard {students}/>
+			<AllStudentsCard {students} />
 		</div>
 		<div class="flex w-[400px] flex-col gap-8">
-			<AddStudentsCard addFunction={addStudents}/>
+			<AddStudentsCard addFunction={addStudents} />
 		</div>
 	</div>
 </div>

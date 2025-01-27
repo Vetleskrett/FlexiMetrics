@@ -4,22 +4,9 @@
 	import Plus from 'lucide-svelte/icons/plus';
 	import CustomButton from 'src/components/CustomButton.svelte';
 	import { Role, type Course } from 'src/types';
-	import { getCourses } from 'src/api';
-	import { onMount } from 'svelte';
-	import { userRole } from 'src/store';
 
-	let courses : Course[] = [];
-
-	onMount(async () => {
-		try{
-			courses = await getCourses();
-		}
-		catch(error){
-			console.error("Something went wrong!")
-		}
-	})
-
-
+	export let userRole: Role;
+	export let courses: Course[];
 </script>
 
 <Card.Root class="m-auto mt-16 w-[700px] overflow-hidden p-0">
@@ -34,11 +21,11 @@
 			<Card.Title class="ml-4 text-3xl">Courses</Card.Title>
 		</div>
 
-		{#if $userRole == Role.Teacher}
-		<CustomButton href="courses/new" color="green">
-			<Plus />
-			<p>New</p>
-		</CustomButton>
+		{#if userRole == Role.Teacher}
+			<CustomButton href="courses/new" color="green">
+				<Plus />
+				<p>New</p>
+			</CustomButton>
 		{/if}
 	</Card.Header>
 	<Card.Content class="p-0">
@@ -46,7 +33,7 @@
 			{#each courses as course}
 				<Separator class="w-full" />
 				<a
-					href="/courses/{course.id}"
+					href="courses/{course.id}"
 					class="h-18 flex w-full items-center justify-between p-6 hover:bg-blue-50"
 				>
 					<h1 class="text-xl">{course.code} - {course.name}</h1>

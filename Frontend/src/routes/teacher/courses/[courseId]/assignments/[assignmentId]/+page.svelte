@@ -15,39 +15,39 @@
 	import { getCourse, getAssignment, getAssignmentFields } from 'src/api';
 	import { analyzers } from 'src/mockData';
 	import type { Assignment, Course, AssignmentField, Analyzer } from 'src/types';
-	import { Role } from 'src/types';
 
 	const courseId = $page.params.courseId;
 	const assignmentId = $page.params.assignmentId;
 
-	let course : Course;
-	let assignment : Assignment;
-	let assignmentFields: AssignmentField[] = []
-	let teams : number;
+	let course: Course;
+	let assignment: Assignment;
+	let assignmentFields: AssignmentField[] = [];
+	let teams: number;
 	//let analyzers: Analyzer[] = []
 
 	onMount(async () => {
-		try{
+		try {
 			course = await getCourse(courseId);
 			assignment = await getAssignment(assignmentId);
-			assignmentFields = await getAssignmentFields(assignmentId)
+			assignmentFields = await getAssignmentFields(assignmentId);
 			teams = course.numTeams ?? 0;
+		} catch (error) {
+			console.error('Something went wrong!');
 		}
-		catch(error){
-			console.error("Something went wrong!")
-		}
-	})
+	});
 </script>
 
 <div class="m-auto mt-4 flex w-max flex-col items-center justify-center gap-10">
 	<Breadcrumb.Root class="self-start">
 		<Breadcrumb.List>
 			<Breadcrumb.Item>
-				<Breadcrumb.Link href="/courses">Courses</Breadcrumb.Link>
+				<Breadcrumb.Link href="/teacher/courses">Courses</Breadcrumb.Link>
 			</Breadcrumb.Item>
 			<Breadcrumb.Separator />
 			<Breadcrumb.Item>
-				<Breadcrumb.Link href="/courses/{courseId}">{course?.code} - {course?.name}</Breadcrumb.Link>
+				<Breadcrumb.Link href="/teacher/courses/{courseId}"
+					>{course?.code} - {course?.name}</Breadcrumb.Link
+				>
 			</Breadcrumb.Item>
 			<Breadcrumb.Separator />
 			<Breadcrumb.Item>

@@ -1,15 +1,9 @@
 <script lang="ts">
-	import type { Teacher } from 'src/types.js';
+	import type { Team } from 'src/types.js';
 	import * as Card from '$lib/components/ui/card/index.js';
 	import * as Table from '$lib/components/ui/table';
-	import EllipsisVertical from 'lucide-svelte/icons/ellipsis-vertical';
-	import Pencil from 'lucide-svelte/icons/pencil';
-	import * as DropdownMenu from '$lib/components/ui/dropdown-menu';
-	import { Role } from 'src/types';
 
-	export let userRole: Role;
-	export let teachers: Teacher[];
-	export let courseId: string;
+	export let team: Team;
 </script>
 
 <Card.Root class="w-full overflow-hidden p-0">
@@ -21,22 +15,8 @@
 				src="https://img.icons8.com/color/480/teacher.png"
 				alt="knowledge-sharing"
 			/>
-			<Card.Title class="m-0 ml-2 text-2xl">Teachers</Card.Title>
+			<Card.Title class="m-0 ml-2 text-2xl">Team {team.teamNr}</Card.Title>
 		</div>
-
-		{#if userRole == Role.Teacher}
-			<DropdownMenu.Root>
-				<DropdownMenu.Trigger class="ml-auto">
-					<EllipsisVertical size="20" />
-				</DropdownMenu.Trigger>
-				<DropdownMenu.Content>
-					<DropdownMenu.Item>
-						<Pencil class="h-4" />
-						<p>Edit teachers</p>
-					</DropdownMenu.Item>
-				</DropdownMenu.Content>
-			</DropdownMenu.Root>
-		{/if}
 	</Card.Header>
 	<Card.Content class="p-0">
 		<Table.Root>
@@ -47,13 +27,13 @@
 				</Table.Row>
 			</Table.Header>
 			<Table.Body>
-				{#each teachers as teacher}
+				{#each team.students as student}
 					<Table.Row>
 						<Table.Cell class="px-6">
-							{teacher.name}
+							{student.name}
 						</Table.Cell>
 						<Table.Cell class="px-6">
-							{teacher.email}
+							{student.email}
 						</Table.Cell>
 					</Table.Row>
 				{/each}
