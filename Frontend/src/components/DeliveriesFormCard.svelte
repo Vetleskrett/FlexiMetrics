@@ -7,7 +7,7 @@
 	import Undo2 from 'lucide-svelte/icons/undo-2';
 	import { Separator } from 'src/lib/components/ui/separator';
 	import CustomButton from 'src/components/CustomButton.svelte';
-	import type { Delivery, DeliveryField, DeliveryFieldValue } from 'src/types';
+	import type { Delivery, DeliveryFieldValue, DeliveryField } from 'src/types';
 	import { Checkbox } from 'src/lib/components/ui/checkbox';
 
 	export let deliveryFields: DeliveryField[];

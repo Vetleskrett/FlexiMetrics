@@ -9,8 +9,13 @@ var migrationService = builder.AddProject<Projects.MigrationService>("migrations
     .WithReference(postgresdb)
     .WaitFor(postgresdb);
 
-builder.AddProject<Projects.Api>("api")
+var api = builder.AddProject<Projects.Api>("api")
     .WithReference(postgresdb)
     .WaitForCompletion(migrationService);
+
+builder.AddNpmApp("frontend", "../../Frontend", "dev")
+    .WithReference(api)
+    .WaitFor(api)
+    .WithHttpEndpoint(5173, isProxied: false);
 
 builder.Build().Run();

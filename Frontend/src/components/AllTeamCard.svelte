@@ -1,7 +1,7 @@
 <script lang="ts">
 	import type { Team } from 'src/types.js';
 	import * as Card from '$lib/components/ui/card/index.js';
-	import { Separator } from '$lib/components/ui/separator/index.js';
+	import * as Table from '$lib/components/ui/table';
 	import { Progress } from '$lib/components/ui/progress/index.js';
 
 	export let teams: Team[], courseId: string;
@@ -9,29 +9,33 @@
 
 <Card.Root class="w-full overflow-hidden p-0">
 	<Card.Content class="p-0">
-		<div class="flex flex-col">
-			<div class="flex items-center px-6 text-sm font-bold">
-				<h1 class="w-1/2">Team</h1>
-				<h1 class="w-1/2">Members</h1>
-				<h1 class="w-1/2 pl-5">Progress</h1>
-			</div>
-			{#each teams as team}
-				<Separator class="w-full" />
-				<a href="/courses/{courseId}/teams/{team.id}" class="hover:bg-blue-50">
-					<div class="flex items-center px-6 py-4">
-						<h1 class="w-1/2">{team.teamNr}</h1>
-						<div class="w-1/2">
+		<Table.Root class="h-full">
+			<Table.Header>
+				<Table.Row>
+					<Table.Head class="flex h-8 items-center justify-center px-6 font-bold text-black">
+						Team
+					</Table.Head>
+					<Table.Head class="h-8 px-6 font-bold text-black">Members</Table.Head>
+					<Table.Head class="h-8 w-[250px] px-6 font-bold text-black">Progress</Table.Head>
+				</Table.Row>
+			</Table.Header>
+			<Table.Body>
+				{#each teams as team}
+					<Table.Row class="text-base ">
+						<Table.Cell class="flex h-full items-center justify-center px-6">
+							<p>{team.teamNr}</p>
+						</Table.Cell>
+						<Table.Cell class="px-6">
 							{#each team.students as student}
-								<h1>{student.email}</h1>
-								<Separator class="w-full" />
+								<p>• {student.email}</p>
 							{/each}
-						</div>
-						<div class="w-1/2 pl-5">
+						</Table.Cell>
+						<Table.Cell class="px-6">
 							<Progress value={team.complete} />
-						</div>
-					</div>
-				</a>
-			{/each}
-		</div>
+						</Table.Cell>
+					</Table.Row>
+				{/each}
+			</Table.Body>
+		</Table.Root>
 	</Card.Content>
 </Card.Root>

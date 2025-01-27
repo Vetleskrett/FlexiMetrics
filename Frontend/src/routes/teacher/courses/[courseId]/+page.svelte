@@ -13,40 +13,37 @@
 	import type { Course, Assignment, Teacher } from 'src/types';
 	import { Role } from 'src/types';
 	import { getCourse, getAssignments } from 'src/api';
-	import { userRole } from 'src/store';
-
 
 	const courseId = $page.params.courseId;
 
-	let course : Course;
-	let assignments : Assignment[] = []
-	let teachers : Teacher[] = []
-	let students : number;
-	let teams : number;
+	let course: Course;
+	let assignments: Assignment[] = [];
+	let teachers: Teacher[] = [];
+	let students: number;
+	let teams: number;
 
 	onMount(async () => {
-		try{
+		try {
 			course = await getCourse(courseId);
 			assignments = await getAssignments(courseId);
 			students = course.numStudents ?? 0;
 			teams = course.numTeams ?? 0;
-			teachers = course.teachers ?? []
+			teachers = course.teachers ?? [];
+		} catch (error) {
+			console.error(error);
 		}
-		catch(error){
-			console.error("Something went wrong!")
-		}
-	})
+	});
 </script>
 
 <div class="m-auto mt-4 flex w-max flex-col items-center justify-center gap-10">
 	<Breadcrumb.Root class="self-start">
 		<Breadcrumb.List>
 			<Breadcrumb.Item>
-				<Breadcrumb.Link href="/courses">Courses</Breadcrumb.Link>
+				<Breadcrumb.Link href="/teacher/courses">Courses</Breadcrumb.Link>
 			</Breadcrumb.Item>
 			<Breadcrumb.Separator />
 			<Breadcrumb.Item>
-				<Breadcrumb.Page>{course?.code || "loading"} - {course?.name || 'loading'}</Breadcrumb.Page>
+				<Breadcrumb.Page>{course?.code || 'loading'} - {course?.name || 'loading'}</Breadcrumb.Page>
 			</Breadcrumb.Item>
 		</Breadcrumb.List>
 	</Breadcrumb.Root>
@@ -59,8 +56,13 @@
 				alt="knowledge-sharing"
 			/>
 			<div>
-				<h1 class="ml-4 text-4xl font-semibold">{course?.code || 'loading'} - {course?.name || 'loading'}</h1>
-				<p class="ml-4 font-semibold text-gray-500">{course?.year || 'loading'} {course?.semester || 'loading'}</p>
+				<h1 class="ml-4 text-4xl font-semibold">
+					{course?.code || 'loading'} - {course?.name || 'loading'}
+				</h1>
+				<p class="ml-4 font-semibold text-gray-500">
+					{course?.year || 'loading'}
+					{course?.semester || 'loading'}
+				</p>
 			</div>
 		</div>
 
@@ -69,7 +71,7 @@
 				<EllipsisVertical size={32} />
 			</DropdownMenu.Trigger>
 			<DropdownMenu.Content>
-				<DropdownMenu.Item href="/courses/{courseId}/edit">
+				<DropdownMenu.Item href="{courseId}/edit">
 					<Pencil class="h-4" />
 					<p>Edit course</p>
 				</DropdownMenu.Item>
@@ -82,17 +84,15 @@
 	</div>
 	<div class="flex w-[1080px] flex-row gap-8">
 		<div class="flex w-3/5 flex-col gap-8">
-			<AssignmentsCard {assignments} {courseId} />
+			<AssignmentsCard userRole={Role.Teacher} {assignments} {courseId} />
 		</div>
 
 		<div class="flex w-2/5 flex-col gap-8">
-			{#if $userRole == Role.Teacher}
 			<div class="flex flex-row gap-8">
 				<StudentsCard {students} {courseId} />
 				<TeamsCard {teams} {courseId} />
 			</div>
-			{/if}
-			<TeachersCard {teachers} {courseId} />
+			<TeachersCard userRole={Role.Teacher} {teachers} {courseId} />
 		</div>
 	</div>
 </div>

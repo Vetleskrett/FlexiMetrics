@@ -1,13 +1,12 @@
 <script lang="ts">
 	import type { AssignmentField } from 'src/types.js';
 	import * as Card from '$lib/components/ui/card/index.js';
-	import { Separator } from '$lib/components/ui/separator/index.js';
+	import * as Table from '$lib/components/ui/table';
 	import Ellipsis from 'lucide-svelte/icons/ellipsis';
 	import Trash2 from 'lucide-svelte/icons/trash-2';
 	import * as DropdownMenu from '$lib/components/ui/dropdown-menu';
 	import Plus from 'lucide-svelte/icons/plus';
 	import CustomButton from './CustomButton.svelte';
-	import * as Table from '$lib/components/ui/table';
 
 	export let assignmentFields: AssignmentField[];
 	export let assignmentId: string;

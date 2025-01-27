@@ -13,88 +13,84 @@
 
 	const courseId = $page.params.courseId;
 
-	let course : Course;
-	let teams : Team[] = []
+	let course: Course;
+	let teams: Team[] = [];
 
 	onMount(async () => {
-		try{
+		try {
 			course = await getCourse(courseId);
 			teams = await getTeams(courseId);
+		} catch (error) {
+			console.error(error);
 		}
-		catch(error){
-			console.error("Something went wrong!")
-		}
-	})
-	async function addTeams(input: number){
-		if (input && input > 0){
-			try{
-				await postTeams(
-					{
-						courseId: courseId,
-						numTeams: input,
-					});
+	});
+	async function addTeams(input: number) {
+		if (input && input > 0) {
+			try {
+				await postTeams({
+					courseId: courseId,
+					numTeams: input
+				});
 				teams = await getTeams(courseId);
-				}
-			catch(error){
-				console.error("Something went wrong!")
+			} catch (error) {
+				console.error('Something went wrong!');
 			}
 		}
 	}
 
-	async function addTeamMembers(input: string, file: File | null){
-		if (file){
-			input = await file.text()
+	async function addTeamMembers(input: string, file: File | null) {
+		if (file) {
+			input = await file.text();
 		}
-		console.log(input)
-		const allTeams : StudentToTeam[] = []
-        const newTeams = input.split("\n")
-        for (const team of newTeams){
-            const rawInfo = team.split(",")
-            if (!checkInfo(rawInfo)){
-                console.warn("Something is wrong with the input")
-                return
-            }
-			const info = rawInfo.map(i => i.trim())
-            allTeams.push({teamNr: Number(info[0].trim()), emails: info.slice(1)})
-        }
-		console.log(allTeams)
-		try
-		{
-			await postStudentsTeam(
-				{
-					courseId: courseId,
-					teams: allTeams,
-				});
-			teams = await getTeams(courseId);
+		console.log(input);
+		const allTeams: StudentToTeam[] = [];
+		const newTeams = input.split('\n');
+		for (const team of newTeams) {
+			const rawInfo = team.split(',');
+			if (!checkInfo(rawInfo)) {
+				console.warn('Something is wrong with the input');
+				return;
 			}
-		catch(error){
-				console.error("Something went wrong!")
+			const info = rawInfo.map((i) => i.trim());
+			allTeams.push({ teamNr: Number(info[0].trim()), emails: info.slice(1) });
 		}
-    }
+		console.log(allTeams);
+		try {
+			await postStudentsTeam({
+				courseId: courseId,
+				teams: allTeams
+			});
+			teams = await getTeams(courseId);
+		} catch (error) {
+			console.error('Something went wrong!');
+		}
+	}
 
-    function checkInfo(info: string[]): boolean {
-        // Add additional checks if needed
-		if (info.length < 2 || isNaN(Number(info[0].trim()))){
-			return false
+	function checkInfo(info: string[]): boolean {
+		// Add additional checks if needed
+		if (info.length < 2 || isNaN(Number(info[0].trim()))) {
+			return false;
 		}
-        for (const i of info.slice(1)){
-            if (i.trim().length < 1){
-                return false
-            }
-        }
-        return true
-    }
+		for (const i of info.slice(1)) {
+			if (i.trim().length < 1) {
+				return false;
+			}
+		}
+		return true;
+	}
 </script>
 
 <div class="m-auto mt-4 flex w-max flex-col items-center justify-center gap-10">
 	<Breadcrumb.Root class="self-start">
 		<Breadcrumb.List>
 			<Breadcrumb.Item>
-				<Breadcrumb.Link href="/courses">Courses</Breadcrumb.Link>
+				<Breadcrumb.Link href="/teacher/courses">Courses</Breadcrumb.Link>
 			</Breadcrumb.Item>
 			<Breadcrumb.Separator />
 			<Breadcrumb.Item>
-				<Breadcrumb.Link href="/courses/{courseId}">{course?.code} - {course?.name}</Breadcrumb.Link>
+				<Breadcrumb.Link href="/teacher/courses/{courseId}"
+					>{course?.code} - {course?.name}</Breadcrumb.Link
+				>
 			</Breadcrumb.Item>
 			<Breadcrumb.Separator />
 			<Breadcrumb.Item>
@@ -134,7 +130,7 @@
 				inputType="Number"
 				addFunction={addTeams}
 			/>
-			<AddTeamMembersCard addFunction={addTeamMembers}/>
+			<AddTeamMembersCard addFunction={addTeamMembers} />
 		</div>
 	</div>
 </div>
