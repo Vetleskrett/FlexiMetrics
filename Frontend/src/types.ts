@@ -5,9 +5,27 @@ export type Course = {
     code: string;
     year: number;
     semester: Semester;
-    numStudents: number | null | undefined
-    numTeams: number | null | undefined
-    teachers: Teacher[] | null | undefined
+}
+
+export type TeacherCourse = {
+    id: string;
+    name: string;
+    code: string;
+    year: number;
+    semester: Semester;
+    numStudents: number;
+    numTeams: number;
+    teachers: Teacher[];
+}
+
+export type StudentCourse = {
+    id: string;
+    name: string;
+    code: string;
+    year: number;
+    semester: Semester;
+    team: Team;
+    teachers: Teacher[];
 }
 
 enum Semester{
@@ -26,6 +44,16 @@ export type Assignment = {
     dueDate: string;
     published: boolean;
     collaborationType : string;
+    courseId : string;
+}
+
+export type StudentAssignment = {
+    id: string;
+    name: string;
+    dueDate: string;
+    published: boolean;
+    collaborationType : string;
+    isDelivered: boolean;
     courseId : string;
 }
 
@@ -61,14 +89,18 @@ export type AssignmentField = {
     type: 'String' | 'Integer' | 'Boolean' | 'File';
 }
 
-export type DeliveryFieldValue = {
-    fieldId: string;
+export type DeliveryField = {
+    id: string;
+    assignmentFieldId: string;
     value: any;
 }
 
 export type Delivery = {
+    id: string;
+    assignmentId: string;
+    studentId?: string;
     teamId: string;
-    values: DeliveryFieldValue[];
+    fields: DeliveryField[];
 }
 
 export type Analyzer = {

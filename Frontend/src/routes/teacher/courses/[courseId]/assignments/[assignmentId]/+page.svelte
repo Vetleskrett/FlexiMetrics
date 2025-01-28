@@ -30,7 +30,7 @@
 			course = await getCourse(courseId);
 			assignment = await getAssignment(assignmentId);
 			assignmentFields = await getAssignmentFields(assignmentId);
-			teams = course.numTeams ?? 0;
+			teams = 0;
 		} catch (error) {
 			console.error('Something went wrong!');
 		}

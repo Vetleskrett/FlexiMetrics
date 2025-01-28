@@ -1,5 +1,4 @@
-import { assignments, course } from "./mockData";
-import type { Course, Assignment, AssignmentField, Team, CreateTeams, Student, AddStudentsToCourse, AddStudentsToTeams } from "./types";
+import type { Course, TeacherCourse, StudentCourse, Assignment, AssignmentField, Team, CreateTeams, Student, AddStudentsToCourse, AddStudentsToTeams } from "./types";
 const API_BASE_URL = 'https://localhost:7255';
 
 async function getApiCall(url:string){
@@ -37,12 +36,33 @@ export async function getCourses() : Promise<Course[]> {
   return getApiCall("/courses")
 }
 
+export async function getCoursesByTeacher(teacherId: string) : Promise<Course[]> {
+  return getApiCall(`/teachers/${teacherId}/courses`)
+}
+
+export async function getCoursesByStudent(studentId: string) : Promise<Course[]> {
+  return getApiCall(`/students/${studentId}/courses`)
+}
+
 export async function getCourse(courseId: string) : Promise<Course> {
   return getApiCall(`/courses/${courseId}`)
 }
 
+export async function getTeacherCourse(teacherId: string, courseId: string) : Promise<TeacherCourse> {
+  return getApiCall(`/teachers/${teacherId}/courses/${courseId}`)
+}
+
+export async function getStudentCourse(studentId: string, courseId: string) : Promise<StudentCourse> {
+  return getApiCall(`/students/${studentId}/courses/${courseId}`)
+}
+
 export async function getAssignments(courseId: string) : Promise<Assignment[]> {
   return getApiCall(`/course/${courseId}/assignments`)
+}
+
+
+export async function getStudentAssignments(studentId: string, courseId: string) : Promise<StudentAssignment[]> {
+  return getApiCall(`/students/${studentId}/course/${courseId}/assignments`)
 }
 
 export async function getAssignment(assignmentId: string): Promise<Assignment> {

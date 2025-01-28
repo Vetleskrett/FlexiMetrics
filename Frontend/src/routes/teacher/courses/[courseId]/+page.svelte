@@ -10,13 +10,14 @@
 	import TeachersCard from 'src/components/TeachersCard.svelte';
 	import * as Breadcrumb from '$lib/components/ui/breadcrumb/index.js';
 	import { onMount } from 'svelte';
-	import type { Course, Assignment, Teacher } from 'src/types';
+	import type { TeacherCourse, Assignment, Teacher } from 'src/types';
 	import { Role } from 'src/types';
-	import { getCourse, getAssignments } from 'src/api';
+	import { getTeacherCourse, getAssignments } from 'src/api';
+	import { teacherId } from 'src/store';
 
 	const courseId = $page.params.courseId;
 
-	let course: Course;
+	let course: TeacherCourse;
 	let assignments: Assignment[] = [];
 	let teachers: Teacher[] = [];
 	let students: number;
@@ -24,7 +25,7 @@
 
 	onMount(async () => {
 		try {
-			course = await getCourse(courseId);
+			course = await getTeacherCourse(teacherId, courseId);
 			assignments = await getAssignments(courseId);
 			students = course.numStudents ?? 0;
 			teams = course.numTeams ?? 0;

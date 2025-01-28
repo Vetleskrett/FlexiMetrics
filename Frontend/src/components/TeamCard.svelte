@@ -12,7 +12,7 @@
 			<img
 				width="40"
 				height="40"
-				src="https://img.icons8.com/color/480/teacher.png"
+				src="https://img.icons8.com/fluency/480/group.png"
 				alt="knowledge-sharing"
 			/>
 			<Card.Title class="m-0 ml-2 text-2xl">Team {team.teamNr}</Card.Title>

@@ -1,4 +1,4 @@
-import type { Analyzer, Delivery, DeliveryField, Student, Teacher, Team, AnalyzerOutput } from "./types";
+import type { Analyzer, Delivery, AssignmentField, Student, Teacher, Team, AnalyzerOutput } from "./types";
 
 export const courses = [
     {
@@ -72,6 +72,7 @@ export const teams: Team[] = [];
 for (let i = 1; i <= 49; i++) {
     teams.push({
         id: i.toString(),
+        teamNr: i,
         students: [],
         complete: 2
     });
@@ -90,7 +91,7 @@ export const teachers: Teacher[] = [
     }
 ];
 
-export const deliveryFields: DeliveryField[] = [
+export const assignmentFields: AssignmentField[] = [
     {
         id: '1',
         name: 'Project Title',
@@ -120,151 +121,100 @@ export const deliveryFields: DeliveryField[] = [
 
 export const deliveries: Delivery[] = [
     {
+        id: '1',
+        assignmentId: '1',
         teamId: '1',
-        values: [
+        studentId: undefined,
+        fields: [
             {
-                fieldId: '1',
+                id: '1',
+                assignmentFieldId: '1',
                 value: 'Weather app'
             },
             {
-                fieldId: '2',
+                id: '2',
+                assignmentFieldId: '2',
                 value: 'team1.zip'
             },
             {
-                fieldId: '3',
+                id: '3',
+                assignmentFieldId: '3',
                 value: 'http://team1.ntnu.no'
             },
             {
-                fieldId: '4',
+                id: '4',
+                assignmentFieldId: '4',
                 value: 17
             },
             {
-                fieldId: '5',
+                id: '5',
+                assignmentFieldId: '5',
                 value: true
             }
         ]
     },
     {
+        id: '1',
+        assignmentId: '1',
         teamId: '2',
-        values: [
+        studentId: undefined,
+        fields: [
             {
-                fieldId: '1',
+                id: '6',
+                assignmentFieldId: '1',
                 value: 'Snake Game'
             },
             {
-                fieldId: '2',
+                id: '7',
+                assignmentFieldId: '2',
                 value: 'team2.zip'
             },
             {
-                fieldId: '3',
+                id: '8',
+                assignmentFieldId: '3',
                 value: 'http://team2.ntnu.no'
             },
             {
-                fieldId: '4',
+                id: '9',
+                assignmentFieldId: '4',
                 value: 65
             },
             {
-                fieldId: '5',
+                id: '10',
+                assignmentFieldId: '5',
                 value: true
             }
         ]
     },
     {
+        id: '1',
+        assignmentId: '1',
         teamId: '3',
-        values: [
+        studentId: undefined,
+        fields: [
             {
-                fieldId: '1',
+                id: '11',
+                assignmentFieldId: '1',
                 value: 'Tic Tac Toe'
             },
             {
-                fieldId: '2',
+                id: '12',
+                assignmentFieldId: '2',
                 value: 'team3.zip'
             },
             {
-                fieldId: '3',
+                id: '13',
+                assignmentFieldId: '3',
                 value: 'http://team3.ntnu.no'
             },
             {
-                fieldId: '4',
+                id: '14',
+                assignmentFieldId: '4',
                 value: 12
             },
             {
-                fieldId: '5',
-                value: false
-            }
-        ]
-    },
-    {
-        teamId: '4',
-        values: [
-            {
-                fieldId: '1',
-                value: 'Sudoku'
-            },
-            {
-                fieldId: '2',
-                value: 'team4.zip'
-            },
-            {
-                fieldId: '3',
-                value: 'http://team4.ntnu.no'
-            },
-            {
-                fieldId: '4',
-                value: 84
-            },
-            {
-                fieldId: '5',
-                value: true
-            }
-        ]
-    },
-    {
-        teamId: '5',
-        values: [
-            {
-                fieldId: '1',
-                value: 'Music app'
-            },
-            {
-                fieldId: '2',
-                value: 'team5.zip'
-            },
-            {
-                fieldId: '3',
-                value: 'http://team5.ntnu.no'
-            },
-            {
-                fieldId: '4',
-                value: 44
-            },
-            {
-                fieldId: '5',
-                value: false
-            }
-        ]
-    },
-    {
-        teamId: '6',
-        values: [
-            {
-                fieldId: '1',
-                value: 'Quiz Game'
-            },
-            {
-                fieldId: '2',
-                value: 'team6.zip'
-            },
-            {
-                fieldId: '3',
-                value: 'http://team6.ntnu.no'
-            },
-            {
-                fieldId: '4',
-                value: 35
-            },
-            {
-                fieldId: '5',
+                id: '15',
+                assignmentFieldId: '5',
                 value: false
             }
         ]

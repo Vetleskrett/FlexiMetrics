@@ -7,27 +7,27 @@
 	import Undo2 from 'lucide-svelte/icons/undo-2';
 	import { Separator } from 'src/lib/components/ui/separator';
 	import CustomButton from 'src/components/CustomButton.svelte';
-	import type { Delivery, DeliveryFieldValue, DeliveryField } from 'src/types';
+	import type { Delivery, DeliveryField, AssignmentField } from 'src/types';
 	import { Checkbox } from 'src/lib/components/ui/checkbox';
 
-	export let deliveryFields: DeliveryField[];
+	export let assignmentFields: AssignmentField[];
 	let originalDeliveries: Delivery[];
 	export { originalDeliveries as deliveries };
 
-	const deliveryTypes = new Map<string, string>(
-		deliveryFields.map((field) => [field.id, field.type])
+	const assignmentFieldTypes = new Map<string, string>(
+		assignmentFields.map((field) => [field.id, field.type])
 	);
 
 	let deliveries: Delivery[] = structuredClone(originalDeliveries);
 	let isAnyChanges = false;
 
-	const teamsChanges = new Map<string, Map<string, DeliveryFieldValue>>(
-		deliveries.map((delivery) => [delivery.teamId, new Map<string, DeliveryFieldValue>()])
+	const teamsChanges = new Map<string, Map<string, DeliveryField>>(
+		deliveries.map((delivery) => [delivery.teamId, new Map<string, DeliveryField>()])
 	);
 
-	const onChange = (teamId: string, field: DeliveryFieldValue) => {
+	const onChange = (teamId: string, field: DeliveryField) => {
 		isAnyChanges = true;
-		teamsChanges.get(teamId)?.set(field.fieldId, field);
+		teamsChanges.get(teamId)?.set(field.assignmentFieldId, field);
 	};
 
 	const onSubmit = () => {
@@ -59,7 +59,7 @@
 				<Table.Header>
 					<Table.Row>
 						<Table.Head class="h-0 pt-4 font-bold text-black">Team</Table.Head>
-						{#each deliveryFields as field}
+						{#each assignmentFields as field}
 							<Table.Head class="h-0 pt-4 font-bold text-black">
 								{field.name}
 							</Table.Head>
@@ -77,28 +77,28 @@
 							<Table.Cell>
 								{delivery.teamId}
 							</Table.Cell>
-							{#each delivery.values as fieldValue (fieldValue.fieldId)}
-								{@const type = deliveryTypes.get(fieldValue.fieldId)}
+							{#each delivery.fields as deliveryField (deliveryField.assignmentFieldId)}
+								{@const type = assignmentFieldTypes.get(deliveryField.assignmentFieldId)}
 								<Table.Cell>
 									{#if type == 'String'}
 										<Input
 											type="text"
-											on:change={() => onChange(delivery.teamId, fieldValue)}
-											bind:value={fieldValue.value}
+											on:change={() => onChange(delivery.teamId, deliveryField)}
+											bind:value={deliveryField.value}
 										/>
 									{:else if type == 'Integer'}
 										<Input
 											type="number"
 											class="w-24"
-											on:change={() => onChange(delivery.teamId, fieldValue)}
-											bind:value={fieldValue.value}
+											on:change={() => onChange(delivery.teamId, deliveryField)}
+											bind:value={deliveryField.value}
 										/>
 									{:else if type == 'Boolean'}
 										<div class="flex justify-center">
 											<Checkbox
 												class="rounded-[0.25rem]"
-												on:click={() => onChange(delivery.teamId, fieldValue)}
-												bind:checked={fieldValue.value}
+												on:click={() => onChange(delivery.teamId, deliveryField)}
+												bind:checked={deliveryField.value}
 											/>
 										</div>
 									{:else if type == 'File'}
@@ -108,19 +108,19 @@
 											class="flex items-center text-blue-500"
 										>
 											<ArrowDownToline size="20" />
-											{fieldValue.value}
+											{deliveryField.value}
 										</a>
 									{:else}
-										{fieldValue.value}
+										{deliveryField.value}
 									{/if}
 								</Table.Cell>
 								{#if type == 'File'}
 									<Table.Cell>
 										<input
-											bind:files={fieldValue.value}
+											bind:files={deliveryField.value}
 											type="file"
 											class="flex h-10 w-48 rounded-sm border border-input bg-white px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
-											on:change={() => onChange(delivery.teamId, fieldValue)}
+											on:change={() => onChange(delivery.teamId, deliveryField)}
 										/>
 									</Table.Cell>
 								{/if}

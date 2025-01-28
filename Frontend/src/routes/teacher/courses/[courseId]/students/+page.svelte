@@ -79,7 +79,12 @@
 	</Breadcrumb.Root>
 	<div class="flex w-full items-center justify-between">
 		<div class="flex items-center">
-			<img width="60" height="60" src="https://img.icons8.com/fluency/480/group.png" alt="group" />
+			<img
+				width="60"
+				height="60"
+				src="https://img.icons8.com/fluency/480/student-male.png"
+				alt="group"
+			/>
 			<div>
 				<h1 class="ml-4 text-4xl font-semibold">Students</h1>
 			</div>
