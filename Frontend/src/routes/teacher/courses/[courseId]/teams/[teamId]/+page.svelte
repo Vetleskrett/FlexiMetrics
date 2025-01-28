@@ -75,7 +75,7 @@
 			</Breadcrumb.Item>
 			<Breadcrumb.Separator />
 			<Breadcrumb.Item>
-				<Breadcrumb.Page>Team {teamId}</Breadcrumb.Page>
+				<Breadcrumb.Page>Team {team.teamNr}</Breadcrumb.Page>
 			</Breadcrumb.Item>
 		</Breadcrumb.List>
 	</Breadcrumb.Root>
@@ -83,7 +83,7 @@
 		<div class="flex items-center">
 			<img width="60" height="60" src="https://img.icons8.com/fluency/480/group.png" alt="group" />
 			<div>
-				<h1 class="ml-4 text-4xl font-semibold">Team {teamId}</h1>
+				<h1 class="ml-4 text-4xl font-semibold">Team {team.teamNr}</h1>
 			</div>
 		</div>
 

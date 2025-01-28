@@ -5,6 +5,8 @@ using Database.Models;
 using Database;
 using Api.Courses.Contracts;
 using Api.Teachers.Contracts;
+using Api.Teams;
+using Api.Teachers;
 
 namespace Api.Courses;
 
@@ -13,7 +15,9 @@ public interface ICourseService
     Task<IEnumerable<CourseResponse>> GetAll();
     Task<IEnumerable<CourseResponse>> GetAllByTeacher(Guid teacherId);
     Task<IEnumerable<CourseResponse>> GetAllByStudent(Guid studentId);
-    Task<CourseFullResponse?> GetById(Guid id);
+    Task<CourseResponse?> GetById(Guid id);
+    Task<TeacherCourseResponse?> GetByTeacher(Guid teacherId, Guid id);
+    Task<StudentCourseResponse?> GetByStudent(Guid studentId, Guid id);
     Task<Result<CourseResponse, ValidationResponse>> Create(CreateCourseRequest request);
     Task<Result<CourseResponse?, ValidationResponse>> Update(UpdateCourseRequest request, Guid id);
     Task<bool> DeleteById(Guid id);
@@ -59,11 +63,17 @@ public class CourseService : ICourseService
         return courses.MapToResponse();
     }
 
-    public async Task<CourseFullResponse?> GetById(Guid id)
+    public async Task<CourseResponse?> GetById(Guid id)
+    {
+        var course = await _dbContext.Courses.FindAsync(id);
+        return course?.MapToResponse();
+    }
+
+    public async Task<TeacherCourseResponse?> GetByTeacher(Guid teacherId, Guid id)
     {
         var course = await _dbContext.Courses
             .Where(course => course.Id == id)
-            .Select(course => new CourseFullResponse
+            .Select(course => new TeacherCourseResponse
             {
                 Id = course.Id,
                 Code = course.Code,
@@ -87,6 +97,36 @@ public class CourseService : ICourseService
             .FirstOrDefaultAsync();
 
         return course;
+    }
+
+    public async Task<StudentCourseResponse?> GetByStudent(Guid studentId, Guid id)
+    {
+        var course = await _dbContext.Courses.FindAsync(id);
+        if (course is null)
+        {
+            return default;
+        }
+
+        var team = await _dbContext.Teams
+            .Include(t => t.Students)
+            .Where(t => t.CourseId == id && t.Students.Any(s => s.Id == studentId))
+            .FirstOrDefaultAsync();
+
+        var courseTeachers = await _dbContext.CourseTeachers
+                .Include(ct => ct.Teacher)
+                .Where(ct => ct.CourseId == course.Id)
+                .ToListAsync();
+
+        return new StudentCourseResponse
+        {
+            Id = course.Id,
+            Code = course.Code,
+            Name = course.Name,
+            Year = course.Year,
+            Semester = course.Semester,
+            Team = team?.MapToResponse(),
+            Teachers = courseTeachers.Select(ct => ct.Teacher)!.MapToTeacherResponse().ToList()
+        };
     }
 
     public async Task<Result<CourseResponse, ValidationResponse>> Create(CreateCourseRequest request)

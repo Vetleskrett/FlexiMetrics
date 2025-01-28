@@ -11,6 +11,7 @@ public interface IAssignmentService
 {
     Task<IEnumerable<AssignmentResponse>> GetAll();
     Task<IEnumerable<AssignmentResponse>> GetAllByCourse(Guid courseId);
+    Task<IEnumerable<StudentAssignmentResponse>?> GetAllByStudentCourse(Guid studentId, Guid courseId);
     Task<AssignmentResponse?> GetById(Guid id);
     Task<Result<AssignmentResponse, ValidationResponse>> Create(CreateAssignmentRequest request);
     Task<Result<AssignmentResponse?, ValidationResponse>> Update(UpdateAssignmentRequest request, Guid id);
@@ -36,12 +37,39 @@ public class AssignmentService : IAssignmentService
         return assignments.MapToResponse();
     }
 
-    public async Task<IEnumerable<AssignmentResponse>> GetAllByCourse(Guid CourseId)
+    public async Task<IEnumerable<AssignmentResponse>> GetAllByCourse(Guid courseId)
     {
         var assignments = await _dbContext.Assignments
-            .Where(x => x.CourseId == CourseId)
+            .Where(x => x.CourseId == courseId)
             .ToListAsync();
         return assignments.MapToResponse();
+    }
+
+    public async Task<IEnumerable<StudentAssignmentResponse>?> GetAllByStudentCourse(Guid studentId, Guid courseId)
+    {
+        var assignments = await _dbContext.Assignments
+            .Where(x => x.CourseId == courseId && x.Published == true)
+            .Select(a => new StudentAssignmentResponse
+            {
+                Id = a.Id,
+                Name = a.Name,
+                DueDate = a.DueDate,
+                CollaborationType = a.CollaborationType,
+                CourseId = a.CourseId,
+
+                IsDelivered =
+                    _dbContext.Deliveries
+                        .Where(d => d.AssignmentId == a.Id)
+                        .OfType<StudentDelivery>()
+                        .Any(d => d.StudentId == studentId) ||
+                    _dbContext.Deliveries
+                        .Where(d => d.AssignmentId == a.Id)
+                        .OfType<TeamDelivery>()
+                        .Any(d => d.Team!.Students.Any(s => s.Id == studentId)),
+            })
+            .ToListAsync();
+
+        return assignments;
     }
 
     public async Task<AssignmentResponse?> GetById(Guid id)

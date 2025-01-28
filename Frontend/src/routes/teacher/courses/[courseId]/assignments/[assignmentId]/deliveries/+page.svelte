@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { page } from '$app/stores';
 	import * as Breadcrumb from '$lib/components/ui/breadcrumb/index.js';
-	import { course, assignment, deliveryFields, deliveries } from 'src/mockData';
+	import { course, assignment, assignmentFields, deliveries } from 'src/mockData';
 	import DeliveriesFormCard from 'src/components/DeliveriesFormCard.svelte';
 
 	const courseId = $page.params.courseId;
@@ -42,5 +42,5 @@
 		</div>
 	</div>
 
-	<DeliveriesFormCard {deliveryFields} {deliveries} />
+	<DeliveriesFormCard {assignmentFields} {deliveries} />
 </div>

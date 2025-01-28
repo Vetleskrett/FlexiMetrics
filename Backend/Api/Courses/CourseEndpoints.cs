@@ -17,7 +17,7 @@ public static class CourseEndpoints
         .WithName("GetAllCourses")
         .WithSummary("Get all courses");
 
-        group.MapGet("teacher/{teacherId:guid}/courses", async (ICourseService courseService, Guid teacherId) =>
+        group.MapGet("teachers/{teacherId:guid}/courses", async (ICourseService courseService, Guid teacherId) =>
         {
             var courses = await courseService.GetAllByTeacher(teacherId);
             return Results.Ok(courses);
@@ -26,7 +26,7 @@ public static class CourseEndpoints
         .WithName("GetAllCoursesByTeacher")
         .WithSummary("Get all courses by teacher id");
 
-        group.MapGet("student/{studentId:guid}/courses", async (ICourseService courseService, Guid studentId) =>
+        group.MapGet("students/{studentId:guid}/courses", async (ICourseService courseService, Guid studentId) =>
         {
             var courses = await courseService.GetAllByStudent(studentId);
             return Results.Ok(courses);
@@ -35,14 +35,32 @@ public static class CourseEndpoints
         .WithName("GetAllCoursesByStudent")
         .WithSummary("Get all courses by student id");
 
-        group.MapGet("courses/{id:guid}", async (ICourseService courseService, Guid id) =>
+        group.MapGet("/courses/{id:guid}", async (ICourseService courseService, Guid id) =>
         {
             var course = await courseService.GetById(id);
             return course is not null ? Results.Ok(course) : Results.NotFound();
         })
-        .Produces<CourseFullResponse>()
+        .Produces<CourseResponse>()
         .WithName("GetCourse")
         .WithSummary("Get course by id");
+
+        group.MapGet("teachers/{teacherId:guid}/courses/{id:guid}", async (ICourseService courseService, Guid teacherId, Guid id) =>
+        {
+            var course = await courseService.GetByTeacher(teacherId, id);
+            return course is not null ? Results.Ok(course) : Results.NotFound();
+        })
+        .Produces<TeacherCourseResponse>()
+        .WithName("GetTeacherCourse")
+        .WithSummary("Get teacher course by id");
+
+        group.MapGet("students/{studentId:guid}/courses/{id:guid}", async (ICourseService courseService, Guid studentId, Guid id) =>
+        {
+            var course = await courseService.GetByStudent(studentId, id);
+            return course is not null ? Results.Ok(course) : Results.NotFound();
+        })
+        .Produces<StudentCourseResponse>()
+        .WithName("GetStudentCourse")
+        .WithSummary("Get student course by id");
 
         group.MapPost("courses", async (ICourseService courseService, CreateCourseRequest request) =>
         {

@@ -103,12 +103,12 @@ public static class Seed
                 .Where(x => x.CourseId == course.Id)
                 .Select(x => students.First(s => s.Id == x.StudentId));
 
-            return studentsInCourse.Chunk(3).Select((students, index) =>
+            return studentsInCourse.Chunk(3).Select((studentsInTeam, index) =>
             {
                 return teamFaker
                     .RuleFor(x => x.TeamNr, index + 1)
                     .RuleFor(x => x.CourseId, course.Id)
-                    .RuleFor(x => x.Students, students.ToList())
+                    .RuleFor(x => x.Students, studentsInTeam.ToList())
                     .Generate();
             });
         })

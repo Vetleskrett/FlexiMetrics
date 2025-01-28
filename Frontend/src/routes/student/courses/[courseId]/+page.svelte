@@ -1,24 +1,25 @@
 <script lang="ts">
 	import { page } from '$app/stores';
-	import AssignmentsCard from 'src/components/AssignmentsCard.svelte';
 	import TeachersCard from 'src/components/TeachersCard.svelte';
 	import * as Breadcrumb from '$lib/components/ui/breadcrumb/index.js';
 	import { onMount } from 'svelte';
-	import type { Course, Assignment, Teacher, Team } from 'src/types';
+	import type { StudentAssignment, Teacher, StudentCourse } from 'src/types';
 	import { Role } from 'src/types';
-	import { getCourse, getAssignments } from 'src/api';
+	import { getStudentCourse, getStudentAssignments } from 'src/api';
 	import TeamCard from 'src/components/TeamCard.svelte';
+	import { studentId } from 'src/store';
+	import StudentAssignmentsCard from 'src/components/StudentAssignmentsCard.svelte';
 
 	const courseId = $page.params.courseId;
 
-	let course: Course;
-	let assignments: Assignment[] = [];
+	let course: StudentCourse;
+	let assignments: StudentAssignment[] = [];
 	let teachers: Teacher[] = [];
 
 	onMount(async () => {
 		try {
-			course = await getCourse(courseId);
-			assignments = await getAssignments(courseId);
+			course = await getStudentCourse(studentId, courseId);
+			assignments = await getStudentAssignments(studentId, courseId);
 			teachers = course.teachers ?? [];
 		} catch (error) {
 			console.error(error);
@@ -59,10 +60,13 @@
 	</div>
 	<div class="flex w-[1080px] flex-row gap-8">
 		<div class="flex w-3/5 flex-col gap-8">
-			<AssignmentsCard userRole={Role.Student} {assignments} {courseId} />
+			<StudentAssignmentsCard {assignments} {courseId} />
 		</div>
 
 		<div class="flex w-2/5 flex-col gap-8">
+			{#if course?.team}
+				<TeamCard team={course.team} />
+			{/if}
 			<TeachersCard userRole={Role.Student} {teachers} {courseId} />
 		</div>
 	</div>

@@ -21,7 +21,7 @@
 			</Table.Header>
 			<Table.Body>
 				{#each teams as team}
-					<Table.Row class="text-base ">
+					<a href="/teacher/courses/{courseId}/teams/{team.id}" class="table-row hover:bg-blue-50">
 						<Table.Cell class="flex h-full items-center justify-center px-6">
 							<p>{team.teamNr}</p>
 						</Table.Cell>
@@ -33,7 +33,7 @@
 						<Table.Cell class="px-6">
 							<Progress value={team.complete} />
 						</Table.Cell>
-					</Table.Row>
+					</a>
 				{/each}
 			</Table.Body>
 		</Table.Root>
