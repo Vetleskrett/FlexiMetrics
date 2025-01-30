@@ -1,6 +1,7 @@
 ﻿using Bogus;
 using Database.Models;
 using Microsoft.EntityFrameworkCore;
+using System.Linq;
 
 namespace Database;
 
@@ -131,8 +132,19 @@ public static class Seed
             return assignmentFaker
                 .RuleFor(x => x.Name, f => f.PickRandom(ASSIGNMENTS))
                 .RuleFor(x => x.DueDate, f => f.Date.Between(new DateTime(2024, 1, 1, 0, 0, 0, DateTimeKind.Utc), new DateTime(2024, 6, 1, 0, 0, 0, DateTimeKind.Utc)))
-                .RuleFor(x => x.Published, f => f.Random.Bool())
+                .RuleFor(x => x.Published, f => f.PickRandom(true, true, true, false))
                 .RuleFor(x => x.CollaborationType, f => f.Random.Enum<CollaborationType>())
+                .RuleFor(x => x.Mandatory, f => f.Random.Bool())
+                .RuleFor(x => x.GradingFormat, f =>
+                {
+                    var type = f.Random.Enum<GradingType>();
+                    return new GradingFormat
+                    {
+                        GradingType = type,
+                        MaxPoints = type == GradingType.PointsGrading ? 10 * f.Random.Int(1, 10) : null,
+                    };
+                })
+                .RuleFor(x => x.Description, f => f.Lorem.Paragraphs(2))
                 .RuleFor(x => x.CourseId, course.Id)
                 .GenerateBetween(2, 5);
         })
@@ -156,7 +168,7 @@ public static class Seed
                 .RuleFor(x => x.Type, f => f.Random.Enum<AssignmentDataType>())
                 .RuleFor(x => x.Name, f => f.System.FileName().Split(".")[0])
                 .RuleFor(x => x.AssignmentId, assignment.Id)
-                .GenerateBetween(2, 5);
+                .GenerateBetween(3, 6);
         })
         .SelectMany(x => x)
         .ToList();
@@ -168,12 +180,8 @@ public static class Seed
             field => dbContext.Set<AssignmentField>().Add(field)
         );
 
-        var studentDeliveryFaker = new Faker<StudentDelivery>()
+        var deliveryFaker = new Faker<Delivery>()
             .UseSeed(SEED)
-            .RuleFor(x => x.Id, f => f.Random.Guid());
-
-        var teamDeliveryFaker = new Faker<TeamDelivery>()
-            .UseSeed(SEED + 1)
             .RuleFor(x => x.Id, f => f.Random.Guid());
 
         var deliveries = courses.Select(course =>
@@ -187,8 +195,12 @@ public static class Seed
                 .Where(x => x.CourseId == course.Id)
                 .ToList();
 
-            return assignments
-                .Where(a => a.CourseId == course.Id)
+            var assignmentsInCourse = assignments
+                .Where(a => a.CourseId == course.Id && a.Published)
+                .ToList();
+
+            return assignmentsInCourse
+                .Take(assignmentsInCourse.Count * 3 / 4)
                 .Select(assignment =>
                 {
                     var isIndividual = assignment.CollaborationType == CollaborationType.Individual;
@@ -197,23 +209,25 @@ public static class Seed
                     {
                         return studentsInCourse.Select(student =>
                         {
-                            return studentDeliveryFaker
+                            return deliveryFaker
                                 .RuleFor(x => x.AssignmentId, assignment.Id)
                                 .RuleFor(x => x.StudentId, student.Id)
+                                .RuleFor(x => x.TeamId, f => null)
                                 .Generate();
                         })
-                        .ToList<Delivery>();
+                        .ToList();
                     }
                     else
                     {
                         return teamsInCourse.Select(team =>
                         {
-                            return teamDeliveryFaker
+                            return deliveryFaker
                                 .RuleFor(x => x.AssignmentId, assignment.Id)
                                 .RuleFor(x => x.TeamId, team.Id)
+                                .RuleFor(x => x.StudentId, f => null)
                                 .Generate();
                         })
-                        .ToList<Delivery>();
+                        .ToList();
                     }
                 })
                 .SelectMany(x => x);
@@ -265,6 +279,62 @@ public static class Seed
             deliveryFields,
             field => dbContext.Set<DeliveryField>().AnyAsync(x => x.Id == field.Id),
             field => dbContext.Set<DeliveryField>().Add(field)
+        );
+
+        var feedbackFaker = new Faker<Feedback>()
+            .UseSeed(SEED + 0)
+            .RuleFor(x => x.Id, f => f.Random.Guid())
+            .RuleFor(x => x.Comment, f => f.Lorem.Paragraphs(2));
+
+        var approvalFeedbackFaker = new Faker<ApprovalFeedback>()
+            .UseSeed(SEED + 1)
+            .RuleFor(x => x.Id, f => f.Random.Guid())
+            .RuleFor(x => x.Comment, f => f.Lorem.Paragraphs(2))
+            .RuleFor(x => x.IsApproved, f => f.Random.Bool());
+
+        var letterFeedbackFaker = new Faker<LetterFeedback>()
+            .UseSeed(SEED + 2)
+            .RuleFor(x => x.Id, f => f.Random.Guid())
+            .RuleFor(x => x.Comment, f => f.Lorem.Paragraphs(2))
+            .RuleFor(x => x.LetterGrade, f => f.Random.Enum<LetterGrade>());
+
+        var pointsFeedbackFaker = new Faker<PointsFeedback>()
+            .UseSeed(SEED + 3)
+            .RuleFor(x => x.Id, f => f.Random.Guid())
+            .RuleFor(x => x.Comment, f => f.Lorem.Paragraphs(2));
+
+        var feedbacks = deliveries
+            .Take(deliveries.Count * 3 / 4)
+            .Select(delivery =>
+            {
+                var assignment = assignments.First(a => a.Id == delivery.AssignmentId);
+                return assignment.GradingFormat.GradingType switch
+                {
+                    GradingType.ApprovalGrading => approvalFeedbackFaker
+                        .RuleFor(x => x.DeliveryId, delivery.Id)
+                        .Generate(),
+
+                    GradingType.LetterGrading => letterFeedbackFaker
+                        .RuleFor(x => x.DeliveryId, delivery.Id)
+                        .Generate(),
+
+                    GradingType.PointsGrading => pointsFeedbackFaker
+                        .RuleFor(x => x.DeliveryId, delivery.Id)
+                        .RuleFor(x => x.Points, f => f.Random.Int(0, assignment.GradingFormat.MaxPoints!.Value))
+                        .Generate(),
+
+                    _ => feedbackFaker
+                        .RuleFor(x => x.DeliveryId, delivery.Id)
+                        .Generate()
+                };
+            })
+            .ToList();
+
+        await AddRangeIfNotExists
+        (
+            feedbacks,
+            feedback => dbContext.Set<Feedback>().AnyAsync(x => x.Id == feedback.Id),
+            feedback => dbContext.Set<Feedback>().Add(feedback)
         );
 
         await dbContext.SaveChangesAsync();

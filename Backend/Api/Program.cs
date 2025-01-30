@@ -8,6 +8,7 @@ using Api.Teachers;
 using Api.Students;
 using Api.AssignmentFields;
 using Api.Deliveries;
+using Api.Feedbacks;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -22,6 +23,7 @@ builder.Services.AddScoped<ITeamService, TeamService>();
 builder.Services.AddScoped<IAssignmentService, AssignmentService>();
 builder.Services.AddScoped<IAssignmentFieldService, AssignmentFieldService>();
 builder.Services.AddScoped<IDeliveryService, DeliveryService>();
+builder.Services.AddScoped<IFeedbackService, FeedbackService>();
 
 builder.Services.AddValidatorsFromAssemblyContaining<Program>();
 
@@ -69,5 +71,6 @@ app.MapTeamEndpoints();
 app.MapAssignmentEndpoints();
 app.MapAssignmentFieldEndpoints();
 app.MapDeliveryEndpoints();
+app.MapFeedbackEndpoints();
 
 app.Run();

@@ -14,7 +14,13 @@
 	import { onMount } from 'svelte';
 	import { getCourse, getAssignment, getAssignmentFields } from 'src/api';
 	import { analyzers } from 'src/mockData';
-	import type { Assignment, Course, AssignmentField, Analyzer } from 'src/types';
+	import {
+		type Assignment,
+		type Course,
+		type AssignmentField,
+		type Analyzer,
+		Role
+	} from 'src/types';
 
 	const courseId = $page.params.courseId;
 	const assignmentId = $page.params.assignmentId;
@@ -65,7 +71,7 @@
 			/>
 			<h1 class="ml-4 text-4xl font-semibold">{assignment?.name}</h1>
 			{#if !assignment?.published}
-				<p class="ml-4 text-2xl font-semibold text-gray-500">DRAFT</p>
+				<p class="ml-4 text-2xl font-semibold text-red-500">DRAFT</p>
 			{/if}
 		</div>
 
@@ -100,7 +106,7 @@
 		</div>
 
 		<div class="flex w-2/5 flex-col gap-8">
-			<AssignmentInformationCard {assignment} />
+			<AssignmentInformationCard userRole={Role.Teacher} {assignment} />
 			<CompletedTotalCard completed={0} total={teams} headline={'Deliveries Submitted'} />
 		</div>
 	</div>

@@ -4,6 +4,7 @@ using System.Text.Json;
 using Database;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -12,9 +13,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Database.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250129121030_GradingType")]
+    partial class GradingType
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -146,22 +149,20 @@ namespace Database.Migrations
                     b.Property<Guid>("AssignmentId")
                         .HasColumnType("uuid");
 
-                    b.Property<Guid?>("StudentId")
-                        .HasColumnType("uuid");
-
-                    b.Property<Guid?>("TeamId")
-                        .HasColumnType("uuid");
+                    b.Property<string>("Discriminator")
+                        .IsRequired()
+                        .HasMaxLength(21)
+                        .HasColumnType("character varying(21)");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("StudentId");
-
-                    b.HasIndex("TeamId");
-
-                    b.HasIndex("AssignmentId", "StudentId", "TeamId")
-                        .IsUnique();
+                    b.HasIndex("AssignmentId");
 
                     b.ToTable("Deliveries");
+
+                    b.HasDiscriminator().HasValue("Delivery");
+
+                    b.UseTphMappingStrategy();
                 });
 
             modelBuilder.Entity("Database.Models.DeliveryField", b =>
@@ -186,36 +187,6 @@ namespace Database.Migrations
                     b.HasIndex("DeliveryId");
 
                     b.ToTable("DeliveryFields");
-                });
-
-            modelBuilder.Entity("Database.Models.Feedback", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
-
-                    b.Property<string>("Comment")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<Guid>("DeliveryId")
-                        .HasColumnType("uuid");
-
-                    b.Property<string>("Discriminator")
-                        .IsRequired()
-                        .HasMaxLength(21)
-                        .HasColumnType("character varying(21)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("DeliveryId")
-                        .IsUnique();
-
-                    b.ToTable("Feedbacks");
-
-                    b.HasDiscriminator().HasValue("Feedback");
-
-                    b.UseTphMappingStrategy();
                 });
 
             modelBuilder.Entity("Database.Models.Team", b =>
@@ -277,34 +248,34 @@ namespace Database.Migrations
                     b.ToTable("TeamUser");
                 });
 
-            modelBuilder.Entity("Database.Models.ApprovalFeedback", b =>
+            modelBuilder.Entity("Database.Models.StudentDelivery", b =>
                 {
-                    b.HasBaseType("Database.Models.Feedback");
+                    b.HasBaseType("Database.Models.Delivery");
 
-                    b.Property<bool>("IsApproved")
-                        .HasColumnType("boolean");
+                    b.Property<Guid>("StudentId")
+                        .HasColumnType("uuid");
 
-                    b.HasDiscriminator().HasValue("ApprovalFeedback");
+                    b.HasIndex("StudentId");
+
+                    b.HasIndex("AssignmentId", "StudentId")
+                        .IsUnique();
+
+                    b.HasDiscriminator().HasValue("StudentDelivery");
                 });
 
-            modelBuilder.Entity("Database.Models.LetterFeedback", b =>
+            modelBuilder.Entity("Database.Models.TeamDelivery", b =>
                 {
-                    b.HasBaseType("Database.Models.Feedback");
+                    b.HasBaseType("Database.Models.Delivery");
 
-                    b.Property<int>("LetterGrade")
-                        .HasColumnType("integer");
+                    b.Property<Guid>("TeamId")
+                        .HasColumnType("uuid");
 
-                    b.HasDiscriminator().HasValue("LetterFeedback");
-                });
+                    b.HasIndex("TeamId");
 
-            modelBuilder.Entity("Database.Models.PointsFeedback", b =>
-                {
-                    b.HasBaseType("Database.Models.Feedback");
+                    b.HasIndex("AssignmentId", "TeamId")
+                        .IsUnique();
 
-                    b.Property<int>("Points")
-                        .HasColumnType("integer");
-
-                    b.HasDiscriminator().HasValue("PointsFeedback");
+                    b.HasDiscriminator().HasValue("TeamDelivery");
                 });
 
             modelBuilder.Entity("Database.Models.Assignment", b =>
@@ -397,19 +368,7 @@ namespace Database.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("Database.Models.User", "Student")
-                        .WithMany()
-                        .HasForeignKey("StudentId");
-
-                    b.HasOne("Database.Models.Team", "Team")
-                        .WithMany()
-                        .HasForeignKey("TeamId");
-
                     b.Navigation("Assignment");
-
-                    b.Navigation("Student");
-
-                    b.Navigation("Team");
                 });
 
             modelBuilder.Entity("Database.Models.DeliveryField", b =>
@@ -427,17 +386,6 @@ namespace Database.Migrations
                         .IsRequired();
 
                     b.Navigation("AssignmentField");
-
-                    b.Navigation("Delivery");
-                });
-
-            modelBuilder.Entity("Database.Models.Feedback", b =>
-                {
-                    b.HasOne("Database.Models.Delivery", "Delivery")
-                        .WithOne()
-                        .HasForeignKey("Database.Models.Feedback", "DeliveryId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
 
                     b.Navigation("Delivery");
                 });
@@ -466,6 +414,28 @@ namespace Database.Migrations
                         .HasForeignKey("TeamId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+                });
+
+            modelBuilder.Entity("Database.Models.StudentDelivery", b =>
+                {
+                    b.HasOne("Database.Models.User", "Student")
+                        .WithMany()
+                        .HasForeignKey("StudentId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Student");
+                });
+
+            modelBuilder.Entity("Database.Models.TeamDelivery", b =>
+                {
+                    b.HasOne("Database.Models.Team", "Team")
+                        .WithMany()
+                        .HasForeignKey("TeamId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Team");
                 });
 
             modelBuilder.Entity("Database.Models.Assignment", b =>

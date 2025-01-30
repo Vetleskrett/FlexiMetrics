@@ -56,16 +56,12 @@ public class AssignmentService : IAssignmentService
                 DueDate = a.DueDate,
                 CollaborationType = a.CollaborationType,
                 CourseId = a.CourseId,
-
-                IsDelivered =
-                    _dbContext.Deliveries
+                IsDelivered = _dbContext.Deliveries
                         .Where(d => d.AssignmentId == a.Id)
-                        .OfType<StudentDelivery>()
-                        .Any(d => d.StudentId == studentId) ||
-                    _dbContext.Deliveries
-                        .Where(d => d.AssignmentId == a.Id)
-                        .OfType<TeamDelivery>()
-                        .Any(d => d.Team!.Students.Any(s => s.Id == studentId)),
+                        .Any(d =>
+                            (d.StudentId == studentId) ||
+                            (d.Team != null && d.Team.Students.Any(s => s.Id == studentId))
+                        ),
             })
             .ToListAsync();
 
@@ -81,6 +77,7 @@ public class AssignmentService : IAssignmentService
     public async Task<Result<AssignmentResponse, ValidationResponse>> Create(CreateAssignmentRequest request)
     {
         var assignment = request.MapToAssignment();
+        assignment.Course = await _dbContext.Courses.FindAsync(assignment.CourseId);
 
         var validationResult = await _validator.ValidateAsync(assignment);
         if (!validationResult.IsValid)

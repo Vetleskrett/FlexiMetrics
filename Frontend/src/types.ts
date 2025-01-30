@@ -43,9 +43,19 @@ export type Assignment = {
     name: string;
     dueDate: string;
     published: boolean;
-    collaborationType : string;
+    collaborationType: 'Individual' | 'Teams';
     courseId : string;
+    mandatory: boolean;
+    gradingFormat: GradingFormat;
+    description: string;
 }
+
+export type GradingFormat = {
+    gradingType: GradingType;
+    maxPoints?: number;
+}
+
+export type GradingType = 'NoGrading' | 'ApprovalGrading' | 'LetterGrading' | 'PointsGrading'
 
 export type StudentAssignment = {
     id: string;
@@ -101,6 +111,15 @@ export type Delivery = {
     studentId?: string;
     teamId: string;
     fields: DeliveryField[];
+}
+
+export type Feedback = {
+    id: string;
+    comment: string;
+    deliveryId: string;
+    isApproved?: boolean;
+    letterGrade?: 'A' | 'B' | 'C' | 'D' | 'E' | ' F';
+    points?: number;
 }
 
 export type Analyzer = {

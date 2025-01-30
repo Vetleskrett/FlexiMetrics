@@ -21,37 +21,41 @@
 			<Card.Title class="ml-4 text-3xl">Assignments</Card.Title>
 		</div>
 	</Card.Header>
-	<Card.Content class="p-0">
-		<Table.Root class="h-full">
-			<Table.Header>
-				<Table.Row>
-					<Table.Head class="h-8 px-6 font-bold text-black">Name</Table.Head>
-					<Table.Head class="h-8 px-6 font-bold text-black">Due</Table.Head>
-					<Table.Head class="h-8 px-6 font-bold text-black">Delivered</Table.Head>
-				</Table.Row>
-			</Table.Header>
-			<Table.Body>
-				{#each assignments as assignment}
-					<a
-						href="/student/courses/{courseId}/assignments/{assignment.id}"
-						class="table-row h-20 hover:bg-blue-50"
-					>
-						<Table.Cell class="px-6">
-							<h1 class="text-xl">{assignment.name}</h1>
-						</Table.Cell>
-						<Table.Cell class="w-32 px-6">
-							<p>{assignment.dueDate.split('T')[0]}</p>
-						</Table.Cell>
-						<Table.Cell class="flex h-full items-center justify-center px-6">
-							{#if assignment.isDelivered}
-								<Check color="green" />
-							{:else}
-								<X color="red" />
-							{/if}
-						</Table.Cell>
-					</a>
-				{/each}
-			</Table.Body>
-		</Table.Root>
+	<Card.Content class="flex p-0">
+		{#if assignments.length > 0}
+			<Table.Root class="h-full">
+				<Table.Header>
+					<Table.Row>
+						<Table.Head class="h-8 px-6 font-bold text-black">Name</Table.Head>
+						<Table.Head class="h-8 px-6 font-bold text-black">Due</Table.Head>
+						<Table.Head class="h-8 px-6 font-bold text-black">Delivered</Table.Head>
+					</Table.Row>
+				</Table.Header>
+				<Table.Body>
+					{#each assignments as assignment}
+						<a
+							href="/student/courses/{courseId}/assignments/{assignment.id}"
+							class="table-row h-20 hover:bg-blue-50"
+						>
+							<Table.Cell class="px-6">
+								<h1 class="text-xl">{assignment.name}</h1>
+							</Table.Cell>
+							<Table.Cell class="w-32 px-6">
+								<p>{new Date(assignment?.dueDate).toLocaleDateString()}</p>
+							</Table.Cell>
+							<Table.Cell class="flex h-full items-center justify-center px-6">
+								{#if assignment.isDelivered}
+									<Check color="green" />
+								{:else}
+									<X color="red" />
+								{/if}
+							</Table.Cell>
+						</a>
+					{/each}
+				</Table.Body>
+			</Table.Root>
+		{:else}
+			<p class="mx-auto py-4">No assignments found</p>
+		{/if}
 	</Card.Content>
 </Card.Root>

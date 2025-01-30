@@ -13,7 +13,7 @@ public interface IDeliveryService
     Task<DeliveryResponse?> GetById(Guid id);
     Task<DeliveryResponse?> GetByStudentAssignment(Guid studentId, Guid assignmentId);
     Task<DeliveryResponse?> GetByTeamAssignment(Guid teamId, Guid assignmentId);
-    Task<IEnumerable<DeliveryResponse>?> GetAllByAssignment(Guid assignmentId);
+    Task<IEnumerable<DeliveryResponse>> GetAllByAssignment(Guid assignmentId);
     Task<Result<DeliveryResponse?, ValidationResponse>> Create(CreateDeliveryRequest request);
     Task<Result<DeliveryResponse?, ValidationResponse>> Update(UpdateDeliveryRequest request, Guid id);
     Task<bool> DeleteById(Guid id);
@@ -49,24 +49,6 @@ public class DeliveryService : IDeliveryService
 
     public async Task<DeliveryResponse?> GetByStudentAssignment(Guid studentId, Guid assignmentId)
     {
-        var delivery = await _dbContext.Deliveries
-            .Include(d => d.Fields)
-            .OfType<StudentDelivery>()
-            .FirstOrDefaultAsync(d => d.AssignmentId == assignmentId && d.StudentId == studentId);
-        return delivery?.MapToResponse();
-    }
-
-    public async Task<DeliveryResponse?> GetByTeamAssignment(Guid teamId, Guid assignmentId)
-    {
-        var delivery = await _dbContext.Deliveries
-            .Include(d => d.Fields)
-            .OfType<TeamDelivery>()
-            .FirstOrDefaultAsync(d => d.AssignmentId == assignmentId && d.TeamId == teamId);
-        return delivery?.MapToResponse();
-    }
-
-    public async Task<IEnumerable<DeliveryResponse>?> GetAllByAssignment(Guid assignmentId)
-    {
         var assignment = await _dbContext.Assignments.FindAsync(assignmentId);
         if (assignment is null)
         {
@@ -79,14 +61,34 @@ public class DeliveryService : IDeliveryService
 
         if (assignment.CollaborationType == CollaborationType.Individual)
         {
-            var deliveries = await query.OfType<StudentDelivery>().ToListAsync();
-            return deliveries.MapToResponse();
+            var delivery = await query
+                .FirstOrDefaultAsync(d => d.StudentId == studentId);
+            return delivery?.MapToResponse();
         }
         else
         {
-            var deliveries = await query.OfType<TeamDelivery>().ToListAsync();
-            return deliveries.MapToResponse();
+            var delivery = await query
+                .FirstOrDefaultAsync(d => d.Team!.Students.Any(s => s.Id == studentId));
+            return delivery?.MapToResponse();
         }
+    }
+
+    public async Task<DeliveryResponse?> GetByTeamAssignment(Guid teamId, Guid assignmentId)
+    {
+        var delivery = await _dbContext.Deliveries
+            .Include(d => d.Fields)
+            .FirstOrDefaultAsync(d => d.AssignmentId == assignmentId && d.TeamId == teamId);
+        return delivery?.MapToResponse();
+    }
+
+    public async Task<IEnumerable<DeliveryResponse>> GetAllByAssignment(Guid assignmentId)
+    {
+        var deliveries = await _dbContext.Deliveries
+            .Include(d => d.Fields)
+            .Where(d => d.AssignmentId == assignmentId)
+            .ToListAsync();
+
+        return deliveries.MapToResponse();
     }
 
     public async Task<Result<DeliveryResponse?, ValidationResponse>> Create(CreateDeliveryRequest request)

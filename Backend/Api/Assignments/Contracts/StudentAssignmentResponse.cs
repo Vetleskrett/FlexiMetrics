@@ -4,10 +4,10 @@ namespace Api.Assignments.Contracts;
 
 public class StudentAssignmentResponse
 {
-    public required Guid Id { get; set; }
-    public required string Name { get; set; }
-    public required DateTime DueDate { get; set; }
-    public required CollaborationType CollaborationType { get; set; }
-    public required bool IsDelivered { get; set; }
-    public required Guid CourseId { get; set; }
+    public required Guid Id { get; init; }
+    public required string Name { get; init; }
+    public required DateTime DueDate { get; init; }
+    public required CollaborationType CollaborationType { get; init; }
+    public required bool IsDelivered { get; init; }
+    public required Guid CourseId { get; init; }
 }

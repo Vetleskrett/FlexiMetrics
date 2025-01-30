@@ -1,25 +1,54 @@
 <script lang="ts">
-	import type { Assignment } from 'src/types.js';
+	import { Role, type Assignment, type GradingType } from 'src/types.js';
 	import * as Card from '$lib/components/ui/card/index.js';
 	import { Separator } from '$lib/components/ui/separator/index.js';
 
+	export let userRole: Role;
 	export let assignment: Assignment;
+
+	const toFriendlyName = (gradingType: GradingType) => {
+		switch (gradingType) {
+			case 'NoGrading':
+				return 'No Grading';
+			case 'ApprovalGrading':
+				return 'Approval';
+			case 'LetterGrading':
+				return 'Letter';
+			case 'PointsGrading':
+				return 'Points';
+		}
+	};
 
 	$: rows = [
 		{
 			label: 'Due',
-			value: assignment?.dueDate.split("T")[0]
+			value: new Date(assignment?.dueDate).toLocaleDateString()
 		},
 		{
-			label: 'Collaberation Type',
+			label: 'Collaboration',
 			value: assignment?.collaborationType
 		},
 		{
-			label: 'Published',
-			value: assignment?.published ? 'Yes' : 'No'
-		}
-	];
-	console.log(rows)
+			label: 'Mandatory/Optional',
+			value: assignment?.mandatory ? 'Mandatory' : 'Optional'
+		},
+		{
+			label: 'Grading',
+			value: toFriendlyName(assignment?.gradingFormat.gradingType)
+		},
+		assignment?.gradingFormat.gradingType == 'PointsGrading'
+			? {
+					label: 'Max Points',
+					value: assignment?.gradingFormat.maxPoints?.toString() || ''
+				}
+			: undefined,
+		userRole == Role.Teacher
+			? {
+					label: 'Published',
+					value: assignment?.published ? 'Yes' : 'No'
+				}
+			: undefined
+	].filter((x) => x != undefined);
 </script>
 
 <Card.Root class="w-full overflow-hidden p-0">
