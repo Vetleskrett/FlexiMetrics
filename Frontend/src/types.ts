@@ -28,9 +28,9 @@ export type StudentCourse = {
     teachers: Teacher[];
 }
 
-enum Semester{
+export enum Semester{
     Spring = "Spring",
-    Fall = "Fall",
+    Autumn = "Autumn",
 }
 
 export enum Role {
@@ -175,4 +175,14 @@ export type AddStudentsToTeams = {
 export type StudentToTeam = {
     teamNr: number,
     emails: string[],
+}
+export type CreateCourse = {
+    code: string,
+    name: string,
+    year: number
+    semester: number
+}
+
+export type AddTeacherToCourse = {
+    email: string,
 }

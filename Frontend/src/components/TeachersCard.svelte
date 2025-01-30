@@ -9,7 +9,6 @@
 
 	export let userRole: Role;
 	export let teachers: Teacher[];
-	export let courseId: string;
 </script>
 
 <Card.Root class="w-full overflow-hidden p-0">

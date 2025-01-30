@@ -1,4 +1,4 @@
-import type { Course, TeacherCourse, StudentCourse, Assignment, StudentAssignment, AssignmentField, Team, CreateTeams, Student, AddStudentsToCourse, AddStudentsToTeams, Delivery, Feedback } from "./types";
+import type { Course, TeacherCourse, StudentCourse, Assignment, StudentAssignment, AssignmentField, Team, CreateTeams, Student, AddStudentsToCourse, AddStudentsToTeams, Delivery, Feedback, CreateCourse, AddTeacherToCourse } from "./types";
 const API_BASE_URL = 'https://localhost:7255';
 
 async function getApiCall(url:string){
@@ -25,9 +25,39 @@ async function postApiCall(url:string, payload: any){
     if (!response.ok) {
       throw new Error('Network response was not ok');
     }
+    return response;
+  } catch (error) {
+    console.error('Error posting data:', error);
+    throw error;
+  }
+}
+
+async function putApiCall(url:string, payload: any){
+  try {
+    const response = await fetch(`${API_BASE_URL + url}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json', },
+      body: JSON.stringify(payload)
+    });
+    if (!response.ok) {
+      throw new Error('Network response was not ok');
+    }
+    return response;
+  } catch (error) {
+    console.error('Error posting data:', error);
+    throw error;
+  }
+}
+
+async function deleteApiCall(url:string){
+  try {
+    const response = await fetch(`${API_BASE_URL + url}`, { method: 'DELETE' });
+    if (!response.ok) {
+      throw new Error('Network response was not ok');
+    }
     return;
   } catch (error) {
-    console.error('Error fetching data:', error);
+    console.error('Error deleting data:', error);
     throw error;
   }
 }
@@ -103,4 +133,20 @@ export async function postStudentsCourse(courseId: string, emails: AddStudentsTo
 
 export async function postStudentsTeam(teams: AddStudentsToTeams) {
   return postApiCall(`/teams/bulk`, teams)
+}
+
+export async function postCourse(course: CreateCourse) : Promise<Course>{
+  return (await postApiCall(`/courses`, course)).json()
+}
+
+export async function addTeacherToCourse(courseId: string, teacher: AddTeacherToCourse){
+  return postApiCall(`/courses/${courseId}/teachers`, teacher)
+}
+
+export async function deleteCourse(courseId: string){
+  return deleteApiCall(`/courses/${courseId}`)
+}
+
+export async function editCourse(courseId: string, course: CreateCourse) {
+  return putApiCall(`/courses/${courseId}`, course)
 }

@@ -12,8 +12,9 @@
 	import { onMount } from 'svelte';
 	import type { TeacherCourse, Assignment, Teacher } from 'src/types';
 	import { Role } from 'src/types';
-	import { getTeacherCourse, getAssignments } from 'src/api';
+	import { getTeacherCourse, getAssignments, deleteCourse } from 'src/api';
 	import { teacherId } from 'src/store';
+	import { goto } from '$app/navigation';
 
 	const courseId = $page.params.courseId;
 
@@ -22,6 +23,15 @@
 	let teachers: Teacher[] = [];
 	let students: number;
 	let teams: number;
+
+	async function deleteCoursePage(){
+		try {
+			await deleteCourse(courseId);
+			goto("/teacher/courses")
+		} catch (error) {
+			console.error(error);
+		}
+	}
 
 	onMount(async () => {
 		try {
@@ -76,8 +86,8 @@
 					<Pencil class="h-4" />
 					<p>Edit course</p>
 				</DropdownMenu.Item>
-				<DropdownMenu.Item>
-					<Trash2 class="h-4" />
+				<DropdownMenu.Item on:click={deleteCoursePage}>
+					<Trash2 class="h-4"/>
 					<p>Delete course</p>
 				</DropdownMenu.Item>
 			</DropdownMenu.Content>
@@ -93,7 +103,7 @@
 				<StudentsCard {students} {courseId} />
 				<TeamsCard {teams} {courseId} />
 			</div>
-			<TeachersCard userRole={Role.Teacher} {teachers} {courseId} />
+			<TeachersCard userRole={Role.Teacher} {teachers} />
 		</div>
 	</div>
 </div>
