@@ -5,6 +5,7 @@
 	import CustomButton from './CustomButton.svelte';
 	import Save from 'lucide-svelte/icons/save';
 	import Undo_2 from 'lucide-svelte/icons/undo-2';
+    import * as Table from '$lib/components/ui/table';
 
     export let courseName: string = "", courseCode: string = "", year: number  = 2025, semester: Semester = Semester.Autumn, redirect: string, edit: boolean = false;
     export let submitFunction: (name: string, code: string, year: number, semester: Semester) => void;
@@ -25,35 +26,57 @@
 
         </Card.Header>
         <Card.Content class="p-0">
-            <div class="space-y-4">
-                <Separator class="w-full" />
-                <div class="inline-flex space-x-5 w-full item-center pl-10">
-                    <label for="courseName" class="text-lg w-1/5 font-bold self-center"> Course Name:</label>
-                    <input id="courseName" class="border p-3 text-lg" bind:value={courseName}/>
-                </div>
-                <Separator class="w-full" />
-                <div class="inline-flex space-x-5 w-full item-center pl-10">
-                    <label for="courseCode" class="text-lg w-1/5 font-bold self-center">Course Code:</label>
-                    <input id="courseCode" class="border p-3 text-lg" bind:value={courseCode}/>
-                </div>
-                <Separator class="w-full" />
-                <div class="inline-flex space-x-5 w-full item-center pl-10">
-                    <label for="courseYear" class="text-lg w-1/5 font-bold self-center"> Year:</label>
-                    <input id="courseYear" type="number" min="2000" max="2099" class="border p-3 text-lg" bind:value={year}/>
-                </div>
-                <Separator class="w-full" />
-                <div class="inline-flex space-x-5 w-full item-center pl-10 self-center py-3">
-                    <label for="courseSemester"class="text-lg w-1/5 font-bold"> Semester:</label>
-                    <div>
-                        <input id="fall" type="radio" class="form-radio" value={Semester.Autumn} bind:group={semester}>
-                        <span class="ml-2">Autumn</span>
-                    </div>
-                    <div>        
-                        <input id="spring" type="radio" class="form-radio" value={Semester.Spring} bind:group={semester}>
-                        <span class="ml-2">Spring</span>
-                    </div>
-                </div>
-            </div>
+            <Table.Root>
+                <Table.Body >
+                    <Table.Row class="border-none">
+                        <div class="pt-5">
+                            <label for="courseName" class="text-lg w-1/5 pl-5 font-bold self-center">Course Name:</label>
+                        </div>
+                    </Table.Row>
+                    <Table.Row class="border-none">
+                        <div class="ml-4 mr-4">
+                            <input id="courseName" class="border-2 border-gray-800 rounded-lg p-1 w-full text-lg" bind:value={courseName}/>
+                        </div>
+                    </Table.Row>
+                    <Table.Row class="border-none">
+                        <div class="pt-5">
+                            <label for="courseCode" class="text-lg pl-5 w-1/5 font-bold self-center">Course Code:</label>
+                        </div>
+                    </Table.Row>
+                    <Table.Row class="border-none">
+                        <div class="ml-4 mr-4">
+                            <input id="courseCode" class="border-2 border-gray-800 rounded-lg p-1 w-full text-lg" bind:value={courseCode}/>
+                        </div>
+                    </Table.Row>
+                    <Table.Row class="border-none">
+                        <div class="pt-5">
+                            <label for="courseYear" class="text-lg pl-5 w-1/5 font-bold self-center">Year:</label>
+                        </div>
+                    </Table.Row>
+                    <Table.Row class="border-none">
+                        <div class="ml-4 mr-4">
+                            <input id="courseYear" type="number" min="2000" max="2099" class="border-2 border-gray-800 rounded-lg p-1 w-full text-lg" bind:value={year}/>
+                        </div>
+                    </Table.Row>
+                    <Table.Row class="border-none">
+                        <div class="pt-5">
+                            <label for="courseSemester"class="text-lg w-1/5 pl-5 space-y-5 font-bold"> Course Code:</label>
+                        </div>
+                    </Table.Row>
+                    <Table.Row class="border-none">
+                        <div class="ml-4 mr-4">
+                            <div class="w-1/2">
+                                <input id="fall" type="radio" class="form-radio" value={Semester.Autumn} bind:group={semester}>
+                                <span class="ml-2  text-lg">Autumn</span>
+                            </div>
+                            <div class="w-1/2">
+                                <input id="spring" type="radio" class="form-radio" value={Semester.Spring} bind:group={semester}>
+                                <span class="ml-2  text-lg">Spring</span>
+                            </div>
+                        </div>
+                    </Table.Row>
+                </Table.Body>
+            </Table.Root>
         </Card.Content>
         <Card.Footer class="flex flex-col items-middle p-0">
             <Separator />
