@@ -20,6 +20,16 @@ public class AssignmentValidator : AbstractValidator<Assignment>
             .NotEmpty()
             .IsInEnum();
 
+        RuleFor(x => x.GradingFormat)
+            .NotNull();
+
+        RuleFor(x => x.GradingFormat.GradingType)
+            .NotEmpty()
+            .IsInEnum();
+
+        RuleFor(x => x.Description)
+            .NotNull();
+
         RuleFor(x => x.CourseId)
             .NotEmpty();
     }

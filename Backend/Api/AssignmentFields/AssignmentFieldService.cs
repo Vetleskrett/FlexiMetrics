@@ -40,6 +40,7 @@ public class AssignmentFieldService : IAssignmentFieldService
     public async Task<Result<AssignmentFieldResponse, ValidationResponse>> Create(CreateAssignmentFieldRequest request)
     {
         var field = request.MapToAssignmentField();
+        field.Assignment = await _dbContext.Assignments.FindAsync(field.AssignmentId);
 
         var validationResult = await _validator.ValidateAsync(field);
         if (!validationResult.IsValid)

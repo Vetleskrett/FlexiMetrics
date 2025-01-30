@@ -1,4 +1,4 @@
-import type { Course, TeacherCourse, StudentCourse, Assignment, AssignmentField, Team, CreateTeams, Student, AddStudentsToCourse, AddStudentsToTeams } from "./types";
+import type { Course, TeacherCourse, StudentCourse, Assignment, StudentAssignment, AssignmentField, Team, CreateTeams, Student, AddStudentsToCourse, AddStudentsToTeams, Delivery, Feedback } from "./types";
 const API_BASE_URL = 'https://localhost:7255';
 
 async function getApiCall(url:string){
@@ -73,6 +73,18 @@ export async function getAssignmentFields(assignmentId: string): Promise<Assignm
   return getApiCall(`/assignments/${assignmentId}/fields`)
 }
 
+export async function getStudentDelivery(studentId: string, assignmentId: string): Promise<Delivery> {
+  return getApiCall(`/students/${studentId}/assignments/${assignmentId}/deliveries`)
+}
+
+export async function getTeamDelivery(teamId: string, assignmentId: string): Promise<Delivery> {
+  return getApiCall(`/teams/${teamId}/assignments/${assignmentId}/deliveries`)
+}
+
+export async function getStudentFeedback(studentId: string, assignmentId: string): Promise<Feedback> {
+  return getApiCall(`/students/${studentId}/assignments/${assignmentId}/feedbacks`)
+}
+
 export async function getTeams(courseId: string): Promise<Team[]> {
   return getApiCall(`/courses/${courseId}/teams`)
 }
@@ -88,6 +100,7 @@ export async function getStudents(courseId: string): Promise<Student[]> {
 export async function postStudentsCourse(courseId: string, emails: AddStudentsToCourse) {
   return postApiCall(`/courses/${courseId}/students`, emails)
 }
+
 export async function postStudentsTeam(teams: AddStudentsToTeams) {
   return postApiCall(`/teams/bulk`, teams)
 }

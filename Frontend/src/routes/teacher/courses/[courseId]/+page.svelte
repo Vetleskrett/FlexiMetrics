@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { page } from '$app/stores';
-	import AssignmentsCard from 'src/components/AssignmentsCard.svelte';
+	import TeacherAssignmentsCard from 'src/components/TeacherAssignmentsCard.svelte';
 	import StudentsCard from 'src/components/StudentsCard.svelte';
 	import EllipsisVertical from 'lucide-svelte/icons/ellipsis-vertical';
 	import Pencil from 'lucide-svelte/icons/pencil';
@@ -85,7 +85,7 @@
 	</div>
 	<div class="flex w-[1080px] flex-row gap-8">
 		<div class="flex w-3/5 flex-col gap-8">
-			<AssignmentsCard userRole={Role.Teacher} {assignments} {courseId} />
+			<TeacherAssignmentsCard {assignments} {courseId} />
 		</div>
 
 		<div class="flex w-2/5 flex-col gap-8">

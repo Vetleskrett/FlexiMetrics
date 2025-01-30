@@ -5,26 +5,28 @@ namespace Api.Deliveries;
 
 public static class DeliveryMapping
 {
-    public static StudentDelivery MapToStudentDelivery(this CreateDeliveryRequest request)
+    public static Delivery MapToStudentDelivery(this CreateDeliveryRequest request)
     {
         var id = Guid.NewGuid();
-        return new StudentDelivery
+        return new Delivery
         {
             Id = id,
             AssignmentId = request.AssignmentId,
             StudentId = request.StudentOrTeamId,
+            TeamId = null,
             Fields = request.Fields.MapToDeliveryFields(id).ToList(),
         };
     }
 
-    public static TeamDelivery MapToTeamDelivery(this CreateDeliveryRequest request)
+    public static Delivery MapToTeamDelivery(this CreateDeliveryRequest request)
     {
         var id = Guid.NewGuid();
-        return new TeamDelivery
+        return new Delivery
         {
             Id = id,
             AssignmentId = request.AssignmentId,
             TeamId = request.StudentOrTeamId,
+            StudentId = null,
             Fields = request.Fields.MapToDeliveryFields(id).ToList(),
         };
     }
@@ -47,45 +49,11 @@ public static class DeliveryMapping
 
     public static DeliveryResponse MapToResponse(this Delivery delivery)
     {
-        if (delivery is StudentDelivery studentDelivery)
-        {
-            return studentDelivery.MapToResponse();
-        }
-
-        if (delivery is TeamDelivery teamDelivery)
-        {
-            return teamDelivery.MapToResponse();
-        }
-
-        return new DeliveryResponse
-        {
-            Id = delivery.Id,
-            AssignmentId = delivery.AssignmentId,
-            StudentId = null,
-            TeamId = null,
-            Fields = delivery.Fields!.MapToResponse().ToList(),
-        };
-    }
-
-    public static DeliveryResponse MapToResponse(this StudentDelivery delivery)
-    {
         return new DeliveryResponse
         {
             Id = delivery.Id,
             AssignmentId = delivery.AssignmentId,
             StudentId = delivery.StudentId,
-            TeamId = null,
-            Fields = delivery.Fields!.MapToResponse().ToList(),
-        };
-    }
-
-    public static DeliveryResponse MapToResponse(this TeamDelivery delivery)
-    {
-        return new DeliveryResponse
-        {
-            Id = delivery.Id,
-            AssignmentId = delivery.AssignmentId,
-            StudentId = null,
             TeamId = delivery.TeamId,
             Fields = delivery.Fields!.MapToResponse().ToList(),
         };

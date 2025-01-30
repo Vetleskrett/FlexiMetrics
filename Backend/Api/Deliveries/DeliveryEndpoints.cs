@@ -27,7 +27,7 @@ public static class DeliveryEndpoints
         .WithName("GetDelivery")
         .WithSummary("Get delivery by id");
 
-        group.MapGet("student/{studentId:guid}/assignments/{assignmentId:guid}/deliveries",
+        group.MapGet("students/{studentId:guid}/assignments/{assignmentId:guid}/deliveries",
             async (IDeliveryService deliveryService, Guid studentId, Guid assignmentId) =>
         {
             var delivery = await deliveryService.GetByStudentAssignment(studentId, assignmentId);
@@ -50,7 +50,7 @@ public static class DeliveryEndpoints
         group.MapGet("assignments/{assignmentId:guid}/deliveries", async (IDeliveryService deliveryService, Guid assignmentId) =>
         {
             var deliveries = await deliveryService.GetAllByAssignment(assignmentId);
-            return deliveries is not null ? Results.Ok(deliveries) : Results.NotFound();
+            return Results.Ok(deliveries);
         })
         .Produces<IEnumerable<DeliveryResponse>>()
         .WithName("GetAllDeliveriesByAssignment")

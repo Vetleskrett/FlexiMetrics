@@ -13,7 +13,7 @@ var api = builder.AddProject<Projects.Api>("api")
     .WithReference(postgresdb)
     .WaitForCompletion(migrationService);
 
-builder.AddNpmApp("frontend", "../../Frontend", "dev")
+builder.AddNpmApp("frontend", "../../Frontend", "start")
     .WithReference(api)
     .WaitFor(api)
     .WithHttpEndpoint(5173, isProxied: false);
