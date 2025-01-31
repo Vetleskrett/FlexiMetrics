@@ -9,41 +9,30 @@
 	import TeamsCard from 'src/components/TeamsCard.svelte';
 	import TeachersCard from 'src/components/TeachersCard.svelte';
 	import * as Breadcrumb from '$lib/components/ui/breadcrumb/index.js';
-	import { onMount } from 'svelte';
 	import type { TeacherCourse, Assignment, Teacher } from 'src/types';
 	import { Role } from 'src/types';
-	import { getTeacherCourse, getAssignments, deleteCourse } from 'src/api';
-	import { teacherId } from 'src/store';
+	import { deleteCourse } from 'src/api';
 	import { goto } from '$app/navigation';
 
 	const courseId = $page.params.courseId;
 
-	let course: TeacherCourse;
-	let assignments: Assignment[] = [];
-	let teachers: Teacher[] = [];
-	let students: number;
-	let teams: number;
+	export let data: {
+		course: TeacherCourse;
+		assignments: Assignment[];
+	};
 
-	async function deleteCoursePage(){
+	const teachers = data.course.teachers;
+	const students = data.course.numStudents ?? 0;
+	const teams = data.course.numTeams ?? 0;
+
+	async function deleteCoursePage() {
 		try {
 			await deleteCourse(courseId);
-			goto("/teacher/courses")
+			goto('/teacher/courses');
 		} catch (error) {
 			console.error(error);
 		}
 	}
-
-	onMount(async () => {
-		try {
-			course = await getTeacherCourse(teacherId, courseId);
-			assignments = await getAssignments(courseId);
-			students = course.numStudents ?? 0;
-			teams = course.numTeams ?? 0;
-			teachers = course.teachers ?? [];
-		} catch (error) {
-			console.error(error);
-		}
-	});
 </script>
 
 <div class="m-auto mt-4 flex w-max flex-col items-center justify-center gap-10">
@@ -54,7 +43,7 @@
 			</Breadcrumb.Item>
 			<Breadcrumb.Separator />
 			<Breadcrumb.Item>
-				<Breadcrumb.Page>{course?.code || 'loading'} - {course?.name || 'loading'}</Breadcrumb.Page>
+				<Breadcrumb.Page>{data.course.code} - {data.course.name}</Breadcrumb.Page>
 			</Breadcrumb.Item>
 		</Breadcrumb.List>
 	</Breadcrumb.Root>
@@ -68,11 +57,11 @@
 			/>
 			<div>
 				<h1 class="ml-4 text-4xl font-semibold">
-					{course?.code || 'loading'} - {course?.name || 'loading'}
+					{data.course.code} - {data.course.name}
 				</h1>
 				<p class="ml-4 font-semibold text-gray-500">
-					{course?.year || 'loading'}
-					{course?.semester || 'loading'}
+					{data.course.year}
+					{data.course.semester}
 				</p>
 			</div>
 		</div>
@@ -87,7 +76,7 @@
 					<p>Edit course</p>
 				</DropdownMenu.Item>
 				<DropdownMenu.Item on:click={deleteCoursePage}>
-					<Trash2 class="h-4"/>
+					<Trash2 class="h-4" />
 					<p>Delete course</p>
 				</DropdownMenu.Item>
 			</DropdownMenu.Content>
@@ -95,7 +84,7 @@
 	</div>
 	<div class="flex w-[1080px] flex-row gap-8">
 		<div class="flex w-3/5 flex-col gap-8">
-			<TeacherAssignmentsCard {assignments} {courseId} />
+			<TeacherAssignmentsCard assignments={data.assignments} {courseId} />
 		</div>
 
 		<div class="flex w-2/5 flex-col gap-8">

@@ -28,25 +28,13 @@
 	const courseId = $page.params.courseId;
 	const assignmentId = $page.params.assignmentId;
 
-	let course: Course;
-	let assignment: Assignment;
-	let assignmentFields: AssignmentField[];
-	let delivery: Delivery | null;
-	let feedback: Feedback | null;
-
-	onMount(async () => {
-		try {
-			course = await getCourse(courseId);
-			assignment = await getAssignment(assignmentId);
-			assignmentFields = await getAssignmentFields(assignmentId);
-			try {
-				delivery = await getStudentDelivery(studentId, assignmentId);
-				feedback = await getStudentFeedback(studentId, assignmentId);
-			} catch (error) {}
-		} catch (error) {
-			console.error(error);
-		}
-	});
+	export let data: {
+		course: Course;
+		assignment: Assignment;
+		assignmentFields: AssignmentField[];
+		delivery: Delivery | null;
+		feedback: Feedback | null;
+	};
 </script>
 
 <div class="m-auto mt-4 flex w-max flex-col items-center justify-center gap-10">
@@ -58,12 +46,12 @@
 			<Breadcrumb.Separator />
 			<Breadcrumb.Item>
 				<Breadcrumb.Link href="/student/courses/{courseId}"
-					>{course?.code} - {course?.name}</Breadcrumb.Link
+					>{data.course.code} - {data.course.name}</Breadcrumb.Link
 				>
 			</Breadcrumb.Item>
 			<Breadcrumb.Separator />
 			<Breadcrumb.Item>
-				<Breadcrumb.Page>{assignment?.name}</Breadcrumb.Page>
+				<Breadcrumb.Page>{data.assignment.name}</Breadcrumb.Page>
 			</Breadcrumb.Item>
 		</Breadcrumb.List>
 	</Breadcrumb.Root>
@@ -75,11 +63,11 @@
 				src="https://img.icons8.com/fluency/480/edit-text-file.png"
 				alt="knowledge-sharing"
 			/>
-			<h1 class="ml-4 text-4xl font-semibold">{assignment?.name}</h1>
+			<h1 class="ml-4 text-4xl font-semibold">{data.assignment.name}</h1>
 		</div>
 		<CustomButton
 			color="green"
-			href="/student/courses/{assignment?.courseId}/assignments/{assignment?.id}/delivery"
+			href="/student/courses/{courseId}/assignments/{assignmentId}/delivery"
 		>
 			<MoveRight />
 			<p>New Delivery</p>
@@ -87,12 +75,12 @@
 	</div>
 	<div class="flex w-[1080px] flex-row gap-8">
 		<div class="flex w-3/5 flex-col gap-8">
-			<AssignmentDescriptionCard {assignment} />
-			<DeliveryCard {assignmentFields} {delivery} />
+			<AssignmentDescriptionCard assignment={data.assignment} />
+			<DeliveryCard assignmentFields={data.assignmentFields} delivery={data.delivery} />
 		</div>
 		<div class="flex w-2/5 flex-col gap-8">
-			<AssignmentInformationCard userRole={Role.Student} {assignment} />
-			<FeedbackCard {feedback} {assignment} />
+			<AssignmentInformationCard userRole={Role.Student} assignment={data.assignment} />
+			<FeedbackCard feedback={data.feedback} assignment={data.assignment} />
 		</div>
 	</div>
 </div>

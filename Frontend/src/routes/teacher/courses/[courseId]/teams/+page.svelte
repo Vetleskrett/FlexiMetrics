@@ -1,29 +1,22 @@
 <script lang="ts">
 	import { page } from '$app/stores';
 	import AllTeamCard from 'src/components/AllTeamCard.svelte';
-	import type { Team, Course, AddStudentsToTeams, StudentToTeam } from 'src/types';
+	import type { Team, Course, StudentToTeam } from 'src/types';
 	import EllipsisVertical from 'lucide-svelte/icons/ellipsis-vertical';
 	import Trash2 from 'lucide-svelte/icons/trash-2';
 	import * as DropdownMenu from '$lib/components/ui/dropdown-menu';
 	import * as Breadcrumb from '$lib/components/ui/breadcrumb/index.js';
 	import AddTeamMembersCard from 'src/components/AddTeamMembersCard.svelte';
 	import SimpleAddCard from 'src/components/SimpleAddCard.svelte';
-	import { getCourse, getTeams, postStudentsTeam, postTeams } from 'src/api';
-	import { onMount } from 'svelte';
+	import { getTeams, postStudentsTeam, postTeams } from 'src/api';
 
 	const courseId = $page.params.courseId;
 
-	let course: Course;
-	let teams: Team[] = [];
+	export let data: {
+		course: Course;
+		teams: Team[];
+	};
 
-	onMount(async () => {
-		try {
-			course = await getCourse(courseId);
-			teams = await getTeams(courseId);
-		} catch (error) {
-			console.error(error);
-		}
-	});
 	async function addTeams(input: number) {
 		if (input && input > 0) {
 			try {
@@ -31,7 +24,8 @@
 					courseId: courseId,
 					numTeams: input
 				});
-				teams = await getTeams(courseId);
+				const teamsResponse = await getTeams(courseId);
+				data.teams = teamsResponse.data;
 			} catch (error) {
 				console.error('Something went wrong!');
 			}
@@ -60,7 +54,8 @@
 				courseId: courseId,
 				teams: allTeams
 			});
-			teams = await getTeams(courseId);
+			const teamsResponse = await getTeams(courseId);
+			data.teams = teamsResponse.data;
 		} catch (error) {
 			console.error('Something went wrong!');
 		}
@@ -89,7 +84,7 @@
 			<Breadcrumb.Separator />
 			<Breadcrumb.Item>
 				<Breadcrumb.Link href="/teacher/courses/{courseId}"
-					>{course?.code} - {course?.name}</Breadcrumb.Link
+					>{data.course.code} - {data.course.name}</Breadcrumb.Link
 				>
 			</Breadcrumb.Item>
 			<Breadcrumb.Separator />
@@ -120,7 +115,7 @@
 	</div>
 	<div class="flex flex-row gap-8">
 		<div class="flex w-[700px] flex-col gap-8">
-			<AllTeamCard {teams} {courseId} />
+			<AllTeamCard teams={data.teams} {courseId} />
 		</div>
 		<div class="flex w-[400px] flex-col gap-8">
 			<SimpleAddCard
