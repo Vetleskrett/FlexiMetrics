@@ -1,152 +1,114 @@
-import type { Course, TeacherCourse, StudentCourse, Assignment, StudentAssignment, AssignmentField, Team, CreateTeams, Student, AddStudentsToCourse, AddStudentsToTeams, Delivery, Feedback, CreateCourse, AddTeacherToCourse } from "./types";
-const API_BASE_URL = 'https://localhost:7255';
+import { browser } from '$app/environment'; 
+import axios, { type AxiosResponse } from 'axios';
+import type {
+  Course,
+  TeacherCourse,
+  StudentCourse,
+  Assignment,
+  StudentAssignment,
+  AssignmentField,
+  Team,
+  CreateTeams,
+  Student,
+  AddStudentsToCourse,
+  AddStudentsToTeams,
+  Delivery, Feedback,
+  CreateCourse,
+  AddTeacherToCourse
+} from "./types";
 
-async function getApiCall(url:string){
-  try {
-    const response = await fetch(`${API_BASE_URL + url}`);
-    if (!response.ok) {
-      throw new Error('Network response was not ok');
-    }
-    const data = await response.json();
-    return data;
-  } catch (error) {
-    console.error('Error fetching data:', error);
-    throw error;
-  }
+const instance = axios.create({
+  baseURL: browser ? 'https://localhost:7255' : 'http://localhost:5041'
+})
+
+export function getCourses() : Promise<AxiosResponse<Course[]>> {
+  return instance.get("/courses")
 }
 
-async function postApiCall(url:string, payload: any){
-  try {
-    const response = await fetch(`${API_BASE_URL + url}`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', },
-      body: JSON.stringify(payload)
-    });
-    if (!response.ok) {
-      throw new Error('Network response was not ok');
-    }
-    return response;
-  } catch (error) {
-    console.error('Error posting data:', error);
-    throw error;
-  }
+export function getCoursesByTeacher(teacherId: string) : Promise<AxiosResponse<Course[]>> {
+  return instance.get(`/teachers/${teacherId}/courses`)
 }
 
-async function putApiCall(url:string, payload: any){
-  try {
-    const response = await fetch(`${API_BASE_URL + url}`, {
-      method: 'PUT',
-      headers: { 'Content-Type': 'application/json', },
-      body: JSON.stringify(payload)
-    });
-    if (!response.ok) {
-      throw new Error('Network response was not ok');
-    }
-    return response;
-  } catch (error) {
-    console.error('Error posting data:', error);
-    throw error;
-  }
+export function getCoursesByStudent(studentId: string) : Promise<AxiosResponse<Course[]>> {
+  return instance.get(`/students/${studentId}/courses`)
 }
 
-async function deleteApiCall(url:string){
-  try {
-    const response = await fetch(`${API_BASE_URL + url}`, { method: 'DELETE' });
-    if (!response.ok) {
-      throw new Error('Network response was not ok');
-    }
-    return;
-  } catch (error) {
-    console.error('Error deleting data:', error);
-    throw error;
-  }
+export function getCourse(courseId: string) : Promise<AxiosResponse<Course>> {
+  return instance.get(`/courses/${courseId}`)
 }
 
-export async function getCourses() : Promise<Course[]> {
-  return getApiCall("/courses")
+export function getTeacherCourse(teacherId: string, courseId: string) : Promise<AxiosResponse<TeacherCourse>> {
+  return instance.get(`/teachers/${teacherId}/courses/${courseId}`)
 }
 
-export async function getCoursesByTeacher(teacherId: string) : Promise<Course[]> {
-  return getApiCall(`/teachers/${teacherId}/courses`)
+export function getStudentCourse(studentId: string, courseId: string) : Promise<AxiosResponse<StudentCourse>> {
+  return instance.get(`/students/${studentId}/courses/${courseId}`)
 }
 
-export async function getCoursesByStudent(studentId: string) : Promise<Course[]> {
-  return getApiCall(`/students/${studentId}/courses`)
+export function getAssignments(courseId: string) : Promise<AxiosResponse<Assignment[]>> {
+  return instance.get(`/course/${courseId}/assignments`)
 }
 
-export async function getCourse(courseId: string) : Promise<Course> {
-  return getApiCall(`/courses/${courseId}`)
+export function getStudentAssignments(studentId: string, courseId: string) : Promise<AxiosResponse<StudentAssignment[]>> {
+  return instance.get(`/students/${studentId}/course/${courseId}/assignments`)
 }
 
-export async function getTeacherCourse(teacherId: string, courseId: string) : Promise<TeacherCourse> {
-  return getApiCall(`/teachers/${teacherId}/courses/${courseId}`)
+export function getAssignment(assignmentId: string): Promise<AxiosResponse<Assignment>> {
+  return instance.get(`/assignments/${assignmentId}`)
 }
 
-export async function getStudentCourse(studentId: string, courseId: string) : Promise<StudentCourse> {
-  return getApiCall(`/students/${studentId}/courses/${courseId}`)
+export function getAssignmentFields(assignmentId: string): Promise<AxiosResponse<AssignmentField[]>> {
+  return instance.get(`/assignments/${assignmentId}/fields`)
 }
 
-export async function getAssignments(courseId: string) : Promise<Assignment[]> {
-  return getApiCall(`/course/${courseId}/assignments`)
+export function getStudentDelivery(studentId: string, assignmentId: string): Promise<AxiosResponse<Delivery>> {
+  return instance.get(`/students/${studentId}/assignments/${assignmentId}/deliveries`)
 }
 
-
-export async function getStudentAssignments(studentId: string, courseId: string) : Promise<StudentAssignment[]> {
-  return getApiCall(`/students/${studentId}/course/${courseId}/assignments`)
+export function getTeamDelivery(teamId: string, assignmentId: string): Promise<AxiosResponse<Delivery>> {
+  return instance.get(`/teams/${teamId}/assignments/${assignmentId}/deliveries`)
 }
 
-export async function getAssignment(assignmentId: string): Promise<Assignment> {
-  return getApiCall(`/assignments/${assignmentId}`)
+export function getDeliveries(assignmentId: string) : Promise<AxiosResponse<Delivery[]>> {
+  return instance.get(`/assignments/${assignmentId}/deliveries`)
 }
 
-export async function getAssignmentFields(assignmentId: string): Promise<AssignmentField[]> {
-  return getApiCall(`/assignments/${assignmentId}/fields`)
+export function getStudentFeedback(studentId: string, assignmentId: string): Promise<AxiosResponse<Feedback>> {
+  return instance.get(`/students/${studentId}/assignments/${assignmentId}/feedbacks`)
 }
 
-export async function getStudentDelivery(studentId: string, assignmentId: string): Promise<Delivery> {
-  return getApiCall(`/students/${studentId}/assignments/${assignmentId}/deliveries`)
+export function getTeams(courseId: string): Promise<AxiosResponse<Team[]>> {
+  return instance.get(`/courses/${courseId}/teams`)
 }
 
-export async function getTeamDelivery(teamId: string, assignmentId: string): Promise<Delivery> {
-  return getApiCall(`/teams/${teamId}/assignments/${assignmentId}/deliveries`)
+export function postTeams(payload: CreateTeams) : Promise<AxiosResponse> {
+  return instance.post("/teams", payload)
 }
 
-export async function getStudentFeedback(studentId: string, assignmentId: string): Promise<Feedback> {
-  return getApiCall(`/students/${studentId}/assignments/${assignmentId}/feedbacks`)
+export function getStudents(courseId: string): Promise<AxiosResponse<Student[]>> {
+  return instance.get(`/courses/${courseId}/students`)
 }
 
-export async function getTeams(courseId: string): Promise<Team[]> {
-  return getApiCall(`/courses/${courseId}/teams`)
+export function postStudentsCourse(courseId: string, emails: AddStudentsToCourse) : Promise<AxiosResponse> {
+  return instance.post(`/courses/${courseId}/students`, emails)
 }
 
-export async function postTeams(payload: CreateTeams) {
-  return postApiCall("/teams", payload)
+export function postStudentsTeam(teams: AddStudentsToTeams) : Promise<AxiosResponse> {
+  return instance.post(`/teams/bulk`, teams)
 }
 
-export async function getStudents(courseId: string): Promise<Student[]> {
-  return getApiCall(`/courses/${courseId}/students`)
+export function postCourse(course: CreateCourse) : Promise<AxiosResponse<Course>> {
+  return instance.post(`/courses`, course)
 }
 
-export async function postStudentsCourse(courseId: string, emails: AddStudentsToCourse) {
-  return postApiCall(`/courses/${courseId}/students`, emails)
+export function addTeacherToCourse(courseId: string, teacher: AddTeacherToCourse) : Promise<AxiosResponse> {
+  return instance.post(`/courses/${courseId}/teachers`, teacher)
 }
 
-export async function postStudentsTeam(teams: AddStudentsToTeams) {
-  return postApiCall(`/teams/bulk`, teams)
+export function deleteCourse(courseId: string) : Promise<AxiosResponse> {
+  return instance.delete(`/courses/${courseId}`)
 }
 
-export async function postCourse(course: CreateCourse) : Promise<Course>{
-  return (await postApiCall(`/courses`, course)).json()
-}
-
-export async function addTeacherToCourse(courseId: string, teacher: AddTeacherToCourse){
-  return postApiCall(`/courses/${courseId}/teachers`, teacher)
-}
-
-export async function deleteCourse(courseId: string){
-  return deleteApiCall(`/courses/${courseId}`)
-}
-
-export async function editCourse(courseId: string, course: CreateCourse) {
-  return putApiCall(`/courses/${courseId}`, course)
+export function editCourse(courseId: string, course: CreateCourse) : Promise<AxiosResponse> {
+  return instance.put(`/courses/${courseId}`, course)
 }

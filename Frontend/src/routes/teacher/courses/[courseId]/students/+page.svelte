@@ -5,15 +5,16 @@
 	import Trash2 from 'lucide-svelte/icons/trash-2';
 	import * as DropdownMenu from '$lib/components/ui/dropdown-menu';
 	import * as Breadcrumb from '$lib/components/ui/breadcrumb/index.js';
-	import { getCourse, getStudents, postStudentsCourse } from 'src/api';
-	import { onMount } from 'svelte';
+	import { getStudents, postStudentsCourse } from 'src/api';
 	import AllStudentsCard from 'src/components/AllStudentsCard.svelte';
 	import AddStudentsCard from 'src/components/AddStudentsCard.svelte';
 
 	const courseId = $page.params.courseId;
 
-	let course: Course;
-	let students: Student[] = [];
+	export let data: {
+		course: Course;
+		students: Student[];
+	};
 
 	async function addStudents(input: string, file: File | null) {
 		if (file) {
@@ -23,7 +24,8 @@
 		try {
 			if (studentEmails) {
 				await postStudentsCourse(courseId, { emails: studentEmails });
-				students = await getStudents(courseId);
+				const studentsResponse = await getStudents(courseId);
+				data.students = studentsResponse.data;
 			}
 		} catch (error) {
 			console.error('Something went wrong!');
@@ -48,15 +50,6 @@
 		}
 		return true;
 	}
-
-	onMount(async () => {
-		try {
-			course = await getCourse(courseId);
-			students = await getStudents(courseId);
-		} catch (error) {
-			console.error('Something went wrong!');
-		}
-	});
 </script>
 
 <div class="m-auto mt-4 flex w-max flex-col items-center justify-center gap-10">
@@ -68,7 +61,7 @@
 			<Breadcrumb.Separator />
 			<Breadcrumb.Item>
 				<Breadcrumb.Link href="/teacher/courses/{courseId}"
-					>{course?.code} - {course?.name}</Breadcrumb.Link
+					>{data.course.code} - {data.course.name}</Breadcrumb.Link
 				>
 			</Breadcrumb.Item>
 			<Breadcrumb.Separator />
@@ -104,7 +97,7 @@
 	</div>
 	<div class="flex flex-row gap-8">
 		<div class="flex w-[700px] flex-col gap-8">
-			<AllStudentsCard {students} />
+			<AllStudentsCard students={data.students} />
 		</div>
 		<div class="flex w-[400px] flex-col gap-8">
 			<AddStudentsCard addFunction={addStudents} />

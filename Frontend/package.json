@@ -39,6 +39,7 @@
 	},
 	"type": "module",
 	"dependencies": {
+		"axios": "^1.7.9",
 		"clsx": "^2.1.1",
 		"svelte-headless-table": "^0.18.2",
 		"tailwind-merge": "^2.5.3",

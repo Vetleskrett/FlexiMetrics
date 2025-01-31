@@ -1,19 +1,10 @@
 <script lang="ts">
 	import { Role, type Course } from 'src/types';
-	import { getCoursesByStudent } from 'src/api';
-	import { onMount } from 'svelte';
 	import CoursesCard from 'src/components/CoursesCard.svelte';
-	import { studentId } from 'src/store';
 
-	let courses: Course[] = [];
-
-	onMount(async () => {
-		try {
-			courses = await getCoursesByStudent(studentId);
-		} catch (error) {
-			console.error(error);
-		}
-	});
+	export let data: {
+		courses: Course[];
+	};
 </script>
 
-<CoursesCard userRole={Role.Student} {courses} />
+<CoursesCard userRole={Role.Student} courses={data.courses} />
