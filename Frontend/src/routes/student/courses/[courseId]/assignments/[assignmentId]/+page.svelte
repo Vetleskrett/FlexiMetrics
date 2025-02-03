@@ -56,13 +56,17 @@
 			/>
 			<h1 class="ml-4 text-4xl font-semibold">{data.assignment.name}</h1>
 		</div>
-		<CustomButton
-			color="green"
-			href="/student/courses/{courseId}/assignments/{assignmentId}/delivery"
-		>
-			<MoveRight />
-			<p>New Delivery</p>
-		</CustomButton>
+		{#if new Date(data.assignment.dueDate) > new Date()}
+			<CustomButton
+				color="green"
+				href="/student/courses/{courseId}/assignments/{assignmentId}/delivery"
+			>
+				<MoveRight />
+				<p>New Delivery</p>
+			</CustomButton>
+		{:else}
+			<p class="font-semibold text-gray-500">Due date expired</p>
+		{/if}
 	</div>
 	<div class="flex w-[1080px] flex-row gap-8">
 		<div class="flex w-3/5 flex-col gap-8">

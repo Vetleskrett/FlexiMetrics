@@ -16,7 +16,7 @@
 
 			case 'PointsGrading':
 				return (
-					feedback!.points!.toString() + ' / ' + assignment.gradingFormat.maxPoints!.toString()
+					feedback?.points?.toString() + ' / ' + assignment.gradingFormat.maxPoints!.toString()
 				);
 		}
 		return null;

@@ -12,20 +12,20 @@ public static class DeliveryMapping
         {
             Id = id,
             AssignmentId = request.AssignmentId,
-            StudentId = request.StudentOrTeamId,
+            StudentId = request.StudentId,
             TeamId = null,
             Fields = request.Fields.MapToDeliveryFields(id).ToList(),
         };
     }
 
-    public static Delivery MapToTeamDelivery(this CreateDeliveryRequest request)
+    public static Delivery MapToTeamDelivery(this CreateDeliveryRequest request, Guid teamId)
     {
         var id = Guid.NewGuid();
         return new Delivery
         {
             Id = id,
             AssignmentId = request.AssignmentId,
-            TeamId = request.StudentOrTeamId,
+            TeamId = teamId,
             StudentId = null,
             Fields = request.Fields.MapToDeliveryFields(id).ToList(),
         };

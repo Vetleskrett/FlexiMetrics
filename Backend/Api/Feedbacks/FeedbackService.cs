@@ -56,6 +56,25 @@ public class FeedbackService : IFeedbackService
 
     public async Task<Result<FeedbackResponse, ValidationResponse>> Create(CreateFeedbackRequest request)
     {
+        var assignment = await _dbContext.Deliveries
+            .Where(d => d.Id == request.DeliveryId)
+            .Select(d => d.Assignment)
+            .FirstOrDefaultAsync();
+
+        if (assignment is null)
+        {
+            return default;
+        }
+
+        if (assignment.DueDate > DateTime.UtcNow)
+        {
+            return new ValidationError
+            {
+                PropertyName = nameof(assignment.DueDate),
+                Message = "Cannot give feedback before assignment due date"
+            }.MapToResponse();
+        }
+
         var feedback = request.MapToFeedback();
         var validationResult = await _validator.ValidateAsync(feedback);
         if (!validationResult.IsValid)

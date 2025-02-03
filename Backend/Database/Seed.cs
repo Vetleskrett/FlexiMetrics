@@ -131,7 +131,7 @@ public static class Seed
         {
             return assignmentFaker
                 .RuleFor(x => x.Name, f => f.PickRandom(ASSIGNMENTS))
-                .RuleFor(x => x.DueDate, f => f.Date.Between(new DateTime(2024, 1, 1, 0, 0, 0, DateTimeKind.Utc), new DateTime(2024, 6, 1, 0, 0, 0, DateTimeKind.Utc)))
+                .RuleFor(x => x.DueDate, f => f.Date.Between(new DateTime(2025, 1, 1, 0, 0, 0, DateTimeKind.Utc), new DateTime(2025, 6, 1, 0, 0, 0, DateTimeKind.Utc)))
                 .RuleFor(x => x.Published, f => f.PickRandom(true, true, true, false))
                 .RuleFor(x => x.CollaborationType, f => f.Random.Enum<CollaborationType>())
                 .RuleFor(x => x.Mandatory, f => f.Random.Bool())
