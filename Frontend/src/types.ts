@@ -37,6 +37,11 @@ export enum Role {
     Student = 1,
 }
 
+export enum CollaborationType {
+    Individual = 0,
+    Teams = 1,
+}
+
 export type Assignment = {
     id: string;
     name: string;
@@ -98,6 +103,11 @@ export type AssignmentField = {
     id: string;
     name: string;
     type: AssignmentFieldType;
+}
+
+export type NewAssignmentField = {
+    name: string;
+    type: string;
 }
 
 export type DeliveryField = {
@@ -197,4 +207,12 @@ export type CreateDelivery = {
 export type CreateDeliveryField = {
     assignmentFieldId: string;
     value: any;
+}
+export type CreateAssignment = {
+    name: string,
+    courseId: string,
+    dueDate: string,
+    published: boolean,
+    collaborationType: number,
+    fields: NewAssignmentField[]
 }
