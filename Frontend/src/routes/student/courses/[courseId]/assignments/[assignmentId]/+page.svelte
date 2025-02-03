@@ -3,14 +3,6 @@
 	import * as Breadcrumb from '$lib/components/ui/breadcrumb/index.js';
 	import MoveRight from 'lucide-svelte/icons/move-right';
 	import AssignmentInformationCard from 'src/components/AssignmentInformationCard.svelte';
-	import { onMount } from 'svelte';
-	import {
-		getCourse,
-		getAssignment,
-		getAssignmentFields,
-		getStudentDelivery,
-		getStudentFeedback
-	} from 'src/api';
 	import {
 		Role,
 		type Assignment,
@@ -21,7 +13,6 @@
 	} from 'src/types';
 	import AssignmentDescriptionCard from 'src/components/AssignmentDescriptionCard.svelte';
 	import DeliveryCard from 'src/components/DeliveryCard.svelte';
-	import { studentId } from 'src/store';
 	import FeedbackCard from 'src/components/FeedbackCard.svelte';
 	import CustomButton from 'src/components/CustomButton.svelte';
 
