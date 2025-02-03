@@ -13,5 +13,11 @@ public class CreateAssignmentRequest
     public required bool Mandatory { get; init; }
     public required GradingFormatRequest GradingFormat { get; init; }
     public required string Description { get; init; }
-    public required List<CreateAssignmentFieldRequest> Fields { get; init; }
+    public required List<NewAssignmentFieldRequest> Fields { get; init; }
+}
+
+public class NewAssignmentFieldRequest
+{
+    public required AssignmentDataType Type { get; init; }
+    public required string Name { get; init; }
 }
