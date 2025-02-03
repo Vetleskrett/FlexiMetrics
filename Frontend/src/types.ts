@@ -42,6 +42,13 @@ export enum CollaborationType {
     Teams = 1,
 }
 
+export enum GradingTypeEnum {
+    NoGrading = 0,
+    ApprovalGrading = 1,
+    LetterGrading = 2,
+    PointsGrading = 3,
+}
+
 export type Assignment = {
     id: string;
     name: string;
@@ -210,9 +217,31 @@ export type CreateDeliveryField = {
 }
 export type CreateAssignment = {
     name: string,
+    description: string,
     courseId: string,
     dueDate: string,
+    gradingFormat: {
+        gradingType: number,
+        maxPoints: number,
+    }
+    mandatory: boolean,
     published: boolean,
     collaborationType: number,
     fields: NewAssignmentField[]
 }
+
+export type EditAssignment = {
+    name: string,
+    description: string,
+    courseId: string,
+    dueDate: string,
+    gradingFormat: {
+        gradingType: number,
+        maxPoints: number,
+    }
+    mandatory: boolean,
+    published: boolean,
+    collaborationType: number,
+}
+
+
