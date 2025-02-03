@@ -1,5 +1,6 @@
 ﻿using Database.Models;
 using FluentValidation;
+using System.Text.Json;
 
 namespace Api.Deliveries;
 
@@ -42,14 +43,22 @@ public class DeliveryValidator : AbstractValidator<Delivery>
                     return false;
                 }
 
-                return assignmentField.Type switch
+                try
                 {
-                    AssignmentDataType.String => field.Value.GetType() == typeof(string),
-                    AssignmentDataType.Integer => field.Value.GetType() == typeof(int),
-                    AssignmentDataType.Double => field.Value.GetType() == typeof(double),
-                    AssignmentDataType.Boolean => field.Value.GetType() == typeof(bool),
-                    _ => false,
-                };
+                    object? value = assignmentField.Type switch
+                    {
+                        AssignmentDataType.String => field.JsonValue?.Deserialize<string>(),
+                        AssignmentDataType.Integer => field.JsonValue?.Deserialize<int>(),
+                        AssignmentDataType.Double => field.JsonValue?.Deserialize<double>(),
+                        AssignmentDataType.Boolean => field.JsonValue?.Deserialize<bool>(),
+                        _ => null,
+                    };
+                    return value is not null;
+                }
+                catch
+                {
+                    return false;
+                }
             })
             .WithMessage("Delivery field must match assignment field from the assignment");
     }

@@ -1,26 +1,23 @@
 <script lang="ts">
 	import { page } from '$app/stores';
 	import * as Breadcrumb from '$lib/components/ui/breadcrumb/index.js';
-	import DeliveriesCard from 'src/components/DeliveriesCard.svelte';
-	import type {
-		Assignment,
-		AssignmentField,
-		Delivery,
-		Student,
-		TeacherCourse,
-		Team
+	import DeliveryFormCard from 'src/components/DeliveryFormCard.svelte';
+	import {
+		type Assignment,
+		type AssignmentField,
+		type Course,
+		type Delivery,
+		type Team
 	} from 'src/types';
 
 	const courseId = $page.params.courseId;
 	const assignmentId = $page.params.assignmentId;
 
 	export let data: {
-		course: TeacherCourse;
+		course: Course;
 		assignment: Assignment;
 		assignmentFields: AssignmentField[];
-		deliveries: Delivery[];
-		students: Student[];
-		teams: Team[];
+		delivery: Delivery | null;
 	};
 </script>
 
@@ -28,21 +25,23 @@
 	<Breadcrumb.Root class="self-start">
 		<Breadcrumb.List>
 			<Breadcrumb.Item>
-				<Breadcrumb.Link href="/teacher/courses">Courses</Breadcrumb.Link>
+				<Breadcrumb.Link href="/student/courses">Courses</Breadcrumb.Link>
 			</Breadcrumb.Item>
 			<Breadcrumb.Separator />
 			<Breadcrumb.Item>
-				<Breadcrumb.Link href="/teacher/courses/{courseId}"
-					>{data.course.code} - {data.course.name}</Breadcrumb.Link
-				>
+				<Breadcrumb.Link href="/student/courses/{courseId}">
+					{data.course.code} - {data.course.name}
+				</Breadcrumb.Link>
 			</Breadcrumb.Item>
 			<Breadcrumb.Separator />
-			<Breadcrumb.Link href="/teacher/courses/{courseId}/assignments/{assignmentId}">
-				{data.assignment.name}
-			</Breadcrumb.Link>
+			<Breadcrumb.Item>
+				<Breadcrumb.Link href="/student/courses/{courseId}/assignments/{assignmentId}">
+					{data.assignment.name}
+				</Breadcrumb.Link>
+			</Breadcrumb.Item>
 			<Breadcrumb.Separator />
 			<Breadcrumb.Item>
-				<Breadcrumb.Page>Deliveries</Breadcrumb.Page>
+				<Breadcrumb.Page>Delivery</Breadcrumb.Page>
 			</Breadcrumb.Item>
 		</Breadcrumb.List>
 	</Breadcrumb.Root>
@@ -54,15 +53,14 @@
 				src="https://img.icons8.com/fluency/480/pass.png"
 				alt="knowledge-sharing"
 			/>
-			<h1 class="ml-4 text-4xl font-semibold">Deliveries</h1>
+			<h1 class="ml-4 text-4xl font-semibold">Delivery</h1>
 		</div>
 	</div>
-
-	<DeliveriesCard
-		assignment={data.assignment}
-		assignmentFields={data.assignmentFields}
-		deliveries={data.deliveries}
-		students={data.students}
-		teams={data.teams}
-	/>
+	<div class="flex w-[1080px] flex-col gap-8">
+		<DeliveryFormCard
+			assignment={data.assignment}
+			assignmentFields={data.assignmentFields}
+			delivery={data.delivery}
+		/>
+	</div>
 </div>

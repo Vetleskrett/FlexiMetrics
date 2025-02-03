@@ -14,7 +14,8 @@ import type {
   AddStudentsToTeams,
   Delivery, Feedback,
   CreateCourse,
-  AddTeacherToCourse
+  AddTeacherToCourse,
+  CreateDelivery
 } from "./types";
 
 const instance = axios.create({
@@ -71,6 +72,10 @@ export function getTeamDelivery(teamId: string, assignmentId: string): Promise<A
 
 export function getDeliveries(assignmentId: string) : Promise<AxiosResponse<Delivery[]>> {
   return instance.get(`/assignments/${assignmentId}/deliveries`)
+}
+
+export function postDelivery(delivery: CreateDelivery) : Promise<AxiosResponse<Delivery>> {
+  return instance.post(`/deliveries`, delivery)
 }
 
 export function getStudentFeedback(studentId: string, assignmentId: string): Promise<AxiosResponse<Feedback>> {

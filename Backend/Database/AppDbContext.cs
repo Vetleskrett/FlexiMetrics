@@ -49,7 +49,7 @@ public class AppDbContext : DbContext
 
         var delivery = modelBuilder.Entity<Delivery>();
         delivery.HasOne(d => d.Assignment).WithMany();
-        delivery.HasMany(d => d.Fields).WithOne(f => f.Delivery);
+        delivery.HasMany(d => d.Fields).WithOne(f => f.Delivery).OnDelete(DeleteBehavior.Cascade);
         delivery.HasOne(d => d.Student).WithMany().IsRequired(false);
         delivery.HasOne(d => d.Team).WithMany().IsRequired(false);
         delivery.HasIndex(d => new

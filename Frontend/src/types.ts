@@ -92,10 +92,12 @@ export type Team = {
     complete: number | null | undefined;
 }
 
+export type AssignmentFieldType = 'String' | 'Integer' | 'Double' | 'Boolean' | 'File';
+
 export type AssignmentField = {
     id: string;
     name: string;
-    type: 'String' | 'Integer' | 'Boolean' | 'File';
+    type: AssignmentFieldType;
 }
 
 export type DeliveryField = {
@@ -184,4 +186,15 @@ export type CreateCourse = {
 
 export type AddTeacherToCourse = {
     email: string,
+}
+
+export type CreateDelivery = {
+    assignmentId: string;
+    studentId: string;
+    fields: CreateDeliveryField[];
+}
+
+export type CreateDeliveryField = {
+    assignmentFieldId: string;
+    value: any;
 }

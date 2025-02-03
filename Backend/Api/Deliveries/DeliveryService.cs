@@ -15,7 +15,6 @@ public interface IDeliveryService
     Task<DeliveryResponse?> GetByTeamAssignment(Guid teamId, Guid assignmentId);
     Task<IEnumerable<DeliveryResponse>> GetAllByAssignment(Guid assignmentId);
     Task<Result<DeliveryResponse?, ValidationResponse>> Create(CreateDeliveryRequest request);
-    Task<Result<DeliveryResponse?, ValidationResponse>> Update(UpdateDeliveryRequest request, Guid id);
     Task<bool> DeleteById(Guid id);
 }
 
@@ -102,8 +101,36 @@ public class DeliveryService : IDeliveryService
             return default;
         }
 
-        var isIndividual = assignment.CollaborationType == CollaborationType.Individual;
-        Delivery delivery = isIndividual ? request.MapToStudentDelivery() : request.MapToTeamDelivery();
+        if (assignment.DueDate < DateTime.UtcNow)
+        {
+            return new ValidationError
+            {
+                PropertyName = nameof(assignment.DueDate),
+                Message = "Cannot deliver after assignment due date"
+            }.MapToResponse();
+        }
+
+        Delivery delivery;
+
+        if (assignment.CollaborationType == CollaborationType.Teams)
+        {
+            var team = await _dbContext.Teams
+                .Where(t => t.CourseId == assignment.CourseId)
+                .Where(t => t.Students.Any(s => s.Id == request.StudentId))
+                .FirstOrDefaultAsync();
+
+            if (team is null)
+            {
+                return default;
+            }
+
+            delivery = request.MapToTeamDelivery(team.Id);
+        }
+        else
+        {
+            delivery = request.MapToStudentDelivery();
+        }
+
         delivery.Assignment = assignment;
 
         var validationResult = await _validator.ValidateAsync(delivery);
@@ -112,42 +139,22 @@ public class DeliveryService : IDeliveryService
             return validationResult.Errors.MapToResponse();
         }
 
+        if (assignment.CollaborationType == CollaborationType.Individual)
+        {
+            await _dbContext.Deliveries
+                .Where(d => d.AssignmentId == assignment.Id)
+                .Where(d => d.StudentId == delivery.StudentId)
+                .ExecuteDeleteAsync();
+        }
+        else
+        {
+            await _dbContext.Deliveries
+                .Where(d => d.AssignmentId == assignment.Id)
+                .Where(d => d.TeamId != null && d.TeamId == delivery.TeamId)
+                .ExecuteDeleteAsync();
+        }
+
         _dbContext.Deliveries.Add(delivery);
-        await _dbContext.SaveChangesAsync();
-
-        return delivery.MapToResponse();
-    }
-
-    public async Task<Result<DeliveryResponse?, ValidationResponse>> Update(UpdateDeliveryRequest request, Guid id)
-    {
-        var delivery = await _dbContext.Deliveries
-            .Include(d => d.Fields)
-            .Include(d => d.Assignment)
-            .ThenInclude(a => a!.Fields)
-            .FirstOrDefaultAsync(x => x.Id == id);
-
-        if (delivery is null)
-        {
-            return default;
-        }
-
-        foreach (var newField in request.Fields)
-        {
-            var existingField = delivery.Fields!.FirstOrDefault(f => f.Id == newField.Id);
-            if (existingField is null)
-            {
-                return default;
-            }
-
-            existingField.Value = newField.Value;
-        }
-
-        var validationResult = await _validator.ValidateAsync(delivery);
-        if (!validationResult.IsValid)
-        {
-            return validationResult.Errors.MapToResponse();
-        }
-
         await _dbContext.SaveChangesAsync();
 
         return delivery.MapToResponse();

@@ -75,20 +75,6 @@ public static class DeliveryEndpoints
         .WithName("CreateDelivery")
         .WithSummary("Create new delivery");
 
-        group.MapPut("deliveries/{id:guid}", async (IDeliveryService deliveryService, Guid id, UpdateDeliveryRequest request) =>
-        {
-            var result = await deliveryService.Update(request, id);
-
-            return result.Match
-            (
-                delivery => delivery is not null ? Results.Ok(delivery) : Results.NotFound(),
-                failure => Results.BadRequest(failure)
-            );
-        })
-        .Produces<DeliveryResponse>()
-        .WithName("UpdateDelivery")
-        .WithSummary("Update delivery by id");
-
         group.MapDelete("deliveries/{id:guid}", async (IDeliveryService deliveryService, Guid id) =>
         {
             var deleted = await deliveryService.DeleteById(id);
