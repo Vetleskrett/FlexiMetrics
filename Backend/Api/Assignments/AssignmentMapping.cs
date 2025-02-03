@@ -20,7 +20,6 @@ public static class AssignmentMapping
             GradingFormat = request.GradingFormat.MapToGradingFormat(),
             Description = request.Description,
             CourseId = request.CourseId,
-            Fields = request.Fields.MapToAssignmentField().ToList(),
         };
     }
 

@@ -17,14 +17,12 @@ public class AssignmentValidator : AbstractValidator<Assignment>
             .NotEmpty();
 
         RuleFor(x => x.CollaborationType)
-            .NotEmpty()
             .IsInEnum();
 
         RuleFor(x => x.GradingFormat)
             .NotNull();
 
         RuleFor(x => x.GradingFormat.GradingType)
-            .NotEmpty()
             .IsInEnum();
 
         RuleFor(x => x.Description)

@@ -75,7 +75,7 @@
 					<EllipsisVertical size={32} />
 				</DropdownMenu.Trigger>
 				<DropdownMenu.Content>
-					<DropdownMenu.Item href="/courses/{courseId}/assignments/{assignmentId}/edit">
+					<DropdownMenu.Item href="{assignmentId}/edit">
 						<Pencil class="h-4" />
 						<p>Edit assignment</p>
 					</DropdownMenu.Item>
