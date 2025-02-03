@@ -1,151 +1,117 @@
 <script lang="ts">
 	import * as Card from '$lib/components/ui/card/index.js';
 	import * as Table from '$lib/components/ui/table';
-	import { Input } from '$lib/components/ui/input';
 	import ArrowDownToline from 'lucide-svelte/icons/arrow-down-to-line';
-	import Save from 'lucide-svelte/icons/save';
-	import Undo2 from 'lucide-svelte/icons/undo-2';
-	import { Separator } from 'src/lib/components/ui/separator';
-	import CustomButton from 'src/components/CustomButton.svelte';
-	import type { Delivery, DeliveryField, AssignmentField } from 'src/types';
-	import { Checkbox } from 'src/lib/components/ui/checkbox';
+	import type { Delivery, AssignmentField, Assignment, Student, Team } from 'src/types';
+	import Check from 'lucide-svelte/icons/check';
+	import X from 'lucide-svelte/icons/x';
+	import Separator from 'src/lib/components/ui/separator/separator.svelte';
 
+	export let assignment: Assignment;
 	export let assignmentFields: AssignmentField[];
-	let originalDeliveries: Delivery[];
-	export { originalDeliveries as deliveries };
+	export let deliveries: Delivery[];
+	export let students: Student[];
+	export let teams: Team[];
 
-	const assignmentFieldTypes = new Map<string, string>(
-		assignmentFields.map((field) => [field.id, field.type])
-	);
+	teams.sort((a, b) => a.teamNr - b.teamNr);
+	students.sort((a, b) => (a.name > b.name ? 1 : -1));
 
-	let deliveries: Delivery[] = structuredClone(originalDeliveries);
-	let isAnyChanges = false;
-
-	const teamsChanges = new Map<string, Map<string, DeliveryField>>(
-		deliveries.map((delivery) => [delivery.teamId, new Map<string, DeliveryField>()])
-	);
-
-	const onChange = (teamId: string, field: DeliveryField) => {
-		isAnyChanges = true;
-		teamsChanges.get(teamId)?.set(field.assignmentFieldId, field);
-	};
-
-	const onSubmit = () => {
-		console.log('Changes to send to backend:');
-
-		teamsChanges.forEach((teamChanges, teamId) => {
-			const changes = teamChanges.values().toArray();
-
-			if (changes.length > 0) {
-				console.log(`Team ${teamId}`, changes);
-			}
-		});
-
-		isAnyChanges = false;
-		teamsChanges.forEach((team) => team.clear());
-	};
-
-	const undoChanges = () => {
-		deliveries = structuredClone(originalDeliveries);
-		isAnyChanges = false;
-		teamsChanges.forEach((team) => team.clear());
-	};
+	const ids =
+		assignment.collaborationType == 'Individual'
+			? students.map((s) => s.id)
+			: teams.map((t) => t.id);
 </script>
 
-<form method="POST" on:submit|preventDefault={onSubmit}>
-	<Card.Root class="w-[1080px] overflow-hidden p-0">
-		<Card.Content class="p-0">
-			<Table.Root>
-				<Table.Header>
-					<Table.Row>
-						<Table.Head class="h-0 pt-4 font-bold text-black">Team</Table.Head>
-						{#each assignmentFields as field}
-							<Table.Head class="h-0 pt-4 font-bold text-black">
-								{field.name}
-							</Table.Head>
-							{#if field.type == 'File'}
-								<Table.Head class="h-0 pt-4 font-bold text-black"
-									>Upload new [{field.name}]</Table.Head
-								>
+<Card.Root class="w-[1080px] overflow-hidden p-0">
+	<Card.Content class="p-0">
+		<Table.Root class="h-full">
+			<Table.Header>
+				<Table.Row>
+					{#if assignment.collaborationType == 'Individual'}
+						<Table.Head class="h-8">
+							<p class="font-bold text-black">Student</p>
+						</Table.Head>
+					{:else}
+						<Table.Head class="flex h-8 items-center justify-center">
+							<p class="font-bold text-black">Team</p>
+						</Table.Head>
+					{/if}
+
+					<Table.Head class="h-8 w-2 p-0">
+						<Separator orientation="vertical"></Separator>
+					</Table.Head>
+
+					{#each assignmentFields as field}
+						<Table.Head class="h-8">
+							{#if field.type == 'Integer'}
+								<p class="text-right font-bold text-black">{field.name}</p>
+							{:else if field.type == 'Boolean'}
+								<p class="text-center font-bold text-black">{field.name}</p>
+							{:else}
+								<p class="font-bold text-black">{field.name}</p>
 							{/if}
-						{/each}
-					</Table.Row>
-				</Table.Header>
-				<Table.Body>
-					{#each deliveries as delivery (delivery.teamId)}
-						<Table.Row>
+						</Table.Head>
+					{/each}
+				</Table.Row>
+			</Table.Header>
+			<Table.Body>
+				{#each ids as id}
+					{@const delivery = deliveries.find((x) => x.studentId == id || x.teamId == id)}
+
+					<Table.Row>
+						{#if assignment.collaborationType == 'Individual'}
 							<Table.Cell>
-								{delivery.teamId}
+								<p>
+									{students.find((x) => x.id == id)?.name}
+								</p>
 							</Table.Cell>
-							{#each delivery.fields as deliveryField (deliveryField.assignmentFieldId)}
-								{@const type = assignmentFieldTypes.get(deliveryField.assignmentFieldId)}
+						{:else}
+							<Table.Cell class="h-fulls flex items-center justify-center">
+								<p>{teams.find((x) => x.id == id)?.teamNr}</p>
+							</Table.Cell>
+						{/if}
+
+						<Table.Cell class="w-2 p-0">
+							<Separator orientation="vertical"></Separator>
+						</Table.Cell>
+
+						{#if delivery}
+							{#each assignmentFields as assignmentField}
+								{@const deliveryField = delivery.fields.find(
+									(x) => x.assignmentFieldId == assignmentField.id
+								)}
+
 								<Table.Cell>
-									{#if type == 'String'}
-										<Input
-											type="text"
-											on:change={() => onChange(delivery.teamId, deliveryField)}
-											bind:value={deliveryField.value}
-										/>
-									{:else if type == 'Integer'}
-										<Input
-											type="number"
-											class="w-24"
-											on:change={() => onChange(delivery.teamId, deliveryField)}
-											bind:value={deliveryField.value}
-										/>
-									{:else if type == 'Boolean'}
-										<div class="flex justify-center">
-											<Checkbox
-												class="rounded-[0.25rem]"
-												on:click={() => onChange(delivery.teamId, deliveryField)}
-												bind:checked={deliveryField.value}
-											/>
-										</div>
-									{:else if type == 'File'}
+									{#if assignmentField.type == 'File'}
 										<a
 											href="TODO: add url here"
 											download="TODO"
 											class="flex items-center text-blue-500"
 										>
 											<ArrowDownToline size="20" />
-											{deliveryField.value}
+											{deliveryField?.value}
 										</a>
+									{:else if assignmentField.type == 'Integer'}
+										<p class="text-right">{deliveryField?.value}</p>
+									{:else if assignmentField.type == 'Boolean'}
+										{#if deliveryField?.value}
+											<Check color="green" class="mx-auto" />
+										{:else}
+											<X color="red" class="mx-auto" />
+										{/if}
 									{:else}
-										{deliveryField.value}
+										<p>{deliveryField?.value}</p>
 									{/if}
 								</Table.Cell>
-								{#if type == 'File'}
-									<Table.Cell>
-										<input
-											bind:files={deliveryField.value}
-											type="file"
-											class="flex h-10 w-48 rounded-sm border border-input bg-white px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
-											on:change={() => onChange(delivery.teamId, deliveryField)}
-										/>
-									</Table.Cell>
-								{/if}
 							{/each}
-						</Table.Row>
-					{/each}
-				</Table.Body>
-			</Table.Root>
-		</Card.Content>
-
-		{#if isAnyChanges}
-			<Card.Footer class="flex flex-col items-end p-0">
-				<Separator />
-
-				<div class="m-4 flex gap-4">
-					<CustomButton color="yellow" on:click={undoChanges}>
-						<Undo2 size="20" />
-						<p>Undo changes</p>
-					</CustomButton>
-					<CustomButton color="submit">
-						<Save size="20" />
-						<p>Save</p>
-					</CustomButton>
-				</div>
-			</Card.Footer>
-		{/if}
-	</Card.Root>
-</form>
+						{:else}
+							{#each assignmentFields as assignmentField}
+								<Table.Cell></Table.Cell>
+							{/each}
+						{/if}
+					</Table.Row>
+				{/each}
+			</Table.Body>
+		</Table.Root>
+	</Card.Content>
+</Card.Root>

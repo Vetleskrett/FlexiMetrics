@@ -166,7 +166,7 @@ public static class Seed
         {
             return assignmentFieldFaker
                 .RuleFor(x => x.Type, f => f.Random.Enum<AssignmentDataType>())
-                .RuleFor(x => x.Name, f => f.System.FileName().Split(".")[0])
+                .RuleFor(x => x.Name, f => f.Lorem.Word())
                 .RuleFor(x => x.AssignmentId, assignment.Id)
                 .GenerateBetween(3, 6);
         })

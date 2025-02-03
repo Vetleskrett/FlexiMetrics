@@ -1,11 +1,27 @@
 <script lang="ts">
 	import { page } from '$app/stores';
 	import * as Breadcrumb from '$lib/components/ui/breadcrumb/index.js';
-	import { course, assignment, assignmentFields, deliveries } from 'src/mockData';
 	import DeliveriesFormCard from 'src/components/DeliveriesFormCard.svelte';
+	import type {
+		Assignment,
+		AssignmentField,
+		Delivery,
+		Student,
+		TeacherCourse,
+		Team
+	} from 'src/types';
 
 	const courseId = $page.params.courseId;
 	const assignmentId = $page.params.assignmentId;
+
+	export let data: {
+		course: TeacherCourse;
+		assignment: Assignment;
+		assignmentFields: AssignmentField[];
+		deliveries: Delivery[];
+		students: Student[];
+		teams: Team[];
+	};
 </script>
 
 <div class="m-auto mt-4 flex w-max flex-col items-center justify-center gap-10">
@@ -17,12 +33,12 @@
 			<Breadcrumb.Separator />
 			<Breadcrumb.Item>
 				<Breadcrumb.Link href="/teacher/courses/{courseId}"
-					>{course.code} - {course.name}</Breadcrumb.Link
+					>{data.course.code} - {data.course.name}</Breadcrumb.Link
 				>
 			</Breadcrumb.Item>
 			<Breadcrumb.Separator />
 			<Breadcrumb.Link href="/teacher/courses/{courseId}/assignments/{assignmentId}">
-				{assignment.name}
+				{data.assignment.name}
 			</Breadcrumb.Link>
 			<Breadcrumb.Separator />
 			<Breadcrumb.Item>
@@ -42,5 +58,11 @@
 		</div>
 	</div>
 
-	<DeliveriesFormCard {assignmentFields} {deliveries} />
+	<DeliveriesFormCard
+		assignment={data.assignment}
+		assignmentFields={data.assignmentFields}
+		deliveries={data.deliveries}
+		students={data.students}
+		teams={data.teams}
+	/>
 </div>
