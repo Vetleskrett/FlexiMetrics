@@ -1,8 +1,4 @@
-﻿using Api.Courses.Contracts;
-using Database.Models;
-using System.Net.Http.Json;
-
-namespace Api.Tests.Integration.Courses;
+﻿namespace Api.Tests.Integration.Courses;
 
 public class GetCourseTests(ApiFactory factory) : BaseIntegrationTest(factory)
 {

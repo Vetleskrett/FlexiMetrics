@@ -1,5 +1,4 @@
 ﻿using Database.Models;
-using Microsoft.EntityFrameworkCore;
 
 namespace Api.Tests.Integration.Courses;
 

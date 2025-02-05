@@ -1,6 +1,4 @@
-﻿using Database.Models;
-
-namespace Api.Feedbacks.Contracts;
+﻿namespace Api.Feedbacks.Contracts;
 
 public class UpdateFeedbackRequest
 {
