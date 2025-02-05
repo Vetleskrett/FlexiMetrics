@@ -2,8 +2,6 @@ import { browser } from '$app/environment';
 import axios, { type AxiosResponse } from 'axios';
 import type {
   Course,
-  TeacherCourse,
-  StudentCourse,
   Assignment,
   StudentAssignment,
   AssignmentField,
@@ -15,7 +13,8 @@ import type {
   Delivery, Feedback,
   CreateCourse,
   AddTeacherToCourse,
-  CreateDelivery
+  CreateDelivery,
+  Teacher
 } from "./types";
 
 const instance = axios.create({
@@ -36,14 +35,6 @@ export function getCoursesByStudent(studentId: string) : Promise<AxiosResponse<C
 
 export function getCourse(courseId: string) : Promise<AxiosResponse<Course>> {
   return instance.get(`/courses/${courseId}`)
-}
-
-export function getTeacherCourse(teacherId: string, courseId: string) : Promise<AxiosResponse<TeacherCourse>> {
-  return instance.get(`/teachers/${teacherId}/courses/${courseId}`)
-}
-
-export function getStudentCourse(studentId: string, courseId: string) : Promise<AxiosResponse<StudentCourse>> {
-  return instance.get(`/students/${studentId}/courses/${courseId}`)
 }
 
 export function getAssignments(courseId: string) : Promise<AxiosResponse<Assignment[]>> {
@@ -104,6 +95,10 @@ export function postStudentsTeam(teams: AddStudentsToTeams) : Promise<AxiosRespo
 
 export function postCourse(course: CreateCourse) : Promise<AxiosResponse<Course>> {
   return instance.post(`/courses`, course)
+}
+
+export function getTeachers(courseId: string): Promise<AxiosResponse<Teacher[]>> {
+  return instance.get(`/courses/${courseId}/teachers`)
 }
 
 export function addTeacherToCourse(courseId: string, teacher: AddTeacherToCourse) : Promise<AxiosResponse> {

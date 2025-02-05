@@ -9,7 +9,7 @@
 	import TeamsCard from 'src/components/TeamsCard.svelte';
 	import TeachersCard from 'src/components/TeachersCard.svelte';
 	import * as Breadcrumb from '$lib/components/ui/breadcrumb/index.js';
-	import type { TeacherCourse, Assignment, Teacher } from 'src/types';
+	import type { Course, Assignment, Teacher, Student, Team } from 'src/types';
 	import { Role } from 'src/types';
 	import { deleteCourse } from 'src/api';
 	import { goto } from '$app/navigation';
@@ -17,13 +17,12 @@
 	const courseId = $page.params.courseId;
 
 	export let data: {
-		course: TeacherCourse;
+		course: Course;
 		assignments: Assignment[];
+		teachers: Teacher[];
+		students: Student[];
+		teams: Team[];
 	};
-
-	const teachers = data.course.teachers;
-	const students = data.course.numStudents ?? 0;
-	const teams = data.course.numTeams ?? 0;
 
 	async function deleteCoursePage() {
 		try {
@@ -89,10 +88,10 @@
 
 		<div class="flex w-2/5 flex-col gap-8">
 			<div class="flex flex-row gap-8">
-				<StudentsCard {students} {courseId} />
-				<TeamsCard {teams} {courseId} />
+				<StudentsCard numStudents={data.students.length} {courseId} />
+				<TeamsCard numTeams={data.teams.length} {courseId} />
 			</div>
-			<TeachersCard userRole={Role.Teacher} {teachers} />
+			<TeachersCard userRole={Role.Teacher} teachers={data.teachers} />
 		</div>
 	</div>
 </div>

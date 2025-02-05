@@ -10,7 +10,4 @@ public class Course
     public required string Name { get; set; }
     public required int Year { get; set; }
     public required Semester Semester { get; set; }
-    // public List<User>? Students { get; set; }
-    // Replace with Seperate CourseStudent, like CourseTeacher
-    public List<Team>? Teams { get; set; }
 }

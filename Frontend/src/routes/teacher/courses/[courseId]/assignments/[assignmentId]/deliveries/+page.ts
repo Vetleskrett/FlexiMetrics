@@ -1,5 +1,4 @@
-import { getTeacherCourse, getAssignment, getAssignmentFields, getDeliveries, getStudents, getTeams } from "src/api";
-import { teacherId } from "src/store";
+import { getCourse, getAssignment, getAssignmentFields, getDeliveries, getStudents, getTeams } from "src/api";
 
 export const load = async ({ params }: { params: { courseId: string; assignmentId: string; } }) => {
     const [
@@ -10,7 +9,7 @@ export const load = async ({ params }: { params: { courseId: string; assignmentI
         studentsResponse,
         teamsResponse,
     ] = await Promise.all([
-        getTeacherCourse(teacherId, params.courseId),
+        getCourse(params.courseId),
         getAssignment(params.assignmentId),
         getAssignmentFields(params.assignmentId),
         getDeliveries(params.assignmentId),

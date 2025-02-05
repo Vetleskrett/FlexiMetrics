@@ -11,6 +11,7 @@ public interface ITeamService
     Task<IEnumerable<TeamResponse>> GetAll();
     Task<IEnumerable<TeamResponse>> GetAllByCourse(Guid courseId);
     Task<TeamResponse?> GetById(Guid id);
+    Task<TeamResponse?> GetByStudentCourse(Guid studentId, Guid courseId);
     Task<IEnumerable<TeamResponse>> Create(CreateTeamsRequest request);
     Task<bool> BulkAddToTeam(BulkAddStudentToTeamsRequest request);
     Task<bool> AddToTeam(Guid teamId, AddStudentToTeamRequest request);
@@ -55,6 +56,17 @@ public class TeamService : ITeamService
         return team?.MapToResponse();
     }
 
+    public async Task<TeamResponse?> GetByStudentCourse(Guid studentId, Guid courseId)
+    {
+        var team = await _dbContext.Teams
+            .Include(t => t.Students)
+            .Where(t => t.CourseId == courseId)
+            .Where(t => t.Students.Any(s => s.Id == studentId))
+            .FirstOrDefaultAsync();
+
+        return team?.MapToResponse();
+    }
+
     public async Task<IEnumerable<TeamResponse>> Create(CreateTeamsRequest request)
     {
         var existingTeamNrs = await _dbContext.Teams
@@ -83,15 +95,16 @@ public class TeamService : ITeamService
 
     public async Task<bool> BulkAddToTeam(BulkAddStudentToTeamsRequest request)
     {
-        var course = await _dbContext.Courses
-            .Include(c => c.Teams)!
-            .ThenInclude(t => t.Students)
-            .FirstOrDefaultAsync(c => c.Id == request.CourseId);
+        var course = await _dbContext.Courses.FindAsync(request.CourseId);
 
         if (course is null)
         {
             return false;
         }
+
+        var teams = await _dbContext.Teams
+            .Where(t => t.CourseId == request.CourseId)
+            .ToListAsync();
 
         var allEmails = request.Teams
             .Select(t => t.Emails)
@@ -121,7 +134,7 @@ public class TeamService : ITeamService
 
         foreach (var teamRequest in request.Teams)
         {
-            var team = course.Teams!.FirstOrDefault(t => t.TeamNr == teamRequest.TeamNr);
+            var team = teams.FirstOrDefault(t => t.TeamNr == teamRequest.TeamNr);
             if (team is null)
             {
                 team = new Team

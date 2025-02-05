@@ -1,8 +1,7 @@
 <script lang="ts">
-	import type { Team } from 'src/types.js';
 	import * as Card from '$lib/components/ui/card/index.js';
 
-	export let teams: number;
+	export let numTeams: number;
 	export let courseId: string;
 </script>
 
@@ -20,7 +19,7 @@
 			</div>
 		</Card.Header>
 		<Card.Content class="p-0 py-3">
-			<h1 class="m-auto text-center text-5xl font-semibold">{teams}</h1>
+			<h1 class="m-auto text-center text-5xl font-semibold">{numTeams}</h1>
 		</Card.Content>
 	</a>
 </Card.Root>

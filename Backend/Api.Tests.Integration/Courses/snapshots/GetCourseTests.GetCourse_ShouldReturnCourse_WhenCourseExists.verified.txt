@@ -1,0 +1,15 @@
+﻿{
+  Status: 200 OK,
+  Content: {
+    Headers: {
+      Content-Type: application/json; charset=utf-8
+    },
+    Value: {
+      id: Guid_1,
+      code: TDT1001,
+      name: Webutvikling,
+      year: 2025,
+      semester: Spring
+    }
+  }
+}

@@ -445,7 +445,7 @@ namespace Database.Migrations
             modelBuilder.Entity("Database.Models.Team", b =>
                 {
                     b.HasOne("Database.Models.Course", "Course")
-                        .WithMany("Teams")
+                        .WithMany()
                         .HasForeignKey("CourseId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -471,11 +471,6 @@ namespace Database.Migrations
             modelBuilder.Entity("Database.Models.Assignment", b =>
                 {
                     b.Navigation("Fields");
-                });
-
-            modelBuilder.Entity("Database.Models.Course", b =>
-                {
-                    b.Navigation("Teams");
                 });
 
             modelBuilder.Entity("Database.Models.Delivery", b =>

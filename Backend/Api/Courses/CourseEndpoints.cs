@@ -20,7 +20,7 @@ public static class CourseEndpoints
         group.MapGet("teachers/{teacherId:guid}/courses", async (ICourseService courseService, Guid teacherId) =>
         {
             var courses = await courseService.GetAllByTeacher(teacherId);
-            return Results.Ok(courses);
+            return courses is not null ? Results.Ok(courses) : Results.NotFound();
         })
         .Produces<IEnumerable<CourseResponse>>()
         .WithName("GetAllCoursesByTeacher")
@@ -29,7 +29,7 @@ public static class CourseEndpoints
         group.MapGet("students/{studentId:guid}/courses", async (ICourseService courseService, Guid studentId) =>
         {
             var courses = await courseService.GetAllByStudent(studentId);
-            return Results.Ok(courses);
+            return courses is not null ? Results.Ok(courses) : Results.NotFound();
         })
         .Produces<IEnumerable<CourseResponse>>()
         .WithName("GetAllCoursesByStudent")
@@ -43,24 +43,6 @@ public static class CourseEndpoints
         .Produces<CourseResponse>()
         .WithName("GetCourse")
         .WithSummary("Get course by id");
-
-        group.MapGet("teachers/{teacherId:guid}/courses/{id:guid}", async (ICourseService courseService, Guid teacherId, Guid id) =>
-        {
-            var course = await courseService.GetByTeacher(teacherId, id);
-            return course is not null ? Results.Ok(course) : Results.NotFound();
-        })
-        .Produces<TeacherCourseResponse>()
-        .WithName("GetTeacherCourse")
-        .WithSummary("Get teacher course by id");
-
-        group.MapGet("students/{studentId:guid}/courses/{id:guid}", async (ICourseService courseService, Guid studentId, Guid id) =>
-        {
-            var course = await courseService.GetByStudent(studentId, id);
-            return course is not null ? Results.Ok(course) : Results.NotFound();
-        })
-        .Produces<StudentCourseResponse>()
-        .WithName("GetStudentCourse")
-        .WithSummary("Get student course by id");
 
         group.MapPost("courses", async (ICourseService courseService, CreateCourseRequest request) =>
         {

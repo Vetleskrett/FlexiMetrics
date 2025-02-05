@@ -1,0 +1,28 @@
+﻿{
+  Status: 400 Bad Request,
+  Content: {
+    Headers: {
+      Content-Type: application/json; charset=utf-8
+    },
+    Value: {
+      errors: [
+        {
+          propertyName: Name,
+          message: 'Name' must not be empty.
+        },
+        {
+          propertyName: Code,
+          message: 'Code' must not be empty.
+        },
+        {
+          propertyName: Year,
+          message: 'Year' must not be empty.
+        },
+        {
+          propertyName: Semester,
+          message: 'Semester' has a range of values which does not include '100'.
+        }
+      ]
+    }
+  }
+}
