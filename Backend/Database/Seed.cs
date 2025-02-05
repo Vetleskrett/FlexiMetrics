@@ -1,7 +1,6 @@
 ﻿using Bogus;
 using Database.Models;
 using Microsoft.EntityFrameworkCore;
-using System.Linq;
 
 namespace Database;
 

@@ -72,3 +72,5 @@ app.MapDeliveryEndpoints();
 app.MapFeedbackEndpoints();
 
 app.Run();
+
+public partial class Program { }

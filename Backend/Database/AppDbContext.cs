@@ -30,7 +30,6 @@ public class AppDbContext : DbContext
             .IsUnique();
 
         var course = modelBuilder.Entity<Course>();
-        course.HasMany(c => c.Teams).WithOne(t => t.Course);
 
         var courseTeacher = modelBuilder.Entity<CourseTeacher>();
         courseTeacher.HasOne(x => x.Course).WithMany();
@@ -40,7 +39,9 @@ public class AppDbContext : DbContext
         courseStudent.HasOne(x => x.Course).WithMany();
         courseStudent.HasOne(x => x.Student).WithMany();
 
-        modelBuilder.Entity<Team>().HasMany(t => t.Students).WithMany();
+        var team = modelBuilder.Entity<Team>();
+        team.HasOne(t => t.Course).WithMany();
+        team.HasMany(t => t.Students).WithMany();
 
         var assignment = modelBuilder.Entity<Assignment>();
         assignment.HasOne(a => a.Course).WithMany();

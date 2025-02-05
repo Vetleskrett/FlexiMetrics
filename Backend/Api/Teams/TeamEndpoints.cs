@@ -35,6 +35,15 @@ public static class TeamEndpoints
         .WithName("GetTeam")
         .WithSummary("Get team by id");
 
+        group.MapGet("students/{studentId:guid}/courses/{courseId:guid}/teams", async (ITeamService teamService, Guid studentId, Guid courseId) =>
+        {
+            var team = await teamService.GetByStudentCourse(studentId, courseId);
+            return team is not null ? Results.Ok(team) : Results.NotFound();
+        })
+        .Produces<TeamResponse>()
+        .WithName("GetTeamByStudentCourse")
+        .WithSummary("Get team by student id and course id");
+
         group.MapPost("teams", async (ITeamService teamService, CreateTeamsRequest request) =>
         {
             var teams = await teamService.Create(request);

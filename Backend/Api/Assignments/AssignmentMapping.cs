@@ -1,5 +1,4 @@
-﻿using Api.AssignmentFields;
-using Api.Assignments.Contracts;
+﻿using Api.Assignments.Contracts;
 using Database.Models;
 
 namespace Api.Assignments;

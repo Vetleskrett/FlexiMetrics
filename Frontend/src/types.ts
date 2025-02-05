@@ -6,27 +6,6 @@ export type Course = {
     semester: Semester;
 }
 
-export type TeacherCourse = {
-    id: string;
-    name: string;
-    code: string;
-    year: number;
-    semester: Semester;
-    numStudents: number;
-    numTeams: number;
-    teachers: Teacher[];
-}
-
-export type StudentCourse = {
-    id: string;
-    name: string;
-    code: string;
-    year: number;
-    semester: Semester;
-    team: Team;
-    teachers: Teacher[];
-}
-
 export enum Semester{
     Spring = "Spring",
     Autumn = "Autumn",

@@ -12,22 +12,19 @@
 	import AnalyzersCard from 'src/components/AnalyzersCard.svelte';
 	import CustomButton from 'src/components/CustomButton.svelte';
 	import { analyzers } from 'src/mockData';
-	import {
-		type Assignment,
-		type TeacherCourse,
-		type AssignmentField,
-		Role,
-		type Delivery
-	} from 'src/types';
+	import type { Assignment, Course, AssignmentField, Delivery, Student, Team } from 'src/types';
+	import { Role } from 'src/types';
 
 	const courseId = $page.params.courseId;
 	const assignmentId = $page.params.assignmentId;
 
 	export let data: {
-		course: TeacherCourse;
+		course: Course;
 		assignment: Assignment;
 		assignmentFields: AssignmentField[];
 		deliveries: Delivery[];
+		students: Student[];
+		teams: Team[];
 	};
 </script>
 
@@ -98,8 +95,8 @@
 			<CompletedTotalCard
 				completed={data.deliveries.length}
 				total={data.assignment.collaborationType == 'Individual'
-					? data.course.numStudents
-					: data.course.numTeams}
+					? data.students.length
+					: data.teams.length}
 				headline={'Deliveries Submitted'}
 			/>
 		</div>

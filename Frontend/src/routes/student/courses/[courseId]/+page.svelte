@@ -2,7 +2,7 @@
 	import { page } from '$app/stores';
 	import TeachersCard from 'src/components/TeachersCard.svelte';
 	import * as Breadcrumb from '$lib/components/ui/breadcrumb/index.js';
-	import type { StudentAssignment, StudentCourse } from 'src/types';
+	import type { StudentAssignment, Course, Team, Teacher } from 'src/types';
 	import { Role } from 'src/types';
 	import TeamCard from 'src/components/TeamCard.svelte';
 	import StudentAssignmentsCard from 'src/components/StudentAssignmentsCard.svelte';
@@ -10,8 +10,10 @@
 	const courseId = $page.params.courseId;
 
 	export let data: {
-		course: StudentCourse;
+		course: Course;
 		assignments: StudentAssignment[];
+		team: Team | null;
+		teachers: Teacher[];
 	};
 </script>
 
@@ -52,10 +54,10 @@
 		</div>
 
 		<div class="flex w-2/5 flex-col gap-8">
-			{#if data.course.team}
-				<TeamCard team={data.course.team} />
+			{#if data.team}
+				<TeamCard team={data.team} />
 			{/if}
-			<TeachersCard userRole={Role.Student} teachers={data.course.teachers} />
+			<TeachersCard userRole={Role.Student} teachers={data.teachers} />
 		</div>
 	</div>
 </div>
