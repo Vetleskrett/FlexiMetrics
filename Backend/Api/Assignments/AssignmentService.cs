@@ -1,4 +1,5 @@
-﻿using Api.Assignments.Contracts;
+﻿using Api.AssignmentFields;
+using Api.Assignments.Contracts;
 using Api.Validation;
 using Database;
 using Database.Models;
@@ -77,6 +78,7 @@ public class AssignmentService : IAssignmentService
     public async Task<Result<AssignmentResponse, ValidationResponse>> Create(CreateAssignmentRequest request)
     {
         var assignment = request.MapToAssignment();
+        var fields = request.Fields.MapToNewAssignmentField(assignment.Id);
         assignment.Course = await _dbContext.Courses.FindAsync(assignment.CourseId);
 
         var validationResult = await _validator.ValidateAsync(assignment);
@@ -85,8 +87,8 @@ public class AssignmentService : IAssignmentService
             return validationResult.Errors.MapToResponse();
         }
 
-        _dbContext.AssignmentFields.AddRange(assignment.Fields!);
         _dbContext.Assignments.Add(assignment);
+        _dbContext.AssignmentFields.AddRange(fields);
 
         await _dbContext.SaveChangesAsync();
 

@@ -10,11 +10,14 @@ import type {
   Student,
   AddStudentsToCourse,
   AddStudentsToTeams,
-  Delivery, Feedback,
+  Delivery,
+  Feedback,
   CreateCourse,
   AddTeacherToCourse,
   CreateDelivery,
-  Teacher
+  Teacher,
+  CreateAssignment,
+  EditAssignment,
 } from "./types";
 
 const instance = axios.create({
@@ -111,4 +114,12 @@ export function deleteCourse(courseId: string) : Promise<AxiosResponse> {
 
 export function editCourse(courseId: string, course: CreateCourse) : Promise<AxiosResponse> {
   return instance.put(`/courses/${courseId}`, course)
+}
+
+export async function postAssignment(assingment: CreateAssignment){
+  return instance.post(`/assignments`, assingment)
+}
+
+export async function editAssignment(courseId: string, assignment: EditAssignment){
+  return instance.put(`/assignments/${courseId}`, assignment)
 }

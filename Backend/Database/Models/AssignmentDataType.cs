@@ -6,4 +6,5 @@ public enum AssignmentDataType
     Integer,
     Double,
     Boolean,
+    File,
 }
