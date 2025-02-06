@@ -11,8 +11,8 @@ namespace Api.Assignments;
 public interface IAssignmentService
 {
     Task<IEnumerable<AssignmentResponse>> GetAll();
-    Task<IEnumerable<AssignmentResponse>> GetAllByCourse(Guid courseId);
-    Task<IEnumerable<StudentAssignmentResponse>?> GetAllByStudentCourse(Guid studentId, Guid courseId);
+    Task<IEnumerable<AssignmentResponse>?> GetAllByCourse(Guid courseId);
+    Task<Result<IEnumerable<StudentAssignmentResponse>?, ValidationResponse>> GetAllByStudentCourse(Guid studentId, Guid courseId);
     Task<AssignmentResponse?> GetById(Guid id);
     Task<Result<AssignmentResponse, ValidationResponse>> Create(CreateAssignmentRequest request);
     Task<Result<AssignmentResponse?, ValidationResponse>> Update(UpdateAssignmentRequest request, Guid id);
@@ -34,22 +34,56 @@ public class AssignmentService : IAssignmentService
     {
         var assignments = await _dbContext.Assignments
             .AsNoTracking()
+            .OrderBy(x => x.DueDate)
             .ToListAsync();
         return assignments.MapToResponse();
     }
 
-    public async Task<IEnumerable<AssignmentResponse>> GetAllByCourse(Guid courseId)
+    public async Task<IEnumerable<AssignmentResponse>?> GetAllByCourse(Guid courseId)
     {
+        var course = await _dbContext.Courses.FindAsync(courseId);
+        if (course is null)
+        {
+            return default;
+        }
+
         var assignments = await _dbContext.Assignments
             .Where(x => x.CourseId == courseId)
+            .OrderBy(x => x.DueDate)
             .ToListAsync();
+
         return assignments.MapToResponse();
     }
 
-    public async Task<IEnumerable<StudentAssignmentResponse>?> GetAllByStudentCourse(Guid studentId, Guid courseId)
+    public async Task<Result<IEnumerable<StudentAssignmentResponse>?, ValidationResponse>> GetAllByStudentCourse(Guid studentId, Guid courseId)
     {
+        var course = await _dbContext.Courses.FindAsync(courseId);
+        if (course is null)
+        {
+            return default;
+        }
+
+        var student = await _dbContext.Users.FindAsync(studentId);
+        if (student is null)
+        {
+            return default;
+        }
+
+        var courseStudent = await _dbContext.CourseStudents
+            .FirstOrDefaultAsync(cs => cs.StudentId == studentId && cs.CourseId == courseId);
+
+        if (courseStudent is null)
+        {
+            return new ValidationError
+            {
+                PropertyName = "[studentId, courseId]",
+                Message = "Student is not enrolled in the course"
+            }.MapToResponse();
+        }
+
         var assignments = await _dbContext.Assignments
             .Where(x => x.CourseId == courseId && x.Published == true)
+            .OrderBy(x => x.DueDate)
             .Select(a => new StudentAssignmentResponse
             {
                 Id = a.Id,
@@ -75,11 +109,15 @@ public class AssignmentService : IAssignmentService
         return assignment?.MapToResponse();
     }
 
-    public async Task<Result<AssignmentResponse, ValidationResponse>> Create(CreateAssignmentRequest request)
+    public async Task<Result<AssignmentResponse?, ValidationResponse>> Create(CreateAssignmentRequest request)
     {
         var assignment = request.MapToAssignment();
-        var fields = request.Fields.MapToNewAssignmentField(assignment.Id);
-        assignment.Course = await _dbContext.Courses.FindAsync(assignment.CourseId);
+        var course = await _dbContext.Courses.FindAsync(assignment.CourseId);
+
+        if (course is null)
+        {
+            return default;
+        }
 
         var validationResult = await _validator.ValidateAsync(assignment);
         if (!validationResult.IsValid)
@@ -88,7 +126,7 @@ public class AssignmentService : IAssignmentService
         }
 
         _dbContext.Assignments.Add(assignment);
-        _dbContext.AssignmentFields.AddRange(fields);
+        _dbContext.AssignmentFields.AddRange(assignment.Fields!);
 
         await _dbContext.SaveChangesAsync();
 

@@ -1,0 +1,46 @@
+﻿{
+  Status: 200 OK,
+  Content: {
+    Headers: {
+      Content-Type: application/json; charset=utf-8
+    },
+    Value: [
+      {
+        id: Guid_1,
+        name: Frontend project,
+        dueDate: DateTimeOffset_1,
+        published: true,
+        collaborationType: Individual,
+        mandatory: true,
+        gradingType: LetterGrading,
+        maxPoints: null,
+        description: Create a frontend project with svelte,
+        courseId: Guid_2
+      },
+      {
+        id: Guid_3,
+        name: Frontend project,
+        dueDate: DateTimeOffset_1,
+        published: true,
+        collaborationType: Individual,
+        mandatory: true,
+        gradingType: LetterGrading,
+        maxPoints: null,
+        description: Create a frontend project with svelte,
+        courseId: Guid_2
+      },
+      {
+        id: Guid_4,
+        name: Frontend project,
+        dueDate: DateTimeOffset_1,
+        published: true,
+        collaborationType: Individual,
+        mandatory: true,
+        gradingType: LetterGrading,
+        maxPoints: null,
+        description: Create a frontend project with svelte,
+        courseId: Guid_2
+      }
+    ]
+  }
+}

@@ -67,15 +67,15 @@ public static class ModelFactory
         };
     }
 
-    public static Assignment GetValidAssignment(Guid courseId)
+    public static Assignment GetValidAssignment(Guid courseId, bool published = true, TimeSpan offset = new())
     {
         return new Assignment
         {
             Id = Guid.NewGuid(),
             Name = "Frontend project",
-            DueDate = new DateTime(2025, 5, 15, 0, 0, 0, DateTimeKind.Utc),
-            Published = true,
-            CollaborationType = CollaborationType.Teams,
+            DueDate = new DateTime(2025, 5, 15, 0, 0, 0, DateTimeKind.Utc).Add(offset),
+            Published = published,
+            CollaborationType = CollaborationType.Individual,
             Mandatory = true,
             GradingFormat = new GradingFormat { GradingType = GradingType.LetterGrading, MaxPoints = null },
             Description = "Create a frontend project with svelte",

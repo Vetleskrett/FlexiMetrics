@@ -8,6 +8,7 @@ public class VerifyGlobalSettings
     public static void Initialize()
     {
         VerifierSettings.ScrubInlineGuids();
+        VerifierSettings.IgnoreMembers("Content-Length");
         UseSourceFileRelativeDirectory("snapshots");
         VerifyHttp.Initialize();
         Recording.Start();
