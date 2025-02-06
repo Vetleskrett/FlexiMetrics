@@ -12,7 +12,7 @@ public class GetAllCoursesTests(ApiFactory factory) : BaseIntegrationTest(factor
     [Fact]
     public async Task GetAllCourses_ShouldReturnCourses_WhenCoursesExists()
     {
-        DbContext.AddRange([
+        DbContext.Courses.AddRange([
             ModelFactory.GetValidCourse(),
             ModelFactory.GetValidCourse(),
             ModelFactory.GetValidCourse(),

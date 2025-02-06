@@ -9,6 +9,7 @@ public class UpdateAssignmentRequest
     public required bool Published { get; init; }
     public required CollaborationType CollaborationType { get; init; }
     public required bool Mandatory { get; init; }
-    public required GradingFormatRequest GradingFormat { get; init; }
+    public required GradingType GradingType { get; init; }
+    public int? MaxPoints { get; init; }
     public required string Description { get; init; }
 }

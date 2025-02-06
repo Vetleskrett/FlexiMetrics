@@ -1,4 +1,5 @@
-﻿using Api.Assignments.Contracts;
+﻿using Api.AssignmentFields;
+using Api.Assignments.Contracts;
 using Database.Models;
 
 namespace Api.Assignments;
@@ -16,9 +17,30 @@ public static class AssignmentMapping
             Published = request.Published,
             CollaborationType = request.CollaborationType,
             Mandatory = request.Mandatory,
-            GradingFormat = request.GradingFormat.MapToGradingFormat(),
+            GradingFormat = new GradingFormat
+            {
+                GradingType = request.GradingType,
+                MaxPoints = request.MaxPoints,
+            },
             Description = request.Description,
             CourseId = request.CourseId,
+            Fields = request.Fields.MapToAssignmentField(id).ToList()
+        };
+    }
+
+    public static IEnumerable<AssignmentField> MapToAssignmentField(this IEnumerable<NewAssignmentFieldRequest> fields, Guid assignmentId)
+    {
+        return fields.Select(field => field.MapToAssignmentField(assignmentId));
+    }
+
+    public static AssignmentField MapToAssignmentField(this NewAssignmentFieldRequest request, Guid assignmentId)
+    {
+        return new AssignmentField
+        {
+            Id = Guid.NewGuid(),
+            AssignmentId = assignmentId,
+            Type = request.Type,
+            Name = request.Name,
         };
     }
 
@@ -32,7 +54,11 @@ public static class AssignmentMapping
             Published = request.Published,
             CollaborationType = request.CollaborationType,
             Mandatory = request.Mandatory,
-            GradingFormat = request.GradingFormat.MapToGradingFormat(),
+            GradingFormat = new GradingFormat
+            {
+                GradingType = request.GradingType,
+                MaxPoints = request.MaxPoints,
+            },
             Description = request.Description,
             CourseId = courseId,
         };
@@ -48,7 +74,8 @@ public static class AssignmentMapping
             Published = assignment.Published,
             CollaborationType = assignment.CollaborationType,
             Mandatory = assignment.Mandatory,
-            GradingFormat = assignment.GradingFormat.MapToResponse(),
+            GradingType = assignment.GradingFormat.GradingType,
+            MaxPoints = assignment.GradingFormat.MaxPoints,
             Description = assignment.Description,
             CourseId = assignment.CourseId,
         };
@@ -57,23 +84,5 @@ public static class AssignmentMapping
     public static IEnumerable<AssignmentResponse> MapToResponse(this IEnumerable<Assignment> assignments)
     {
         return assignments.Select(assignment => assignment.MapToResponse());
-    }
-
-    public static GradingFormat MapToGradingFormat(this GradingFormatRequest request)
-    {
-        return new GradingFormat
-        {
-            GradingType = request.GradingType,
-            MaxPoints = request.MaxPoints,
-        };
-    }
-
-    public static GradingFormatResponse MapToResponse(this GradingFormat gradingFormat)
-    {
-        return new GradingFormatResponse
-        {
-            GradingType = gradingFormat.GradingType,
-            MaxPoints = gradingFormat.MaxPoints,
-        };
     }
 }

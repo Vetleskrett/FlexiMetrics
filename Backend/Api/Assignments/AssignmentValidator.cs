@@ -1,11 +1,12 @@
-﻿using Database.Models;
+﻿using Api.AssignmentFields;
+using Database.Models;
 using FluentValidation;
 
 namespace Api.Assignments;
 
 public class AssignmentValidator : AbstractValidator<Assignment>
 {
-    public AssignmentValidator()
+    public AssignmentValidator(IValidator<AssignmentField> assignmentFieldValidator)
     {
         RuleFor(x => x.Id)
             .NotEmpty();
@@ -30,5 +31,9 @@ public class AssignmentValidator : AbstractValidator<Assignment>
 
         RuleFor(x => x.CourseId)
             .NotEmpty();
+
+        RuleForEach(x => x.Fields)
+            .NotNull()
+            .SetValidator(assignmentFieldValidator);
     }
 }

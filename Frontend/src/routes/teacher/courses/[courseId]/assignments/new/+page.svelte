@@ -16,7 +16,8 @@
 		fields: NewAssignmentField[],
 		description: string,
 		gradingType: GradingTypeEnum,
-		maxPoints: number){
+		maxPoints: number
+	) {
 		try {
 			await postAssignment({
 				name: assignmentName,
@@ -24,17 +25,17 @@
 				dueDate: dueDate,
 				mandatory: mandatory,
 				published: !draft,
-				gradingFormat: { gradingType: gradingType, maxPoints: maxPoints},
+				gradingType: gradingType,
+				maxPoints: maxPoints,
 				collaborationType: collaborationType,
 				courseId: courseId,
 				fields: fields
-			})
-			goto(`/teacher/courses/${courseId}`)
-		}
-		catch(exception){
-			console.error("Something Went Wrong!")
+			});
+			goto(`/teacher/courses/${courseId}`);
+		} catch (exception) {
+			console.error('Something Went Wrong!');
 		}
 	}
 </script>
 
-<CreateOrEditAssignment submitFunction={addAssignment} redirect={`/teacher/courses/${courseId}`}/>
+<CreateOrEditAssignment submitFunction={addAssignment} redirect={`/teacher/courses/${courseId}`} />

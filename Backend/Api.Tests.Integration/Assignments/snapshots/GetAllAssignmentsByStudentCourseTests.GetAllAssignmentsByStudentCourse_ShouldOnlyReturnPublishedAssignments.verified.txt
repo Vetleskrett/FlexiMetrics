@@ -1,0 +1,34 @@
+﻿{
+  Status: 200 OK,
+  Content: {
+    Headers: {
+      Content-Type: application/json; charset=utf-8
+    },
+    Value: [
+      {
+        id: Guid_1,
+        name: Frontend project,
+        dueDate: DateTimeOffset_1,
+        collaborationType: Individual,
+        isDelivered: false,
+        courseId: Guid_2
+      },
+      {
+        id: Guid_3,
+        name: Frontend project,
+        dueDate: DateTimeOffset_2,
+        collaborationType: Individual,
+        isDelivered: false,
+        courseId: Guid_2
+      },
+      {
+        id: Guid_4,
+        name: Frontend project,
+        dueDate: DateTimeOffset_3,
+        collaborationType: Individual,
+        isDelivered: false,
+        courseId: Guid_2
+      }
+    ]
+  }
+}

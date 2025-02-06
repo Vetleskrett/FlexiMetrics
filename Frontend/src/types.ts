@@ -36,16 +36,12 @@ export type Assignment = {
     collaborationType: 'Individual' | 'Teams';
     courseId : string;
     mandatory: boolean;
-    gradingFormat: GradingFormat;
+    gradingType: GradingType;
+    maxPoints?: number;
     description: string;
 }
 
-export type GradingFormat = {
-    gradingType: GradingType;
-    maxPoints?: number;
-}
-
-export type GradingType = 'NoGrading' | 'ApprovalGrading' | 'LetterGrading' | 'PointsGrading'
+export type GradingType = 'NoGrading' | 'ApprovalGrading' | 'LetterGrading' | 'PointsGrading';
 
 export type StudentAssignment = {
     id: string;
@@ -199,10 +195,8 @@ export type CreateAssignment = {
     description: string,
     courseId: string,
     dueDate: string,
-    gradingFormat: {
-        gradingType: number,
-        maxPoints: number,
-    }
+    gradingType: number,
+    maxPoints: number | undefined,
     mandatory: boolean,
     published: boolean,
     collaborationType: number,
@@ -214,10 +208,8 @@ export type EditAssignment = {
     description: string,
     courseId: string,
     dueDate: string,
-    gradingFormat: {
-        gradingType: number,
-        maxPoints: number,
-    }
+    gradingType: number,
+    maxPoints: number | undefined,
     mandatory: boolean,
     published: boolean,
     collaborationType: number,

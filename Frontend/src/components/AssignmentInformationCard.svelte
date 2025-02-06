@@ -34,12 +34,12 @@
 		},
 		{
 			label: 'Grading',
-			value: toFriendlyName(assignment?.gradingFormat.gradingType)
+			value: toFriendlyName(assignment?.gradingType)
 		},
-		assignment?.gradingFormat.gradingType == 'PointsGrading'
+		assignment?.gradingType == 'PointsGrading'
 			? {
 					label: 'Max Points',
-					value: assignment?.gradingFormat.maxPoints?.toString() || ''
+					value: assignment?.maxPoints?.toString() || ''
 				}
 			: undefined,
 		userRole == Role.Teacher

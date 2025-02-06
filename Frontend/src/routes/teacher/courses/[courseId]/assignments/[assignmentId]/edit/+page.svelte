@@ -1,6 +1,11 @@
 <script lang="ts">
 	import { editAssignment } from 'src/api';
-	import { CollaborationType, GradingTypeEnum, type Assignment, type NewAssignmentField } from 'src/types';
+	import {
+		CollaborationType,
+		GradingTypeEnum,
+		type Assignment,
+		type NewAssignmentField
+	} from 'src/types';
 	import { goto } from '$app/navigation';
 	import CreateOrEditAssignment from 'src/components/CreateOrEditAssignment.svelte';
 	import { page } from '$app/stores';
@@ -21,7 +26,8 @@
 		fields: NewAssignmentField[],
 		description: string,
 		gradingType: GradingTypeEnum,
-		maxPoints: number){
+		maxPoints: number
+	) {
 		try {
 			await editAssignment(assignmentId, {
 				name: assignmentName,
@@ -29,27 +35,28 @@
 				dueDate: dueDate,
 				mandatory: mandatory,
 				published: !draft,
-				gradingFormat: { gradingType: gradingType, maxPoints: maxPoints},
+				gradingType: gradingType,
+				maxPoints: maxPoints,
 				collaborationType: collaborationType,
-				courseId: courseId,
-			})
-			goto(`/teacher/courses/${courseId}/assignments/${assignmentId}`)
-		}
-		catch(exception){
-			console.error("Something Went Wrong!")
+				courseId: courseId
+			});
+			goto(`/teacher/courses/${courseId}/assignments/${assignmentId}`);
+		} catch (exception) {
+			console.error('Something Went Wrong!');
 		}
 	}
 </script>
 
-<CreateOrEditAssignment 
+<CreateOrEditAssignment
 	asssignmentName={data.assignment.name}
 	description={data.assignment.description}
 	mandatory={data.assignment.mandatory}
 	collaberationType={CollaborationType[data.assignment.collaborationType]}
-	gradingType={GradingTypeEnum[data.assignment.gradingFormat.gradingType]}
+	gradingType={GradingTypeEnum[data.assignment.gradingType]}
 	dueDate={data.assignment.dueDate}
-	maxPoints={data.assignment.gradingFormat.maxPoints ? data.assignment.gradingFormat.maxPoints : 0}
+	maxPoints={data.assignment.maxPoints ? data.assignment.maxPoints : 0}
 	draft={!data.assignment.published}
 	submitFunction={editAssignments}
 	edit={true}
-	redirect={`/teacher/courses/${courseId}/assignments/${assignmentId}`}/>
+	redirect={`/teacher/courses/${courseId}/assignments/${assignmentId}`}
+/>

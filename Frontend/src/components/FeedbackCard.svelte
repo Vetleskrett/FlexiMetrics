@@ -15,9 +15,7 @@
 				return feedback!.letterGrade;
 
 			case 'PointsGrading':
-				return (
-					feedback?.points?.toString() + ' / ' + assignment.gradingFormat.maxPoints!.toString()
-				);
+				return feedback?.points?.toString() + ' / ' + assignment.maxPoints!.toString();
 		}
 		return null;
 	};
@@ -38,11 +36,11 @@
 	<Card.Content class="p-0">
 		<div class="flex flex-col">
 			{#if feedback}
-				{#if assignment?.gradingFormat?.gradingType != 'NoGrading'}
+				{#if assignment?.gradingType != 'NoGrading'}
 					<Separator class="w-full" />
 					<div class="flex items-center justify-between px-6 py-4">
 						<h1 class="font-semibold">Grading</h1>
-						<h1>{getGradingString(assignment?.gradingFormat?.gradingType, feedback)}</h1>
+						<h1>{getGradingString(assignment?.gradingType, feedback)}</h1>
 					</div>
 				{/if}
 				<Separator class="w-full" />

@@ -1,0 +1,32 @@
+﻿{
+  Status: 400 Bad Request,
+  Content: {
+    Headers: {
+      Content-Type: application/json; charset=utf-8
+    },
+    Value: {
+      errors: [
+        {
+          propertyName: Name,
+          message: 'Name' must not be empty.
+        },
+        {
+          propertyName: DueDate,
+          message: 'Due Date' must not be empty.
+        },
+        {
+          propertyName: CollaborationType,
+          message: 'Collaboration Type' has a range of values which does not include '100'.
+        },
+        {
+          propertyName: GradingFormat.GradingType,
+          message: 'Grading Format Grading Type' has a range of values which does not include '100'.
+        },
+        {
+          propertyName: Description,
+          message: 'Description' must not be empty.
+        }
+      ]
+    }
+  }
+}

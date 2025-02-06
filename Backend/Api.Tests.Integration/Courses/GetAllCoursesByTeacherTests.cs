@@ -7,7 +7,7 @@ public class GetAllCoursesByTeacherTests(ApiFactory factory) : BaseIntegrationTe
     [Fact]
     public async Task GetAllCoursesByTeacher_ShouldReturnEmpty_WhenEmpty()
     {
-        DbContext.AddRange([
+        DbContext.Courses.AddRange([
             ModelFactory.GetValidCourse(),
             ModelFactory.GetValidCourse(),
             ModelFactory.GetValidCourse(),
@@ -32,7 +32,7 @@ public class GetAllCoursesByTeacherTests(ApiFactory factory) : BaseIntegrationTe
             ModelFactory.GetValidCourse(),
             ModelFactory.GetValidCourse(),
         ];
-        DbContext.AddRange(courses);
+        DbContext.Courses.AddRange(courses);
 
         var teacher = ModelFactory.GetValidTeacher();
         DbContext.Users.Add(teacher);

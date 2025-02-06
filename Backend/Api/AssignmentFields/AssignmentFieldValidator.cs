@@ -14,7 +14,6 @@ public class AssignmentFieldValidator : AbstractValidator<AssignmentField>
             .NotEmpty();
 
         RuleFor(x => x.Type)
-            .NotEmpty()
             .IsInEnum();
 
         RuleFor(x => x.AssignmentId)

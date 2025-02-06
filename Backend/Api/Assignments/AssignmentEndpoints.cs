@@ -1,4 +1,6 @@
 ﻿using Api.Assignments.Contracts;
+using Api.Validation;
+using Database.Models;
 
 namespace Api.Assignments;
 
@@ -20,7 +22,7 @@ public static class AssignmentEndpoints
         group.MapGet("course/{courseId:guid}/assignments", async (IAssignmentService assignmentService, Guid courseId) =>
         {
             var assignments = await assignmentService.GetAllByCourse(courseId);
-            return Results.Ok(assignments);
+            return assignments is not null ? Results.Ok(assignments) : Results.NotFound();
         })
         .Produces<IEnumerable<AssignmentResponse>>()
         .WithName("GetAllAssignmentsByCourse")
@@ -28,8 +30,12 @@ public static class AssignmentEndpoints
 
         group.MapGet("students/{studentId:guid}/course/{courseId:guid}/assignments", async (IAssignmentService assignmentService, Guid studentId, Guid courseId) =>
         {
-            var assignments = await assignmentService.GetAllByStudentCourse(studentId, courseId);
-            return Results.Ok(assignments);
+            var result = await assignmentService.GetAllByStudentCourse(studentId, courseId);
+            return result.Match
+            (
+                assignment => assignment is not null ? Results.Ok(assignment) : Results.NotFound(),
+                failure => Results.BadRequest(failure)
+            );
         })
         .Produces<IEnumerable<StudentAssignmentResponse>>()
         .WithName("GetAllAssignmentsByStudentCourse")
@@ -50,12 +56,12 @@ public static class AssignmentEndpoints
 
             return result.Match
             (
-                assignment => Results.CreatedAtRoute
+                assignment => assignment is not null ? Results.CreatedAtRoute
                     (
                         "GetAssignment",
                         new { id = assignment.Id },
                         assignment
-                    ),
+                    ) : Results.NotFound(),
                 failure => Results.BadRequest(failure)
             );
         })
