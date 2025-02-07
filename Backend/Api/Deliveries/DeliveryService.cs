@@ -103,11 +103,7 @@ public class DeliveryService : IDeliveryService
 
         if (assignment.DueDate < DateTime.UtcNow)
         {
-            return new ValidationError
-            {
-                PropertyName = nameof(assignment.DueDate),
-                Message = "Cannot deliver after assignment due date"
-            }.MapToResponse();
+            return new ValidationError("Cannot deliver after assignment due date").MapToResponse();
         }
 
         Delivery delivery;

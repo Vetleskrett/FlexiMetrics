@@ -1,10 +1,89 @@
-﻿namespace Api.Tests.Integration.Teachers;
+﻿using Api.Teachers.Contracts;
+using System.Net.Http.Json;
+
+namespace Api.Tests.Integration.Teachers;
 
 public class AddTeacherToCourseTests(ApiFactory factory) : BaseIntegrationTest(factory)
 {
     [Fact]
-    public void Test1()
+    public async Task AddTeacherToCourse_ShouldAddTeacherToCourse_WhenValidRequest()
     {
-        throw new NotImplementedException();
+        var course = ModelFactory.GetValidCourse();
+        DbContext.Courses.Add(course);
+
+        var teacher = ModelFactory.GetValidTeacher();
+        DbContext.Users.Add(teacher);
+
+        await DbContext.SaveChangesAsync();
+
+        var request = new AddTeacherRequest
+        {
+            Email = teacher.Email
+        };
+
+        var response = Client.PostAsJsonAsync($"courses/{course.Id}/teachers", request);
+
+        await Verify(response);
+    }
+
+    [Fact]
+    public async Task AddTeacherToCourse_ShouldReturnBadRequest_WhenAlreadyInCourse()
+    {
+        var course = ModelFactory.GetValidCourse();
+        DbContext.Courses.Add(course);
+
+        var teacher = ModelFactory.GetValidTeacher();
+        DbContext.Users.Add(teacher);
+
+        DbContext.CourseTeachers.Add(ModelFactory.GetValidCourseTeacher(course.Id, teacher.Id));
+
+        await DbContext.SaveChangesAsync();
+
+        var request = new AddTeacherRequest
+        {
+            Email = teacher.Email
+        };
+
+        var response = Client.PostAsJsonAsync($"courses/{course.Id}/teachers", request);
+
+        await Verify(response);
+    }
+
+    [Fact]
+    public async Task AddTeacherToCourse_ShouldReturnNotFound_WhenInvalidTeacher()
+    {
+        var course = ModelFactory.GetValidCourse();
+        DbContext.Courses.Add(course);
+
+        await DbContext.SaveChangesAsync();
+
+        var request = new AddTeacherRequest
+        {
+            Email = "teacher@ntnu.no"
+        };
+
+        var response = Client.PostAsJsonAsync($"courses/{course.Id}/teachers", request);
+
+        await Verify(response);
+    }
+
+    [Fact]
+    public async Task AddTeacherToCourse_ShouldReturnNotFound_WhenInvalidCourse()
+    {
+        var teacher = ModelFactory.GetValidTeacher();
+        DbContext.Users.Add(teacher);
+
+        await DbContext.SaveChangesAsync();
+
+        var request = new AddTeacherRequest
+        {
+            Email = teacher.Email
+        };
+
+        var courseId = Guid.NewGuid();
+
+        var response = Client.PostAsJsonAsync($"courses/{courseId}/teachers", request);
+
+        await Verify(response);
     }
 }

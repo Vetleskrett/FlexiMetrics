@@ -2,6 +2,11 @@
 
 public class ValidationError
 {
-    public required string PropertyName { get; init; }
-    public required string Message { get; init; }
+    public string? PropertyName { get; init; }
+    public string Message { get; init; }
+
+    public ValidationError(string message)
+    {
+        Message = message;
+    }
 }

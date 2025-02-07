@@ -32,11 +32,11 @@ public class AppDbContext : DbContext
         var course = modelBuilder.Entity<Course>();
 
         var courseTeacher = modelBuilder.Entity<CourseTeacher>();
-        courseTeacher.HasOne(x => x.Course).WithMany();
+        courseTeacher.HasOne(x => x.Course).WithMany(x => x.CourseTeachers);
         courseTeacher.HasOne(x => x.Teacher).WithMany();
 
         var courseStudent = modelBuilder.Entity<CourseStudent>();
-        courseStudent.HasOne(x => x.Course).WithMany();
+        courseStudent.HasOne(x => x.Course).WithMany(x => x.CourseStudents);
         courseStudent.HasOne(x => x.Student).WithMany();
 
         var team = modelBuilder.Entity<Team>();

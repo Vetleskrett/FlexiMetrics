@@ -8,7 +8,7 @@
       errors: [
         {
           propertyName: null,
-          message: Student is not enrolled in the course
+          message: Teacher is not a teacher in the course
         }
       ]
     }
