@@ -1,4 +1,5 @@
 ﻿using Api.Teachers.Contracts;
+using Microsoft.EntityFrameworkCore;
 using System.Net.Http.Json;
 
 namespace Api.Tests.Integration.Teachers;
@@ -24,6 +25,7 @@ public class AddTeacherToCourseTests(ApiFactory factory) : BaseIntegrationTest(f
         var response = Client.PostAsJsonAsync($"courses/{course.Id}/teachers", request);
 
         await Verify(response);
+        Assert.True(await DbContext.CourseTeachers.AnyAsync(ct => ct.CourseId == course.Id && ct.TeacherId == teacher.Id));
     }
 
     [Fact]

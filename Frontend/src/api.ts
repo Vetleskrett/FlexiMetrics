@@ -88,7 +88,7 @@ export function getStudents(courseId: string): Promise<AxiosResponse<Student[]>>
   return instance.get(`/courses/${courseId}/students`)
 }
 
-export function postStudentsCourse(courseId: string, emails: AddStudentsToCourse) : Promise<AxiosResponse> {
+export function postStudentsCourse(courseId: string, emails: AddStudentsToCourse) : Promise<AxiosResponse<Student[]>> {
   return instance.post(`/courses/${courseId}/students`, emails)
 }
 
