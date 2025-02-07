@@ -9,10 +9,19 @@ public static class AssignmentFieldEndpoints
     {
         var group = app.MapGroup("").WithTags("AssignmentFields");
 
+        group.MapGet("assignment-fields", async (IAssignmentFieldService assignmentFieldService) =>
+        {
+            var fields = await assignmentFieldService.GetAll();
+            return Results.Ok(fields);
+        })
+        .Produces<IEnumerable<AssignmentFieldResponse>>()
+        .WithName("GetAllAssignmentFields")
+        .WithSummary("Get all assignment fields");
+
         group.MapGet("/assignments/{assignmentId:guid}/fields", async (IAssignmentFieldService assignmentFieldService, Guid assignmentId) =>
         {
             var fields = await assignmentFieldService.GetAllByAssignment(assignmentId);
-            return Results.Ok(fields);
+            return fields is not null ? Results.Ok(fields) : Results.NotFound();
         })
         .Produces<IEnumerable<AssignmentFieldResponse>>()
         .WithName("GetAllAssignmentFieldsByAssignment")
@@ -24,12 +33,12 @@ public static class AssignmentFieldEndpoints
 
             return result.Match
             (
-                field => Results.CreatedAtRoute
+                field => field is not null ? Results.CreatedAtRoute
                     (
                         "GetAllAssignmentFieldsByAssignment",
                         new { assignmentId = field.AssignmentId },
                         field
-                    ),
+                    ) : Results.NotFound(),
                 failure => Results.BadRequest(failure)
             );
         })

@@ -1,0 +1,28 @@
+﻿{
+  Status: 200 OK,
+  Content: {
+    Headers: {
+      Content-Type: application/json; charset=utf-8
+    },
+    Value: [
+      {
+        id: Guid_1,
+        type: String,
+        name: Project title,
+        assignmentId: Guid_2
+      },
+      {
+        id: Guid_3,
+        type: String,
+        name: Project title,
+        assignmentId: Guid_2
+      },
+      {
+        id: Guid_4,
+        type: String,
+        name: Project title,
+        assignmentId: Guid_2
+      }
+    ]
+  }
+}

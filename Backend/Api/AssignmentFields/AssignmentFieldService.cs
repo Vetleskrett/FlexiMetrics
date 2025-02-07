@@ -10,8 +10,9 @@ namespace Api.AssignmentFields;
 
 public interface IAssignmentFieldService
 {
+    Task<IEnumerable<AssignmentFieldResponse>> GetAll();
     Task<IEnumerable<AssignmentFieldResponse>?> GetAllByAssignment(Guid assignmentId);
-    Task<Result<AssignmentFieldResponse, ValidationResponse>> Create(CreateAssignmentFieldRequest request);
+    Task<Result<AssignmentFieldResponse?, ValidationResponse>> Create(CreateAssignmentFieldRequest request);
     Task<Result<AssignmentFieldResponse?, ValidationResponse>> Update(UpdateAssignmentFieldRequest request, Guid id);
     Task<bool> DeleteById(Guid id);
 }
@@ -27,20 +28,38 @@ public class AssignmentFieldService : IAssignmentFieldService
         _validator = validator;
     }
 
-    public async Task<IEnumerable<AssignmentFieldResponse>?> GetAllByAssignment(Guid assignmentId)
+    public async Task<IEnumerable<AssignmentFieldResponse>> GetAll()
     {
         var fields = await _dbContext.AssignmentFields
             .AsNoTracking()
-            .Where(f => f.AssignmentId == assignmentId)
             .ToListAsync();
 
         return fields.MapToResponse();
     }
 
-    public async Task<Result<AssignmentFieldResponse, ValidationResponse>> Create(CreateAssignmentFieldRequest request)
+    public async Task<IEnumerable<AssignmentFieldResponse>?> GetAllByAssignment(Guid assignmentId)
+    {
+        var assignment = await _dbContext.Assignments
+            .Include(a => a.Fields)
+            .FirstOrDefaultAsync(a => a.Id == assignmentId);
+
+        if (assignment is null)
+        {
+            return default;
+        }
+
+        return assignment.Fields!.MapToResponse();
+    }
+
+    public async Task<Result<AssignmentFieldResponse?, ValidationResponse>> Create(CreateAssignmentFieldRequest request)
     {
         var field = request.MapToAssignmentField();
-        field.Assignment = await _dbContext.Assignments.FindAsync(field.AssignmentId);
+        var assignment = await _dbContext.Assignments.FindAsync(field.AssignmentId);
+
+        if (assignment is null)
+        {
+            return default;
+        }
 
         var validationResult = await _validator.ValidateAsync(field);
         if (!validationResult.IsValid)
