@@ -50,12 +50,12 @@ public static class CourseEndpoints
 
             return result.Match
             (
-                course => Results.CreatedAtRoute
+                course => course is not null ? Results.CreatedAtRoute
                 (
                     "GetCourse",
                     new { id = course.Id },
                     course
-                ),
+                ) : Results.NotFound(),
                 failure => Results.BadRequest(failure)
             );
         })

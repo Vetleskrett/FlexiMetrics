@@ -14,7 +14,7 @@ public interface ICourseService
     Task<IEnumerable<CourseResponse>?> GetAllByTeacher(Guid teacherId);
     Task<IEnumerable<CourseResponse>?> GetAllByStudent(Guid studentId);
     Task<CourseResponse?> GetById(Guid id);
-    Task<Result<CourseResponse, ValidationResponse>> Create(CreateCourseRequest request);
+    Task<Result<CourseResponse?, ValidationResponse>> Create(CreateCourseRequest request);
     Task<Result<CourseResponse?, ValidationResponse>> Update(UpdateCourseRequest request, Guid id);
     Task<bool> DeleteById(Guid id);
 }
@@ -77,8 +77,14 @@ public class CourseService : ICourseService
         return course?.MapToResponse();
     }
 
-    public async Task<Result<CourseResponse, ValidationResponse>> Create(CreateCourseRequest request)
+    public async Task<Result<CourseResponse?, ValidationResponse>> Create(CreateCourseRequest request)
     {
+        var teacher = await _dbContext.Users.FindAsync(request.TeacherId);
+        if (teacher is null)
+        {
+            return default;
+        }
+
         var course = request.MapToCourse();
         var validationResult = await _validator.ValidateAsync(course);
         if (!validationResult.IsValid)
@@ -87,6 +93,11 @@ public class CourseService : ICourseService
         }
 
         _dbContext.Courses.Add(course);
+        _dbContext.CourseTeachers.Add(new CourseTeacher
+        {
+            CourseId = course.Id,
+            TeacherId = teacher.Id,
+        });
         await _dbContext.SaveChangesAsync();
 
         return course.MapToResponse();
