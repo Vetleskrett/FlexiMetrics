@@ -9,7 +9,7 @@ namespace Api.Teachers;
 public interface ITeacherService
 {
     Task<IEnumerable<TeacherResponse>?> GetAllByCourse(Guid courseId);
-    Task<bool> AddToCourse(Guid courseId, AddTeacherRequest request);
+    Task<Result<bool, ValidationResponse>> AddToCourse(Guid courseId, AddTeacherRequest request);
     Task<Result<bool, ValidationResponse>> RemoveFromCourse(Guid courseId, Guid teacherId);
 }
 
@@ -24,32 +24,47 @@ public class TeacherService : ITeacherService
 
     public async Task<IEnumerable<TeacherResponse>?> GetAllByCourse(Guid courseId)
     {
-        var teachers = await _dbContext.CourseTeachers
-            .AsNoTracking()
-            .Include(x => x.Teacher)
-            .Where(x => x.CourseId == courseId)
-            .Select(x => x.Teacher)
-            .ToListAsync();
+        var course = await _dbContext.Courses
+            .Include(c => c.CourseTeachers!)
+            .ThenInclude(ct => ct.Teacher)
+            .FirstOrDefaultAsync(c => c.Id == courseId);
 
-        return teachers!.MapToTeacherResponse();
+        if (course is null)
+        {
+            return default;
+        }
+
+        var teachers = course.CourseTeachers!
+            .Select(ct => ct.Teacher!)
+            .OrderBy(t => t.Email);
+
+        return teachers.MapToTeacherResponse();
     }
 
-    public async Task<bool> AddToCourse(Guid courseId, AddTeacherRequest request)
+    public async Task<Result<bool, ValidationResponse>> AddToCourse(Guid courseId, AddTeacherRequest request)
     {
-        var user = await _dbContext.Users
+        var teacher = await _dbContext.Users
             .FirstOrDefaultAsync(u => u.Email == request.Email);
 
         var course = await _dbContext.Courses.FindAsync(courseId);
 
-        if (user is null || course is null)
+        if (teacher is null || course is null)
         {
             return false;
+        }
+
+        var alreadyInCourse = await _dbContext.CourseTeachers
+            .AnyAsync(ct => ct.CourseId == courseId && ct.TeacherId == teacher.Id);
+
+        if (alreadyInCourse)
+        {
+            return new ValidationError("Teacher already in course").MapToResponse();
         }
 
         _dbContext.CourseTeachers.Add(new CourseTeacher
         {
             CourseId = courseId,
-            TeacherId = user.Id
+            TeacherId = teacher.Id
         });
         await _dbContext.SaveChangesAsync();
 
@@ -58,23 +73,30 @@ public class TeacherService : ITeacherService
 
     public async Task<Result<bool, ValidationResponse>> RemoveFromCourse(Guid courseId, Guid teacherId)
     {
-        var numTeachers = await _dbContext.CourseTeachers
-            .Where(x => x.CourseId == courseId)
-            .CountAsync();
+        var course = await _dbContext.Courses
+            .Include(c => c.CourseTeachers)
+            .FirstOrDefaultAsync(c => c.Id == courseId);
 
-        if (numTeachers <= 1)
+        var teacher = await _dbContext.Users.FindAsync(teacherId);
+
+        if (course is null || teacher is null)
         {
-            return new ValidationError
-            {
-                PropertyName = nameof(Teachers),
-                Message = "Course must have at least one teacher."
-            }.MapToResponse();
+            return false;
         }
 
-        var numDeleted = await _dbContext.CourseTeachers
-            .Where(x => x.CourseId == courseId && x.TeacherId == teacherId)
-            .ExecuteDeleteAsync();
+        if (!course.CourseTeachers!.Any(ct => ct.TeacherId == teacherId))
+        {
+            return new ValidationError("Teacher is not a teacher in the course").MapToResponse();
+        }
 
-        return numDeleted > 0;
+        if (course.CourseTeachers!.Count <= 1)
+        {
+            return new ValidationError("Course must have at least one teacher").MapToResponse();
+        }
+
+        course.CourseTeachers.RemoveAll(ct => ct.TeacherId == teacherId);
+        await _dbContext.SaveChangesAsync();
+
+        return true;
     }
 }

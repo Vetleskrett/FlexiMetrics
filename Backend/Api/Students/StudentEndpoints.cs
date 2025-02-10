@@ -1,4 +1,5 @@
 ﻿using Api.Students.Contracts;
+using Api.Validation;
 
 namespace Api.Students;
 
@@ -11,7 +12,7 @@ public static class StudentEndpoints
         group.MapGet("courses/{courseId:guid}/students", async (IStudentService studentService, Guid courseId) =>
         {
             var courses = await studentService.GetAllByCourse(courseId);
-            return Results.Ok(courses);
+            return courses is not null ? Results.Ok(courses) : Results.NotFound();
         })
         .Produces<IEnumerable<StudentResponse>>()
         .WithName("GetAllStudentsByCourse")
@@ -19,16 +20,21 @@ public static class StudentEndpoints
 
         group.MapPost("courses/{courseId:guid}/students", async (IStudentService studentService, Guid courseId, AddStudentsToCourseRequest request) =>
         {
-            var added = await studentService.AddToCourse(courseId, request);
-            return added ? Results.Ok() : Results.NotFound();
+            var students = await studentService.AddToCourse(courseId, request);
+            return students is not null ? Results.Ok(students) : Results.NotFound();
         })
+        .Produces<IEnumerable<StudentResponse>>()
         .WithName("AddStudentsToCourse")
         .WithSummary("Add students to course");
 
         group.MapDelete("courses/{courseId:guid}/students/{studentId:guid}", async (IStudentService studentService, Guid courseId, Guid studentId) =>
         {
-            var removed = await studentService.RemoveFromCourse(courseId, studentId);
-            return removed ? Results.Ok() : Results.NotFound();
+            var result = await studentService.RemoveFromCourse(courseId, studentId);
+            return result.Match
+            (
+                deleted => deleted ? Results.Ok() : Results.NotFound(),
+                failure => Results.BadRequest(failure)
+            );
         })
         .WithName("RemoveStudentFromCourse")
         .WithSummary("Remove student from course");

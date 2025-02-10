@@ -35,6 +35,7 @@
 
 	<ItemGroup>
 		<Folder Include="Courses\snapshots\" />
+		<Folder Include="Teams\snapshots\" />
 	</ItemGroup>
 
 </Project>

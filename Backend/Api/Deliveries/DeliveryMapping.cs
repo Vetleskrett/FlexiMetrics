@@ -14,7 +14,7 @@ public static class DeliveryMapping
             AssignmentId = request.AssignmentId,
             StudentId = request.StudentId,
             TeamId = null,
-            Fields = request.Fields.MapToDeliveryFields(id).ToList(),
+            Fields = request.Fields.MapToDeliveryFields(id),
         };
     }
 
@@ -27,7 +27,7 @@ public static class DeliveryMapping
             AssignmentId = request.AssignmentId,
             TeamId = teamId,
             StudentId = null,
-            Fields = request.Fields.MapToDeliveryFields(id).ToList(),
+            Fields = request.Fields.MapToDeliveryFields(id),
         };
     }
 
@@ -42,9 +42,9 @@ public static class DeliveryMapping
         };
     }
 
-    public static IEnumerable<DeliveryField> MapToDeliveryFields(this IEnumerable<CreateDeliveryFieldRequest> fields, Guid deliveryId)
+    public static List<DeliveryField> MapToDeliveryFields(this IEnumerable<CreateDeliveryFieldRequest> fields, Guid deliveryId)
     {
-        return fields.Select(field => field.MapToDeliveryField(deliveryId));
+        return fields.Select(field => field.MapToDeliveryField(deliveryId)).ToList();
     }
 
     public static DeliveryResponse MapToResponse(this Delivery delivery)
@@ -55,13 +55,13 @@ public static class DeliveryMapping
             AssignmentId = delivery.AssignmentId,
             StudentId = delivery.StudentId,
             TeamId = delivery.TeamId,
-            Fields = delivery.Fields!.MapToResponse().ToList(),
+            Fields = delivery.Fields!.MapToResponse(),
         };
     }
 
-    public static IEnumerable<DeliveryResponse> MapToResponse(this IEnumerable<Delivery> deliveries)
+    public static List<DeliveryResponse> MapToResponse(this IEnumerable<Delivery> deliveries)
     {
-        return deliveries.Select(delivery => delivery.MapToResponse());
+        return deliveries.Select(delivery => delivery.MapToResponse()).ToList();
     }
 
     public static DeliveryFieldResponse MapToResponse(this DeliveryField field)
@@ -74,8 +74,8 @@ public static class DeliveryMapping
         };
     }
 
-    public static IEnumerable<DeliveryFieldResponse> MapToResponse(this IEnumerable<DeliveryField> fields)
+    public static List<DeliveryFieldResponse> MapToResponse(this IEnumerable<DeliveryField> fields)
     {
-        return fields.Select(field => field.MapToResponse());
+        return fields.Select(field => field.MapToResponse()).ToList();
     }
 }

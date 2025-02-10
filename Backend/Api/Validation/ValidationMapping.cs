@@ -8,10 +8,9 @@ public static class ValidationMapping
     {
         return new ValidationResponse
         {
-            Errors = failures.Select(x => new ValidationError
+            Errors = failures.Select(x => new ValidationError(x.ErrorMessage)
             {
-                PropertyName = x.PropertyName,
-                Message = x.ErrorMessage
+                PropertyName = x.PropertyName
             })
         };
     }

@@ -23,9 +23,8 @@
 		const studentEmails = handleInput(input);
 		try {
 			if (studentEmails) {
-				await postStudentsCourse(courseId, { emails: studentEmails });
-				const studentsResponse = await getStudents(courseId);
-				data.students = studentsResponse.data;
+				var response = await postStudentsCourse(courseId, { emails: studentEmails });
+				data.students = response.data;
 			}
 		} catch (error) {
 			console.error('Something went wrong!');

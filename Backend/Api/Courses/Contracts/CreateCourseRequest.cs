@@ -8,4 +8,5 @@ public class CreateCourseRequest
     public required string Name { get; init; }
     public required int Year { get; init; }
     public required Semester Semester { get; init; }
+    public required Guid TeacherId { get; init; }
 }

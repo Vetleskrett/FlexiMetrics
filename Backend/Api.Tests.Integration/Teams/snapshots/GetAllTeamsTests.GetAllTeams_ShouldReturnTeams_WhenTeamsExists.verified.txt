@@ -1,0 +1,105 @@
+﻿{
+  Status: 200 OK,
+  Content: {
+    Headers: {
+      Content-Type: application/json; charset=utf-8
+    },
+    Value: [
+      {
+        id: Guid_1,
+        courseId: Guid_2,
+        teamNr: 1,
+        students: [
+          {
+            id: Guid_3,
+            email: student1@ntnu.no,
+            name: Student Studentsen
+          },
+          {
+            id: Guid_4,
+            email: student2@ntnu.no,
+            name: Student Studentsen
+          }
+        ]
+      },
+      {
+        id: Guid_5,
+        courseId: Guid_2,
+        teamNr: 2,
+        students: [
+          {
+            id: Guid_6,
+            email: student3@ntnu.no,
+            name: Student Studentsen
+          },
+          {
+            id: Guid_7,
+            email: student4@ntnu.no,
+            name: Student Studentsen
+          }
+        ]
+      },
+      {
+        id: Guid_8,
+        courseId: Guid_2,
+        teamNr: 3,
+        students: [
+          {
+            id: Guid_9,
+            email: student5@ntnu.no,
+            name: Student Studentsen
+          },
+          {
+            id: Guid_10,
+            email: student6@ntnu.no,
+            name: Student Studentsen
+          }
+        ]
+      },
+      {
+        id: Guid_11,
+        courseId: Guid_12,
+        teamNr: 1,
+        students: [
+          {
+            id: Guid_3,
+            email: student1@ntnu.no,
+            name: Student Studentsen
+          },
+          {
+            id: Guid_4,
+            email: student2@ntnu.no,
+            name: Student Studentsen
+          },
+          {
+            id: Guid_6,
+            email: student3@ntnu.no,
+            name: Student Studentsen
+          }
+        ]
+      },
+      {
+        id: Guid_13,
+        courseId: Guid_12,
+        teamNr: 2,
+        students: [
+          {
+            id: Guid_7,
+            email: student4@ntnu.no,
+            name: Student Studentsen
+          },
+          {
+            id: Guid_9,
+            email: student5@ntnu.no,
+            name: Student Studentsen
+          },
+          {
+            id: Guid_10,
+            email: student6@ntnu.no,
+            name: Student Studentsen
+          }
+        ]
+      }
+    ]
+  }
+}

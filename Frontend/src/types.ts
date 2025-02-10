@@ -173,7 +173,8 @@ export type CreateCourse = {
     code: string,
     name: string,
     year: number
-    semester: number
+    semester: string,
+    teacherId: string
 }
 
 export type AddTeacherToCourse = {

@@ -16,7 +16,7 @@
       {
         id: Guid_3,
         name: Frontend project,
-        dueDate: DateTimeOffset_1,
+        dueDate: DateTimeOffset_2,
         collaborationType: Individual,
         isDelivered: false,
         courseId: Guid_2
@@ -24,7 +24,7 @@
       {
         id: Guid_4,
         name: Frontend project,
-        dueDate: DateTimeOffset_1,
+        dueDate: DateTimeOffset_3,
         collaborationType: Individual,
         isDelivered: false,
         courseId: Guid_2

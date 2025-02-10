@@ -19,8 +19,12 @@ public static class TeacherEndpoints
 
         group.MapPost("courses/{courseId:guid}/teachers", async (ITeacherService teacherService, Guid courseId, AddTeacherRequest request) =>
         {
-            var added = await teacherService.AddToCourse(courseId, request);
-            return added ? Results.Ok() : Results.NotFound();
+            var result = await teacherService.AddToCourse(courseId, request);
+            return result.Match
+            (
+                added => added ? Results.Ok() : Results.NotFound(),
+                failure => Results.BadRequest(failure)
+            );
         })
         .WithName("AddTeacherToCourse")
         .WithSummary("Add teacher to course");

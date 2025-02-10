@@ -1,4 +1,6 @@
 ﻿using Api.Students.Contracts;
+using Api.Teachers;
+using Api.Validation;
 using Database;
 using Database.Models;
 using Microsoft.EntityFrameworkCore;
@@ -7,9 +9,9 @@ namespace Api.Students;
 
 public interface IStudentService
 {
-    Task<IEnumerable<StudentResponse>> GetAllByCourse(Guid courseId);
-    Task<bool> AddToCourse(Guid courseId, AddStudentsToCourseRequest request);
-    Task<bool> RemoveFromCourse(Guid courseId, Guid studentId);
+    Task<IEnumerable<StudentResponse>?> GetAllByCourse(Guid courseId);
+    Task<IEnumerable<StudentResponse>?> AddToCourse(Guid courseId, AddStudentsToCourseRequest request);
+    Task<Result<bool, ValidationResponse>> RemoveFromCourse(Guid courseId, Guid studentId);
 }
 
 public class StudentService : IStudentService
@@ -21,23 +23,35 @@ public class StudentService : IStudentService
         _dbContext = dbContext;
     }
 
-    public async Task<IEnumerable<StudentResponse>> GetAllByCourse(Guid courseId)
+    public async Task<IEnumerable<StudentResponse>?> GetAllByCourse(Guid courseId)
     {
-        var students = await _dbContext.CourseStudents
-            .Include(c => c.Student)
-            .Where(x => x.CourseId == courseId)
-            .Select(x => x.Student!)
-            .ToListAsync();
+        var course = await _dbContext.Courses
+            .Include(c => c.CourseStudents!)
+            .ThenInclude(cs => cs.Student)
+            .FirstOrDefaultAsync(c => c.Id == courseId);
+
+        if (course is null)
+        {
+            return default;
+        }
+
+        var students = course.CourseStudents!
+            .Select(ct => ct.Student!)
+            .OrderBy(t => t.Email);
 
         return students.MapToStudentResponse();
     }
 
-    public async Task<bool> AddToCourse(Guid courseId, AddStudentsToCourseRequest request)
+    public async Task<IEnumerable<StudentResponse>?> AddToCourse(Guid courseId, AddStudentsToCourseRequest request)
     {
-        var course = await _dbContext.Courses.FindAsync(courseId);
+        var course = await _dbContext.Courses
+            .Include(c => c.CourseStudents!)
+            .ThenInclude(cs => cs.Student)
+            .FirstOrDefaultAsync(c => c.Id == courseId);
+
         if (course is null)
         {
-            return false;
+            return default;
         }
 
         var existingUsers = await _dbContext.Users
@@ -58,12 +72,12 @@ public class StudentService : IStudentService
             .ToList();
         _dbContext.Users.AddRange(newUsers);
 
-        var alreadyInCourse = await _dbContext.CourseStudents
+        var alreadyInCourse = course.CourseStudents!
             .Where(x => existingUsersIds.Contains(x.StudentId))
             .Select(x => x.StudentId)
-            .ToListAsync();
+            .ToList();
 
-        var courseStudents = existingUsersIds
+        var newCourseStudents = existingUsersIds
             .Except(alreadyInCourse)
             .Union(newUsers.Select(x => x.Id))
             .Select(studentId => new CourseStudent
@@ -71,20 +85,38 @@ public class StudentService : IStudentService
                 CourseId = courseId,
                 StudentId = studentId,
             });
-
-        _dbContext.CourseStudents.AddRange(courseStudents);
+        course.CourseStudents!.AddRange(newCourseStudents);
 
         await _dbContext.SaveChangesAsync();
 
-        return true;
+        var students = course.CourseStudents!
+            .Select(ct => ct.Student!)
+            .OrderBy(t => t.Email);
+
+        return students.MapToStudentResponse();
     }
 
-    public async Task<bool> RemoveFromCourse(Guid courseId, Guid studentId)
+    public async Task<Result<bool, ValidationResponse>> RemoveFromCourse(Guid courseId, Guid studentId)
     {
-        var removed = await _dbContext.CourseStudents
-            .Where(x => x.CourseId == courseId && x.StudentId == studentId)
-            .ExecuteDeleteAsync();
+        var course = await _dbContext.Courses
+            .Include(c => c.CourseStudents)
+            .FirstOrDefaultAsync(c => c.Id == courseId);
 
-        return removed > 0;
+        var student = await _dbContext.Users.FindAsync(studentId);
+
+        if (course is null || student is null)
+        {
+            return false;
+        }
+
+        if (!course.CourseStudents!.Any(ct => ct.StudentId == studentId))
+        {
+            return new ValidationError("Student is not enrolled in the course").MapToResponse();
+        }
+
+        course.CourseStudents!.RemoveAll(ct => ct.StudentId == studentId);
+        await _dbContext.SaveChangesAsync();
+
+        return true;
     }
 }

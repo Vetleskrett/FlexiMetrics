@@ -1,20 +1,13 @@
-﻿using Database.Models;
-
-namespace Api.Tests.Integration.Courses;
+﻿namespace Api.Tests.Integration.Courses;
 
 public class GetAllCoursesByTeacherTests(ApiFactory factory) : BaseIntegrationTest(factory)
 {
     [Fact]
     public async Task GetAllCoursesByTeacher_ShouldReturnEmpty_WhenEmpty()
     {
-        DbContext.Courses.AddRange([
-            ModelFactory.GetValidCourse(),
-            ModelFactory.GetValidCourse(),
-            ModelFactory.GetValidCourse(),
-        ]);
+        ModelFactory.CreateCourses(3);
 
-        var teacher = ModelFactory.GetValidTeacher();
-        DbContext.Users.Add(teacher);
+        var teacher = ModelFactory.CreateTeacher();
 
         await DbContext.SaveChangesAsync();
 
@@ -25,21 +18,13 @@ public class GetAllCoursesByTeacherTests(ApiFactory factory) : BaseIntegrationTe
     [Fact]
     public async Task GetAllCoursesByTeacher_ShouldReturnCourses_WhenCoursesExists()
     {
-        List<Course> courses = [
-            ModelFactory.GetValidCourse(),
-            ModelFactory.GetValidCourse(),
-            ModelFactory.GetValidCourse(),
-            ModelFactory.GetValidCourse(),
-            ModelFactory.GetValidCourse(),
-        ];
-        DbContext.Courses.AddRange(courses);
+        var courses = ModelFactory.CreateCourses(5);
 
-        var teacher = ModelFactory.GetValidTeacher();
-        DbContext.Users.Add(teacher);
+        var teacher = ModelFactory.CreateTeacher();
 
-        DbContext.CourseTeachers.Add(ModelFactory.GetValidCourseTeacher(courses[0].Id, teacher.Id));
-        DbContext.CourseTeachers.Add(ModelFactory.GetValidCourseTeacher(courses[1].Id, teacher.Id));
-        DbContext.CourseTeachers.Add(ModelFactory.GetValidCourseTeacher(courses[2].Id, teacher.Id));
+        ModelFactory.CreateCourseTeacher(courses[0].Id, teacher.Id);
+        ModelFactory.CreateCourseTeacher(courses[1].Id, teacher.Id);
+        ModelFactory.CreateCourseTeacher(courses[2].Id, teacher.Id);
 
         await DbContext.SaveChangesAsync();
 

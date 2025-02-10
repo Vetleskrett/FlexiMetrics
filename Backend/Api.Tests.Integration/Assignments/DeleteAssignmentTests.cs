@@ -1,5 +1,4 @@
-﻿using Database.Models;
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 
 namespace Api.Tests.Integration.Assignments;
 
@@ -8,11 +7,9 @@ public class DeleteAssignmentTests(ApiFactory factory) : BaseIntegrationTest(fac
     [Fact]
     public async Task DeleteAssignment_ShouldDeleteAssignment_WhenValidAssignment()
     {
-        var course = ModelFactory.GetValidCourse();
-        DbContext.Courses.Add(course);
+        var course = ModelFactory.CreateCourse();
 
-        var assignment = ModelFactory.GetValidAssignment(course.Id);
-        DbContext.Assignments.Add(assignment);
+        var assignment = ModelFactory.CreateAssignment(course.Id);
 
         await DbContext.SaveChangesAsync();
 
@@ -25,17 +22,11 @@ public class DeleteAssignmentTests(ApiFactory factory) : BaseIntegrationTest(fac
     [Fact]
     public async Task DeleteAssignment_ShouldDeleteAssignmentFields_WhenValidAssignment()
     {
-        var course = ModelFactory.GetValidCourse();
-        DbContext.Courses.Add(course);
+        var course = ModelFactory.CreateCourse();
 
-        var assignment = ModelFactory.GetValidAssignment(course.Id);
-        DbContext.Assignments.Add(assignment);
+        var assignment = ModelFactory.CreateAssignment(course.Id);
 
-        DbContext.AssignmentFields.AddRange([
-            ModelFactory.GetValidAssignmentField(assignment.Id),
-            ModelFactory.GetValidAssignmentField(assignment.Id),
-            ModelFactory.GetValidAssignmentField(assignment.Id),
-        ]);
+        ModelFactory.CreateAssignmentFields(assignment.Id, 3);
 
         await DbContext.SaveChangesAsync();
 
@@ -47,30 +38,13 @@ public class DeleteAssignmentTests(ApiFactory factory) : BaseIntegrationTest(fac
     [Fact]
     public async Task DeleteAssignment_ShouldDeleteDeliveries_WhenValidAssignment()
     {
-        var course = ModelFactory.GetValidCourse();
-        DbContext.Courses.Add(course);
+        var course = ModelFactory.CreateCourse();
 
-        var assignment = ModelFactory.GetValidAssignment(course.Id);
-        DbContext.Assignments.Add(assignment);
+        var assignment = ModelFactory.CreateAssignment(course.Id);
 
-        List<User> students = [
-            ModelFactory.GetValidStudent("student1@ntnu.no"),
-            ModelFactory.GetValidStudent("student2@ntnu.no"),
-            ModelFactory.GetValidStudent("student3@ntnu.no"),
-        ];
-        DbContext.Users.AddRange(students);
+        var students = ModelFactory.CreateCourseStudents(course.Id, 3);
 
-        DbContext.CourseStudents.AddRange([
-            ModelFactory.GetValidCourseStudent(course.Id, students[0].Id),
-            ModelFactory.GetValidCourseStudent(course.Id, students[1].Id),
-            ModelFactory.GetValidCourseStudent(course.Id, students[2].Id),
-        ]);
-
-        DbContext.Deliveries.AddRange([
-            ModelFactory.GetValidStudentDelivery(assignment.Id, students[0].Id),
-            ModelFactory.GetValidStudentDelivery(assignment.Id, students[1].Id),
-            ModelFactory.GetValidStudentDelivery(assignment.Id, students[2].Id),
-        ]);
+        ModelFactory.CreateStudentDeliveries(assignment.Id, students);
 
         await DbContext.SaveChangesAsync();
 

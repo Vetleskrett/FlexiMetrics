@@ -3,8 +3,37 @@
 public class GetAllTeachersByCourseTests(ApiFactory factory) : BaseIntegrationTest(factory)
 {
     [Fact]
-    public void Test1()
+    public async Task GetAllTeachersByCourse_ShouldReturnEmpty_WhenEmpty()
     {
-        throw new NotImplementedException();
+        var course = ModelFactory.CreateCourse();
+        await DbContext.SaveChangesAsync();
+
+        var response = Client.GetAsync($"courses/{course.Id}/teachers");
+
+        await Verify(response);
+    }
+
+    [Fact]
+    public async Task GetAllTeachersByCourse_ShouldReturnTeachers_WhenTeachersExists()
+    {
+        var course = ModelFactory.CreateCourse();
+
+        ModelFactory.CreateCourseTeachers(course.Id, 3);
+
+        await DbContext.SaveChangesAsync();
+
+        var response = Client.GetAsync($"courses/{course.Id}/teachers");
+
+        await Verify(response);
+    }
+
+    [Fact]
+    public async Task GetAllTeachersByCourse_ShouldNotFound_WhenInvalidCourse()
+    {
+        var id = Guid.NewGuid();
+
+        var response = Client.GetAsync($"courses/{id}/teachers");
+
+        await Verify(response);
     }
 }

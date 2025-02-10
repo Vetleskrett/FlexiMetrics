@@ -74,11 +74,7 @@ public class AssignmentService : IAssignmentService
 
         if (courseStudent is null)
         {
-            return new ValidationError
-            {
-                PropertyName = "[studentId, courseId]",
-                Message = "Student is not enrolled in the course"
-            }.MapToResponse();
+            return new ValidationError("Student is not enrolled in the course").MapToResponse();
         }
 
         var assignments = await _dbContext.Assignments

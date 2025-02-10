@@ -8,6 +8,7 @@ public abstract class BaseIntegrationTest : IClassFixture<ApiFactory>, IAsyncLif
 {
     protected readonly HttpClient Client;
     protected readonly AppDbContext DbContext;
+    protected readonly ModelFactory ModelFactory;
 
     public BaseIntegrationTest(ApiFactory factory)
     {
@@ -15,6 +16,8 @@ public abstract class BaseIntegrationTest : IClassFixture<ApiFactory>, IAsyncLif
 
         var scope = factory.Services.CreateScope();
         DbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+
+        ModelFactory = new(DbContext);
     }
 
     public Task InitializeAsync()

@@ -12,14 +12,10 @@ public class GetAllAssignmentsTests(ApiFactory factory) : BaseIntegrationTest(fa
     [Fact]
     public async Task GetAllAssignments_ShouldReturnAssignments_WhenAssignmentsExists()
     {
-        var course = ModelFactory.GetValidCourse();
-        DbContext.Courses.Add(course);
+        var course = ModelFactory.CreateCourse();
 
-        DbContext.Assignments.AddRange([
-            ModelFactory.GetValidAssignment(course.Id),
-            ModelFactory.GetValidAssignment(course.Id),
-            ModelFactory.GetValidAssignment(course.Id)
-        ]);
+        var asignments = ModelFactory.CreateAssignments(course.Id, 3);
+
         await DbContext.SaveChangesAsync();
 
         var response = await Client.GetAsync("assignments");

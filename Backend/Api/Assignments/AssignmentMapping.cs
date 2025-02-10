@@ -28,9 +28,9 @@ public static class AssignmentMapping
         };
     }
 
-    public static IEnumerable<AssignmentField> MapToAssignmentField(this IEnumerable<NewAssignmentFieldRequest> fields, Guid assignmentId)
+    public static List<AssignmentField> MapToAssignmentField(this IEnumerable<NewAssignmentFieldRequest> fields, Guid assignmentId)
     {
-        return fields.Select(field => field.MapToAssignmentField(assignmentId));
+        return fields.Select(field => field.MapToAssignmentField(assignmentId)).ToList();
     }
 
     public static AssignmentField MapToAssignmentField(this NewAssignmentFieldRequest request, Guid assignmentId)
@@ -81,8 +81,8 @@ public static class AssignmentMapping
         };
     }
 
-    public static IEnumerable<AssignmentResponse> MapToResponse(this IEnumerable<Assignment> assignments)
+    public static List<AssignmentResponse> MapToResponse(this IEnumerable<Assignment> assignments)
     {
-        return assignments.Select(assignment => assignment.MapToResponse());
+        return assignments.Select(assignment => assignment.MapToResponse()).ToList();
     }
 }

@@ -14,7 +14,7 @@ public interface ICourseService
     Task<IEnumerable<CourseResponse>?> GetAllByTeacher(Guid teacherId);
     Task<IEnumerable<CourseResponse>?> GetAllByStudent(Guid studentId);
     Task<CourseResponse?> GetById(Guid id);
-    Task<Result<CourseResponse, ValidationResponse>> Create(CreateCourseRequest request);
+    Task<Result<CourseResponse?, ValidationResponse>> Create(CreateCourseRequest request);
     Task<Result<CourseResponse?, ValidationResponse>> Update(UpdateCourseRequest request, Guid id);
     Task<bool> DeleteById(Guid id);
 }
@@ -32,7 +32,12 @@ public class CourseService : ICourseService
 
     public async Task<IEnumerable<CourseResponse>> GetAll()
     {
-        var courses = await _dbContext.Courses.AsNoTracking().ToListAsync();
+        var courses = await _dbContext.Courses
+            .AsNoTracking()
+            .OrderByDescending(c => c.Year)
+            .ThenByDescending(c => c.Semester)
+            .ThenBy(c => c.Code)
+            .ToListAsync();
         return courses.MapToResponse();
     }
 
@@ -48,7 +53,10 @@ public class CourseService : ICourseService
             .AsNoTracking()
             .Where(x => x.TeacherId == teacherId)
             .Include(x => x.Course)
-            .Select(x => x.Course)
+            .Select(x => x.Course!)
+            .OrderByDescending(c => c.Year)
+            .ThenByDescending(c => c.Semester)
+            .ThenBy(c => c.Code)
             .ToListAsync();
 
         return courses!.MapToResponse();
@@ -66,6 +74,9 @@ public class CourseService : ICourseService
             .Include(x => x.Course)
             .Where(x => x.StudentId == studentId)
             .Select(x => x.Course!)
+            .OrderByDescending(c => c.Year)
+            .ThenByDescending(c => c.Semester)
+            .ThenBy(c => c.Code)
             .ToListAsync();
 
         return courses.MapToResponse();
@@ -77,8 +88,14 @@ public class CourseService : ICourseService
         return course?.MapToResponse();
     }
 
-    public async Task<Result<CourseResponse, ValidationResponse>> Create(CreateCourseRequest request)
+    public async Task<Result<CourseResponse?, ValidationResponse>> Create(CreateCourseRequest request)
     {
+        var teacher = await _dbContext.Users.FindAsync(request.TeacherId);
+        if (teacher is null)
+        {
+            return default;
+        }
+
         var course = request.MapToCourse();
         var validationResult = await _validator.ValidateAsync(course);
         if (!validationResult.IsValid)
@@ -87,6 +104,11 @@ public class CourseService : ICourseService
         }
 
         _dbContext.Courses.Add(course);
+        _dbContext.CourseTeachers.Add(new CourseTeacher
+        {
+            CourseId = course.Id,
+            TeacherId = teacher.Id,
+        });
         await _dbContext.SaveChangesAsync();
 
         return course.MapToResponse();

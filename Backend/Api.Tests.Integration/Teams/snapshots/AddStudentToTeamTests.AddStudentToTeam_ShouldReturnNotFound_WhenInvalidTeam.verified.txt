@@ -1,0 +1,14 @@
+﻿{
+  Version: 1.1,
+  Status: 404 Not Found,
+  RequestMessage: {
+    Method: POST,
+    Uri: http://localhost/teams/Guid_1/students,
+    Content: {
+      Headers: {
+        Content-Type: application/json; charset=utf-8
+      },
+      Value: 
+    }
+  }
+}

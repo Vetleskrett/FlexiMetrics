@@ -32,15 +32,15 @@ public class AppDbContext : DbContext
         var course = modelBuilder.Entity<Course>();
 
         var courseTeacher = modelBuilder.Entity<CourseTeacher>();
-        courseTeacher.HasOne(x => x.Course).WithMany();
+        courseTeacher.HasOne(x => x.Course).WithMany(x => x.CourseTeachers);
         courseTeacher.HasOne(x => x.Teacher).WithMany();
 
         var courseStudent = modelBuilder.Entity<CourseStudent>();
-        courseStudent.HasOne(x => x.Course).WithMany();
+        courseStudent.HasOne(x => x.Course).WithMany(x => x.CourseStudents);
         courseStudent.HasOne(x => x.Student).WithMany();
 
         var team = modelBuilder.Entity<Team>();
-        team.HasOne(t => t.Course).WithMany();
+        team.HasOne(t => t.Course).WithMany(c => c.Teams);
         team.HasMany(t => t.Students).WithMany();
 
         var assignment = modelBuilder.Entity<Assignment>();
@@ -51,8 +51,8 @@ public class AppDbContext : DbContext
         var delivery = modelBuilder.Entity<Delivery>();
         delivery.HasOne(d => d.Assignment).WithMany();
         delivery.HasMany(d => d.Fields).WithOne(f => f.Delivery).OnDelete(DeleteBehavior.Cascade);
-        delivery.HasOne(d => d.Student).WithMany().IsRequired(false);
-        delivery.HasOne(d => d.Team).WithMany().IsRequired(false);
+        delivery.HasOne(d => d.Student).WithMany().IsRequired(false).OnDelete(DeleteBehavior.Cascade);
+        delivery.HasOne(d => d.Team).WithMany().IsRequired(false).OnDelete(DeleteBehavior.Cascade);
         delivery.HasIndex(d => new
         {
             d.AssignmentId,

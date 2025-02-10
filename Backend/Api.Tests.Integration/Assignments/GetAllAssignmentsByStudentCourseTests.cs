@@ -1,26 +1,17 @@
-﻿using Database.Models;
-
-namespace Api.Tests.Integration.Assignments;
+﻿namespace Api.Tests.Integration.Assignments;
 
 public class GetAllAssignmentsByStudentCourseTests(ApiFactory factory) : BaseIntegrationTest(factory)
 {
     [Fact]
     public async Task GetAllAssignmentsByStudentCourse_ShouldReturnEmpty_WhenEmpty()
     {
-        var course = ModelFactory.GetValidCourse();
-        var otherCourse = ModelFactory.GetValidCourse();
-        DbContext.Courses.Add(course);
-        DbContext.Courses.Add(otherCourse);
+        var course = ModelFactory.CreateCourse();
+        var otherCourse = ModelFactory.CreateCourse();
 
-        DbContext.Assignments.AddRange([
-            ModelFactory.GetValidAssignment(otherCourse.Id),
-            ModelFactory.GetValidAssignment(otherCourse.Id),
-            ModelFactory.GetValidAssignment(otherCourse.Id)
-        ]);
+        ModelFactory.CreateAssignments(otherCourse.Id, 3);
 
-        var student = ModelFactory.GetValidStudent();
-        DbContext.Users.Add(student);
-        DbContext.CourseStudents.Add(ModelFactory.GetValidCourseStudent(course.Id, student.Id));
+        var student = ModelFactory.CreateStudent();
+        ModelFactory.CreateCourseStudent(course.Id, student.Id);
 
         await DbContext.SaveChangesAsync();
 
@@ -32,23 +23,14 @@ public class GetAllAssignmentsByStudentCourseTests(ApiFactory factory) : BaseInt
     [Fact]
     public async Task GetAllAssignmentsByStudentCourse_ShouldReturnAssignments_WhenAssignmentsExists()
     {
-        var course = ModelFactory.GetValidCourse();
-        var otherCourse = ModelFactory.GetValidCourse();
-        DbContext.Courses.Add(course);
-        DbContext.Courses.Add(otherCourse);
+        var course = ModelFactory.CreateCourse();
+        var otherCourse = ModelFactory.CreateCourse();
 
-        DbContext.Assignments.AddRange([
-            ModelFactory.GetValidAssignment(course.Id),
-            ModelFactory.GetValidAssignment(course.Id),
-            ModelFactory.GetValidAssignment(course.Id),
+        ModelFactory.CreateAssignments(course.Id, 3);
+        ModelFactory.CreateAssignments(otherCourse.Id, 2);
 
-            ModelFactory.GetValidAssignment(otherCourse.Id),
-            ModelFactory.GetValidAssignment(otherCourse.Id)
-        ]);
-
-        var student = ModelFactory.GetValidStudent();
-        DbContext.Users.Add(student);
-        DbContext.CourseStudents.Add(ModelFactory.GetValidCourseStudent(course.Id, student.Id));
+        var student = ModelFactory.CreateStudent();
+        ModelFactory.CreateCourseStudent(course.Id, student.Id);
 
         await DbContext.SaveChangesAsync();
 
@@ -60,22 +42,13 @@ public class GetAllAssignmentsByStudentCourseTests(ApiFactory factory) : BaseInt
     [Fact]
     public async Task GetAllAssignmentsByStudentCourse_ShouldOnlyReturnPublishedAssignments()
     {
-        var course = ModelFactory.GetValidCourse();
-        DbContext.Courses.Add(course);
+        var course = ModelFactory.CreateCourse();
 
-        List<Assignment> assignments = [
-            ModelFactory.GetValidAssignment(course.Id, true, TimeSpan.FromDays(0)),
-            ModelFactory.GetValidAssignment(course.Id, true, TimeSpan.FromDays(1)),
-            ModelFactory.GetValidAssignment(course.Id, true, TimeSpan.FromDays(2)),
+        ModelFactory.CreateAssignments(course.Id, 3, true);
+        ModelFactory.CreateAssignments(course.Id, 2, false);
 
-            ModelFactory.GetValidAssignment(course.Id, false, TimeSpan.FromDays(3)),
-            ModelFactory.GetValidAssignment(course.Id, false, TimeSpan.FromDays(4)),
-        ];
-        DbContext.Assignments.AddRange(assignments);
-
-        var student = ModelFactory.GetValidStudent();
-        DbContext.Users.Add(student);
-        DbContext.CourseStudents.Add(ModelFactory.GetValidCourseStudent(course.Id, student.Id));
+        var student = ModelFactory.CreateStudent();
+        ModelFactory.CreateCourseStudent(course.Id, student.Id);
 
         await DbContext.SaveChangesAsync();
 
@@ -87,27 +60,16 @@ public class GetAllAssignmentsByStudentCourseTests(ApiFactory factory) : BaseInt
     [Fact]
     public async Task GetAllAssignmentsByStudentCourse_ShouldHaveIsDeliveredTrue_WhenDeliveryExists()
     {
-        var course = ModelFactory.GetValidCourse();
-        DbContext.Courses.Add(course);
+        var course = ModelFactory.CreateCourse();
 
-        List<Assignment> assignments = [
-            ModelFactory.GetValidAssignment(course.Id, offset: TimeSpan.FromDays(0)),
-            ModelFactory.GetValidAssignment(course.Id, offset: TimeSpan.FromDays(1)),
-            ModelFactory.GetValidAssignment(course.Id, offset: TimeSpan.FromDays(2)),
-            ModelFactory.GetValidAssignment(course.Id, offset: TimeSpan.FromDays(3)),
-            ModelFactory.GetValidAssignment(course.Id, offset: TimeSpan.FromDays(4)),
-        ];
-        DbContext.Assignments.AddRange(assignments);
+        var assignments = ModelFactory.CreateAssignments(course.Id, 5);
 
-        var student = ModelFactory.GetValidStudent();
-        DbContext.Users.Add(student);
-        DbContext.CourseStudents.Add(ModelFactory.GetValidCourseStudent(course.Id, student.Id));
+        var student = ModelFactory.CreateStudent();
+        ModelFactory.CreateCourseStudent(course.Id, student.Id);
 
-        DbContext.Deliveries.AddRange([
-            ModelFactory.GetValidStudentDelivery(assignments[0].Id, student.Id),
-            ModelFactory.GetValidStudentDelivery(assignments[1].Id, student.Id),
-            ModelFactory.GetValidStudentDelivery(assignments[2].Id, student.Id),
-        ]);
+        ModelFactory.CreateStudentDelivery(assignments[0].Id, student.Id);
+        ModelFactory.CreateStudentDelivery(assignments[1].Id, student.Id);
+        ModelFactory.CreateStudentDelivery(assignments[2].Id, student.Id);
 
         await DbContext.SaveChangesAsync();
 
@@ -119,8 +81,7 @@ public class GetAllAssignmentsByStudentCourseTests(ApiFactory factory) : BaseInt
     [Fact]
     public async Task GetAllAssignmentsByStudentCourse_ShouldReturnNotFound_WhenInvalidStudent()
     {
-        var course = ModelFactory.GetValidCourse();
-        DbContext.Courses.Add(course);
+        var course = ModelFactory.CreateCourse();
         await DbContext.SaveChangesAsync();
 
         var studentId = Guid.NewGuid();
@@ -133,8 +94,7 @@ public class GetAllAssignmentsByStudentCourseTests(ApiFactory factory) : BaseInt
     [Fact]
     public async Task GetAllAssignmentsByStudentCourse_ShouldReturnNotFound_WhenInvalidCourse()
     {
-        var student = ModelFactory.GetValidStudent();
-        DbContext.Users.Add(student);
+        var student = ModelFactory.CreateStudent();
         await DbContext.SaveChangesAsync();
 
         var courseId = Guid.NewGuid();
@@ -147,11 +107,9 @@ public class GetAllAssignmentsByStudentCourseTests(ApiFactory factory) : BaseInt
     [Fact]
     public async Task GetAllAssignmentsByStudentCourse_ShouldReturnBadRequest_WhenStudentNotInCourse()
     {
-        var student = ModelFactory.GetValidStudent();
-        DbContext.Users.Add(student);
+        var student = ModelFactory.CreateStudent();
 
-        var course = ModelFactory.GetValidCourse();
-        DbContext.Courses.Add(course);
+        var course = ModelFactory.CreateCourse();
 
         await DbContext.SaveChangesAsync();
 

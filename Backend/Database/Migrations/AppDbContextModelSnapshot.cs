@@ -354,7 +354,7 @@ namespace Database.Migrations
             modelBuilder.Entity("Database.Models.CourseStudent", b =>
                 {
                     b.HasOne("Database.Models.Course", "Course")
-                        .WithMany()
+                        .WithMany("CourseStudents")
                         .HasForeignKey("CourseId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -373,7 +373,7 @@ namespace Database.Migrations
             modelBuilder.Entity("Database.Models.CourseTeacher", b =>
                 {
                     b.HasOne("Database.Models.Course", "Course")
-                        .WithMany()
+                        .WithMany("CourseTeachers")
                         .HasForeignKey("CourseId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -399,11 +399,13 @@ namespace Database.Migrations
 
                     b.HasOne("Database.Models.User", "Student")
                         .WithMany()
-                        .HasForeignKey("StudentId");
+                        .HasForeignKey("StudentId")
+                        .OnDelete(DeleteBehavior.Cascade);
 
                     b.HasOne("Database.Models.Team", "Team")
                         .WithMany()
-                        .HasForeignKey("TeamId");
+                        .HasForeignKey("TeamId")
+                        .OnDelete(DeleteBehavior.Cascade);
 
                     b.Navigation("Assignment");
 
@@ -445,7 +447,7 @@ namespace Database.Migrations
             modelBuilder.Entity("Database.Models.Team", b =>
                 {
                     b.HasOne("Database.Models.Course", "Course")
-                        .WithMany()
+                        .WithMany("Teams")
                         .HasForeignKey("CourseId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -471,6 +473,15 @@ namespace Database.Migrations
             modelBuilder.Entity("Database.Models.Assignment", b =>
                 {
                     b.Navigation("Fields");
+                });
+
+            modelBuilder.Entity("Database.Models.Course", b =>
+                {
+                    b.Navigation("CourseStudents");
+
+                    b.Navigation("CourseTeachers");
+
+                    b.Navigation("Teams");
                 });
 
             modelBuilder.Entity("Database.Models.Delivery", b =>

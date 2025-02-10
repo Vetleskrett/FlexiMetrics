@@ -41,8 +41,8 @@ public static class CourseMapping
         };
     }
 
-    public static IEnumerable<CourseResponse> MapToResponse(this IEnumerable<Course> courses)
+    public static List<CourseResponse> MapToResponse(this IEnumerable<Course> courses)
     {
-        return courses.Select(course => course.MapToResponse());
+        return courses.Select(course => course.MapToResponse()).ToList();
     }
 }

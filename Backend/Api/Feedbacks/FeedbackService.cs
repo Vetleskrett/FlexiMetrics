@@ -68,11 +68,7 @@ public class FeedbackService : IFeedbackService
 
         if (assignment.DueDate > DateTime.UtcNow)
         {
-            return new ValidationError
-            {
-                PropertyName = nameof(assignment.DueDate),
-                Message = "Cannot give feedback before assignment due date"
-            }.MapToResponse();
+            return new ValidationError("Cannot give feedback before assignment due date").MapToResponse();
         }
 
         var feedback = request.MapToFeedback();

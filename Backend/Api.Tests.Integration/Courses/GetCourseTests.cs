@@ -5,8 +5,7 @@ public class GetCourseTests(ApiFactory factory) : BaseIntegrationTest(factory)
     [Fact]
     public async Task GetCourse_ShouldReturnCourse_WhenCourseExists()
     {
-        var course = ModelFactory.GetValidCourse();
-        DbContext.Courses.Add(course);
+        var course = ModelFactory.CreateCourse();
         await DbContext.SaveChangesAsync();
 
         var response = await Client.GetAsync($"courses/{course.Id}");

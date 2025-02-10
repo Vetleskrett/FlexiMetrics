@@ -1,10 +1,43 @@
-﻿namespace Api.Tests.Integration.Teams;
+﻿using Microsoft.EntityFrameworkCore;
+
+namespace Api.Tests.Integration.Teams;
 
 public class DeleteTeamTests(ApiFactory factory) : BaseIntegrationTest(factory)
 {
     [Fact]
-    public void Test1()
+    public async Task DeleteTeam_ShouldDeleteTeam_WhenValidTeam()
     {
-        throw new NotImplementedException();
+        var course = ModelFactory.CreateCourse();
+        var team = ModelFactory.CreateTeam(course.Id);
+        await DbContext.SaveChangesAsync();
+
+        var response = await Client.DeleteAsync($"teams/{team.Id}");
+
+        await Verify(response);
+        Assert.False(await DbContext.Teams.AnyAsync(t => t.Id == team.Id));
+    }
+
+    [Fact]
+    public async Task DeleteTeam_ShouldDeleteTeamDeliveries_WhenValidTeam()
+    {
+        var course = ModelFactory.CreateCourse();
+        var team = ModelFactory.CreateTeam(course.Id);
+        var assignment = ModelFactory.CreateAssignment(course.Id);
+        var delivery = ModelFactory.CreateTeamDelivery(assignment.Id, team.Id);
+        await DbContext.SaveChangesAsync();
+
+        await Client.DeleteAsync($"teams/{team.Id}");
+
+        Assert.False(await DbContext.Deliveries.AnyAsync(d => d.Id == delivery.Id));
+    }
+
+    [Fact]
+    public async Task DeleteTeam_ShouldReturnNotFound_WhenInvalidTeam()
+    {
+        var teamId = Guid.NewGuid();
+
+        var response = await Client.DeleteAsync($"teams/{teamId}");
+
+        await Verify(response);
     }
 }

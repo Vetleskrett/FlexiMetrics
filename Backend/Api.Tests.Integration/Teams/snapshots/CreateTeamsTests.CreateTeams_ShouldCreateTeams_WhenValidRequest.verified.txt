@@ -1,0 +1,43 @@
+﻿{
+  Status: 201 Created,
+  Headers: {
+    Location: http://localhost/courses/Guid_1/teams
+  },
+  Content: {
+    Headers: {
+      Content-Type: application/json; charset=utf-8
+    },
+    Value: [
+      {
+        id: Guid_2,
+        courseId: Guid_1,
+        teamNr: 1
+      },
+      {
+        id: Guid_3,
+        courseId: Guid_1,
+        teamNr: 2
+      },
+      {
+        id: Guid_4,
+        courseId: Guid_1,
+        teamNr: 3
+      },
+      {
+        id: Guid_5,
+        courseId: Guid_1,
+        teamNr: 4
+      },
+      {
+        id: Guid_6,
+        courseId: Guid_1,
+        teamNr: 5
+      },
+      {
+        id: Guid_7,
+        courseId: Guid_1,
+        teamNr: 6
+      }
+    ]
+  }
+}

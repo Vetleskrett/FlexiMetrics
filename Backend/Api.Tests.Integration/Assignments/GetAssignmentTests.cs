@@ -5,11 +5,9 @@ public class GetAssignmentTests(ApiFactory factory) : BaseIntegrationTest(factor
     [Fact]
     public async Task GetAssignment_ShouldReturnAssignment_WhenAssignmentExists()
     {
-        var course = ModelFactory.GetValidCourse();
-        DbContext.Courses.Add(course);
+        var course = ModelFactory.CreateCourse();
 
-        var assignment = ModelFactory.GetValidAssignment(course.Id);
-        DbContext.Assignments.Add(assignment);
+        var assignment = ModelFactory.CreateAssignment(course.Id);
 
         await DbContext.SaveChangesAsync();
 
