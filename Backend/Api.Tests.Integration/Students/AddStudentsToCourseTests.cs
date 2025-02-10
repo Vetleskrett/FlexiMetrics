@@ -1,5 +1,4 @@
 ﻿using Api.Students.Contracts;
-using Database.Models;
 using Microsoft.EntityFrameworkCore;
 using System.Net.Http.Json;
 
@@ -10,21 +9,12 @@ public class AddStudentsToCourseTests(ApiFactory factory) : BaseIntegrationTest(
     [Fact]
     public async Task AddStudentsToCourse_ShouldAddStudentsToCourse_WhenValidRequest()
     {
-        var course = ModelFactory.GetValidCourse();
-        DbContext.Courses.Add(course);
+        var course = ModelFactory.CreateCourse();
 
-        List<User> existingStudents = [
-            ModelFactory.GetValidStudent("existing1@ntnu.no"),
-            ModelFactory.GetValidStudent("existing2@ntnu.no"),
-            ModelFactory.GetValidStudent("existing3@ntnu.no"),
-            ModelFactory.GetValidStudent("existing4@ntnu.no"),
-        ];
-        DbContext.Users.AddRange(existingStudents);
+        var existingStudents = ModelFactory.CreateStudents(4);
 
-        DbContext.CourseStudents.AddRange([
-            ModelFactory.GetValidCourseStudent(course.Id, existingStudents[0].Id),
-            ModelFactory.GetValidCourseStudent(course.Id, existingStudents[1].Id),
-        ]);
+        ModelFactory.CreateCourseStudent(course.Id, existingStudents[0].Id);
+        ModelFactory.CreateCourseStudent(course.Id, existingStudents[1].Id);
 
         await DbContext.SaveChangesAsync();
 

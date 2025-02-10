@@ -5,16 +5,11 @@ public class GetAllAssignmentsByCourseTests(ApiFactory factory) : BaseIntegratio
     [Fact]
     public async Task GetAllAssignmentsByCourse_ShouldReturnEmpty_WhenEmpty()
     {
-        var course = ModelFactory.GetValidCourse();
-        var otherCourse = ModelFactory.GetValidCourse();
-        DbContext.Courses.Add(course);
-        DbContext.Courses.Add(otherCourse);
+        var course = ModelFactory.CreateCourse();
+        var otherCourse = ModelFactory.CreateCourse();
 
-        DbContext.Assignments.AddRange([
-            ModelFactory.GetValidAssignment(otherCourse.Id),
-            ModelFactory.GetValidAssignment(otherCourse.Id),
-            ModelFactory.GetValidAssignment(otherCourse.Id)
-        ]);
+        ModelFactory.CreateAssignments(otherCourse.Id, 3);
+
         await DbContext.SaveChangesAsync();
 
         var response = await Client.GetAsync($"course/{course.Id}/assignments");
@@ -25,19 +20,12 @@ public class GetAllAssignmentsByCourseTests(ApiFactory factory) : BaseIntegratio
     [Fact]
     public async Task GetAllAssignmentsByCourse_ShouldReturnAssignments_WhenAssignmentsExists()
     {
-        var course = ModelFactory.GetValidCourse();
-        var otherCourse = ModelFactory.GetValidCourse();
-        DbContext.Courses.Add(course);
-        DbContext.Courses.Add(otherCourse);
+        var course = ModelFactory.CreateCourse();
+        var otherCourse = ModelFactory.CreateCourse();
 
-        DbContext.Assignments.AddRange([
-            ModelFactory.GetValidAssignment(course.Id),
-            ModelFactory.GetValidAssignment(course.Id),
-            ModelFactory.GetValidAssignment(course.Id),
+        ModelFactory.CreateAssignments(course.Id, 3);
+        ModelFactory.CreateAssignments(otherCourse.Id, 2);
 
-            ModelFactory.GetValidAssignment(otherCourse.Id),
-            ModelFactory.GetValidAssignment(otherCourse.Id)
-        ]);
         await DbContext.SaveChangesAsync();
 
         var response = await Client.GetAsync($"course/{course.Id}/assignments");

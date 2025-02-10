@@ -32,7 +32,12 @@ public class CourseService : ICourseService
 
     public async Task<IEnumerable<CourseResponse>> GetAll()
     {
-        var courses = await _dbContext.Courses.AsNoTracking().ToListAsync();
+        var courses = await _dbContext.Courses
+            .AsNoTracking()
+            .OrderByDescending(c => c.Year)
+            .ThenByDescending(c => c.Semester)
+            .ThenBy(c => c.Code)
+            .ToListAsync();
         return courses.MapToResponse();
     }
 
@@ -48,7 +53,10 @@ public class CourseService : ICourseService
             .AsNoTracking()
             .Where(x => x.TeacherId == teacherId)
             .Include(x => x.Course)
-            .Select(x => x.Course)
+            .Select(x => x.Course!)
+            .OrderByDescending(c => c.Year)
+            .ThenByDescending(c => c.Semester)
+            .ThenBy(c => c.Code)
             .ToListAsync();
 
         return courses!.MapToResponse();
@@ -66,6 +74,9 @@ public class CourseService : ICourseService
             .Include(x => x.Course)
             .Where(x => x.StudentId == studentId)
             .Select(x => x.Course!)
+            .OrderByDescending(c => c.Year)
+            .ThenByDescending(c => c.Semester)
+            .ThenBy(c => c.Code)
             .ToListAsync();
 
         return courses.MapToResponse();

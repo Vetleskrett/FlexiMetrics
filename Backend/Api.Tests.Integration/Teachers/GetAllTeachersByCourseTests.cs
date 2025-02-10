@@ -7,8 +7,7 @@ public class GetAllTeachersByCourseTests(ApiFactory factory) : BaseIntegrationTe
     [Fact]
     public async Task GetAllTeachersByCourse_ShouldReturnEmpty_WhenEmpty()
     {
-        var course = ModelFactory.GetValidCourse();
-        DbContext.Courses.Add(course);
+        var course = ModelFactory.CreateCourse();
         await DbContext.SaveChangesAsync();
 
         var response = Client.GetAsync($"courses/{course.Id}/teachers");
@@ -19,21 +18,9 @@ public class GetAllTeachersByCourseTests(ApiFactory factory) : BaseIntegrationTe
     [Fact]
     public async Task GetAllTeachersByCourse_ShouldReturnTeachers_WhenTeachersExists()
     {
-        var course = ModelFactory.GetValidCourse();
-        DbContext.Courses.Add(course);
+        var course = ModelFactory.CreateCourse();
 
-        List<User> teachers = [
-            ModelFactory.GetValidTeacher("teacher1@ntnu.no"),
-            ModelFactory.GetValidTeacher("teacher2@ntnu.no"),
-            ModelFactory.GetValidTeacher("teacher3@ntnu.no")
-        ];
-        DbContext.Users.AddRange(teachers);
-
-        DbContext.CourseTeachers.AddRange([
-            ModelFactory.GetValidCourseTeacher(course.Id, teachers[0].Id),
-            ModelFactory.GetValidCourseTeacher(course.Id, teachers[1].Id),
-            ModelFactory.GetValidCourseTeacher(course.Id, teachers[2].Id)
-        ]);
+        ModelFactory.CreateCourseTeachers(course.Id, 3);
 
         await DbContext.SaveChangesAsync();
 

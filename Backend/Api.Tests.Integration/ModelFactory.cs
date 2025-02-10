@@ -1,75 +1,159 @@
-﻿using Database.Models;
+﻿using Database;
+using Database.Models;
 
 namespace Api.Tests.Integration;
 
-public static class ModelFactory
+public class ModelFactory
 {
-    public static Course GetValidCourse()
+    private readonly AppDbContext _dbContext;
+
+    public ModelFactory(AppDbContext dbContext)
     {
-        return new Course
+        _dbContext = dbContext;
+    }
+
+    public Course CreateCourse(string code = "TDT1001")
+    {
+        var course = new Course
         {
             Id = Guid.NewGuid(),
-            Code = "TDT1001",
+            Code = code,
             Name = "Webutvikling",
             Year = 2025,
             Semester = Semester.Spring
         };
+        _dbContext.Courses.Add(course);
+        return course;
     }
 
-    public static User GetValidStudent(string email = "student@ntnu.no")
+    public List<Course> CreateCourses(int count)
     {
-        return new User
+        return Enumerable.Range(1, count)
+            .Select(i => CreateCourse("TDT1" + i.ToString().PadLeft(3, '0')))
+            .ToList();
+    }
+
+    public User CreateStudent(string email = "student@ntnu.no")
+    {
+        var student = new User
         {
             Id = Guid.NewGuid(),
             Name = "Student Studentsen",
             Email = email,
             Role = Role.Student,
         };
+        _dbContext.Users.Add(student);
+        return student;
     }
 
-    public static User GetValidTeacher(string email = "teacher@ntnu.no")
+    public List<User> CreateStudents(int count)
     {
-        return new User
+        return Enumerable.Range(1, count)
+            .Select(i => CreateStudent($"student{i}@ntnu.no"))
+            .ToList();
+    }
+
+    public User CreateTeacher(string email = "teacher@ntnu.no")
+    {
+        var teacher = new User
         {
             Id = Guid.NewGuid(),
             Name = "Teacher Teachersen",
             Email = email,
             Role = Role.Teacher,
         };
+        _dbContext.Users.Add(teacher);
+        return teacher;
     }
 
-    public static CourseTeacher GetValidCourseTeacher(Guid courseId, Guid teacherId)
+    public List<User> CreateTeachers(int count)
     {
-        return new CourseTeacher
+        return Enumerable.Range(1, count)
+            .Select(i => CreateTeacher($"teacher{i}@ntnu.no"))
+            .ToList();
+    }
+
+    public CourseTeacher CreateCourseTeacher(Guid courseId, Guid teacherId)
+    {
+        var courseTeacher = new CourseTeacher
         {
             CourseId = courseId,
             TeacherId = teacherId
         };
+        _dbContext.CourseTeachers.Add(courseTeacher);
+        return courseTeacher;
     }
 
-    public static CourseStudent GetValidCourseStudent(Guid courseId, Guid studentId)
+    public List<User> CreateCourseTeachers(Guid courseId, int count)
     {
-        return new CourseStudent
+        var teachers = CreateTeachers(count);
+
+        _dbContext.CourseTeachers.AddRange(teachers.Select(teacher => new CourseTeacher
+        {
+            CourseId = courseId,
+            TeacherId = teacher.Id
+        }));
+
+        return teachers;
+    }
+
+    public CourseStudent CreateCourseStudent(Guid courseId, Guid studentId)
+    {
+        var courseStudent = new CourseStudent
         {
             CourseId = courseId,
             StudentId = studentId
         };
+        _dbContext.CourseStudents.Add(courseStudent);
+        return courseStudent;
     }
 
-    public static Team GetValidTeam(Guid courseId, int teamNr = 1)
+    public List<User> CreateCourseStudents(Guid courseId, int count)
     {
-        return new Team
+        var students = CreateStudents(count);
+
+        _dbContext.CourseStudents.AddRange(students.Select(student => new CourseStudent
+        {
+            CourseId = courseId,
+            StudentId = student.Id
+        }));
+
+        return students;
+    }
+
+    public Team CreateTeam(Guid courseId, int teamNr = 1, List<User>? students = null)
+    {
+        var team = new Team
         {
             Id = Guid.NewGuid(),
             CourseId = courseId,
             TeamNr = teamNr,
-            Students = []
+            Students = students ?? []
         };
+        _dbContext.Teams.Add(team);
+        return team;
     }
 
-    public static Assignment GetValidAssignment(Guid courseId, bool published = true, TimeSpan offset = new())
+    public List<Team> CreateTeams(Guid courseId, int count)
     {
-        return new Assignment
+        return Enumerable.Range(1, count)
+            .Select(i => CreateTeam(courseId, i))
+            .ToList();
+    }
+
+    public List<Team> CreateTeamsWithStudents(Guid courseId, List<User> students, int count)
+    {
+        var numStudentsPerTeam = (int)Math.Ceiling(students.Count / (float)count);
+        var teams = students.Chunk(numStudentsPerTeam).Select((members, i) =>
+        {
+            return CreateTeam(courseId, i + 1, members.ToList());
+        });
+        return teams.ToList();
+    }
+
+    public Assignment CreateAssignment(Guid courseId, bool published = true, TimeSpan offset = new())
+    {
+        var assignment = new Assignment
         {
             Id = Guid.NewGuid(),
             Name = "Frontend project",
@@ -81,22 +165,40 @@ public static class ModelFactory
             Description = "Create a frontend project with svelte",
             CourseId = courseId,
         };
+        _dbContext.Assignments.Add(assignment);
+        return assignment;
     }
 
-    public static AssignmentField GetValidAssignmentField(Guid assignmentId)
+    public List<Assignment> CreateAssignments(Guid courseId, int count, bool published = true)
     {
-        return new AssignmentField
+        return Enumerable.Range(1, count)
+            .Select(i => CreateAssignment(courseId, published, TimeSpan.FromDays(i)))
+            .ToList();
+    }
+
+    public AssignmentField CreateAssignmentField(Guid assignmentId)
+    {
+        var assignmentField = new AssignmentField
         {
             Id = Guid.NewGuid(),
             AssignmentId = assignmentId,
             Type = AssignmentDataType.String,
             Name = "Project title"
         };
+        _dbContext.AssignmentFields.Add(assignmentField);
+        return assignmentField;
     }
 
-    public static Delivery GetValidStudentDelivery(Guid assignmentId, Guid studentId)
+    public List<AssignmentField> CreateAssignmentFields(Guid assignmentId, int count)
     {
-        return new Delivery
+        return Enumerable.Range(1, count)
+            .Select(i => CreateAssignmentField(assignmentId))
+            .ToList();
+    }
+
+    public Delivery CreateStudentDelivery(Guid assignmentId, Guid studentId)
+    {
+        var delivery = new Delivery
         {
             Id = Guid.NewGuid(),
             AssignmentId = assignmentId,
@@ -104,11 +206,13 @@ public static class ModelFactory
             TeamId = null,
             Fields = []
         };
+        _dbContext.Deliveries.Add(delivery);
+        return delivery;
     }
 
-    public static Delivery GetValidTeamDelivery(Guid assignmentId, Guid teamId)
+    public Delivery CreateTeamDelivery(Guid assignmentId, Guid teamId)
     {
-        return new Delivery
+        var delivery = new Delivery
         {
             Id = Guid.NewGuid(),
             AssignmentId = assignmentId,
@@ -116,11 +220,13 @@ public static class ModelFactory
             TeamId = teamId,
             Fields = []
         };
+        _dbContext.Deliveries.Add(delivery);
+        return delivery;
     }
 
-    public static DeliveryField GetValidDeliveryField(Guid deliveryId, AssignmentField assignmentField)
+    public DeliveryField CreateDeliveryField(Guid deliveryId, AssignmentField assignmentField)
     {
-        return new DeliveryField
+        var deliveryField = new DeliveryField
         {
             Id = Guid.NewGuid(),
             AssignmentFieldId = assignmentField.Id,
@@ -134,15 +240,79 @@ public static class ModelFactory
                 _ => throw new ArgumentException(),
             }
         };
+        _dbContext.DeliveryFields.Add(deliveryField);
+        return deliveryField;
     }
 
-    public static Feedback GetValidFeedback(Guid deliveryId)
+    public List<Delivery> CreateStudentDeliveries(Guid assignmentId, List<User> students)
     {
-        return new Feedback
+        var deliveries = students
+            .Select(student => CreateStudentDelivery(assignmentId, student.Id))
+            .ToList();
+        _dbContext.Deliveries.AddRange(deliveries);
+        return deliveries;
+    }
+
+    public List<Delivery> CreateStudentDeliveriesWithFields(Guid assignmentId, List<AssignmentField> assignmentFields, List<User> students)
+    {
+        var deliveries = students
+            .Select(student => CreateStudentDelivery(assignmentId, student.Id))
+            .ToList();
+        _dbContext.Deliveries.AddRange(deliveries);
+
+        var deliveryFields = deliveries.Select(delivery =>
+        {
+            delivery.Fields = assignmentFields
+                .Select(assignmentField => CreateDeliveryField(delivery.Id, assignmentField))
+                .ToList();
+
+            return delivery.Fields;
+        })
+        .SelectMany(x => x);
+        _dbContext.DeliveryFields.AddRange(deliveryFields);
+
+        return deliveries;
+    }
+
+    public List<Delivery> CreateTeamDeliveries(Guid assignmentId, List<Team> teams)
+    {
+        var deliveries = teams
+            .Select(team => CreateTeamDelivery(assignmentId, team.Id))
+            .ToList();
+        _dbContext.Deliveries.AddRange(deliveries);
+        return deliveries;
+    }
+
+    public List<Delivery> CreateTeamDeliveriesWithFields(Guid assignmentId, List<AssignmentField> assignmentFields, List<Team> teams)
+    {
+        var deliveries = teams
+            .Select(team => CreateTeamDelivery(assignmentId, team.Id))
+            .ToList();
+        _dbContext.Deliveries.AddRange(deliveries);
+
+        var deliveryFields = deliveries.Select(delivery =>
+        {
+            delivery.Fields = assignmentFields
+                .Select(assignmentField => CreateDeliveryField(delivery.Id, assignmentField))
+                .ToList();
+
+            return delivery.Fields;
+        })
+        .SelectMany(x => x);
+        _dbContext.DeliveryFields.AddRange(deliveryFields);
+
+        return deliveries;
+    }
+
+    public Feedback CreateFeedback(Guid deliveryId)
+    {
+        var feedback = new Feedback
         {
             Id = Guid.NewGuid(),
             Comment = "Looks good to me",
             DeliveryId = deliveryId
         };
+        _dbContext.Feedbacks.Add(feedback);
+        return feedback;
     }
 }

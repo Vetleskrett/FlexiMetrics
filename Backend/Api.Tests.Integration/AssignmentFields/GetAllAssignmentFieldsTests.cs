@@ -12,17 +12,11 @@ public class GetAllAssignmentFieldsTests(ApiFactory factory) : BaseIntegrationTe
     [Fact]
     public async Task GetAllAssignmentFields_ShouldReturnAssignmentFields_WhenAssignmentFieldsExists()
     {
-        var course = ModelFactory.GetValidCourse();
-        DbContext.Courses.Add(course);
+        var course = ModelFactory.CreateCourse();
 
-        var assignment = ModelFactory.GetValidAssignment(course.Id);
-        DbContext.Assignments.Add(assignment);
+        var assignment = ModelFactory.CreateAssignment(course.Id);
 
-        DbContext.AssignmentFields.AddRange([
-            ModelFactory.GetValidAssignmentField(assignment.Id),
-            ModelFactory.GetValidAssignmentField(assignment.Id),
-            ModelFactory.GetValidAssignmentField(assignment.Id)
-        ]);
+        ModelFactory.CreateAssignmentFields(assignment.Id, 3);
 
         await DbContext.SaveChangesAsync();
 

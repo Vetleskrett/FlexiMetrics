@@ -5,19 +5,12 @@ public class GetAllAssignmentFieldsByAssignmentTests(ApiFactory factory) : BaseI
     [Fact]
     public async Task GetAllAssignmentFieldsByAssignment_ShouldReturnEmpty_WhenEmpty()
     {
-        var course = ModelFactory.GetValidCourse();
-        DbContext.Courses.Add(course);
+        var course = ModelFactory.CreateCourse();
 
-        var assignment = ModelFactory.GetValidAssignment(course.Id);
-        var otherAssignment = ModelFactory.GetValidAssignment(course.Id);
-        DbContext.Assignments.Add(assignment);
-        DbContext.Assignments.Add(otherAssignment);
+        var assignment = ModelFactory.CreateAssignment(course.Id);
+        var otherAssignment = ModelFactory.CreateAssignment(course.Id);
 
-        DbContext.AssignmentFields.AddRange([
-            ModelFactory.GetValidAssignmentField(otherAssignment.Id),
-            ModelFactory.GetValidAssignmentField(otherAssignment.Id),
-            ModelFactory.GetValidAssignmentField(otherAssignment.Id)
-        ]);
+        ModelFactory.CreateAssignmentFields(otherAssignment.Id, 3);
 
         await DbContext.SaveChangesAsync();
 
@@ -29,22 +22,14 @@ public class GetAllAssignmentFieldsByAssignmentTests(ApiFactory factory) : BaseI
     [Fact]
     public async Task GetAllAssignmentFieldsByAssignment_ShouldReturnAssignmentFields_WhenAssignmentFieldsExists()
     {
-        var course = ModelFactory.GetValidCourse();
-        DbContext.Courses.Add(course);
+        var course = ModelFactory.CreateCourse();
 
-        var assignment = ModelFactory.GetValidAssignment(course.Id);
-        var otherAssignment = ModelFactory.GetValidAssignment(course.Id);
-        DbContext.Assignments.Add(assignment);
-        DbContext.Assignments.Add(otherAssignment);
+        var assignment = ModelFactory.CreateAssignment(course.Id);
+        var otherAssignment = ModelFactory.CreateAssignment(course.Id);
 
-        DbContext.AssignmentFields.AddRange([
-            ModelFactory.GetValidAssignmentField(assignment.Id),
-            ModelFactory.GetValidAssignmentField(assignment.Id),
-            ModelFactory.GetValidAssignmentField(assignment.Id),
+        ModelFactory.CreateAssignmentFields(assignment.Id, 3);
+        ModelFactory.CreateAssignmentFields(otherAssignment.Id, 2);
 
-            ModelFactory.GetValidAssignmentField(otherAssignment.Id),
-            ModelFactory.GetValidAssignmentField(otherAssignment.Id)
-        ]);
         await DbContext.SaveChangesAsync();
 
         var response = await Client.GetAsync($"assignments/{assignment.Id}/fields");

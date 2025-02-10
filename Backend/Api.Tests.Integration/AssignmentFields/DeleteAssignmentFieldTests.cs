@@ -1,5 +1,4 @@
-﻿using Database.Models;
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 
 namespace Api.Tests.Integration.AssignmentFields;
 
@@ -8,14 +7,11 @@ public class DeleteAssignmentFieldTests(ApiFactory factory) : BaseIntegrationTes
     [Fact]
     public async Task DeleteAssignmentField_ShouldDeleteAssignmentField_WhenValidAssignmentField()
     {
-        var course = ModelFactory.GetValidCourse();
-        DbContext.Courses.Add(course);
+        var course = ModelFactory.CreateCourse();
 
-        var assignment = ModelFactory.GetValidAssignment(course.Id);
-        DbContext.Assignments.Add(assignment);
+        var assignment = ModelFactory.CreateAssignment(course.Id);
 
-        var field = ModelFactory.GetValidAssignmentField(assignment.Id);
-        DbContext.AssignmentFields.Add(field);
+        var field = ModelFactory.CreateAssignmentField(assignment.Id);
 
         await DbContext.SaveChangesAsync();
 
@@ -28,40 +24,15 @@ public class DeleteAssignmentFieldTests(ApiFactory factory) : BaseIntegrationTes
     [Fact]
     public async Task DeleteAssignmentField_ShouldDeleteDeliveryField_WhenValidAssignmentField()
     {
-        var course = ModelFactory.GetValidCourse();
-        DbContext.Courses.Add(course);
+        var course = ModelFactory.CreateCourse();
 
-        var assignment = ModelFactory.GetValidAssignment(course.Id);
-        DbContext.Assignments.Add(assignment);
+        var assignment = ModelFactory.CreateAssignment(course.Id);
 
-        var field = ModelFactory.GetValidAssignmentField(assignment.Id);
-        DbContext.AssignmentFields.Add(field);
+        var field = ModelFactory.CreateAssignmentField(assignment.Id);
 
-        List<User> students = [
-            ModelFactory.GetValidStudent("student1@ntnu.no"),
-            ModelFactory.GetValidStudent("student2@ntnu.no"),
-            ModelFactory.GetValidStudent("student3@ntnu.no")
-        ];
-        DbContext.Users.AddRange(students);
+        var students = ModelFactory.CreateCourseStudents(course.Id, 3);
 
-        DbContext.CourseStudents.AddRange([
-            ModelFactory.GetValidCourseStudent(course.Id, students[0].Id),
-            ModelFactory.GetValidCourseStudent(course.Id, students[1].Id),
-            ModelFactory.GetValidCourseStudent(course.Id, students[2].Id),
-        ]);
-
-        List<Delivery> deliveries = [
-            ModelFactory.GetValidStudentDelivery(assignment.Id, students[0].Id),
-            ModelFactory.GetValidStudentDelivery(assignment.Id, students[1].Id),
-            ModelFactory.GetValidStudentDelivery(assignment.Id, students[2].Id),
-        ];
-        DbContext.Deliveries.AddRange(deliveries);
-
-        DbContext.DeliveryFields.AddRange([
-            ModelFactory.GetValidDeliveryField(deliveries[0].Id, field),
-            ModelFactory.GetValidDeliveryField(deliveries[1].Id, field),
-            ModelFactory.GetValidDeliveryField(deliveries[2].Id, field)
-        ]);
+        ModelFactory.CreateStudentDeliveriesWithFields(assignment.Id, [field], students);
 
         await DbContext.SaveChangesAsync();
 

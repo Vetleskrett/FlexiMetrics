@@ -10,8 +10,7 @@ public class CreateCourseTests(ApiFactory factory) : BaseIntegrationTest(factory
     [Fact]
     public async Task CreateCourse_ShouldCreateCourse_WhenValidRequest()
     {
-        var teacher = ModelFactory.GetValidTeacher();
-        DbContext.Users.Add(teacher);
+        var teacher = ModelFactory.CreateTeacher();
         await DbContext.SaveChangesAsync();
 
         var request = new CreateCourseRequest
@@ -49,8 +48,7 @@ public class CreateCourseTests(ApiFactory factory) : BaseIntegrationTest(factory
     [Fact]
     public async Task CreateCourse_ShouldReturnBadRequest_WhenInvalidRequest()
     {
-        var teacher = ModelFactory.GetValidTeacher();
-        DbContext.Users.Add(teacher);
+        var teacher = ModelFactory.CreateTeacher();
         await DbContext.SaveChangesAsync();
 
         var request = new CreateCourseRequest

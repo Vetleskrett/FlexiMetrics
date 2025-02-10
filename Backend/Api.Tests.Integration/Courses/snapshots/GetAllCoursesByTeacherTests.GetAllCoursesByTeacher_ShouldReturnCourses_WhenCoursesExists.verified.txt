@@ -14,14 +14,14 @@
       },
       {
         id: Guid_2,
-        code: TDT1001,
+        code: TDT1002,
         name: Webutvikling,
         year: 2025,
         semester: Spring
       },
       {
         id: Guid_3,
-        code: TDT1001,
+        code: TDT1003,
         name: Webutvikling,
         year: 2025,
         semester: Spring

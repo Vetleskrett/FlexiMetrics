@@ -13,4 +13,5 @@ public class Course
 
     public List<CourseTeacher>? CourseTeachers { get; set; }
     public List<CourseStudent>? CourseStudents { get; set; }
+    public List<Team>? Teams { get; set; }
 }

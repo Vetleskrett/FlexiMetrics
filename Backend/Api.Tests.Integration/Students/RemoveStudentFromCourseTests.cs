@@ -8,13 +8,11 @@ public class RemoveStudentFromCourseTests(ApiFactory factory) : BaseIntegrationT
     [Fact]
     public async Task RemoveStudentFromCourse_ShouldRemoveStudentFromCourse_WhenValidRequest()
     {
-        var course = ModelFactory.GetValidCourse();
-        DbContext.Courses.Add(course);
+        var course = ModelFactory.CreateCourse();
 
-        User student = ModelFactory.GetValidStudent();
-        DbContext.Users.Add(student);
+        User student = ModelFactory.CreateStudent();
 
-        DbContext.CourseStudents.Add(ModelFactory.GetValidCourseStudent(course.Id, student.Id));
+        ModelFactory.CreateCourseStudent(course.Id, student.Id);
 
         await DbContext.SaveChangesAsync();
 
@@ -27,11 +25,9 @@ public class RemoveStudentFromCourseTests(ApiFactory factory) : BaseIntegrationT
     [Fact]
     public async Task RemoveStudentFromCourse_ShouldReturnBadRequest_WhenNotInCourse()
     {
-        var course = ModelFactory.GetValidCourse();
-        DbContext.Courses.Add(course);
+        var course = ModelFactory.CreateCourse();
 
-        var student = ModelFactory.GetValidStudent();
-        DbContext.Users.Add(student);
+        var student = ModelFactory.CreateStudent();
 
         await DbContext.SaveChangesAsync();
 
@@ -43,8 +39,7 @@ public class RemoveStudentFromCourseTests(ApiFactory factory) : BaseIntegrationT
     [Fact]
     public async Task RemoveStudentFromCourse_ShouldReturnNotFound_WhenInvalidStudent()
     {
-        var course = ModelFactory.GetValidCourse();
-        DbContext.Courses.Add(course);
+        var course = ModelFactory.CreateCourse();
 
         await DbContext.SaveChangesAsync();
 
@@ -58,8 +53,7 @@ public class RemoveStudentFromCourseTests(ApiFactory factory) : BaseIntegrationT
     [Fact]
     public async Task RemoveStudentFromCourse_ShouldReturnNotFound_WhenInvalidCourse()
     {
-        var student = ModelFactory.GetValidStudent();
-        DbContext.Users.Add(student);
+        var student = ModelFactory.CreateStudent();
 
         await DbContext.SaveChangesAsync();
 

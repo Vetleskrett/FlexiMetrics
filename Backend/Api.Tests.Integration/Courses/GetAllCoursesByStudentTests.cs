@@ -1,20 +1,12 @@
-﻿using Database.Models;
-
-namespace Api.Tests.Integration.Courses;
+﻿namespace Api.Tests.Integration.Courses;
 
 public class GetAllCoursesByStudentTests(ApiFactory factory) : BaseIntegrationTest(factory)
 {
     [Fact]
     public async Task GetAllCoursesByStudent_ShouldReturnEmpty_WhenEmpty()
     {
-        DbContext.Courses.AddRange([
-            ModelFactory.GetValidCourse(),
-            ModelFactory.GetValidCourse(),
-            ModelFactory.GetValidCourse(),
-        ]);
-
-        var student = ModelFactory.GetValidStudent();
-        DbContext.Users.Add(student);
+        ModelFactory.CreateCourses(3);
+        var student = ModelFactory.CreateStudent();
 
         await DbContext.SaveChangesAsync();
 
@@ -25,21 +17,13 @@ public class GetAllCoursesByStudentTests(ApiFactory factory) : BaseIntegrationTe
     [Fact]
     public async Task GetAllCoursesByStudent_ShouldReturnCourses_WhenCoursesExists()
     {
-        List<Course> courses = [
-            ModelFactory.GetValidCourse(),
-            ModelFactory.GetValidCourse(),
-            ModelFactory.GetValidCourse(),
-            ModelFactory.GetValidCourse(),
-            ModelFactory.GetValidCourse(),
-        ];
-        DbContext.Courses.AddRange(courses);
+        var courses = ModelFactory.CreateCourses(5);
 
-        var student = ModelFactory.GetValidStudent();
-        DbContext.Users.Add(student);
+        var student = ModelFactory.CreateStudent();
 
-        DbContext.CourseStudents.Add(ModelFactory.GetValidCourseStudent(courses[0].Id, student.Id));
-        DbContext.CourseStudents.Add(ModelFactory.GetValidCourseStudent(courses[1].Id, student.Id));
-        DbContext.CourseStudents.Add(ModelFactory.GetValidCourseStudent(courses[2].Id, student.Id));
+        ModelFactory.CreateCourseStudent(courses[0].Id, student.Id);
+        ModelFactory.CreateCourseStudent(courses[1].Id, student.Id);
+        ModelFactory.CreateCourseStudent(courses[2].Id, student.Id);
 
         await DbContext.SaveChangesAsync();
 

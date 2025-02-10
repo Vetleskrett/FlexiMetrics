@@ -20,7 +20,7 @@
       {
         id: Guid_3,
         name: Frontend project,
-        dueDate: DateTimeOffset_1,
+        dueDate: DateTimeOffset_2,
         published: true,
         collaborationType: Individual,
         mandatory: true,
@@ -32,7 +32,7 @@
       {
         id: Guid_4,
         name: Frontend project,
-        dueDate: DateTimeOffset_1,
+        dueDate: DateTimeOffset_3,
         published: true,
         collaborationType: Individual,
         mandatory: true,

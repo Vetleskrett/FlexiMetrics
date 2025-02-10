@@ -9,8 +9,7 @@ public class CreateAssignmentTests(ApiFactory factory) : BaseIntegrationTest(fac
     [Fact]
     public async Task CreateAssignment_ShouldCreateAssignment_WhenValidRequest()
     {
-        var course = ModelFactory.GetValidCourse();
-        DbContext.Courses.Add(course);
+        var course = ModelFactory.CreateCourse();
         await DbContext.SaveChangesAsync();
 
         var request = new CreateAssignmentRequest
@@ -67,8 +66,7 @@ public class CreateAssignmentTests(ApiFactory factory) : BaseIntegrationTest(fac
     [Fact]
     public async Task CreateAssignment_ShouldReturnBadRequest_WhenInvalidRequest()
     {
-        var course = ModelFactory.GetValidCourse();
-        DbContext.Courses.Add(course);
+        var course = ModelFactory.CreateCourse();
         await DbContext.SaveChangesAsync();
 
         var request = new CreateAssignmentRequest

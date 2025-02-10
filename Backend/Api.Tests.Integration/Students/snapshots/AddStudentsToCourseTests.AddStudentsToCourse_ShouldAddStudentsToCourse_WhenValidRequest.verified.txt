@@ -7,33 +7,33 @@
     Value: [
       {
         id: Guid_1,
-        email: existing1@ntnu.no,
-        name: Student Studentsen
-      },
-      {
-        id: Guid_2,
-        email: existing2@ntnu.no,
-        name: Student Studentsen
-      },
-      {
-        id: Guid_3,
-        email: existing3@ntnu.no,
-        name: Student Studentsen
-      },
-      {
-        id: Guid_4,
-        email: existing4@ntnu.no,
-        name: Student Studentsen
-      },
-      {
-        id: Guid_5,
         email: new1@ntnu.no,
         name: 
       },
       {
-        id: Guid_6,
+        id: Guid_2,
         email: new2@ntnu.no,
         name: 
+      },
+      {
+        id: Guid_3,
+        email: student1@ntnu.no,
+        name: Student Studentsen
+      },
+      {
+        id: Guid_4,
+        email: student2@ntnu.no,
+        name: Student Studentsen
+      },
+      {
+        id: Guid_5,
+        email: student3@ntnu.no,
+        name: Student Studentsen
+      },
+      {
+        id: Guid_6,
+        email: student4@ntnu.no,
+        name: Student Studentsen
       }
     ]
   }

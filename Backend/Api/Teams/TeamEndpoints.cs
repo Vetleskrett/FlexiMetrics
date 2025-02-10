@@ -20,7 +20,7 @@ public static class TeamEndpoints
         group.MapGet("courses/{courseId:guid}/teams", async (ITeamService teamService, Guid courseId) =>
         {
             var teams = await teamService.GetAllByCourse(courseId);
-            return Results.Ok(teams);
+            return teams is not null ? Results.Ok(teams) : Results.NotFound();
         })
         .Produces<IEnumerable<TeamResponse>>()
         .WithName("GetAllTeamsByCourse")

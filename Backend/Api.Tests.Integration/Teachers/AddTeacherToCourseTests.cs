@@ -9,11 +9,9 @@ public class AddTeacherToCourseTests(ApiFactory factory) : BaseIntegrationTest(f
     [Fact]
     public async Task AddTeacherToCourse_ShouldAddTeacherToCourse_WhenValidRequest()
     {
-        var course = ModelFactory.GetValidCourse();
-        DbContext.Courses.Add(course);
+        var course = ModelFactory.CreateCourse();
 
-        var teacher = ModelFactory.GetValidTeacher();
-        DbContext.Users.Add(teacher);
+        var teacher = ModelFactory.CreateTeacher();
 
         await DbContext.SaveChangesAsync();
 
@@ -31,13 +29,11 @@ public class AddTeacherToCourseTests(ApiFactory factory) : BaseIntegrationTest(f
     [Fact]
     public async Task AddTeacherToCourse_ShouldReturnBadRequest_WhenAlreadyInCourse()
     {
-        var course = ModelFactory.GetValidCourse();
-        DbContext.Courses.Add(course);
+        var course = ModelFactory.CreateCourse();
 
-        var teacher = ModelFactory.GetValidTeacher();
-        DbContext.Users.Add(teacher);
+        var teacher = ModelFactory.CreateTeacher();
 
-        DbContext.CourseTeachers.Add(ModelFactory.GetValidCourseTeacher(course.Id, teacher.Id));
+        ModelFactory.CreateCourseTeacher(course.Id, teacher.Id);
 
         await DbContext.SaveChangesAsync();
 
@@ -54,8 +50,7 @@ public class AddTeacherToCourseTests(ApiFactory factory) : BaseIntegrationTest(f
     [Fact]
     public async Task AddTeacherToCourse_ShouldReturnNotFound_WhenInvalidTeacher()
     {
-        var course = ModelFactory.GetValidCourse();
-        DbContext.Courses.Add(course);
+        var course = ModelFactory.CreateCourse();
 
         await DbContext.SaveChangesAsync();
 
@@ -72,8 +67,7 @@ public class AddTeacherToCourseTests(ApiFactory factory) : BaseIntegrationTest(f
     [Fact]
     public async Task AddTeacherToCourse_ShouldReturnNotFound_WhenInvalidCourse()
     {
-        var teacher = ModelFactory.GetValidTeacher();
-        DbContext.Users.Add(teacher);
+        var teacher = ModelFactory.CreateTeacher();
 
         await DbContext.SaveChangesAsync();
 

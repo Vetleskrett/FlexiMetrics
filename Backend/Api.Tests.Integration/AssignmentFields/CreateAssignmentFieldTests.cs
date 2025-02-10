@@ -9,11 +9,9 @@ public class CreateAssignmentFieldTests(ApiFactory factory) : BaseIntegrationTes
     [Fact]
     public async Task CreateAssignmentField_ShouldCreateAssignmentField_WhenValidRequest()
     {
-        var course = ModelFactory.GetValidCourse();
-        DbContext.Courses.Add(course);
+        var course = ModelFactory.CreateCourse();
 
-        var assignment = ModelFactory.GetValidAssignment(course.Id);
-        DbContext.Assignments.Add(assignment);
+        var assignment = ModelFactory.CreateAssignment(course.Id);
 
         await DbContext.SaveChangesAsync();
 
@@ -47,11 +45,9 @@ public class CreateAssignmentFieldTests(ApiFactory factory) : BaseIntegrationTes
     [Fact]
     public async Task CreateAssignmentField_ShouldReturnBadRequest_WhenInvalidRequest()
     {
-        var course = ModelFactory.GetValidCourse();
-        DbContext.Courses.Add(course);
+        var course = ModelFactory.CreateCourse();
 
-        var assignment = ModelFactory.GetValidAssignment(course.Id);
-        DbContext.Assignments.Add(assignment);
+        var assignment = ModelFactory.CreateAssignment(course.Id);
 
         await DbContext.SaveChangesAsync();
 

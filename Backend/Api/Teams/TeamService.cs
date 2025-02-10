@@ -9,7 +9,7 @@ namespace Api.Teams;
 public interface ITeamService
 {
     Task<IEnumerable<TeamResponse>> GetAll();
-    Task<IEnumerable<TeamResponse>> GetAllByCourse(Guid courseId);
+    Task<IEnumerable<TeamResponse>?> GetAllByCourse(Guid courseId);
     Task<TeamResponse?> GetById(Guid id);
     Task<TeamResponse?> GetByStudentCourse(Guid studentId, Guid courseId);
     Task<IEnumerable<TeamResponse>> Create(CreateTeamsRequest request);
@@ -31,27 +31,33 @@ public class TeamService : ITeamService
     public async Task<IEnumerable<TeamResponse>> GetAll()
     {
         var teams = await _dbContext.Teams
-            .Include(t => t.Students)
+            .Include(t => t.Students.OrderBy(s => s.Email))
+            .OrderBy(t => t.Course!.Code)
+            .ThenBy(t => t.TeamNr)
             .AsNoTracking()
             .ToListAsync();
         return teams.MapToResponse();
     }
 
-    public async Task<IEnumerable<TeamResponse>> GetAllByCourse(Guid courseId)
+    public async Task<IEnumerable<TeamResponse>?> GetAllByCourse(Guid courseId)
     {
-        var teams = await _dbContext.Teams
-            .Where(t => t.CourseId == courseId)
-            .Include(t => t.Students)
-            .AsNoTracking()
-            .ToListAsync();
+        var course = await _dbContext.Courses
+            .Include(c => c.Teams!.OrderBy(t => t.TeamNr))
+            .ThenInclude(t => t.Students.OrderBy(s => s.Email))
+            .FirstOrDefaultAsync(c => c.Id == courseId);
 
-        return teams.MapToResponse();
+        if (course is null)
+        {
+            return default;
+        }
+
+        return course.Teams!.MapToResponse();
     }
 
     public async Task<TeamResponse?> GetById(Guid id)
     {
         var team = await _dbContext.Teams
-            .Include(t => t.Students)
+            .Include(t => t.Students.OrderBy(s => s.Email))
             .FirstOrDefaultAsync(t => t.Id == id);
         return team?.MapToResponse();
     }
@@ -59,7 +65,7 @@ public class TeamService : ITeamService
     public async Task<TeamResponse?> GetByStudentCourse(Guid studentId, Guid courseId)
     {
         var team = await _dbContext.Teams
-            .Include(t => t.Students)
+            .Include(t => t.Students.OrderBy(s => s.Email))
             .Where(t => t.CourseId == courseId)
             .Where(t => t.Students.Any(s => s.Id == studentId))
             .FirstOrDefaultAsync();

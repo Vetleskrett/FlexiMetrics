@@ -8,21 +8,9 @@ public class RemoveTeacherFromCourseTests(ApiFactory factory) : BaseIntegrationT
     [Fact]
     public async Task RemoveTeacherFromCourse_ShouldRemoveTeacherFromCourse_WhenValidRequest()
     {
-        var course = ModelFactory.GetValidCourse();
-        DbContext.Courses.Add(course);
+        var course = ModelFactory.CreateCourse();
 
-        List<User> teachers = [
-            ModelFactory.GetValidTeacher("teacher1@ntnu.no"),
-            ModelFactory.GetValidTeacher("teacher2@ntnu.no"),
-            ModelFactory.GetValidTeacher("teacher3@ntnu.no"),
-        ];
-        DbContext.Users.AddRange(teachers);
-
-        DbContext.CourseTeachers.AddRange([
-            ModelFactory.GetValidCourseTeacher(course.Id, teachers[0].Id),
-            ModelFactory.GetValidCourseTeacher(course.Id, teachers[1].Id),
-            ModelFactory.GetValidCourseTeacher(course.Id, teachers[2].Id),
-        ]);
+        var teachers = ModelFactory.CreateCourseTeachers(course.Id, 3);
 
         await DbContext.SaveChangesAsync();
 
@@ -35,13 +23,11 @@ public class RemoveTeacherFromCourseTests(ApiFactory factory) : BaseIntegrationT
     [Fact]
     public async Task RemoveTeacherFromCourse_ShouldReturnBadRequest_WhenOnlyOneTeacher()
     {
-        var course = ModelFactory.GetValidCourse();
-        DbContext.Courses.Add(course);
+        var course = ModelFactory.CreateCourse();
 
-        var teacher = ModelFactory.GetValidTeacher();
-        DbContext.Users.Add(teacher);
+        var teacher = ModelFactory.CreateTeacher();
 
-        DbContext.CourseTeachers.Add(ModelFactory.GetValidCourseTeacher(course.Id, teacher.Id));
+        ModelFactory.CreateCourseTeacher(course.Id, teacher.Id);
 
         await DbContext.SaveChangesAsync();
 
@@ -53,11 +39,9 @@ public class RemoveTeacherFromCourseTests(ApiFactory factory) : BaseIntegrationT
     [Fact]
     public async Task RemoveTeacherFromCourse_ShouldReturnBadRequest_WhenNotInCourse()
     {
-        var course = ModelFactory.GetValidCourse();
-        DbContext.Courses.Add(course);
+        var course = ModelFactory.CreateCourse();
 
-        var teacher = ModelFactory.GetValidTeacher();
-        DbContext.Users.Add(teacher);
+        var teacher = ModelFactory.CreateTeacher();
 
         await DbContext.SaveChangesAsync();
 
@@ -69,8 +53,7 @@ public class RemoveTeacherFromCourseTests(ApiFactory factory) : BaseIntegrationT
     [Fact]
     public async Task RemoveTeacherFromCourse_ShouldReturnNotFound_WhenInvalidTeacher()
     {
-        var course = ModelFactory.GetValidCourse();
-        DbContext.Courses.Add(course);
+        var course = ModelFactory.CreateCourse();
 
         await DbContext.SaveChangesAsync();
 
@@ -84,8 +67,7 @@ public class RemoveTeacherFromCourseTests(ApiFactory factory) : BaseIntegrationT
     [Fact]
     public async Task RemoveTeacherFromCourse_ShouldReturnNotFound_WhenInvalidCourse()
     {
-        var teacher = ModelFactory.GetValidTeacher();
-        DbContext.Users.Add(teacher);
+        var teacher = ModelFactory.CreateTeacher();
 
         await DbContext.SaveChangesAsync();
 

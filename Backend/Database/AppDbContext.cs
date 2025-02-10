@@ -40,7 +40,7 @@ public class AppDbContext : DbContext
         courseStudent.HasOne(x => x.Student).WithMany();
 
         var team = modelBuilder.Entity<Team>();
-        team.HasOne(t => t.Course).WithMany();
+        team.HasOne(t => t.Course).WithMany(c => c.Teams);
         team.HasMany(t => t.Students).WithMany();
 
         var assignment = modelBuilder.Entity<Assignment>();

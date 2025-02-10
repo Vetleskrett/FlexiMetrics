@@ -13,12 +13,12 @@
       {
         id: Guid_2,
         email: student2@ntnu.no,
-        name: Teacher Teachersen
+        name: Student Studentsen
       },
       {
         id: Guid_3,
         email: student3@ntnu.no,
-        name: Teacher Teachersen
+        name: Student Studentsen
       }
     ]
   }
