@@ -12,47 +12,57 @@
         students: [
           {
             id: Guid_3,
-            email: student1@ntnu.no,
+            email: existing@ntnu.no,
             name: Student Studentsen
           },
           {
             id: Guid_4,
+            email: new1@ntnu.no,
+            name: 
+          },
+          {
+            id: Guid_5,
+            email: student1@ntnu.no,
+            name: Student Studentsen
+          },
+          {
+            id: Guid_6,
             email: student2@ntnu.no,
             name: Student Studentsen
           }
         ]
       },
       {
-        id: Guid_5,
+        id: Guid_7,
         courseId: Guid_2,
         teamNr: 2,
         students: [
           {
-            id: Guid_6,
+            id: Guid_8,
             email: student3@ntnu.no,
             name: Student Studentsen
           },
           {
-            id: Guid_7,
+            id: Guid_9,
             email: student4@ntnu.no,
             name: Student Studentsen
           }
         ]
       },
       {
-        id: Guid_8,
+        id: Guid_10,
         courseId: Guid_2,
-        teamNr: 3,
+        teamNr: 100,
         students: [
           {
-            id: Guid_9,
-            email: student5@ntnu.no,
-            name: Student Studentsen
+            id: Guid_11,
+            email: new2@ntnu.no,
+            name: 
           },
           {
-            id: Guid_10,
-            email: student6@ntnu.no,
-            name: Student Studentsen
+            id: Guid_12,
+            email: new3@ntnu.no,
+            name: 
           }
         ]
       }

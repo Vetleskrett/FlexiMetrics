@@ -1,5 +1,4 @@
-﻿using Database.Models;
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 
 namespace Api.Tests.Integration.Teachers;
 

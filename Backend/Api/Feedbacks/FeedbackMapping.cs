@@ -134,8 +134,8 @@ public static class FeedbackMapping
         };
     }
 
-    public static IEnumerable<FeedbackResponse> MapToResponse(this IEnumerable<Feedback> feedbacks)
+    public static List<FeedbackResponse> MapToResponse(this IEnumerable<Feedback> feedbacks)
     {
-        return feedbacks.Select(feedback => feedback.MapToResponse());
+        return feedbacks.Select(feedback => feedback.MapToResponse()).ToList();
     }
 }

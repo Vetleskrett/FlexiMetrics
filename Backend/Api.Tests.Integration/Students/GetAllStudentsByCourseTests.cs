@@ -1,6 +1,4 @@
-﻿using Database.Models;
-
-namespace Api.Tests.Integration.Students;
+﻿namespace Api.Tests.Integration.Students;
 
 public class GetAllStudentsByCourseTests(ApiFactory factory) : BaseIntegrationTest(factory)
 {

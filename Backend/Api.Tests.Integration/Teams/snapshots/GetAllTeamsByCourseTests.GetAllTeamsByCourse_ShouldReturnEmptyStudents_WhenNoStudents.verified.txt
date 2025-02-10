@@ -1,1 +1,25 @@
-﻿
+﻿{
+  Status: 200 OK,
+  Content: {
+    Headers: {
+      Content-Type: application/json; charset=utf-8
+    },
+    Value: [
+      {
+        id: Guid_1,
+        courseId: Guid_2,
+        teamNr: 1
+      },
+      {
+        id: Guid_3,
+        courseId: Guid_2,
+        teamNr: 2
+      },
+      {
+        id: Guid_4,
+        courseId: Guid_2,
+        teamNr: 3
+      }
+    ]
+  }
+}

@@ -5,11 +5,6 @@ namespace Api.Students;
 
 public static class StudentMapping
 {
-    public static IEnumerable<StudentResponse> MapToStudentResponse(this IEnumerable<User> users)
-    {
-        return users.Select(u => u.MapToStudentResponse());
-    }
-
     public static StudentResponse MapToStudentResponse(this User user)
     {
         return new StudentResponse
@@ -18,5 +13,10 @@ public static class StudentMapping
             Email = user.Email,
             Name = user.Name,
         };
+    }
+
+    public static List<StudentResponse> MapToStudentResponse(this IEnumerable<User> users)
+    {
+        return users.Select(u => u.MapToStudentResponse()).ToList();
     }
 }

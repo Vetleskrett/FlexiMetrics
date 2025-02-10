@@ -1,6 +1,6 @@
 ﻿namespace Api.Teams.Contracts;
 
-public class BulkAddStudentToTeamsRequest
+public class BulkAddStudentsToTeamsRequest
 {
     public required Guid CourseId { get; init; }
     public required List<TeamRequest> Teams { get; init; }
