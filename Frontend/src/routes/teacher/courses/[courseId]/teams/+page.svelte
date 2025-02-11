@@ -36,7 +36,6 @@
 		if (file) {
 			input = await file.text();
 		}
-		console.log(input);
 		const allTeams: StudentToTeam[] = [];
 		const newTeams = input.split('\n');
 		for (const team of newTeams) {
@@ -48,7 +47,6 @@
 			const info = rawInfo.map((i) => i.trim());
 			allTeams.push({ teamNr: Number(info[0].trim()), emails: info.slice(1) });
 		}
-		console.log(allTeams);
 		try {
 			await postStudentsTeam({
 				courseId: courseId,

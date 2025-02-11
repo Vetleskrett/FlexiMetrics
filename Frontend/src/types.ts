@@ -92,6 +92,16 @@ export type NewAssignmentField = {
     type: string;
 }
 
+export type RegisterAssignmentField =  {
+    name: string;
+    type: string;
+    assignmentId: string;
+}
+
+export type RegisterAssignmentFields = {
+    fields: RegisterAssignmentField[]
+}
+
 export type DeliveryField = {
     id: string;
     assignmentFieldId: string;

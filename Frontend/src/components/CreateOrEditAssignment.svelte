@@ -15,6 +15,7 @@
     let items: string[] = [
         'String',
         'Integer',
+        'Double',
         'Boolean',
         'File',
     ];
