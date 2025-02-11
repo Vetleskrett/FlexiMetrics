@@ -18,6 +18,7 @@ import type {
   Teacher,
   CreateAssignment,
   EditAssignment,
+  RegisterAssignmentFields,
 } from "./types";
 
 const instance = axios.create({
@@ -116,10 +117,26 @@ export function editCourse(courseId: string, course: CreateCourse) : Promise<Axi
   return instance.put(`/courses/${courseId}`, course)
 }
 
-export async function postAssignment(assingment: CreateAssignment){
+export async function postAssignment(assingment: CreateAssignment) : Promise<AxiosResponse<Assignment>>{
   return instance.post(`/assignments`, assingment)
 }
 
-export async function editAssignment(courseId: string, assignment: EditAssignment){
-  return instance.put(`/assignments/${courseId}`, assignment)
+export async function editAssignment(assignmentId: string, assignment: EditAssignment) : Promise<AxiosResponse<Assignment>>{
+  return instance.put(`/assignments/${assignmentId}`, assignment)
+}
+
+export async function publishAssignment(assignmentId: string) : Promise<AxiosResponse<Assignment>>{
+  return instance.put(`/assignments/${assignmentId}/publish`,)
+}
+
+export async function deleteAssigment(assignmentId: string) : Promise<AxiosResponse>{
+  return instance.delete(`/assignments/${assignmentId}`)
+}
+
+export async function addAssignmentFields(fields: RegisterAssignmentFields):Promise<AxiosResponse<AssignmentField[]>> {
+  return instance.post(`/assignment-fields/bulk-add`, fields)
+}
+
+export async function deleteAssigmentField(assignmentFieldId: string) : Promise<AxiosResponse>{
+  return instance.delete(`/assignment-fields/${assignmentFieldId}`)
 }

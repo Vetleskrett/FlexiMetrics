@@ -11,12 +11,32 @@
 	import DeliveryFormatCard from 'src/components/DeliveryFormatCard.svelte';
 	import AnalyzersCard from 'src/components/AnalyzersCard.svelte';
 	import CustomButton from 'src/components/CustomButton.svelte';
-	import { analyzers } from 'src/mockData';
-	import type { Assignment, Course, AssignmentField, Delivery, Student, Team } from 'src/types';
+	import { analyzers, assignmentFields } from 'src/mockData';
+	import type { Assignment, Course, AssignmentField, Delivery, Student, Team, RegisterAssignmentField } from 'src/types';
 	import { Role } from 'src/types';
+	import { addAssignmentFields, deleteAssigment, publishAssignment } from 'src/api';
+	import { goto } from '$app/navigation';
 
 	const courseId = $page.params.courseId;
 	const assignmentId = $page.params.assignmentId;
+
+	async function publishAssignmentButton() {
+		try {
+			const response = await publishAssignment(assignmentId);
+			data.assignment = response.data
+		} catch (exception) {
+			console.error('Something Went Wrong!');
+		}
+	}
+
+	async function deleteAssignmentButton() {
+		try {
+			await deleteAssigment(assignmentId);
+			goto(`/teacher/courses/${courseId}`)
+		} catch (exception) {
+			console.error('Something Went Wrong!');
+		}
+	}
 
 	export let data: {
 		course: Course;
@@ -62,7 +82,7 @@
 
 		<div class="flex items-center gap-2">
 			{#if !data.assignment.published}
-				<CustomButton color="blue">
+				<CustomButton color="blue" on:click={publishAssignmentButton}>
 					<ArrowUpFromLine size="20" />
 					<p>Publish</p>
 				</CustomButton>
@@ -76,8 +96,8 @@
 						<Pencil class="h-4" />
 						<p>Edit assignment</p>
 					</DropdownMenu.Item>
-					<DropdownMenu.Item>
-						<Trash2 class="h-4" />
+					<DropdownMenu.Item on:click={deleteAssignmentButton}>
+						<Trash2 class="h-4"/>
 						<p>Delete assignment</p>
 					</DropdownMenu.Item>
 				</DropdownMenu.Content>
@@ -86,7 +106,7 @@
 	</div>
 	<div class="flex w-[1080px] flex-row gap-8">
 		<div class="flex w-3/5 flex-col gap-8">
-			<DeliveryFormatCard assignmentFields={data.assignmentFields} {assignmentId} {courseId} />
+			<DeliveryFormatCard assignmentFields={data.assignmentFields} {assignmentId} />
 			<AnalyzersCard {analyzers} {assignmentId} {courseId} />
 		</div>
 
