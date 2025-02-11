@@ -1,0 +1,39 @@
+﻿{
+  Status: 201 Created,
+  Headers: {
+    Location: http://localhost/deliveries/Guid_1
+  },
+  Content: {
+    Headers: {
+      Content-Type: application/json; charset=utf-8
+    },
+    Value: {
+      id: Guid_1,
+      assignmentId: Guid_2,
+      studentId: null,
+      teamId: Guid_3,
+      fields: [
+        {
+          id: Guid_4,
+          assignmentFieldId: Guid_5,
+          value: Value
+        },
+        {
+          id: Guid_6,
+          assignmentFieldId: Guid_7,
+          value: 16
+        },
+        {
+          id: Guid_8,
+          assignmentFieldId: Guid_9,
+          value: 5.7
+        },
+        {
+          id: Guid_10,
+          assignmentFieldId: Guid_11,
+          value: false
+        }
+      ]
+    }
+  }
+}

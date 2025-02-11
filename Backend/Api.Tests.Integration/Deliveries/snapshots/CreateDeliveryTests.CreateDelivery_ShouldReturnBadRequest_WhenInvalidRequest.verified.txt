@@ -1,0 +1,44 @@
+﻿{
+  Status: 400 Bad Request,
+  Content: {
+    Headers: {
+      Content-Type: application/json; charset=utf-8
+    },
+    Value: {
+      errors: [
+        {
+          propertyName: Fields,
+          message: Delivery must contain one delivery field per assignment field
+        },
+        {
+          propertyName: Fields,
+          message: Delivery can only contain delivery fields for assignment fields from assignment
+        },
+        {
+          propertyName: Fields,
+          message: Delivery can only contain one delivery field per assignment field
+        },
+        {
+          propertyName: Fields[0],
+          message: Delivery field data type must match assignment field data type
+        },
+        {
+          propertyName: Fields[3],
+          message: Delivery field data type must match assignment field data type
+        },
+        {
+          propertyName: Fields[4],
+          message: Delivery field data type must match assignment field data type
+        },
+        {
+          propertyName: Fields[5],
+          message: Delivery field data type must match assignment field data type
+        },
+        {
+          propertyName: Fields[6],
+          message: Delivery field data type must match assignment field data type
+        }
+      ]
+    }
+  }
+}

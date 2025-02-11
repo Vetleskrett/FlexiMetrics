@@ -30,8 +30,12 @@ public static class DeliveryEndpoints
         group.MapGet("students/{studentId:guid}/assignments/{assignmentId:guid}/deliveries",
             async (IDeliveryService deliveryService, Guid studentId, Guid assignmentId) =>
         {
-            var delivery = await deliveryService.GetByStudentAssignment(studentId, assignmentId);
-            return delivery is not null ? Results.Ok(delivery) : Results.NotFound();
+            var result = await deliveryService.GetByStudentAssignment(studentId, assignmentId);
+            return result.Match
+            (
+                delivery => delivery is not null ? Results.Ok(delivery) : Results.NotFound(),
+                failure => Results.BadRequest(failure)
+            );
         })
         .Produces<DeliveryResponse>()
         .WithName("GetDeliveryByStudentAssignment")
@@ -40,8 +44,12 @@ public static class DeliveryEndpoints
         group.MapGet("teams/{teamId:guid}/assignments/{assignmentId:guid}/deliveries",
             async (IDeliveryService deliveryService, Guid teamId, Guid assignmentId) =>
         {
-            var delivery = await deliveryService.GetByTeamAssignment(teamId, assignmentId);
-            return delivery is not null ? Results.Ok(delivery) : Results.NotFound();
+            var result = await deliveryService.GetByTeamAssignment(teamId, assignmentId);
+            return result.Match
+            (
+                delivery => delivery is not null ? Results.Ok(delivery) : Results.NotFound(),
+                failure => Results.BadRequest(failure)
+            );
         })
         .Produces<DeliveryResponse>()
         .WithName("GetDeliveryByTeamAssignment")
@@ -50,7 +58,7 @@ public static class DeliveryEndpoints
         group.MapGet("assignments/{assignmentId:guid}/deliveries", async (IDeliveryService deliveryService, Guid assignmentId) =>
         {
             var deliveries = await deliveryService.GetAllByAssignment(assignmentId);
-            return Results.Ok(deliveries);
+            return deliveries is not null ? Results.Ok(deliveries) : Results.NotFound();
         })
         .Produces<IEnumerable<DeliveryResponse>>()
         .WithName("GetAllDeliveriesByAssignment")

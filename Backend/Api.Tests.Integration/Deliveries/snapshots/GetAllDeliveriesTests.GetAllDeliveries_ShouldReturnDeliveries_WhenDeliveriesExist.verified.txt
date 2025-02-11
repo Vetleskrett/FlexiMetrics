@@ -1,0 +1,148 @@
+﻿{
+  Status: 200 OK,
+  Content: {
+    Headers: {
+      Content-Type: application/json; charset=utf-8
+    },
+    Value: [
+      {
+        id: Guid_1,
+        assignmentId: Guid_2,
+        studentId: Guid_3,
+        teamId: null,
+        fields: [
+          {
+            id: Guid_4,
+            assignmentFieldId: Guid_5,
+            value: My Frontend Project
+          },
+          {
+            id: Guid_6,
+            assignmentFieldId: Guid_7,
+            value: My Frontend Project
+          },
+          {
+            id: Guid_8,
+            assignmentFieldId: Guid_9,
+            value: My Frontend Project
+          }
+        ]
+      },
+      {
+        id: Guid_10,
+        assignmentId: Guid_2,
+        studentId: Guid_11,
+        teamId: null,
+        fields: [
+          {
+            id: Guid_12,
+            assignmentFieldId: Guid_5,
+            value: My Frontend Project
+          },
+          {
+            id: Guid_13,
+            assignmentFieldId: Guid_7,
+            value: My Frontend Project
+          },
+          {
+            id: Guid_14,
+            assignmentFieldId: Guid_9,
+            value: My Frontend Project
+          }
+        ]
+      },
+      {
+        id: Guid_15,
+        assignmentId: Guid_2,
+        studentId: Guid_16,
+        teamId: null,
+        fields: [
+          {
+            id: Guid_17,
+            assignmentFieldId: Guid_5,
+            value: My Frontend Project
+          },
+          {
+            id: Guid_18,
+            assignmentFieldId: Guid_7,
+            value: My Frontend Project
+          },
+          {
+            id: Guid_19,
+            assignmentFieldId: Guid_9,
+            value: My Frontend Project
+          }
+        ]
+      },
+      {
+        id: Guid_20,
+        assignmentId: Guid_2,
+        studentId: Guid_21,
+        teamId: null,
+        fields: [
+          {
+            id: Guid_22,
+            assignmentFieldId: Guid_5,
+            value: My Frontend Project
+          },
+          {
+            id: Guid_23,
+            assignmentFieldId: Guid_7,
+            value: My Frontend Project
+          },
+          {
+            id: Guid_24,
+            assignmentFieldId: Guid_9,
+            value: My Frontend Project
+          }
+        ]
+      },
+      {
+        id: Guid_25,
+        assignmentId: Guid_26,
+        studentId: null,
+        teamId: Guid_27,
+        fields: [
+          {
+            id: Guid_28,
+            assignmentFieldId: Guid_29,
+            value: My Frontend Project
+          },
+          {
+            id: Guid_30,
+            assignmentFieldId: Guid_31,
+            value: My Frontend Project
+          },
+          {
+            id: Guid_32,
+            assignmentFieldId: Guid_33,
+            value: My Frontend Project
+          }
+        ]
+      },
+      {
+        id: Guid_34,
+        assignmentId: Guid_26,
+        studentId: null,
+        teamId: Guid_35,
+        fields: [
+          {
+            id: Guid_36,
+            assignmentFieldId: Guid_29,
+            value: My Frontend Project
+          },
+          {
+            id: Guid_37,
+            assignmentFieldId: Guid_31,
+            value: My Frontend Project
+          },
+          {
+            id: Guid_38,
+            assignmentFieldId: Guid_33,
+            value: My Frontend Project
+          }
+        ]
+      }
+    ]
+  }
+}

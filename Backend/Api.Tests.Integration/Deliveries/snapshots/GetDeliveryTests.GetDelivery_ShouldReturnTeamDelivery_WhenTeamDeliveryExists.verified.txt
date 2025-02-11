@@ -1,0 +1,31 @@
+﻿{
+  Status: 200 OK,
+  Content: {
+    Headers: {
+      Content-Type: application/json; charset=utf-8
+    },
+    Value: {
+      id: Guid_1,
+      assignmentId: Guid_2,
+      studentId: null,
+      teamId: Guid_3,
+      fields: [
+        {
+          id: Guid_4,
+          assignmentFieldId: Guid_5,
+          value: My Frontend Project
+        },
+        {
+          id: Guid_6,
+          assignmentFieldId: Guid_7,
+          value: My Frontend Project
+        },
+        {
+          id: Guid_8,
+          assignmentFieldId: Guid_9,
+          value: My Frontend Project
+        }
+      ]
+    }
+  }
+}

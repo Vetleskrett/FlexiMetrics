@@ -151,7 +151,7 @@ public class ModelFactory
         return teams.ToList();
     }
 
-    public Assignment CreateAssignment(Guid courseId, bool published = true, TimeSpan offset = new())
+    public Assignment CreateAssignment(Guid courseId, bool published = true, TimeSpan offset = new(), CollaborationType collaboration = CollaborationType.Individual)
     {
         var assignment = new Assignment
         {
@@ -159,7 +159,7 @@ public class ModelFactory
             Name = "Frontend project",
             DueDate = new DateTime(2025, 5, 15, 0, 0, 0, DateTimeKind.Utc).Add(offset),
             Published = published,
-            CollaborationType = CollaborationType.Individual,
+            CollaborationType = collaboration,
             Mandatory = true,
             GradingFormat = new GradingFormat { GradingType = GradingType.LetterGrading, MaxPoints = null },
             Description = "Create a frontend project with svelte",
@@ -176,13 +176,13 @@ public class ModelFactory
             .ToList();
     }
 
-    public AssignmentField CreateAssignmentField(Guid assignmentId)
+    public AssignmentField CreateAssignmentField(Guid assignmentId, AssignmentDataType dataType = AssignmentDataType.String)
     {
         var assignmentField = new AssignmentField
         {
             Id = Guid.NewGuid(),
             AssignmentId = assignmentId,
-            Type = AssignmentDataType.String,
+            Type = dataType,
             Name = "Project title"
         };
         _dbContext.AssignmentFields.Add(assignmentField);
@@ -210,6 +210,18 @@ public class ModelFactory
         return delivery;
     }
 
+    public Delivery CreateStudentDeliveryWithFields(Guid assignmentId, List<AssignmentField> assignmentFields, Guid studentId)
+    {
+        var delivery = CreateStudentDelivery(assignmentId, studentId);
+
+        var deliveryFields = assignmentFields
+                .Select(assignmentField => CreateDeliveryField(delivery.Id, assignmentField))
+                .ToList();
+        _dbContext.DeliveryFields.AddRange(deliveryFields);
+
+        return delivery;
+    }
+
     public Delivery CreateTeamDelivery(Guid assignmentId, Guid teamId)
     {
         var delivery = new Delivery
@@ -221,6 +233,18 @@ public class ModelFactory
             Fields = []
         };
         _dbContext.Deliveries.Add(delivery);
+        return delivery;
+    }
+
+    public Delivery CreateTeamDeliveryWithFields(Guid assignmentId, List<AssignmentField> assignmentFields, Guid teamId)
+    {
+        var delivery = CreateTeamDelivery(assignmentId, teamId);
+
+        var deliveryFields = assignmentFields
+                .Select(assignmentField => CreateDeliveryField(delivery.Id, assignmentField))
+                .ToList();
+        _dbContext.DeliveryFields.AddRange(deliveryFields);
+
         return delivery;
     }
 

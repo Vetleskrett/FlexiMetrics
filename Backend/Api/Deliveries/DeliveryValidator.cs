@@ -18,14 +18,35 @@ public class DeliveryValidator : AbstractValidator<Delivery>
             .NotEmpty();
 
         RuleFor(x => x.Fields)
-            .NotEmpty();
+            .NotNull();
 
         RuleFor(x => x.Fields)
             .Must((delivery, fields) =>
             {
-                return fields!.Count == delivery.Assignment!.Fields!.Count;
+                foreach (var assignmentField in delivery.Assignment!.Fields!)
+                {
+                    if (!fields!.Any(f => f.AssignmentFieldId == assignmentField.Id))
+                    {
+                        return false;
+                    }
+                }
+                return true;
             })
             .WithMessage("Delivery must contain one delivery field per assignment field");
+
+        RuleFor(x => x.Fields)
+            .Must((delivery, fields) =>
+            {
+                foreach (var field in fields!)
+                {
+                    if (!delivery.Assignment!.Fields!.Any(f => f.Id == field.AssignmentFieldId))
+                    {
+                        return false;
+                    }
+                }
+                return true;
+            })
+            .WithMessage("Delivery can only contain delivery fields for assignment fields from assignment");
 
         RuleFor(x => x.Fields)
             .Must((delivery, fields) =>
@@ -60,6 +81,6 @@ public class DeliveryValidator : AbstractValidator<Delivery>
                     return false;
                 }
             })
-            .WithMessage("Delivery field must match assignment field from the assignment");
+            .WithMessage("Delivery field data type must match assignment field data type");
     }
 }
