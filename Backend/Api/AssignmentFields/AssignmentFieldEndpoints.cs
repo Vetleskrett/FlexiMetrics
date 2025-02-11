@@ -35,16 +35,30 @@ public static class AssignmentFieldEndpoints
             (
                 field => field is not null ? Results.CreatedAtRoute
                     (
-                        "GetAllAssignmentFieldsByAssignment",
+                        "CreateAssignmentFields",
                         new { assignmentId = field.AssignmentId },
                         field
                     ) : Results.NotFound(),
                 failure => Results.BadRequest(failure)
             );
         })
-        .Produces<AssignmentResponse>()
+        .Produces<AssignmentFieldResponse>()
         .WithName("CreateAssignmentField")
-        .WithSummary("Create new assignment with fields");
+        .WithSummary("Create new assignment field for assignment");
+
+        group.MapPost("assignment-fields/bulk-add", async (IAssignmentFieldService assignmentFieldService, CreateAssignmentFieldsRequest request) =>
+        {
+            var result = await assignmentFieldService.Create(request);
+
+            return result.Match
+            (
+                fields => fields is not null ? Results.Ok(fields) : Results.NotFound(),
+                failure => Results.BadRequest(failure)
+            );
+        })
+        .Produces<IEnumerable<AssignmentFieldResponse>>()
+        .WithName("CreateAssignmentFields")
+        .WithSummary("Create new list of assignment field for assignment");
 
         group.MapPut("assignment-fields/{id:guid}", async (IAssignmentFieldService assignmentFieldService, Guid id, UpdateAssignmentFieldRequest request) =>
         {

@@ -83,6 +83,20 @@ public static class AssignmentEndpoints
         .WithName("UpdateAssignment")
         .WithSummary("Update assignment by id");
 
+        group.MapPut("assignments/{id:guid}/publish", async (IAssignmentService assignmentService, Guid id) =>
+        {
+            var result = await assignmentService.Publish(id);
+
+            return result.Match
+            (
+                assignment => assignment is not null ? Results.Ok(assignment) : Results.NotFound(),
+                failure => Results.BadRequest(failure)
+            );
+        })
+      .Produces<AssignmentResponse>()
+      .WithName("PublishAssignment")
+      .WithSummary("Publish assignment by id");
+
         group.MapDelete("assignments/{id:guid}", async (IAssignmentService assignmentService, Guid id) =>
         {
             var deleted = await assignmentService.DeleteById(id);
