@@ -134,15 +134,8 @@ public static class Seed
                 .RuleFor(x => x.Published, f => f.PickRandom(true, true, true, false))
                 .RuleFor(x => x.CollaborationType, f => f.Random.Enum<CollaborationType>())
                 .RuleFor(x => x.Mandatory, f => f.Random.Bool())
-                .RuleFor(x => x.GradingFormat, f =>
-                {
-                    var type = f.Random.Enum<GradingType>();
-                    return new GradingFormat
-                    {
-                        GradingType = type,
-                        MaxPoints = type == GradingType.PointsGrading ? 10 * f.Random.Int(1, 10) : null,
-                    };
-                })
+                .RuleFor(x => x.GradingType, f => f.Random.Enum<GradingType>())
+                .RuleFor(x => x.MaxPoints, (f, a) => a.GradingType == GradingType.PointsGrading ? 10 * f.Random.Int(1, 10) : null)
                 .RuleFor(x => x.Description, f => f.Lorem.Paragraphs(2))
                 .RuleFor(x => x.CourseId, course.Id)
                 .GenerateBetween(2, 5);
@@ -307,7 +300,7 @@ public static class Seed
             .Select(delivery =>
             {
                 var assignment = assignments.First(a => a.Id == delivery.AssignmentId);
-                return assignment.GradingFormat.GradingType switch
+                return assignment.GradingType switch
                 {
                     GradingType.ApprovalGrading => approvalFeedbackFaker
                         .RuleFor(x => x.DeliveryId, delivery.Id)
@@ -319,7 +312,7 @@ public static class Seed
 
                     GradingType.PointsGrading => pointsFeedbackFaker
                         .RuleFor(x => x.DeliveryId, delivery.Id)
-                        .RuleFor(x => x.Points, f => f.Random.Int(0, assignment.GradingFormat.MaxPoints!.Value))
+                        .RuleFor(x => x.Points, f => f.Random.Int(0, assignment.MaxPoints!.Value))
                         .Generate(),
 
                     _ => feedbackFaker

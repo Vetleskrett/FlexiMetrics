@@ -28,12 +28,16 @@ public static class FeedbackEndpoints
 
         group.MapGet("students/{studentId:guid}/assignments/{assignmentId:guid}/feedbacks", async (IFeedbackService feedbackService, Guid studentId, Guid assignmentId) =>
         {
-            var feedback = await feedbackService.GetByStudentAssignment(studentId, assignmentId);
-            return feedback is not null ? Results.Ok(feedback) : Results.NotFound();
+            var result = await feedbackService.GetByStudentAssignment(studentId, assignmentId);
+            return result.Match
+            (
+                feedback => feedback is not null ? Results.Ok(feedback) : Results.NotFound(),
+                failure => Results.BadRequest(failure)
+            );
         })
         .Produces<FeedbackResponse>()
-        .WithName("GetStudentFeedback")
-        .WithSummary("Get student feedback by id");
+        .WithName("GetFeedbackByStudentAssignment")
+        .WithSummary("Get feedback by student id and assignment id");
 
         group.MapPost("feedbacks", async (IFeedbackService feedbackService, CreateFeedbackRequest request) =>
         {
@@ -41,12 +45,12 @@ public static class FeedbackEndpoints
 
             return result.Match
             (
-                feedback => Results.CreatedAtRoute
+                feedback => feedback is not null ? Results.CreatedAtRoute
                 (
                     "GetFeedback",
                     new { id = feedback.Id },
                     feedback
-                ),
+                ) : Results.NotFound(),
                 failure => Results.BadRequest(failure)
             );
         })

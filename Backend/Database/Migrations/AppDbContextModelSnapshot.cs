@@ -42,8 +42,14 @@ namespace Database.Migrations
                     b.Property<DateTime>("DueDate")
                         .HasColumnType("timestamp with time zone");
 
+                    b.Property<int>("GradingType")
+                        .HasColumnType("integer");
+
                     b.Property<bool>("Mandatory")
                         .HasColumnType("boolean");
+
+                    b.Property<int?>("MaxPoints")
+                        .HasColumnType("integer");
 
                     b.Property<string>("Name")
                         .IsRequired()
@@ -315,29 +321,7 @@ namespace Database.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.OwnsOne("Database.Models.GradingFormat", "GradingFormat", b1 =>
-                        {
-                            b1.Property<Guid>("AssignmentId")
-                                .HasColumnType("uuid");
-
-                            b1.Property<int>("GradingType")
-                                .HasColumnType("integer");
-
-                            b1.Property<int?>("MaxPoints")
-                                .HasColumnType("integer");
-
-                            b1.HasKey("AssignmentId");
-
-                            b1.ToTable("Assignments");
-
-                            b1.WithOwner()
-                                .HasForeignKey("AssignmentId");
-                        });
-
                     b.Navigation("Course");
-
-                    b.Navigation("GradingFormat")
-                        .IsRequired();
                 });
 
             modelBuilder.Entity("Database.Models.AssignmentField", b =>

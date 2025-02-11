@@ -20,10 +20,7 @@ public class AssignmentValidator : AbstractValidator<Assignment>
         RuleFor(x => x.CollaborationType)
             .IsInEnum();
 
-        RuleFor(x => x.GradingFormat)
-            .NotNull();
-
-        RuleFor(x => x.GradingFormat.GradingType)
+        RuleFor(x => x.GradingType)
             .IsInEnum();
 
         RuleFor(x => x.Description)

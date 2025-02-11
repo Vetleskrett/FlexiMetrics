@@ -17,11 +17,8 @@ public static class AssignmentMapping
             Published = request.Published,
             CollaborationType = request.CollaborationType,
             Mandatory = request.Mandatory,
-            GradingFormat = new GradingFormat
-            {
-                GradingType = request.GradingType,
-                MaxPoints = request.MaxPoints,
-            },
+            GradingType = request.GradingType,
+            MaxPoints = request.MaxPoints,
             Description = request.Description,
             CourseId = request.CourseId,
             Fields = request.Fields.MapToAssignmentField(id).ToList()
@@ -54,11 +51,8 @@ public static class AssignmentMapping
             Published = request.Published,
             CollaborationType = request.CollaborationType,
             Mandatory = request.Mandatory,
-            GradingFormat = new GradingFormat
-            {
-                GradingType = request.GradingType,
-                MaxPoints = request.MaxPoints,
-            },
+            GradingType = request.GradingType,
+            MaxPoints = request.MaxPoints,
             Description = request.Description,
             CourseId = courseId,
         };
@@ -74,8 +68,8 @@ public static class AssignmentMapping
             Published = assignment.Published,
             CollaborationType = assignment.CollaborationType,
             Mandatory = assignment.Mandatory,
-            GradingType = assignment.GradingFormat.GradingType,
-            MaxPoints = assignment.GradingFormat.MaxPoints,
+            GradingType = assignment.GradingType,
+            MaxPoints = assignment.MaxPoints,
             Description = assignment.Description,
             CourseId = assignment.CourseId,
         };

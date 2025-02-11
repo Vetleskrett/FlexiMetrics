@@ -1,5 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
 
 namespace Database.Models;
 
@@ -12,18 +11,12 @@ public class Assignment
     public required bool Published { get; set; }
     public required CollaborationType CollaborationType { get; set; }
     public required bool Mandatory { get; set; }
-    public required GradingFormat GradingFormat { get; set; }
+    public required GradingType GradingType { get; set; }
+    public required int? MaxPoints { get; set; }
     public required string Description { get; set; }
     public required Guid CourseId { get; set; }
     public Course? Course { get; set; }
     public List<AssignmentField>? Fields { get; set; }
-}
-
-[Owned]
-public class GradingFormat
-{
-    public required GradingType GradingType { get; set; }
-    public required int? MaxPoints { get; set; }
 }
 
 public enum GradingType

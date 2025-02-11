@@ -1,0 +1,16 @@
+﻿{
+  Status: 200 OK,
+  Content: {
+    Headers: {
+      Content-Type: application/json; charset=utf-8
+    },
+    Value: {
+      id: Guid_1,
+      comment: Looks even better to me,
+      deliveryId: Guid_2,
+      isApproved: false,
+      letterGrade: null,
+      points: null
+    }
+  }
+}
