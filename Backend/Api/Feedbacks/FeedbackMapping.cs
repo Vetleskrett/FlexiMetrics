@@ -7,36 +7,36 @@ public static class FeedbackMapping
 {
     public static Feedback MapToFeedback(this CreateFeedbackRequest request)
     {
-        if (request.Grading is ApprovalGradingRequest approval)
+        if (request.IsApproved is not null)
         {
             return new ApprovalFeedback
             {
                 Id = Guid.NewGuid(),
                 Comment = request.Comment,
                 DeliveryId = request.DeliveryId,
-                IsApproved = approval.IsApproved,
+                IsApproved = request.IsApproved.Value,
             };
         }
 
-        if (request.Grading is LetterGradingRequest letter)
+        if (request.LetterGrade is not null)
         {
             return new LetterFeedback
             {
                 Id = Guid.NewGuid(),
                 Comment = request.Comment,
                 DeliveryId = request.DeliveryId,
-                LetterGrade = letter.LetterGrade,
+                LetterGrade = request.LetterGrade.Value,
             };
         }
 
-        if (request.Grading is PointsGradingRequest points)
+        if (request.Points is not null)
         {
             return new PointsFeedback
             {
                 Id = Guid.NewGuid(),
                 Comment = request.Comment,
                 DeliveryId = request.DeliveryId,
-                Points = points.Points,
+                Points = request.Points.Value,
             };
         }
 
@@ -48,38 +48,38 @@ public static class FeedbackMapping
         };
     }
 
-    public static Feedback MapToFeedback(this UpdateFeedbackRequest request, Guid id)
+    public static Feedback MapToFeedback(this UpdateFeedbackRequest request, Guid id, Guid deliveryId)
     {
-        if (request.Grading is ApprovalGradingRequest approval)
+        if (request.IsApproved is not null)
         {
             return new ApprovalFeedback
             {
                 Id = id,
                 Comment = request.Comment,
-                DeliveryId = request.DeliveryId,
-                IsApproved = approval.IsApproved,
+                DeliveryId = deliveryId,
+                IsApproved = request.IsApproved.Value,
             };
         }
 
-        if (request.Grading is LetterGradingRequest letter)
+        if (request.LetterGrade is not null)
         {
             return new LetterFeedback
             {
                 Id = id,
                 Comment = request.Comment,
-                DeliveryId = request.DeliveryId,
-                LetterGrade = letter.LetterGrade,
+                DeliveryId = deliveryId,
+                LetterGrade = request.LetterGrade.Value,
             };
         }
 
-        if (request.Grading is PointsGradingRequest points)
+        if (request.Points is not null)
         {
             return new PointsFeedback
             {
                 Id = id,
                 Comment = request.Comment,
-                DeliveryId = request.DeliveryId,
-                Points = points.Points,
+                DeliveryId = deliveryId,
+                Points = request.Points.Value,
             };
         }
 
@@ -87,7 +87,7 @@ public static class FeedbackMapping
         {
             Id = id,
             Comment = request.Comment,
-            DeliveryId = request.DeliveryId,
+            DeliveryId = deliveryId,
         };
     }
 

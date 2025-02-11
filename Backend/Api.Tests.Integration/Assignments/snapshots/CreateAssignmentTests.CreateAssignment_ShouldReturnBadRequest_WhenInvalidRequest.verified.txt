@@ -19,8 +19,8 @@
           message: 'Collaboration Type' has a range of values which does not include '100'.
         },
         {
-          propertyName: GradingFormat.GradingType,
-          message: 'Grading Format Grading Type' has a range of values which does not include '100'.
+          propertyName: GradingType,
+          message: 'Grading Type' has a range of values which does not include '100'.
         },
         {
           propertyName: Description,

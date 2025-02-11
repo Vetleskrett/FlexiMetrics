@@ -46,7 +46,6 @@ public class AppDbContext : DbContext
         var assignment = modelBuilder.Entity<Assignment>();
         assignment.HasOne(a => a.Course).WithMany();
         assignment.HasMany(a => a.Fields).WithOne(f => f.Assignment);
-        assignment.OwnsOne(a => a.GradingFormat);
 
         var delivery = modelBuilder.Entity<Delivery>();
         delivery.HasOne(d => d.Assignment).WithMany();

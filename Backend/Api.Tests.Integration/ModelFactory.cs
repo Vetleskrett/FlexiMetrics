@@ -151,17 +151,26 @@ public class ModelFactory
         return teams.ToList();
     }
 
-    public Assignment CreateAssignment(Guid courseId, bool published = true, TimeSpan offset = new(), CollaborationType collaboration = CollaborationType.Individual)
+    public Assignment CreateAssignment
+    (
+        Guid courseId,
+        bool published = true,
+        TimeSpan offset = new(),
+        CollaborationType collaboration = CollaborationType.Individual,
+        GradingType gradingType = GradingType.LetterGrading,
+        int? maxPoints = null
+    )
     {
         var assignment = new Assignment
         {
             Id = Guid.NewGuid(),
             Name = "Frontend project",
-            DueDate = new DateTime(2025, 5, 15, 0, 0, 0, DateTimeKind.Utc).Add(offset),
+            DueDate = DateTime.UtcNow.AddDays(1).Add(offset),
             Published = published,
             CollaborationType = collaboration,
             Mandatory = true,
-            GradingFormat = new GradingFormat { GradingType = GradingType.LetterGrading, MaxPoints = null },
+            GradingType = gradingType,
+            MaxPoints = maxPoints,
             Description = "Create a frontend project with svelte",
             CourseId = courseId,
         };
@@ -338,5 +347,72 @@ public class ModelFactory
         };
         _dbContext.Feedbacks.Add(feedback);
         return feedback;
+    }
+
+    public List<Feedback> CreateFeedbacks(List<Delivery> deliveries)
+    {
+        return deliveries
+            .Select(delivery => CreateFeedback(delivery.Id))
+            .ToList();
+    }
+
+    public ApprovalFeedback CreateApprovalFeedback(Guid deliveryId)
+    {
+        var feedback = new ApprovalFeedback
+        {
+            Id = Guid.NewGuid(),
+            Comment = "Looks good to me",
+            DeliveryId = deliveryId,
+            IsApproved = true
+        };
+        _dbContext.Feedbacks.Add(feedback);
+        return feedback;
+    }
+
+    public List<ApprovalFeedback> CreateApprovalFeedbacks(List<Delivery> deliveries)
+    {
+        return deliveries
+            .Select(delivery => CreateApprovalFeedback(delivery.Id))
+            .ToList();
+    }
+
+    public LetterFeedback CreateLetterFeedback(Guid deliveryId)
+    {
+        var feedback = new LetterFeedback
+        {
+            Id = Guid.NewGuid(),
+            Comment = "Looks good to me",
+            DeliveryId = deliveryId,
+            LetterGrade = LetterGrade.C
+        };
+        _dbContext.Feedbacks.Add(feedback);
+        return feedback;
+    }
+
+    public List<LetterFeedback> CreateLetterFeedbacks(List<Delivery> deliveries)
+    {
+        return deliveries
+            .Select(delivery => CreateLetterFeedback(delivery.Id))
+            .ToList();
+    }
+
+    public PointsFeedback CreatePointsFeedback(Guid deliveryId)
+    {
+        var feedback = new PointsFeedback
+        {
+            Id = Guid.NewGuid(),
+            Comment = "Looks good to me",
+            DeliveryId = deliveryId,
+            Points = 75
+        };
+        _dbContext.Feedbacks.Add(feedback);
+        return feedback;
+    }
+
+    public List<PointsFeedback> CreatePointsFeedbacks(List<Delivery> deliveries)
+    {
+        return deliveries
+            .Select(delivery => CreatePointsFeedback(delivery.Id))
+            .ToList();
     }
 }

@@ -12,7 +12,7 @@ public interface IFeedbackService
 {
     Task<IEnumerable<FeedbackResponse>> GetAll();
     Task<FeedbackResponse?> GetById(Guid id);
-    Task<FeedbackResponse?> GetByStudentAssignment(Guid studentId, Guid assignmentId);
+    Task<Result<FeedbackResponse?, ValidationResponse>> GetByStudentAssignment(Guid studentId, Guid assignmentId);
     Task<Result<FeedbackResponse, ValidationResponse>> Create(CreateFeedbackRequest request);
     Task<Result<FeedbackResponse?, ValidationResponse>> Update(UpdateFeedbackRequest request, Guid id);
     Task<bool> DeleteById(Guid id);
@@ -41,8 +41,27 @@ public class FeedbackService : IFeedbackService
         return feedback?.MapToResponse();
     }
 
-    public async Task<FeedbackResponse?> GetByStudentAssignment(Guid studentId, Guid assignmentId)
+    public async Task<Result<FeedbackResponse?, ValidationResponse>> GetByStudentAssignment(Guid studentId, Guid assignmentId)
     {
+        var assignment = await _dbContext.Assignments.FindAsync(assignmentId);
+        if (assignment is null)
+        {
+            return default;
+        }
+
+        var student = await _dbContext.Users.FindAsync(studentId);
+        if (student is null)
+        {
+            return default;
+        }
+
+        var courseStudent = await _dbContext.CourseStudents
+            .FirstOrDefaultAsync(cs => cs.CourseId == assignment.CourseId && cs.StudentId == studentId);
+        if (courseStudent is null)
+        {
+            return new ValidationError("Student is not enrolled in the course").MapToResponse();
+        }
+
         var feedback = await _dbContext.Feedbacks
             .Where(f => f.Delivery!.AssignmentId == assignmentId)
             .Where(f =>
@@ -56,22 +75,22 @@ public class FeedbackService : IFeedbackService
 
     public async Task<Result<FeedbackResponse, ValidationResponse>> Create(CreateFeedbackRequest request)
     {
-        var assignment = await _dbContext.Deliveries
-            .Where(d => d.Id == request.DeliveryId)
-            .Select(d => d.Assignment)
-            .FirstOrDefaultAsync();
+        var delivery = await _dbContext.Deliveries
+            .Include(d => d.Assignment)
+            .FirstOrDefaultAsync(d => d.Id == request.DeliveryId);
 
-        if (assignment is null)
+        if (delivery is null)
         {
             return default;
         }
 
-        if (assignment.DueDate > DateTime.UtcNow)
+        if (delivery.Assignment!.DueDate > DateTime.UtcNow)
         {
             return new ValidationError("Cannot give feedback before assignment due date").MapToResponse();
         }
 
         var feedback = request.MapToFeedback();
+        feedback.Delivery = delivery;
         var validationResult = await _validator.ValidateAsync(feedback);
         if (!validationResult.IsValid)
         {
@@ -87,6 +106,8 @@ public class FeedbackService : IFeedbackService
     public async Task<Result<FeedbackResponse?, ValidationResponse>> Update(UpdateFeedbackRequest request, Guid id)
     {
         var feedback = await _dbContext.Feedbacks
+            .Include(f => f.Delivery!)
+            .ThenInclude(d => d.Assignment)
             .AsNoTracking()
             .FirstOrDefaultAsync(x => x.Id == id);
         if (feedback is null)
@@ -94,7 +115,9 @@ public class FeedbackService : IFeedbackService
             return default;
         }
 
-        feedback = request.MapToFeedback(id);
+        var delivery = feedback.Delivery;
+        feedback = request.MapToFeedback(id, feedback.DeliveryId);
+        feedback.Delivery = delivery;
 
         var validationResult = await _validator.ValidateAsync(feedback);
         if (!validationResult.IsValid)
@@ -103,9 +126,9 @@ public class FeedbackService : IFeedbackService
         }
 
         _dbContext.Feedbacks.Update(feedback);
-        var numEntriesUpdated = await _dbContext.SaveChangesAsync();
+        await _dbContext.SaveChangesAsync();
 
-        return numEntriesUpdated > 0 ? feedback.MapToResponse() : default;
+        return feedback.MapToResponse();
     }
 
     public async Task<bool> DeleteById(Guid id)
