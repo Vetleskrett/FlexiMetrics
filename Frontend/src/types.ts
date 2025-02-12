@@ -187,6 +187,13 @@ export type CreateCourse = {
     teacherId: string
 }
 
+export type EditCourse = {
+    code: string,
+    name: string,
+    year: number
+    semester: string,
+}
+
 export type AddTeacherToCourse = {
     email: string,
 }

@@ -1,37 +1,30 @@
 <script lang="ts">
-	import { page } from '$app/stores';
 	import CreateOrEditCourse from 'src/components/CreateOrEditCourse.svelte';
-	import { editCourse } from 'src/api';
-	import { Semester, type Course } from 'src/types';
-	import { goto } from '$app/navigation';
-
-	const courseId = $page.params.courseId;
+	import * as Breadcrumb from '$lib/components/ui/breadcrumb/index.js';
+	import type { Course } from 'src/types';
 
 	export let data: {
 		course: Course;
 	};
-
-	async function editCoursePage(name: string, code: string, year: number, semester: Semester) {
-		try {
-			await editCourse(courseId, {
-				name: name,
-				code: code,
-				year: year,
-				semester: semester == Semester.Spring ? 0 : 1
-			});
-			goto(`/teacher/courses/${courseId}`);
-		} catch (exception) {
-			console.error('Something Went Wrong!');
-		}
-	}
 </script>
 
-<CreateOrEditCourse
-	courseName={data.course.name}
-	courseCode={data.course.code}
-	year={data.course.year}
-	semester={data.course.semester}
-	edit={true}
-	submitFunction={editCoursePage}
-	redirect={`/teacher/courses/${courseId}`}
-/>
+<div class="mx-auto mt-4 flex w-max flex-col gap-10">
+	<Breadcrumb.Root class="self-start">
+		<Breadcrumb.List>
+			<Breadcrumb.Item>
+				<Breadcrumb.Link href="/teacher/courses">Courses</Breadcrumb.Link>
+			</Breadcrumb.Item>
+			<Breadcrumb.Separator />
+			<Breadcrumb.Item>
+				<Breadcrumb.Link href="/teacher/courses/{data.course.id}"
+					>{data.course.code} - {data.course.name}</Breadcrumb.Link
+				>
+			</Breadcrumb.Item>
+			<Breadcrumb.Separator />
+			<Breadcrumb.Item>
+				<Breadcrumb.Page>Edit Course</Breadcrumb.Page>
+			</Breadcrumb.Item>
+		</Breadcrumb.List>
+	</Breadcrumb.Root>
+	<CreateOrEditCourse edit={true} course={data.course} />
+</div>
