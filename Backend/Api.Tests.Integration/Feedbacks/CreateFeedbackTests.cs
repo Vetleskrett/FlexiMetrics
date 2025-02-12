@@ -30,7 +30,13 @@ public class CreateFeedbackTests(ApiFactory factory) : BaseIntegrationTest(facto
         var response = await Client.PostAsJsonAsync("feedbacks", request);
 
         await Verify(response);
-        Assert.True(await DbContext.Feedbacks.AnyAsync(f => f.DeliveryId == delivery.Id));
+        Assert.True(await DbContext.Feedbacks
+            .OfType<Feedback>()
+            .AnyAsync(f =>
+                f.DeliveryId == request.DeliveryId &&
+                f.Comment == request.Comment
+            )
+        );
     }
 
     [Fact]
@@ -57,7 +63,14 @@ public class CreateFeedbackTests(ApiFactory factory) : BaseIntegrationTest(facto
         var response = await Client.PostAsJsonAsync("feedbacks", request);
 
         await Verify(response);
-        Assert.True(await DbContext.Feedbacks.AnyAsync(f => f.DeliveryId == delivery.Id));
+        Assert.True(await DbContext.Feedbacks
+            .OfType<ApprovalFeedback>()
+            .AnyAsync(f =>
+                f.DeliveryId == request.DeliveryId &&
+                f.Comment == request.Comment &&
+                f.IsApproved == request.IsApproved
+            )
+        );
     }
 
     [Fact]
@@ -84,7 +97,14 @@ public class CreateFeedbackTests(ApiFactory factory) : BaseIntegrationTest(facto
         var response = await Client.PostAsJsonAsync("feedbacks", request);
 
         await Verify(response);
-        Assert.True(await DbContext.Feedbacks.AnyAsync(f => f.DeliveryId == delivery.Id));
+        Assert.True(await DbContext.Feedbacks
+            .OfType<LetterFeedback>()
+            .AnyAsync(f =>
+                f.DeliveryId == request.DeliveryId &&
+                f.Comment == request.Comment &&
+                f.LetterGrade == request.LetterGrade
+            )
+        );
     }
 
     [Fact]
@@ -112,7 +132,14 @@ public class CreateFeedbackTests(ApiFactory factory) : BaseIntegrationTest(facto
         var response = await Client.PostAsJsonAsync("feedbacks", request);
 
         await Verify(response);
-        Assert.True(await DbContext.Feedbacks.AnyAsync(f => f.DeliveryId == delivery.Id));
+        Assert.True(await DbContext.Feedbacks
+            .OfType<PointsFeedback>()
+            .AnyAsync(f =>
+                f.DeliveryId == request.DeliveryId &&
+                f.Comment == request.Comment &&
+                f.Points == request.Points
+            )
+        );
     }
 
     [Fact]

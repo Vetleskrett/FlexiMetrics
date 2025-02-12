@@ -1,9 +1,6 @@
-﻿using Database.Models;
+﻿namespace Api.AssignmentFields.Contracts;
 
-namespace Api.AssignmentFields.Contracts
+public class CreateAssignmentFieldsRequest
 {
-    public class CreateAssignmentFieldsRequest
-    {
-        public required List<CreateAssignmentFieldRequest> fields { get; init; }
-    }
+    public required List<CreateAssignmentFieldRequest> Fields { get; init; }
 }

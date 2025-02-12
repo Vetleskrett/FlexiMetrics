@@ -16,6 +16,7 @@ public class GetAllCoursesTests(ApiFactory factory) : BaseIntegrationTest(factor
         await DbContext.SaveChangesAsync();
 
         var response = await Client.GetAsync("courses");
+
         await Verify(response);
     }
 }

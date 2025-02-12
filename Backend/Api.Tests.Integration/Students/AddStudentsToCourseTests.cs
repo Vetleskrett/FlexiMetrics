@@ -10,12 +10,9 @@ public class AddStudentsToCourseTests(ApiFactory factory) : BaseIntegrationTest(
     public async Task AddStudentsToCourse_ShouldAddStudentsToCourse_WhenValidRequest()
     {
         var course = ModelFactory.CreateCourse();
-
         var existingStudents = ModelFactory.CreateStudents(4);
-
         ModelFactory.CreateCourseStudent(course.Id, existingStudents[0].Id);
         ModelFactory.CreateCourseStudent(course.Id, existingStudents[1].Id);
-
         await DbContext.SaveChangesAsync();
 
         var request = new AddStudentsToCourseRequest
@@ -35,15 +32,12 @@ public class AddStudentsToCourseTests(ApiFactory factory) : BaseIntegrationTest(
         await Verify(response);
         foreach (var email in request.Emails)
         {
-            Assert.True(
-                await DbContext.Users.AnyAsync(u => u.Email == email)
-            );
+            Assert.True(await DbContext.Users.AnyAsync(u => u.Email == email));
 
-            Assert.True(
-                await DbContext.CourseStudents
-                    .Where(cs => cs.CourseId == course.Id)
-                    .AnyAsync(cs => cs.Student!.Email == email)
-            );
+            Assert.True(await DbContext.CourseStudents.AnyAsync(cs =>
+                cs.CourseId == course.Id &&
+                cs.Student!.Email == email
+            ));
         }
     }
 
@@ -58,7 +52,6 @@ public class AddStudentsToCourseTests(ApiFactory factory) : BaseIntegrationTest(
                 "student3@ntnu.no",
             ]
         };
-
         var courseId = Guid.NewGuid();
 
         var response = Client.PostAsJsonAsync($"courses/{courseId}/students", request);

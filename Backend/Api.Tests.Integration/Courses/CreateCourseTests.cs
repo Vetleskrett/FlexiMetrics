@@ -25,7 +25,15 @@ public class CreateCourseTests(ApiFactory factory) : BaseIntegrationTest(factory
         var response = await Client.PostAsJsonAsync($"courses", request);
 
         await Verify(response);
-        Assert.NotNull(await DbContext.CourseTeachers.FirstOrDefaultAsync(x => x.TeacherId == teacher.Id));
+        Assert.True(await DbContext.Courses.AnyAsync(c =>
+            c.Code == request.Code &&
+            c.Name == request.Name &&
+            c.Year == request.Year &&
+            c.Semester == request.Semester &&
+            c.CourseTeachers!.Any(t =>
+                t.TeacherId == teacher.Id
+            )
+        ));
     }
 
     [Fact]

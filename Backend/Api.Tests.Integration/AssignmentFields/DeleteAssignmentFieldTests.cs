@@ -8,11 +8,8 @@ public class DeleteAssignmentFieldTests(ApiFactory factory) : BaseIntegrationTes
     public async Task DeleteAssignmentField_ShouldDeleteAssignmentField_WhenValidAssignmentField()
     {
         var course = ModelFactory.CreateCourse();
-
         var assignment = ModelFactory.CreateAssignment(course.Id);
-
         var field = ModelFactory.CreateAssignmentField(assignment.Id);
-
         await DbContext.SaveChangesAsync();
 
         var response = await Client.DeleteAsync($"assignment-fields/{field.Id}");
@@ -25,18 +22,13 @@ public class DeleteAssignmentFieldTests(ApiFactory factory) : BaseIntegrationTes
     public async Task DeleteAssignmentField_ShouldDeleteDeliveryField_WhenValidAssignmentField()
     {
         var course = ModelFactory.CreateCourse();
-
         var assignment = ModelFactory.CreateAssignment(course.Id);
-
         var field = ModelFactory.CreateAssignmentField(assignment.Id);
-
         var students = ModelFactory.CreateCourseStudents(course.Id, 3);
-
         ModelFactory.CreateStudentDeliveriesWithFields(assignment.Id, [field], students);
-
         await DbContext.SaveChangesAsync();
 
-        var response = await Client.DeleteAsync($"assignment-fields/{field.Id}");
+        await Client.DeleteAsync($"assignment-fields/{field.Id}");
 
         Assert.False(await DbContext.DeliveryFields.AnyAsync());
     }

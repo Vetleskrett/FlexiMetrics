@@ -30,7 +30,14 @@ public class UpdateFeedbackTests(ApiFactory factory) : BaseIntegrationTest(facto
         var response = await Client.PutAsJsonAsync($"feedbacks/{feedback.Id}", request);
 
         await Verify(response);
-        Assert.True(await DbContext.Feedbacks.AnyAsync(f => f.DeliveryId == delivery.Id));
+        Assert.True(await DbContext.Feedbacks
+            .OfType<Feedback>()
+            .AnyAsync(f =>
+                f.Id == feedback.Id &&
+                f.DeliveryId == delivery.Id &&
+                f.Comment == request.Comment
+            )
+        );
     }
 
     [Fact]
@@ -57,7 +64,15 @@ public class UpdateFeedbackTests(ApiFactory factory) : BaseIntegrationTest(facto
         var response = await Client.PutAsJsonAsync($"feedbacks/{feedback.Id}", request);
 
         await Verify(response);
-        Assert.True(await DbContext.Feedbacks.AnyAsync(f => f.DeliveryId == delivery.Id));
+        Assert.True(await DbContext.Feedbacks
+            .OfType<ApprovalFeedback>()
+            .AnyAsync(f =>
+                f.Id == feedback.Id &&
+                f.DeliveryId == delivery.Id &&
+                f.Comment == request.Comment &&
+                f.IsApproved == request.IsApproved
+            )
+        );
     }
 
     [Fact]
@@ -84,7 +99,15 @@ public class UpdateFeedbackTests(ApiFactory factory) : BaseIntegrationTest(facto
         var response = await Client.PutAsJsonAsync($"feedbacks/{feedback.Id}", request);
 
         await Verify(response);
-        Assert.True(await DbContext.Feedbacks.AnyAsync(f => f.DeliveryId == delivery.Id));
+        Assert.True(await DbContext.Feedbacks
+            .OfType<LetterFeedback>()
+            .AnyAsync(f =>
+                f.Id == feedback.Id &&
+                f.DeliveryId == delivery.Id &&
+                f.Comment == request.Comment &&
+                f.LetterGrade == request.LetterGrade
+            )
+        );
     }
 
     [Fact]
@@ -112,7 +135,15 @@ public class UpdateFeedbackTests(ApiFactory factory) : BaseIntegrationTest(facto
         var response = await Client.PutAsJsonAsync($"feedbacks/{feedback.Id}", request);
 
         await Verify(response);
-        Assert.True(await DbContext.Feedbacks.AnyAsync(f => f.DeliveryId == delivery.Id));
+        Assert.True(await DbContext.Feedbacks
+            .OfType<PointsFeedback>()
+            .AnyAsync(f =>
+                f.Id == feedback.Id &&
+                f.DeliveryId == delivery.Id &&
+                f.Comment == request.Comment &&
+                f.Points == request.Points
+            )
+        );
     }
 
     [Fact]
@@ -144,14 +175,13 @@ public class UpdateFeedbackTests(ApiFactory factory) : BaseIntegrationTest(facto
     [Fact]
     public async Task UpdateFeedback_ShouldReturnNotFound_WhenInvalidFeedback()
     {
-        var feedbackId = Guid.NewGuid();
-
         var request = new UpdateFeedbackRequest
         {
             Comment = "Looks even better to me"
         };
+        var id = Guid.NewGuid();
 
-        var response = await Client.PutAsJsonAsync($"feedbacks/{feedbackId}", request);
+        var response = await Client.PutAsJsonAsync($"feedbacks/{id}", request);
 
         await Verify(response);
     }

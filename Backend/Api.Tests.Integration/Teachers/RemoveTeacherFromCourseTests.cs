@@ -8,9 +8,7 @@ public class RemoveTeacherFromCourseTests(ApiFactory factory) : BaseIntegrationT
     public async Task RemoveTeacherFromCourse_ShouldRemoveTeacherFromCourse_WhenValidRequest()
     {
         var course = ModelFactory.CreateCourse();
-
         var teachers = ModelFactory.CreateCourseTeachers(course.Id, 3);
-
         await DbContext.SaveChangesAsync();
 
         var response = Client.DeleteAsync($"courses/{course.Id}/teachers/{teachers[0].Id}");
@@ -23,11 +21,8 @@ public class RemoveTeacherFromCourseTests(ApiFactory factory) : BaseIntegrationT
     public async Task RemoveTeacherFromCourse_ShouldReturnBadRequest_WhenOnlyOneTeacher()
     {
         var course = ModelFactory.CreateCourse();
-
         var teacher = ModelFactory.CreateTeacher();
-
         ModelFactory.CreateCourseTeacher(course.Id, teacher.Id);
-
         await DbContext.SaveChangesAsync();
 
         var response = Client.DeleteAsync($"courses/{course.Id}/teachers/{teacher.Id}");
@@ -39,9 +34,7 @@ public class RemoveTeacherFromCourseTests(ApiFactory factory) : BaseIntegrationT
     public async Task RemoveTeacherFromCourse_ShouldReturnBadRequest_WhenNotInCourse()
     {
         var course = ModelFactory.CreateCourse();
-
         var teacher = ModelFactory.CreateTeacher();
-
         await DbContext.SaveChangesAsync();
 
         var response = Client.DeleteAsync($"courses/{course.Id}/teachers/{teacher.Id}");
@@ -53,9 +46,7 @@ public class RemoveTeacherFromCourseTests(ApiFactory factory) : BaseIntegrationT
     public async Task RemoveTeacherFromCourse_ShouldReturnNotFound_WhenInvalidTeacher()
     {
         var course = ModelFactory.CreateCourse();
-
         await DbContext.SaveChangesAsync();
-
         var teacherId = Guid.NewGuid();
 
         var response = Client.DeleteAsync($"courses/{course.Id}/teachers/{teacherId}");
@@ -67,9 +58,7 @@ public class RemoveTeacherFromCourseTests(ApiFactory factory) : BaseIntegrationT
     public async Task RemoveTeacherFromCourse_ShouldReturnNotFound_WhenInvalidCourse()
     {
         var teacher = ModelFactory.CreateTeacher();
-
         await DbContext.SaveChangesAsync();
-
         var courseId = Guid.NewGuid();
 
         var response = Client.DeleteAsync($"courses/{courseId}/teachers/{teacher.Id}");

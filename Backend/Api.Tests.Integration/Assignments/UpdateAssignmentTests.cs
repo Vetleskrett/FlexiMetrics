@@ -1,5 +1,6 @@
 ﻿using Api.Assignments.Contracts;
 using Database.Models;
+using Microsoft.EntityFrameworkCore;
 using System.Net.Http.Json;
 
 namespace Api.Tests.Integration.Assignments;
@@ -10,9 +11,7 @@ public class UpdateAssignmentTests(ApiFactory factory) : BaseIntegrationTest(fac
     public async Task UpdateAssignment_ShouldUpdateAssignment_WhenValidRequest()
     {
         var course = ModelFactory.CreateCourse();
-
         var assignment = ModelFactory.CreateAssignment(course.Id);
-
         await DbContext.SaveChangesAsync();
 
         var request = new UpdateAssignmentRequest
@@ -29,15 +28,22 @@ public class UpdateAssignmentTests(ApiFactory factory) : BaseIntegrationTest(fac
         var response = await Client.PutAsJsonAsync($"assignments/{assignment.Id}", request);
 
         await Verify(response);
+        Assert.True(await DbContext.Assignments.AnyAsync(a =>
+            a.Name == request.Name &&
+            a.DueDate == request.DueDate &&
+            a.Published == request.Published &&
+            a.CollaborationType == request.CollaborationType &&
+            a.Mandatory == request.Mandatory &&
+            a.GradingType == request.GradingType &&
+            a.Description == request.Description
+        ));
     }
 
     [Fact]
     public async Task UpdateAssignment_ShouldReturnBadRequest_WhenInvalidRequest()
     {
         var course = ModelFactory.CreateCourse();
-
         var assignment = ModelFactory.CreateAssignment(course.Id);
-
         await DbContext.SaveChangesAsync();
 
         var request = new UpdateAssignmentRequest
@@ -69,7 +75,6 @@ public class UpdateAssignmentTests(ApiFactory factory) : BaseIntegrationTest(fac
             GradingType = GradingType.ApprovalGrading,
             Description = "Create a backend project with .net",
         };
-
         var assignmentId = Guid.NewGuid();
 
         var response = await Client.PutAsJsonAsync($"assignments/{assignmentId}", request);

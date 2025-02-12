@@ -16,8 +16,10 @@ public class RemoveStudentFromTeamTests(ApiFactory factory) : BaseIntegrationTes
         var response = await Client.DeleteAsync($"teams/{team.Id}/students/{student.Id}");
 
         await Verify(response);
-
-        Assert.False(await DbContext.Teams.AnyAsync(t => t.Id == team.Id && t.Students.Any(s => s.Id == student.Id)));
+        Assert.False(await DbContext.Teams.AnyAsync(t =>
+            t.Id == team.Id &&
+            t.Students.Any(s => s.Id == student.Id)
+        ));
     }
 
     [Fact]

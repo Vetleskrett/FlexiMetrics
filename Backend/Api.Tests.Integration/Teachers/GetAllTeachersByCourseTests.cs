@@ -17,9 +17,7 @@ public class GetAllTeachersByCourseTests(ApiFactory factory) : BaseIntegrationTe
     public async Task GetAllTeachersByCourse_ShouldReturnTeachers_WhenTeachersExists()
     {
         var course = ModelFactory.CreateCourse();
-
         ModelFactory.CreateCourseTeachers(course.Id, 3);
-
         await DbContext.SaveChangesAsync();
 
         var response = Client.GetAsync($"courses/{course.Id}/teachers");
@@ -30,9 +28,9 @@ public class GetAllTeachersByCourseTests(ApiFactory factory) : BaseIntegrationTe
     [Fact]
     public async Task GetAllTeachersByCourse_ShouldNotFound_WhenInvalidCourse()
     {
-        var id = Guid.NewGuid();
+        var courseId = Guid.NewGuid();
 
-        var response = Client.GetAsync($"courses/{id}/teachers");
+        var response = Client.GetAsync($"courses/{courseId}/teachers");
 
         await Verify(response);
     }

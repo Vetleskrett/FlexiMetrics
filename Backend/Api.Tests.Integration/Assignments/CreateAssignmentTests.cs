@@ -1,5 +1,6 @@
 ﻿using Api.Assignments.Contracts;
 using Database.Models;
+using Microsoft.EntityFrameworkCore;
 using System.Net.Http.Json;
 
 namespace Api.Tests.Integration.Assignments;
@@ -34,6 +35,20 @@ public class CreateAssignmentTests(ApiFactory factory) : BaseIntegrationTest(fac
         var response = await Client.PostAsJsonAsync($"assignments", request);
 
         await Verify(response);
+        Assert.True(await DbContext.Assignments.AnyAsync(a =>
+            a.CourseId == course.Id &&
+            a.Name == request.Name &&
+            a.DueDate == request.DueDate &&
+            a.Published == request.Published &&
+            a.CollaborationType == request.CollaborationType &&
+            a.Mandatory == request.Mandatory &&
+            a.GradingType == request.GradingType &&
+            a.Description == request.Description &&
+            a.Fields!.Any(f =>
+                f.Name == request.Fields[0].Name &&
+                f.Type == request.Fields[0].Type
+            )
+        ));
     }
 
     [Fact]

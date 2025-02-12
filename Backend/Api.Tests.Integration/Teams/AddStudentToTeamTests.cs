@@ -23,7 +23,10 @@ public class AddStudentToTeamTests(ApiFactory factory) : BaseIntegrationTest(fac
         var response = Client.PostAsJsonAsync($"teams/{team.Id}/students", request);
 
         await Verify(response);
-        Assert.True(await DbContext.Teams.AnyAsync(t => t.Id == team.Id && t.Students.Any(s => s.Id == student.Id)));
+        Assert.True(await DbContext.Teams.AnyAsync(
+            t => t.Id == team.Id &&
+            t.Students.Any(s => s.Id == student.Id)
+        ));
     }
 
     [Fact]
@@ -40,9 +43,15 @@ public class AddStudentToTeamTests(ApiFactory factory) : BaseIntegrationTest(fac
 
         var response = Client.PostAsJsonAsync($"teams/{team.Id}/students", request);
 
-        Assert.True(await DbContext.Teams.AnyAsync(t => t.Id == team.Id && t.Students.Any(s => s.Email == "new@ntnu.no")));
-        Assert.True(await DbContext.Users.AnyAsync(u => u.Email == "new@ntnu.no"));
-        Assert.True(await DbContext.CourseStudents.AnyAsync(cs => cs.CourseId == course.Id && cs.Student!.Email == "new@ntnu.no"));
+        Assert.True(await DbContext.Teams.AnyAsync(t =>
+            t.Id == team.Id &&
+            t.Students.Any(s => s.Email == request.Email)
+        ));
+        Assert.True(await DbContext.Users.AnyAsync(u => u.Email == request.Email));
+        Assert.True(await DbContext.CourseStudents.AnyAsync(cs =>
+            cs.CourseId == course.Id &&
+            cs.Student!.Email == request.Email
+        ));
     }
 
     [Fact]
