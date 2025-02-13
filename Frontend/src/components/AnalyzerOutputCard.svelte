@@ -73,7 +73,7 @@
 				<DropdownMenu.Trigger asChild let:builder>
 					<Label>
 						<p class="mb-[1px] ml-2 text-xs">Version</p>
-						<CustomButton color="outline" builders={[builder]}>
+						<CustomButton outline={true} color="blue" builders={[builder]}>
 							<p class="text-start font-normal text-black">
 								{currentVersion.datetime.toLocaleString(undefined, {
 									dateStyle: 'long',
@@ -100,7 +100,7 @@
 			<div class="flex items-start gap-4">
 				<DropdownMenu.Root>
 					<DropdownMenu.Trigger asChild let:builder>
-						<CustomButton color="outline" builders={[builder]}>
+						<CustomButton outline={true} color="blue" builders={[builder]}>
 							<List class="h-4 w-4" />
 							<p>Show/hide columns</p>
 						</CustomButton>
@@ -121,7 +121,7 @@
 				</DropdownMenu.Root>
 				<DropdownMenu.Root>
 					<DropdownMenu.Trigger asChild let:builder>
-						<CustomButton color="outline" builders={[builder]}>
+						<CustomButton outline={true} color="blue" builders={[builder]}>
 							<Filter class="h-4 w-4" />
 							<p>Filter</p>
 						</CustomButton>

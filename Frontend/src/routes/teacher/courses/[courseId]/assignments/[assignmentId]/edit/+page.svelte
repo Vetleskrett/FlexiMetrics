@@ -1,62 +1,43 @@
 <script lang="ts">
-	import { editAssignment } from 'src/api';
-	import {
-		CollaborationType,
-		GradingTypeEnum,
-		type Assignment,
-		type NewAssignmentField
-	} from 'src/types';
-	import { goto } from '$app/navigation';
+	import * as Breadcrumb from '$lib/components/ui/breadcrumb/index.js';
+	import type { Assignment, AssignmentField, Course } from 'src/types';
 	import CreateOrEditAssignment from 'src/components/CreateOrEditAssignment.svelte';
-	import { page } from '$app/stores';
-
-	const courseId = $page.params.courseId;
-	const assignmentId = $page.params.assignmentId;
 
 	export let data: {
+		course: Course;
 		assignment: Assignment;
+		assignmentFields: AssignmentField[];
 	};
-
-	async function editAssignments(
-		assignmentName: string,
-		dueDate: string,
-		collaborationType: CollaborationType,
-		draft: boolean,
-		mandatory: boolean,
-		fields: NewAssignmentField[],
-		description: string,
-		gradingType: GradingTypeEnum,
-		maxPoints: number
-	) {
-		try {
-			await editAssignment(assignmentId, {
-				name: assignmentName,
-				description: description,
-				dueDate: dueDate,
-				mandatory: mandatory,
-				published: !draft,
-				gradingType: gradingType,
-				maxPoints: maxPoints,
-				collaborationType: collaborationType,
-				courseId: courseId
-			});
-			goto(`/teacher/courses/${courseId}/assignments/${assignmentId}`);
-		} catch (exception) {
-			console.error('Something Went Wrong!');
-		}
-	}
 </script>
 
-<CreateOrEditAssignment
-	asssignmentName={data.assignment.name}
-	description={data.assignment.description}
-	mandatory={data.assignment.mandatory}
-	collaberationType={CollaborationType[data.assignment.collaborationType]}
-	gradingType={GradingTypeEnum[data.assignment.gradingType]}
-	dueDate={data.assignment.dueDate}
-	maxPoints={data.assignment.maxPoints ? data.assignment.maxPoints : 0}
-	draft={!data.assignment.published}
-	submitFunction={editAssignments}
-	edit={true}
-	redirect={`/teacher/courses/${courseId}/assignments/${assignmentId}`}
-/>
+<div class="mx-auto mt-4 flex w-max flex-col gap-10">
+	<Breadcrumb.Root class="self-start">
+		<Breadcrumb.List>
+			<Breadcrumb.Item>
+				<Breadcrumb.Link href="/teacher/courses">Courses</Breadcrumb.Link>
+			</Breadcrumb.Item>
+			<Breadcrumb.Separator />
+			<Breadcrumb.Item>
+				<Breadcrumb.Link href="/teacher/courses/{data.course.id}"
+					>{data.course.code} - {data.course.name}</Breadcrumb.Link
+				>
+			</Breadcrumb.Item>
+			<Breadcrumb.Separator />
+			<Breadcrumb.Item>
+				<Breadcrumb.Link href="/teacher/courses/{data.course.id}/assignments/{data.assignment.id}"
+					>{data.assignment.name}</Breadcrumb.Link
+				>
+			</Breadcrumb.Item>
+			<Breadcrumb.Separator />
+			<Breadcrumb.Item>
+				<Breadcrumb.Page>Edit</Breadcrumb.Page>
+			</Breadcrumb.Item>
+		</Breadcrumb.List>
+	</Breadcrumb.Root>
+	<CreateOrEditAssignment
+		course={data.course}
+		assignment={data.assignment}
+		fields={data.assignmentFields}
+		edit={true}
+	/>
+</div>

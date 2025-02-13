@@ -79,7 +79,7 @@
 				<Card.Title class="ml-4 text-3xl">{edit ? 'Edit Course' : 'New Course'}</Card.Title>
 			</div>
 		</Card.Header>
-		<Card.Content class="flex flex-col gap-4 px-4 py-0">
+		<Card.Content class="flex flex-col gap-4 px-6 py-0">
 			<Form.Field {form} name="name">
 				<Form.Control let:attrs>
 					<Form.Label for="name">Name</Form.Label>

@@ -1,8 +1,19 @@
-import { getAssignment } from "src/api";
+import { getAssignment, getAssignmentFields, getCourse } from "src/api";
 
-export const load = async ({ params }: {params: {assignmentId: string}}) => {
-    const assignmentResponse = await getAssignment(params.assignmentId);
+export const load = async ({ params }: {params: { courseId: string, assignmentId: string }}) => {
+    const [
+        courseResponse,
+        assignmentResponse,
+        assignmentFieldsResponse
+    ] = await Promise.all([
+        getCourse(params.courseId),
+        getAssignment(params.assignmentId),
+        getAssignmentFields(params.assignmentId)
+    ])
+
     return { 
-        assignment: assignmentResponse.data
+        course: courseResponse.data,
+        assignment: assignmentResponse.data,
+        assignmentFields: assignmentFieldsResponse.data
     }
 };

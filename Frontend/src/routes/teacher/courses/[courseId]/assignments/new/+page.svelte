@@ -1,41 +1,28 @@
 <script lang="ts">
-	import { postAssignment } from 'src/api';
-	import { CollaborationType, GradingTypeEnum, type NewAssignmentField } from 'src/types';
-	import { goto } from '$app/navigation';
+	import * as Breadcrumb from '$lib/components/ui/breadcrumb/index.js';
 	import CreateOrEditAssignment from 'src/components/CreateOrEditAssignment.svelte';
-	import { page } from '$app/stores';
+	import type { Course } from 'src/types';
 
-	const courseId = $page.params.courseId;
-
-	async function addAssignment(
-		assignmentName: string,
-		dueDate: string,
-		collaborationType: CollaborationType,
-		draft: boolean,
-		mandatory: boolean,
-		fields: NewAssignmentField[],
-		description: string,
-		gradingType: GradingTypeEnum,
-		maxPoints: number
-	) {
-		try {
-			await postAssignment({
-				name: assignmentName,
-				description: description,
-				dueDate: dueDate,
-				mandatory: mandatory,
-				published: !draft,
-				gradingType: gradingType,
-				maxPoints: maxPoints,
-				collaborationType: collaborationType,
-				courseId: courseId,
-				fields: fields
-			});
-			goto(`/teacher/courses/${courseId}`);
-		} catch (exception) {
-			console.error('Something Went Wrong!');
-		}
-	}
+	export let data: { course: Course };
 </script>
 
-<CreateOrEditAssignment submitFunction={addAssignment} redirect={`/teacher/courses/${courseId}`} />
+<div class="mx-auto mt-4 flex w-max flex-col gap-10">
+	<Breadcrumb.Root class="self-start">
+		<Breadcrumb.List>
+			<Breadcrumb.Item>
+				<Breadcrumb.Link href="/teacher/courses">Courses</Breadcrumb.Link>
+			</Breadcrumb.Item>
+			<Breadcrumb.Separator />
+			<Breadcrumb.Item>
+				<Breadcrumb.Link href="/teacher/courses/{data.course.id}"
+					>{data.course.code} - {data.course.name}</Breadcrumb.Link
+				>
+			</Breadcrumb.Item>
+			<Breadcrumb.Separator />
+			<Breadcrumb.Item>
+				<Breadcrumb.Page>New Assignment</Breadcrumb.Page>
+			</Breadcrumb.Item>
+		</Breadcrumb.List>
+	</Breadcrumb.Root>
+	<CreateOrEditAssignment edit={false} course={data.course} />
+</div>

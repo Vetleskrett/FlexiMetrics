@@ -56,7 +56,7 @@
 			<Card.Title class="m-0 ml-4 text-3xl">{assignment.name}</Card.Title>
 		</div>
 		<p class="font-semibold text-gray-500">
-			Due {new Date(assignment.dueDate).toLocaleDateString()}
+			Due {new Date(assignment?.dueDate).toLocaleDateString()}
 		</p>
 	</Card.Header>
 	<Card.Content class="p-0">
