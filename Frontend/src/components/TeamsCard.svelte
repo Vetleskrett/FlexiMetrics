@@ -1,12 +1,14 @@
 <script lang="ts">
 	import * as Card from '$lib/components/ui/card/index.js';
+	import { Role } from 'src/types';
 
 	export let numTeams: number;
 	export let courseId: string;
+	export let userRole: Role = Role.Teacher;
 </script>
 
 <Card.Root class="w-full overflow-hidden p-5 hover:bg-blue-50">
-	<a href="/teacher/courses/{courseId}/teams">
+	<a href="/{userRole == Role.Teacher ? "teacher" : "student"}/courses/{courseId}/teams">
 		<Card.Header class="m-0 p-0">
 			<div class="flex items-center">
 				<img

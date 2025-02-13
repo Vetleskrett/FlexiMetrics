@@ -81,6 +81,10 @@ export function getTeams(courseId: string): Promise<AxiosResponse<Team[]>> {
   return instance.get(`/courses/${courseId}/teams`)
 }
 
+export function getStudentTeam(courseId: string, studentId: string) : Promise<AxiosResponse<Team>>{
+  return instance.get(`students/${studentId}/courses/${courseId}/teams`)
+}
+
 export function postTeams(payload: CreateTeams) : Promise<AxiosResponse> {
   return instance.post("/teams", payload)
 }
@@ -95,6 +99,10 @@ export function postStudentsCourse(courseId: string, emails: AddStudentsToCourse
 
 export function postStudentsTeam(teams: AddStudentsToTeams) : Promise<AxiosResponse> {
   return instance.post(`/teams/bulk`, teams)
+}
+
+export function postStudentTeam(teamId: string, studentId: string) : Promise<AxiosResponse<Team>>{
+  return instance.post(`/teams/${teamId}/students/${studentId}`)
 }
 
 export function postCourse(course: CreateCourse) : Promise<AxiosResponse<Course>> {

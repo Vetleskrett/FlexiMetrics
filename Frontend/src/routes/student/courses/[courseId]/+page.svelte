@@ -6,6 +6,8 @@
 	import { Role } from 'src/types';
 	import TeamCard from 'src/components/TeamCard.svelte';
 	import StudentAssignmentsCard from 'src/components/StudentAssignmentsCard.svelte';
+	import { teams } from 'src/mockData';
+	import TeamsCard from 'src/components/TeamsCard.svelte';
 
 	const courseId = $page.params.courseId;
 
@@ -13,6 +15,7 @@
 		course: Course;
 		assignments: StudentAssignment[];
 		team: Team | null;
+		teams: Team[] | null
 		teachers: Teacher[];
 	};
 </script>
@@ -56,6 +59,8 @@
 		<div class="flex w-2/5 flex-col gap-8">
 			{#if data.team}
 				<TeamCard team={data.team} />
+			{:else if data.teams}
+				<TeamsCard courseId={courseId} numTeams={data.teams.length} userRole={Role.Student}/>
 			{/if}
 			<TeachersCard userRole={Role.Student} teachers={data.teachers} />
 		</div>
