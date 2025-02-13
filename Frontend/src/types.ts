@@ -175,6 +175,7 @@ export type AddStudentsToTeams = {
     courseId: string,
     teams: StudentToTeam[],
 }
+
 export type StudentToTeam = {
     teamNr: number,
     emails: string[],
