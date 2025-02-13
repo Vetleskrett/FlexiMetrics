@@ -3,14 +3,19 @@
 	import { Separator } from '$lib/components/ui/separator/index.js';
 	import Plus from 'lucide-svelte/icons/plus';
 	import Button from '$lib/components/ui/button/button.svelte';
+	import { Input } from 'src/lib/components/ui/input';
+	import CustomButton from './CustomButton.svelte';
 
-	export let headline: string, inputString: string, inputType: string, actionString: string, addFunction: (input: any) => void;
+	export let headline: string,
+		inputString: string,
+		inputType: string,
+		actionString: string,
+		addFunction: (input: any) => void;
 	let input: any;
 
-	function handleInput(thisInput: Event){
+	function handleInput(thisInput: Event) {
 		input = (thisInput.target as HTMLInputElement).value;
 	}
-
 </script>
 
 <Card.Root class="w-full overflow-hidden p-0">
@@ -23,24 +28,15 @@
 	<Card.Content class="p-0">
 		<div class="flex flex-col">
 			<Separator class="w-full" />
-			<div class="m-8 flex items-center px-6 text-sm font-bold">
-				<div>
-					<label class="pl-2" for="AddInput">{inputString}</label>
-					<input
-						id="AddInput"
-						class="mr-2 h-9 rounded-md border-2 border-black p-2"
-						placeholder={inputString}
-						type={inputType}
-						on:input={handleInput}
-					/>
+			<div class="mx-8 my-6 flex items-end gap-4">
+				<div class="w-full">
+					<label class="text-sm font-bold" for="AddInput">{inputString}</label>
+					<Input id="AddInput" placeholder={inputString} type={inputType} on:input={handleInput} />
 				</div>
-				<Button
-					class="mt-auto flex h-9 flex-row justify-between gap-2 bg-button-green pl-2 pr-3 hover:bg-button-green-hover"
-					on:click={() => addFunction(input)}
-				>
+				<CustomButton color="green" on:click={() => addFunction(input)}>
 					<Plus />
 					<p>{actionString}</p>
-				</Button>
+				</CustomButton>
 			</div>
 		</div>
 	</Card.Content>
