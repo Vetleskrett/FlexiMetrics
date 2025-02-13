@@ -16,6 +16,7 @@ public interface ITeamService
     Task<Result<IEnumerable<TeamResponse>?, ValidationResponse>> Create(CreateTeamsRequest request);
     Task<IEnumerable<TeamResponse>?> BulkAddToTeams(BulkAddStudentsToTeamsRequest request);
     Task<Result<TeamResponse?, ValidationResponse>> AddToTeam(Guid teamId, AddStudentToTeamRequest request);
+    Task<Result<TeamResponse?, ValidationResponse>> AddToTeam(Guid teamId, Guid studentId);
     Task<Result<TeamResponse?, ValidationResponse>> RemoveFromTeam(Guid teamId, Guid studentId);
     Task<bool> DeleteById(Guid id);
 }
@@ -290,6 +291,42 @@ public class TeamService : ITeamService
                 CourseId = team.CourseId,
                 StudentId = student.Id,
             });
+        }
+
+        await _dbContext.SaveChangesAsync();
+
+        return team.MapToResponse();
+    }
+
+    public async Task<Result<TeamResponse?, ValidationResponse>> AddToTeam(Guid teamId, Guid studentId)
+    {
+        var team = await _dbContext.Teams
+            .Include(t => t.Students)
+            .Include(t => t.Course!)
+            .ThenInclude(c => c.CourseStudents)
+            .FirstOrDefaultAsync(t => t.Id == teamId);
+
+        if (team is null)
+        {
+            return default;
+        }
+
+        var student = await _dbContext.Users.FirstOrDefaultAsync(u => u.Id == studentId);
+        if (student is null)
+        {
+            return default;
+        }
+
+        if (team.Students.Any(s => s.Id == student.Id))
+        {
+            return new ValidationError("Student already in team").MapToResponse();
+        }
+
+        team.Students.Add(student);
+
+        if (!team.Course!.CourseStudents!.Any(cs => cs.StudentId == student.Id))
+        {
+            return new ValidationError("Student not in course").MapToResponse();
         }
 
         await _dbContext.SaveChangesAsync();
