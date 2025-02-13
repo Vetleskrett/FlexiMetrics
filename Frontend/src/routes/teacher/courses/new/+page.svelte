@@ -1,24 +1,19 @@
 <script lang="ts">
+	import * as Breadcrumb from '$lib/components/ui/breadcrumb/index.js';
 	import CreateOrEditCourse from 'src/components/CreateOrEditCourse.svelte';
-	import { postCourse } from 'src/api';
-	import { Semester } from 'src/types';
-	import { goto } from '$app/navigation';
-	import { teacherId } from 'src/store';
-
-	async function addCourse(name: string, code: string, year: number, semester: Semester) {
-		try {
-			await postCourse({
-				name: name,
-				code: code,
-				year: year,
-				semester: semester == Semester.Spring ? 'Spring' : 'Autumn',
-				teacherId: teacherId
-			});
-			goto('/teacher/courses');
-		} catch (exception) {
-			console.error('Something Went Wrong!');
-		}
-	}
 </script>
 
-<CreateOrEditCourse submitFunction={addCourse} redirect={'/teacher/courses'} />
+<div class="mx-auto mt-4 flex w-max flex-col gap-10">
+	<Breadcrumb.Root class="self-start">
+		<Breadcrumb.List>
+			<Breadcrumb.Item>
+				<Breadcrumb.Link href="/teacher/courses">Courses</Breadcrumb.Link>
+			</Breadcrumb.Item>
+			<Breadcrumb.Separator />
+			<Breadcrumb.Item>
+				<Breadcrumb.Page>New Course</Breadcrumb.Page>
+			</Breadcrumb.Item>
+		</Breadcrumb.List>
+	</Breadcrumb.Root>
+	<CreateOrEditCourse edit={false} />
+</div>

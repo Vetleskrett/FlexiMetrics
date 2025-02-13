@@ -13,6 +13,7 @@ import type {
   Delivery,
   Feedback,
   CreateCourse,
+  EditCourse,
   AddTeacherToCourse,
   CreateDelivery,
   Teacher,
@@ -121,7 +122,7 @@ export function deleteCourse(courseId: string) : Promise<AxiosResponse> {
   return instance.delete(`/courses/${courseId}`)
 }
 
-export function editCourse(courseId: string, course: CreateCourse) : Promise<AxiosResponse> {
+export function editCourse(courseId: string, course: EditCourse) : Promise<AxiosResponse<Course>> {
   return instance.put(`/courses/${courseId}`, course)
 }
 

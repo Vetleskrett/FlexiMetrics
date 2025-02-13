@@ -1,5 +1,4 @@
-﻿using Api.AssignmentFields;
-using Database.Models;
+﻿using Database.Models;
 using FluentValidation;
 
 namespace Api.Assignments;

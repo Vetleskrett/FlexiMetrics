@@ -1,4 +1,5 @@
 ﻿using Api.Teams.Contracts;
+using Microsoft.EntityFrameworkCore;
 using System.Net.Http.Json;
 
 namespace Api.Tests.Integration.Teams;
@@ -23,6 +24,13 @@ public class CreateTeamsTests(ApiFactory factory) : BaseIntegrationTest(factory)
         var response = await Client.PostAsJsonAsync("teams", request);
 
         await Verify(response);
+        for (var nr = 1; nr <= 6; nr++)
+        {
+            Assert.True(await DbContext.Teams.AnyAsync(t =>
+                t.CourseId == request.CourseId &&
+                t.TeamNr == nr
+            ));
+        }
     }
 
     [Fact]

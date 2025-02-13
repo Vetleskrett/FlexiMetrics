@@ -42,6 +42,22 @@ public class BulkAddStudentsToTeamsTests(ApiFactory factory) : BaseIntegrationTe
         var response = Client.PostAsJsonAsync("teams/bulk", request);
 
         await Verify(response);
+        foreach (var team in request.Teams)
+        {
+            foreach (var email in team.Emails)
+            {
+                Assert.True(await DbContext.Teams.AnyAsync(t =>
+                    t.CourseId == request.CourseId &&
+                    t.TeamNr == team.TeamNr &&
+                    t.Students.Any(s => s.Email == email)
+                ));
+                Assert.True(await DbContext.Users.AnyAsync(u => u.Email == email));
+                Assert.True(await DbContext.CourseStudents.AnyAsync(cs =>
+                    cs.CourseId == request.CourseId &&
+                    cs.Student!.Email == email
+                ));
+            }
+        }
     }
 
     [Fact]
@@ -75,18 +91,22 @@ public class BulkAddStudentsToTeamsTests(ApiFactory factory) : BaseIntegrationTe
 
         await Client.PostAsJsonAsync("teams/bulk", request);
 
-        Assert.True(await DbContext.Teams.AnyAsync(t => t.CourseId == course.Id && t.TeamNr == 1));
-        Assert.True(await DbContext.Teams.AnyAsync(t => t.CourseId == course.Id && t.TeamNr == 2));
-
-        Assert.True(await DbContext.Users.AnyAsync(u => u.Email == "new1@ntnu.no"));
-        Assert.True(await DbContext.Users.AnyAsync(u => u.Email == "new2@ntnu.no"));
-        Assert.True(await DbContext.Users.AnyAsync(u => u.Email == "new3@ntnu.no"));
-        Assert.True(await DbContext.Users.AnyAsync(u => u.Email == "new4@ntnu.no"));
-
-        Assert.True(await DbContext.CourseStudents.AnyAsync(cs => cs.CourseId == course.Id && cs.Student!.Email == "new1@ntnu.no"));
-        Assert.True(await DbContext.CourseStudents.AnyAsync(cs => cs.CourseId == course.Id && cs.Student!.Email == "new2@ntnu.no"));
-        Assert.True(await DbContext.CourseStudents.AnyAsync(cs => cs.CourseId == course.Id && cs.Student!.Email == "new3@ntnu.no"));
-        Assert.True(await DbContext.CourseStudents.AnyAsync(cs => cs.CourseId == course.Id && cs.Student!.Email == "new4@ntnu.no"));
+        foreach (var team in request.Teams)
+        {
+            foreach (var email in team.Emails)
+            {
+                Assert.True(await DbContext.Teams.AnyAsync(t =>
+                    t.CourseId == request.CourseId &&
+                    t.TeamNr == team.TeamNr &&
+                    t.Students.Any(s => s.Email == email)
+                ));
+                Assert.True(await DbContext.Users.AnyAsync(u => u.Email == email));
+                Assert.True(await DbContext.CourseStudents.AnyAsync(cs =>
+                    cs.CourseId == request.CourseId &&
+                    cs.Student!.Email == email
+                ));
+            }
+        }
     }
 
     [Fact]

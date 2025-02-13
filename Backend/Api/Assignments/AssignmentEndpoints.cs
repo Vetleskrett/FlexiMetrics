@@ -1,6 +1,4 @@
 ﻿using Api.Assignments.Contracts;
-using Api.Validation;
-using Database.Models;
 
 namespace Api.Assignments;
 

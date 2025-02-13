@@ -2,51 +2,63 @@
 	import * as Card from '$lib/components/ui/card/index.js';
 	import Plus from 'lucide-svelte/icons/plus';
 	import Button from '$lib/components/ui/button/button.svelte';
+	import { Textarea } from 'src/lib/components/ui/textarea';
+	import CustomButton from './CustomButton.svelte';
 
 	export let addFunction: (input: string, file: File | null) => void;
-	let teamInput: string = "";
+	let teamInput: string = '';
 	let file: File | null;
-    let fileInput: HTMLInputElement;
+	let fileInput: HTMLInputElement;
 
-    function handleFileUpload(event: Event): void
-    {
-        const input = event.target as HTMLInputElement;
-        file = input.files ? input.files[0] : null;
-    }
+	function handleFileUpload(event: Event): void {
+		const input = event.target as HTMLInputElement;
+		file = input.files ? input.files[0] : null;
+		file?.text().then((text) => (teamInput = text));
+	}
 
-    function openFileExplorer() { fileInput.click(); }
+	function openFileExplorer() {
+		fileInput.click();
+	}
 </script>
 
 <Card.Root class="w-full overflow-hidden p-0">
-	<Card.Header class="mb-6 flex flex-row items-center justify-between">
+	<Card.Header class="flex flex-row items-center justify-between">
 		<div class="flex items-center">
 			<img width="48" height="48" src="https://img.icons8.com/fluency/480/csv.png" alt="csv" />
 			<Card.Title class="ml-4 text-3xl">Add Team Members</Card.Title>
 		</div>
 	</Card.Header>
-	<Card.Content class="p-0">
-		<div class="flex flex-col items-center">
-			<p>
-				Requires one line per team in the format: <br />
-				<b>teamNumber, email, email, ...</b><br />
-				<br />
-				Copy and Paste, Drag and Drop file, or
-				<a on:click={openFileExplorer} href="#" class="text-blue-500 hover:text-blue-700">Browse Files</a>
-                <input bind:this={fileInput} type="file" on:change={handleFileUpload} style="display: none;" />
-			</p>
-			<textarea
-				class="mb-5 mt-5 h-64 w-2/3 border-2 border-dotted border-gray-500"
-				placeholder="1,abc@email.com,def@email.com,ghi@email.com
-2,jkl@email.com, mno@email.com"
+	<Card.Content class="p-5">
+		<div class="flex flex-col items-center gap-2">
+			<div class="flex w-full flex-col gap-4">
+				<div>
+					<p>Requires the student in the format:</p>
+					<b>teamNr, email1, email2, ...</b>
+				</div>
+
+				<div>
+					<p>Copy and Paste, Drag and Drop file, or</p>
+					<a on:click={openFileExplorer} href="#" class="text-blue-500 hover:text-blue-700">
+						Browse Files
+					</a>
+					<input
+						bind:this={fileInput}
+						type="file"
+						on:change={handleFileUpload}
+						style="display: none;"
+					/>
+				</div>
+			</div>
+			<Textarea
+				class="h-48 border-2 border-dotted border-gray-500"
+				placeholder="1, ola@email.com, kari@email.com
+2, lise@email.com, per@email.com"
 				bind:value={teamInput}
-			/><!-- Find better solution for placeholder with multiple lines? -->
-			<Button
-				class="mb-5 flex h-9 flex-row justify-between gap-2 bg-button-green pl-2 pr-3 hover:bg-button-green-hover"
-				on:click={() => addFunction(teamInput, file)}
-			>
-				<Plus/>
+			/>
+			<CustomButton color="green" on:click={async () => addFunction(teamInput, file)}>
+				<Plus />
 				<p>Add</p>
-			</Button>
+			</CustomButton>
 		</div>
 	</Card.Content>
 </Card.Root>

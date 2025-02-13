@@ -1,3 +1,5 @@
+import type { DateValue } from "@internationalized/date";
+
 export type Course = {
     id: string;
     name: string;
@@ -16,7 +18,7 @@ export enum Role {
     Student = 1,
 }
 
-export enum CollaborationType {
+export enum CollaborationTypeEnum {
     Individual = 0,
     Teams = 1,
 }
@@ -28,12 +30,14 @@ export enum GradingTypeEnum {
     PointsGrading = 3,
 }
 
+export type CollaborationType = 'Individual' | 'Teams';
+
 export type Assignment = {
     id: string;
     name: string;
     dueDate: string;
     published: boolean;
-    collaborationType: 'Individual' | 'Teams';
+    collaborationType: CollaborationType;
     courseId : string;
     mandatory: boolean;
     gradingType: GradingType;
@@ -89,7 +93,7 @@ export type AssignmentField = {
 
 export type NewAssignmentField = {
     name: string;
-    type: string;
+    type: AssignmentFieldType;
 }
 
 export type RegisterAssignmentField =  {
@@ -188,6 +192,13 @@ export type CreateCourse = {
     teacherId: string
 }
 
+export type EditCourse = {
+    code: string,
+    name: string,
+    year: number
+    semester: string,
+}
+
 export type AddTeacherToCourse = {
     email: string,
 }
@@ -207,24 +218,23 @@ export type CreateAssignment = {
     description: string,
     courseId: string,
     dueDate: string,
-    gradingType: number,
+    gradingType: GradingType,
     maxPoints: number | undefined,
     mandatory: boolean,
     published: boolean,
-    collaborationType: number,
+    collaborationType: CollaborationType,
     fields: NewAssignmentField[]
 }
 
 export type EditAssignment = {
     name: string,
     description: string,
-    courseId: string,
     dueDate: string,
-    gradingType: number,
+    gradingType: GradingType,
     maxPoints: number | undefined,
     mandatory: boolean,
     published: boolean,
-    collaborationType: number,
+    collaborationType: CollaborationType,
 }
 
 

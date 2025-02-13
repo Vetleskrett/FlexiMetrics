@@ -12,7 +12,6 @@ public class GetDeliveryByTeamAssignmentTests(ApiFactory factory) : BaseIntegrat
         var assignmentFields = ModelFactory.CreateAssignmentFields(assignment.Id, 3);
         var team = ModelFactory.CreateTeam(course.Id);
         ModelFactory.CreateTeamDeliveryWithFields(assignment.Id, assignmentFields, team.Id);
-
         await DbContext.SaveChangesAsync();
 
         var response = await Client.GetAsync($"teams/{team.Id}/assignments/{assignment.Id}/deliveries");
@@ -26,7 +25,6 @@ public class GetDeliveryByTeamAssignmentTests(ApiFactory factory) : BaseIntegrat
         var course = ModelFactory.CreateCourse();
         var assignment = ModelFactory.CreateAssignment(course.Id, collaboration: CollaborationType.Teams);
         var team = ModelFactory.CreateTeam(course.Id);
-
         await DbContext.SaveChangesAsync();
 
         var response = await Client.GetAsync($"teams/{team.Id}/assignments/{assignment.Id}/deliveries");
@@ -52,10 +50,8 @@ public class GetDeliveryByTeamAssignmentTests(ApiFactory factory) : BaseIntegrat
     {
         var course = ModelFactory.CreateCourse();
         var assignment = ModelFactory.CreateAssignment(course.Id, collaboration: CollaborationType.Teams);
-
         var otherCourse = ModelFactory.CreateCourse();
         var team = ModelFactory.CreateTeam(otherCourse.Id);
-
         await DbContext.SaveChangesAsync();
 
         var response = await Client.GetAsync($"teams/{team.Id}/assignments/{assignment.Id}/deliveries");

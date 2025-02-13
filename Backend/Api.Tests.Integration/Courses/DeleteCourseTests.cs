@@ -20,9 +20,7 @@ public class DeleteCourseTests(ApiFactory factory) : BaseIntegrationTest(factory
     public async Task DeleteCourse_ShouldDeleteAssignments_WhenValidCourse()
     {
         var course = ModelFactory.CreateCourse();
-
         ModelFactory.CreateAssignments(course.Id, 3);
-
         await DbContext.SaveChangesAsync();
 
         await Client.DeleteAsync($"courses/{course.Id}");
@@ -34,9 +32,7 @@ public class DeleteCourseTests(ApiFactory factory) : BaseIntegrationTest(factory
     public async Task DeleteCourse_ShouldDeleteTeams_WhenValidCourse()
     {
         var course = ModelFactory.CreateCourse();
-
         ModelFactory.CreateTeams(course.Id, 3);
-
         await DbContext.SaveChangesAsync();
 
         await Client.DeleteAsync($"courses/{course.Id}");
@@ -48,9 +44,7 @@ public class DeleteCourseTests(ApiFactory factory) : BaseIntegrationTest(factory
     public async Task DeleteCourse_ShouldDeleteCourseTeachers_WhenValidCourse()
     {
         var course = ModelFactory.CreateCourse();
-
         ModelFactory.CreateCourseTeachers(course.Id, 3);
-
         await DbContext.SaveChangesAsync();
 
         await Client.DeleteAsync($"courses/{course.Id}");
@@ -62,12 +56,10 @@ public class DeleteCourseTests(ApiFactory factory) : BaseIntegrationTest(factory
     public async Task DeleteCourse_ShouldDeleteCourseStudents_WhenValidCourse()
     {
         var course = ModelFactory.CreateCourse();
-
         ModelFactory.CreateCourseStudents(course.Id, 3);
-
         await DbContext.SaveChangesAsync();
 
-        var response = await Client.DeleteAsync($"courses/{course.Id}");
+        await Client.DeleteAsync($"courses/{course.Id}");
 
         Assert.False(await DbContext.CourseStudents.AnyAsync());
     }

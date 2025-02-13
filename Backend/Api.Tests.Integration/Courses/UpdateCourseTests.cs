@@ -1,5 +1,6 @@
 ﻿using Api.Courses.Contracts;
 using Database.Models;
+using Microsoft.EntityFrameworkCore;
 using System.Net.Http.Json;
 
 namespace Api.Tests.Integration.Courses;
@@ -23,6 +24,12 @@ public class UpdateCourseTests(ApiFactory factory) : BaseIntegrationTest(factory
         var response = await Client.PutAsJsonAsync($"courses/{course.Id}", request);
 
         await Verify(response);
+        Assert.True(await DbContext.Courses.AnyAsync(c =>
+            c.Code == request.Code &&
+            c.Name == request.Name &&
+            c.Year == request.Year &&
+            c.Semester == request.Semester
+        ));
     }
 
     [Fact]
@@ -47,8 +54,6 @@ public class UpdateCourseTests(ApiFactory factory) : BaseIntegrationTest(factory
     [Fact]
     public async Task UpdateCourse_ShouldReturnNotFound_WhenInvalidCourse()
     {
-        var id = Guid.NewGuid();
-
         var request = new UpdateCourseRequest
         {
             Code = "TDT9999",
@@ -56,6 +61,7 @@ public class UpdateCourseTests(ApiFactory factory) : BaseIntegrationTest(factory
             Year = 2028,
             Semester = Semester.Autumn
         };
+        var id = Guid.NewGuid();
 
         var response = await Client.PutAsJsonAsync($"courses/{id}", request);
 

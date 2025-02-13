@@ -1,5 +1,4 @@
 ﻿using Api.Students.Contracts;
-using Api.Teachers;
 using Api.Validation;
 using Database;
 using Database.Models;

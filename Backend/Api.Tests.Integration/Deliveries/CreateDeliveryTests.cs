@@ -3,6 +3,7 @@ using Database.Models;
 using Microsoft.EntityFrameworkCore;
 using System.Net;
 using System.Net.Http.Json;
+using System.Text.Json;
 
 namespace Api.Tests.Integration.Deliveries;
 
@@ -54,6 +55,18 @@ public class CreateDeliveryTests(ApiFactory factory) : BaseIntegrationTest(facto
         var response = await Client.PostAsJsonAsync("deliveries", request);
 
         await Verify(response);
+        foreach (var field in request.Fields)
+        {
+            var jsonValue = JsonSerializer.SerializeToDocument(field.Value);
+            Assert.True(await DbContext.Deliveries.AnyAsync(d =>
+                d.AssignmentId == request.AssignmentId &&
+                d.StudentId == request.StudentId &&
+                d.Fields!.Any(f =>
+                    f.AssignmentFieldId == field.AssignmentFieldId &&
+                    f.JsonValue == jsonValue
+                )
+            ));
+        }
     }
 
     [Fact]
@@ -102,6 +115,18 @@ public class CreateDeliveryTests(ApiFactory factory) : BaseIntegrationTest(facto
         var response = await Client.PostAsJsonAsync("deliveries", request);
 
         await Verify(response);
+        foreach (var field in request.Fields)
+        {
+            var jsonValue = JsonSerializer.SerializeToDocument(field.Value);
+            Assert.True(await DbContext.Deliveries.AnyAsync(d =>
+                d.AssignmentId == request.AssignmentId &&
+                d.Team!.Students.Any(s => s.Id == request.StudentId) &&
+                d.Fields!.Any(f =>
+                    f.AssignmentFieldId == field.AssignmentFieldId &&
+                    f.JsonValue == jsonValue
+                )
+            ));
+        }
     }
 
     [Fact]
@@ -135,7 +160,6 @@ public class CreateDeliveryTests(ApiFactory factory) : BaseIntegrationTest(facto
         var team = ModelFactory.CreateTeam(course.Id, students: students);
         var assignment = ModelFactory.CreateAssignment(course.Id, collaboration: CollaborationType.Teams);
         var existingDelivery = ModelFactory.CreateTeamDelivery(assignment.Id, team.Id);
-
         await DbContext.SaveChangesAsync();
 
         var request = new CreateDeliveryRequest

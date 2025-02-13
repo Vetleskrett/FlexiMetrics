@@ -1,5 +1,6 @@
 ﻿using Api.AssignmentFields.Contracts;
 using Database.Models;
+using Microsoft.EntityFrameworkCore;
 using System.Net.Http.Json;
 
 namespace Api.Tests.Integration.AssignmentFields;
@@ -10,11 +11,8 @@ public class UpdateAssignmentFieldTests(ApiFactory factory) : BaseIntegrationTes
     public async Task UpdateAssignmentField_ShouldUpdateAssignmentField_WhenValidRequest()
     {
         var course = ModelFactory.CreateCourse();
-
         var assignment = ModelFactory.CreateAssignment(course.Id);
-
         var field = ModelFactory.CreateAssignmentField(assignment.Id);
-
         await DbContext.SaveChangesAsync();
 
         var request = new UpdateAssignmentFieldRequest
@@ -26,6 +24,10 @@ public class UpdateAssignmentFieldTests(ApiFactory factory) : BaseIntegrationTes
         var response = await Client.PutAsJsonAsync($"assignment-fields/{field.Id}", request);
 
         await Verify(response);
+        Assert.True(await DbContext.AssignmentFields.AnyAsync(f =>
+            f.Name == request.Name &&
+            f.Type == request.Type
+        ));
     }
 
     [Fact]
@@ -47,11 +49,8 @@ public class UpdateAssignmentFieldTests(ApiFactory factory) : BaseIntegrationTes
     public async Task UpdateAssignmentField_ShouldReturnBadRequest_WhenInvalidRequest()
     {
         var course = ModelFactory.CreateCourse();
-
         var assignment = ModelFactory.CreateAssignment(course.Id);
-
         var field = ModelFactory.CreateAssignmentField(assignment.Id);
-
         await DbContext.SaveChangesAsync();
 
         var request = new UpdateAssignmentFieldRequest

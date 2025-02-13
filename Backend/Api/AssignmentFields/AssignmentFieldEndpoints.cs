@@ -35,7 +35,7 @@ public static class AssignmentFieldEndpoints
             (
                 field => field is not null ? Results.CreatedAtRoute
                     (
-                        "CreateAssignmentFields",
+                        "GetAllAssignmentFieldsByAssignment",
                         new { assignmentId = field.AssignmentId },
                         field
                     ) : Results.NotFound(),

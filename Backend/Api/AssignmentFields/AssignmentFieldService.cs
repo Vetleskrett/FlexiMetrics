@@ -76,7 +76,7 @@ public class AssignmentFieldService : IAssignmentFieldService
 
     public async Task<Result<IEnumerable<AssignmentFieldResponse>?, ValidationResponse>> Create(CreateAssignmentFieldsRequest requests)
     {
-        var fields = requests.fields.MapToAssignmentField();
+        var fields = requests.Fields.MapToAssignmentField();
         foreach (var field in fields)
         {
             var assignment = await _dbContext.Assignments.FindAsync(field.AssignmentId);
