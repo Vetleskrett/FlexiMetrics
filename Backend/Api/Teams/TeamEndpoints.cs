@@ -40,7 +40,7 @@ public static class TeamEndpoints
             var result = await teamService.GetByStudentCourse(studentId, courseId);
             return result.Match
             (
-                team => team is not null ? Results.Ok(team) : Results.NotFound(),
+                team => team is not null ? Results.Ok(team) : Results.NoContent(),
                 failure => Results.BadRequest(failure)
             );
         })
@@ -85,7 +85,20 @@ public static class TeamEndpoints
             );
         })
         .Produces<TeamResponse>()
-        .WithName("AddStudentToTeam")
+        .WithName("AddStudentEmailToTeam")
+        .WithSummary("Add student to team");
+
+        group.MapPost("teams/{teamId:guid}/students/{studentId:guid}", async (ITeamService teamService, Guid teamId, Guid studentId) =>
+        {
+            var result = await teamService.AddToTeam(teamId, studentId);
+            return result.Match
+            (
+                team => team is not null ? Results.Ok(team) : Results.NotFound(),
+                failure => Results.BadRequest(failure)
+            );
+        })
+        .Produces<TeamResponse>()
+        .WithName("AddStudentIdToTeam")
         .WithSummary("Add student to team");
 
         group.MapDelete("teams/{teamId:guid}/students/{studentId:guid}", async (ITeamService teamService, Guid teamId, Guid studentId) =>
