@@ -14,14 +14,14 @@ import type {
   Feedback,
   CreateCourse,
   EditCourse,
-  AddTeacherToCourse,
   CreateDelivery,
   Teacher,
   CreateAssignment,
   EditAssignment,
   RegisterAssignmentFields,
   CreateFeedback,
-  EditFeedback
+  EditFeedback,
+  EmailAdd,
 } from "./types";
 
 const instance = axios.create({
@@ -50,6 +50,10 @@ export function getAssignments(courseId: string) : Promise<AxiosResponse<Assignm
 
 export function getStudentAssignments(studentId: string, courseId: string) : Promise<AxiosResponse<StudentAssignment[]>> {
   return instance.get(`/students/${studentId}/course/${courseId}/assignments`)
+}
+
+export function getTeamAssignments(courseId: string, teamId: string) : Promise<AxiosResponse<StudentAssignment[]>> {
+  return instance.get(`/courses/${courseId}/teams/${teamId}/assignments`)
 }
 
 export function getAssignment(assignmentId: string): Promise<AxiosResponse<Assignment>> {
@@ -124,7 +128,7 @@ export function postStudentsCourse(courseId: string, emails: AddStudentsToCourse
   return instance.post(`/courses/${courseId}/students`, emails)
 }
 
-export function deleteStudentCourse(courseId: string, studentId: string){
+export function deleteStudentCourse(courseId: string, studentId: string) : Promise<AxiosResponse> {
   return instance.delete(`/courses/${courseId}/students/${studentId}`)
 }
 
@@ -136,6 +140,14 @@ export function postStudentTeam(teamId: string, studentId: string) : Promise<Axi
   return instance.post(`/teams/${teamId}/students/${studentId}`)
 }
 
+export function postStudentEmailTeam(teamId: string, email: EmailAdd) : Promise<AxiosResponse<Team>>{
+  return instance.post(`/teams/${teamId}/students/`, email)
+}
+
+export function deleteStudentTeam(teamId: string, studentId: string) : Promise<AxiosResponse> {
+  return instance.delete(`/teams/${teamId}/students/${studentId}`)
+}
+
 export function postCourse(course: CreateCourse) : Promise<AxiosResponse<Course>> {
   return instance.post(`/courses`, course)
 }
@@ -144,7 +156,7 @@ export function getTeachers(courseId: string): Promise<AxiosResponse<Teacher[]>>
   return instance.get(`/courses/${courseId}/teachers`)
 }
 
-export function addTeacherToCourse(courseId: string, teacher: AddTeacherToCourse) : Promise<AxiosResponse> {
+export function addTeacherToCourse(courseId: string, teacher: EmailAdd) : Promise<AxiosResponse> {
   return instance.post(`/courses/${courseId}/teachers`, teacher)
 }
 
