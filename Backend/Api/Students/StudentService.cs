@@ -8,6 +8,7 @@ namespace Api.Students;
 
 public interface IStudentService
 {
+    Task<StudentResponse?> GetById(Guid studentId);
     Task<IEnumerable<StudentResponse>?> GetAllByCourse(Guid courseId);
     Task<IEnumerable<StudentResponse>?> AddToCourse(Guid courseId, AddStudentsToCourseRequest request);
     Task<Result<bool, ValidationResponse>> RemoveFromCourse(Guid courseId, Guid studentId);
@@ -20,6 +21,12 @@ public class StudentService : IStudentService
     public StudentService(AppDbContext dbContext)
     {
         _dbContext = dbContext;
+    }
+
+    public async Task<StudentResponse?> GetById(Guid studentId)
+    {
+        var student = await _dbContext.Users.FindAsync(studentId);
+        return student?.MapToStudentResponse();
     }
 
     public async Task<IEnumerable<StudentResponse>?> GetAllByCourse(Guid courseId)

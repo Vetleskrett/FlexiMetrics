@@ -1,15 +1,13 @@
 <script lang="ts">
 	import * as Card from '$lib/components/ui/card/index.js';
 	import * as Table from '$lib/components/ui/table';
-	import ArrowDownToline from 'lucide-svelte/icons/arrow-down-to-line';
-	import type { Delivery, AssignmentField, Assignment, Student, Team } from 'src/types';
+	import type { Assignment, Student, Team, Feedback } from 'src/types';
 	import Check from 'lucide-svelte/icons/check';
 	import X from 'lucide-svelte/icons/x';
 	import Separator from 'src/lib/components/ui/separator/separator.svelte';
 
 	export let assignment: Assignment;
-	export let assignmentFields: AssignmentField[];
-	export let deliveries: Delivery[];
+	export let feedbacks: Feedback[];
 	export let students: Student[];
 	export let teams: Team[];
 
@@ -36,27 +34,20 @@
 							<p class="font-bold text-black">Team</p>
 						</Table.Head>
 					{/if}
-
-					<Table.Head class="h-8 w-2 p-0">
-						<Separator orientation="vertical"></Separator>
+					<Table.Head class="h-8">
+						<p class="font-bold text-black">Feedback</p>
 					</Table.Head>
 
-					{#each assignmentFields as field}
+					{#if assignment.gradingType != 'NoGrading'}
 						<Table.Head class="h-8">
-							{#if field.type == 'Integer'}
-								<p class="text-right font-bold text-black">{field.name}</p>
-							{:else if field.type == 'Boolean'}
-								<p class="text-center font-bold text-black">{field.name}</p>
-							{:else}
-								<p class="font-bold text-black">{field.name}</p>
-							{/if}
+							<p class="font-bold text-black">Grading</p>
 						</Table.Head>
-					{/each}
+					{/if}
 				</Table.Row>
 			</Table.Header>
 			<Table.Body>
 				{#each ids as id}
-					{@const delivery = deliveries.find((x) => x.studentId == id || x.teamId == id)}
+					{@const feedback = feedbacks.find((x) => x.studentId == id || x.teamId == id)}
 
 					<a
 						href={assignment.collaborationType == 'Individual'
@@ -71,48 +62,42 @@
 								</p>
 							</Table.Cell>
 						{:else}
-							<Table.Cell class="flex h-full items-center justify-center">
+							<Table.Cell class="text-center">
 								<p>{teams.find((x) => x.id == id)?.teamNr}</p>
 							</Table.Cell>
 						{/if}
 
-						<Table.Cell class="w-2 p-0">
-							<Separator orientation="vertical"></Separator>
-						</Table.Cell>
+						{#if feedback}
+							<Table.Cell>
+								<p>{feedback.comment}</p>
+							</Table.Cell>
 
-						{#if delivery}
-							{#each assignmentFields as assignmentField}
-								{@const deliveryField = delivery.fields.find(
-									(x) => x.assignmentFieldId == assignmentField.id
-								)}
-
-								<Table.Cell>
-									{#if assignmentField.type == 'File'}
-										<a
-											href="TODO: add url here"
-											download="TODO"
-											class="flex items-center text-blue-500"
-										>
-											<ArrowDownToline size="20" />
-											{deliveryField?.value}
-										</a>
-									{:else if assignmentField.type == 'Integer'}
-										<p class="text-right">{deliveryField?.value}</p>
-									{:else if assignmentField.type == 'Boolean'}
-										{#if deliveryField?.value}
-											<Check color="green" class="mx-auto" />
-										{:else}
-											<X color="red" class="mx-auto" />
-										{/if}
+							{#if assignment.gradingType == 'ApprovalGrading'}
+								<Table.Cell class="flex h-full items-center justify-center gap-1">
+									{#if feedback.isApproved}
+										<Check color="green" />
+										<p>Approved</p>
 									{:else}
-										<p>{deliveryField?.value}</p>
+										<X color="red" />
+										<p>Disapproved</p>
 									{/if}
 								</Table.Cell>
-							{/each}
+							{:else if assignment.gradingType == 'LetterGrading'}
+								<Table.Cell class="text-center text-lg">
+									<p>{feedback.letterGrade}</p>
+								</Table.Cell>
+							{:else if assignment.gradingType == 'PointsGrading'}
+								<Table.Cell class="whitespace-nowrap text-lg">
+									<p>{feedback.points} / {assignment.maxPoints}</p>
+								</Table.Cell>
+							{/if}
 						{:else}
-							{#each assignmentFields as assignmentField}
+							<Table.Cell>
+								<p class="font-semibold text-red-500">No feedback given</p>
+							</Table.Cell>
+							{#if assignment.gradingType != 'NoGrading'}
 								<Table.Cell></Table.Cell>
-							{/each}
+							{/if}
 						{/if}
 					</a>
 				{/each}

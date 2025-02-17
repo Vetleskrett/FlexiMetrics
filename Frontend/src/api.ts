@@ -20,6 +20,8 @@ import type {
   CreateAssignment,
   EditAssignment,
   RegisterAssignmentFields,
+  CreateFeedback,
+  EditFeedback
 } from "./types";
 
 const instance = axios.create({
@@ -70,12 +72,32 @@ export function getDeliveries(assignmentId: string) : Promise<AxiosResponse<Deli
   return instance.get(`/assignments/${assignmentId}/deliveries`)
 }
 
+export function getFeedbacks(assignmentId: string) : Promise<AxiosResponse<Feedback[]>> {
+  return instance.get(`/assignments/${assignmentId}/feedbacks`)
+}
+
+export function postFeedback(feedback: CreateFeedback) : Promise<AxiosResponse<Feedback>> {
+  return instance.post(`/feedbacks`, feedback)
+}
+
+export function putFeedback(feedbackId: string, feedback: EditFeedback) : Promise<AxiosResponse<Feedback>> {
+  return instance.put(`/feedbacks/${feedbackId}`, feedback)
+}
+
 export function postDelivery(delivery: CreateDelivery) : Promise<AxiosResponse<Delivery>> {
   return instance.post(`/deliveries`, delivery)
 }
 
 export function getStudentFeedback(studentId: string, assignmentId: string): Promise<AxiosResponse<Feedback>> {
   return instance.get(`/students/${studentId}/assignments/${assignmentId}/feedbacks`)
+}
+
+export function getTeamFeedback(teamId: string, assignmentId: string): Promise<AxiosResponse<Feedback>> {
+  return instance.get(`/teams/${teamId}/assignments/${assignmentId}/feedbacks`)
+}
+
+export function getTeam(teamId: string): Promise<AxiosResponse<Team>> {
+  return instance.get(`/teams/${teamId}`)
 }
 
 export function getTeams(courseId: string): Promise<AxiosResponse<Team[]>> {
@@ -88,6 +110,10 @@ export function getStudentTeam(courseId: string, studentId: string) : Promise<Ax
 
 export function postTeams(payload: CreateTeams) : Promise<AxiosResponse> {
   return instance.post("/teams", payload)
+}
+
+export function getStudent(studentId: string): Promise<AxiosResponse<Student>> {
+  return instance.get(`students/${studentId}`)
 }
 
 export function getStudents(courseId: string): Promise<AxiosResponse<Student[]>> {

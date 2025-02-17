@@ -131,7 +131,7 @@ public static class Seed
             return assignmentFaker
                 .RuleFor(x => x.Name, f => f.PickRandom(ASSIGNMENTS))
                 .RuleFor(x => x.DueDate, f => f.Date.Between(new DateTime(2025, 1, 1, 0, 0, 0, DateTimeKind.Utc), new DateTime(2025, 6, 1, 0, 0, 0, DateTimeKind.Utc)))
-                .RuleFor(x => x.Published, f => f.PickRandom(true, true, true, false))
+                .RuleFor(x => x.Published, f => f.Random.Float() > 0.1)
                 .RuleFor(x => x.CollaborationType, f => f.Random.Enum<CollaborationType>())
                 .RuleFor(x => x.Mandatory, f => f.Random.Bool())
                 .RuleFor(x => x.GradingType, f => f.Random.Enum<GradingType>())
@@ -158,7 +158,11 @@ public static class Seed
         {
             return assignmentFieldFaker
                 .RuleFor(x => x.Type, f => f.Random.Enum<AssignmentDataType>())
-                .RuleFor(x => x.Name, f => f.Lorem.Word())
+                .RuleFor(x => x.Name, f =>
+                {
+                    var word = f.Lorem.Word();
+                    return string.Concat(word.ToUpper().AsSpan(0, 1), word.AsSpan(1));
+                })
                 .RuleFor(x => x.AssignmentId, assignment.Id)
                 .GenerateBetween(3, 6);
         })
@@ -192,7 +196,7 @@ public static class Seed
                 .ToList();
 
             return assignmentsInCourse
-                .Take(assignmentsInCourse.Count * 3 / 4)
+                .Take(assignmentsInCourse.Count - 1)
                 .Select(assignment =>
                 {
                     var isIndividual = assignment.CollaborationType == CollaborationType.Individual;
@@ -257,6 +261,7 @@ public static class Seed
                             AssignmentDataType.Integer => f.Random.Int(0, 100),
                             AssignmentDataType.Double => f.Random.Double(0, 100),
                             AssignmentDataType.Boolean => f.Random.Bool(),
+                            AssignmentDataType.File => f.Lorem.Word() + ".zip",
                             _ => f.Lorem.Sentence()
                         };
                     })
@@ -295,32 +300,67 @@ public static class Seed
             .RuleFor(x => x.Id, f => f.Random.Guid())
             .RuleFor(x => x.Comment, f => f.Lorem.Paragraphs(2));
 
-        var feedbacks = deliveries
-            .Take(deliveries.Count * 3 / 4)
-            .Select(delivery =>
-            {
-                var assignment = assignments.First(a => a.Id == delivery.AssignmentId);
-                return assignment.GradingType switch
+        var feedbacks = courses.Select(course =>
+        {
+            var studentsInCourse = courseStudents
+                .Where(x => x.CourseId == course.Id)
+                .Select(x => students.First(s => s.Id == x.StudentId))
+                .ToList();
+
+            var teamsInCourse = teams
+                .Where(x => x.CourseId == course.Id)
+                .ToList();
+
+            var assignmentsInCourse = assignments
+                .Where(a => a.CourseId == course.Id && a.Published)
+                .ToList();
+
+            return assignmentsInCourse
+                .Take(assignmentsInCourse.Count - 1)
+                .Select(assignment =>
                 {
-                    GradingType.ApprovalGrading => approvalFeedbackFaker
-                        .RuleFor(x => x.DeliveryId, delivery.Id)
-                        .Generate(),
+                    var isIndividual = assignment.CollaborationType == CollaborationType.Individual;
+                    var ids = isIndividual ?
+                        studentsInCourse.Select(s => s.Id).ToList() :
+                        teamsInCourse.Select(s => s.Id).ToList();
 
-                    GradingType.LetterGrading => letterFeedbackFaker
-                        .RuleFor(x => x.DeliveryId, delivery.Id)
-                        .Generate(),
+                    return ids
+                        .Take(ids.Count - 1)
+                        .Select(id =>
+                        {
+                            return assignment.GradingType switch
+                            {
+                                GradingType.ApprovalGrading => approvalFeedbackFaker
+                                    .RuleFor(x => x.AssignmentId, assignment.Id)
+                                    .RuleFor(x => x.StudentId, isIndividual ? id : null)
+                                    .RuleFor(x => x.TeamId, isIndividual ? null : id)
+                                    .Generate(),
 
-                    GradingType.PointsGrading => pointsFeedbackFaker
-                        .RuleFor(x => x.DeliveryId, delivery.Id)
-                        .RuleFor(x => x.Points, f => f.Random.Int(0, assignment.MaxPoints!.Value))
-                        .Generate(),
+                                GradingType.LetterGrading => letterFeedbackFaker
+                                    .RuleFor(x => x.AssignmentId, assignment.Id)
+                                    .RuleFor(x => x.StudentId, isIndividual ? id : null)
+                                    .RuleFor(x => x.TeamId, isIndividual ? null : id)
+                                    .Generate(),
 
-                    _ => feedbackFaker
-                        .RuleFor(x => x.DeliveryId, delivery.Id)
-                        .Generate()
-                };
-            })
-            .ToList();
+                                GradingType.PointsGrading => pointsFeedbackFaker
+                                    .RuleFor(x => x.AssignmentId, assignment.Id)
+                                    .RuleFor(x => x.StudentId, isIndividual ? id : null)
+                                    .RuleFor(x => x.TeamId, isIndividual ? null : id)
+                                    .RuleFor(x => x.Points, f => f.Random.Int(0, assignment.MaxPoints!.Value))
+                                    .Generate(),
+
+                                _ => feedbackFaker
+                                    .RuleFor(x => x.AssignmentId, assignment.Id)
+                                    .RuleFor(x => x.StudentId, isIndividual ? id : null)
+                                    .RuleFor(x => x.TeamId, isIndividual ? null : id)
+                                    .Generate()
+                            };
+                        });
+                })
+                .SelectMany(x => x);
+        })
+        .SelectMany(x => x)
+        .ToList();
 
         await AddRangeIfNotExists
         (

@@ -13,7 +13,9 @@ public static class FeedbackMapping
             {
                 Id = Guid.NewGuid(),
                 Comment = request.Comment,
-                DeliveryId = request.DeliveryId,
+                AssignmentId = request.AssignmentId,
+                StudentId = request.StudentId,
+                TeamId = request.TeamId,
                 IsApproved = request.IsApproved.Value,
             };
         }
@@ -24,7 +26,9 @@ public static class FeedbackMapping
             {
                 Id = Guid.NewGuid(),
                 Comment = request.Comment,
-                DeliveryId = request.DeliveryId,
+                AssignmentId = request.AssignmentId,
+                StudentId = request.StudentId,
+                TeamId = request.TeamId,
                 LetterGrade = request.LetterGrade.Value,
             };
         }
@@ -35,7 +39,9 @@ public static class FeedbackMapping
             {
                 Id = Guid.NewGuid(),
                 Comment = request.Comment,
-                DeliveryId = request.DeliveryId,
+                AssignmentId = request.AssignmentId,
+                StudentId = request.StudentId,
+                TeamId = request.TeamId,
                 Points = request.Points.Value,
             };
         }
@@ -44,11 +50,20 @@ public static class FeedbackMapping
         {
             Id = Guid.NewGuid(),
             Comment = request.Comment,
-            DeliveryId = request.DeliveryId,
+            AssignmentId = request.AssignmentId,
+            StudentId = request.StudentId,
+            TeamId = request.TeamId,
         };
     }
 
-    public static Feedback MapToFeedback(this UpdateFeedbackRequest request, Guid id, Guid deliveryId)
+    public static Feedback MapToFeedback
+    (
+        this UpdateFeedbackRequest request,
+        Guid id,
+        Guid assignmentId,
+        Guid? studentId,
+        Guid? teamId
+    )
     {
         if (request.IsApproved is not null)
         {
@@ -56,7 +71,9 @@ public static class FeedbackMapping
             {
                 Id = id,
                 Comment = request.Comment,
-                DeliveryId = deliveryId,
+                AssignmentId = assignmentId,
+                StudentId = studentId,
+                TeamId = teamId,
                 IsApproved = request.IsApproved.Value,
             };
         }
@@ -67,7 +84,9 @@ public static class FeedbackMapping
             {
                 Id = id,
                 Comment = request.Comment,
-                DeliveryId = deliveryId,
+                AssignmentId = assignmentId,
+                StudentId = studentId,
+                TeamId = teamId,
                 LetterGrade = request.LetterGrade.Value,
             };
         }
@@ -78,7 +97,9 @@ public static class FeedbackMapping
             {
                 Id = id,
                 Comment = request.Comment,
-                DeliveryId = deliveryId,
+                AssignmentId = assignmentId,
+                StudentId = studentId,
+                TeamId = teamId,
                 Points = request.Points.Value,
             };
         }
@@ -87,7 +108,9 @@ public static class FeedbackMapping
         {
             Id = id,
             Comment = request.Comment,
-            DeliveryId = deliveryId,
+            AssignmentId = assignmentId,
+            StudentId = studentId,
+            TeamId = teamId,
         };
     }
 
@@ -99,7 +122,9 @@ public static class FeedbackMapping
             {
                 Id = feedback.Id,
                 Comment = feedback.Comment,
-                DeliveryId = feedback.DeliveryId,
+                AssignmentId = feedback.AssignmentId,
+                StudentId = feedback.StudentId,
+                TeamId = feedback.TeamId,
                 IsApproved = approval.IsApproved,
             };
         }
@@ -110,7 +135,9 @@ public static class FeedbackMapping
             {
                 Id = feedback.Id,
                 Comment = feedback.Comment,
-                DeliveryId = feedback.DeliveryId,
+                AssignmentId = feedback.AssignmentId,
+                StudentId = feedback.StudentId,
+                TeamId = feedback.TeamId,
                 LetterGrade = letter.LetterGrade,
             };
         }
@@ -121,7 +148,9 @@ public static class FeedbackMapping
             {
                 Id = feedback.Id,
                 Comment = feedback.Comment,
-                DeliveryId = feedback.DeliveryId,
+                AssignmentId = feedback.AssignmentId,
+                StudentId = feedback.StudentId,
+                TeamId = feedback.TeamId,
                 Points = points.Points,
             };
         }
@@ -130,7 +159,9 @@ public static class FeedbackMapping
         {
             Id = feedback.Id,
             Comment = feedback.Comment,
-            DeliveryId = feedback.DeliveryId,
+            AssignmentId = feedback.AssignmentId,
+            StudentId = feedback.StudentId,
+            TeamId = feedback.TeamId,
         };
     }
 

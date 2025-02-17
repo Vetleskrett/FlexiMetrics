@@ -12,7 +12,9 @@ public interface IFeedbackService
 {
     Task<IEnumerable<FeedbackResponse>> GetAll();
     Task<FeedbackResponse?> GetById(Guid id);
+    Task<IEnumerable<FeedbackResponse>?> GetByAssignment(Guid assignmentId);
     Task<Result<FeedbackResponse?, ValidationResponse>> GetByStudentAssignment(Guid studentId, Guid assignmentId);
+    Task<Result<FeedbackResponse?, ValidationResponse>> GetByTeamAssignment(Guid teamId, Guid assignmentId);
     Task<Result<FeedbackResponse, ValidationResponse>> Create(CreateFeedbackRequest request);
     Task<Result<FeedbackResponse?, ValidationResponse>> Update(UpdateFeedbackRequest request, Guid id);
     Task<bool> DeleteById(Guid id);
@@ -37,8 +39,26 @@ public class FeedbackService : IFeedbackService
 
     public async Task<FeedbackResponse?> GetById(Guid id)
     {
-        var feedback = await _dbContext.Feedbacks.FindAsync(id);
+        var feedback = await _dbContext.Feedbacks
+            .Include(f => f.Assignment)
+            .FirstOrDefaultAsync(f => f.Id == id);
         return feedback?.MapToResponse();
+    }
+
+    public async Task<IEnumerable<FeedbackResponse>?> GetByAssignment(Guid assignmentId)
+    {
+        var assignment = await _dbContext.Assignments.FindAsync(assignmentId);
+        if (assignment is null)
+        {
+            return default;
+        }
+
+        var feedbacks = await _dbContext.Feedbacks
+            .Include(f => f.Assignment)
+            .Where(f => f.AssignmentId == assignmentId)
+            .ToListAsync();
+
+        return feedbacks.MapToResponse();
     }
 
     public async Task<Result<FeedbackResponse?, ValidationResponse>> GetByStudentAssignment(Guid studentId, Guid assignmentId)
@@ -63,11 +83,39 @@ public class FeedbackService : IFeedbackService
         }
 
         var feedback = await _dbContext.Feedbacks
-            .Where(f => f.Delivery!.AssignmentId == assignmentId)
+            .Include(f => f.Assignment)
+            .Where(f => f.AssignmentId == assignmentId)
             .Where(f =>
-                (f.Delivery!.StudentId == studentId) ||
-                (f.Delivery.Team != null && f.Delivery.Team.Students.Any(s => s.Id == studentId))
+                (f.StudentId == studentId) ||
+                (f.Team != null && f.Team.Students.Any(s => s.Id == studentId))
             )
+            .FirstOrDefaultAsync();
+
+        return feedback?.MapToResponse();
+    }
+
+    public async Task<Result<FeedbackResponse?, ValidationResponse>> GetByTeamAssignment(Guid teamId, Guid assignmentId)
+    {
+        var assignment = await _dbContext.Assignments.FindAsync(assignmentId);
+        if (assignment is null)
+        {
+            return default;
+        }
+
+        var team = await _dbContext.Teams.FindAsync(teamId);
+        if (team is null)
+        {
+            return default;
+        }
+
+        if (team.CourseId != assignment.CourseId)
+        {
+            return new ValidationError("Team is in the course").MapToResponse();
+        }
+
+        var feedback = await _dbContext.Feedbacks
+            .Include(f => f.Assignment)
+            .Where(f => f.AssignmentId == assignmentId && f.TeamId == teamId)
             .FirstOrDefaultAsync();
 
         return feedback?.MapToResponse();
@@ -75,22 +123,20 @@ public class FeedbackService : IFeedbackService
 
     public async Task<Result<FeedbackResponse, ValidationResponse>> Create(CreateFeedbackRequest request)
     {
-        var delivery = await _dbContext.Deliveries
-            .Include(d => d.Assignment)
-            .FirstOrDefaultAsync(d => d.Id == request.DeliveryId);
+        var assignment = await _dbContext.Assignments.FindAsync(request.AssignmentId);
 
-        if (delivery is null)
+        if (assignment is null)
         {
             return default;
         }
 
-        if (delivery.Assignment!.DueDate > DateTime.UtcNow)
+        if (assignment.DueDate > DateTime.UtcNow)
         {
             return new ValidationError("Cannot give feedback before assignment due date").MapToResponse();
         }
 
         var feedback = request.MapToFeedback();
-        feedback.Delivery = delivery;
+        feedback.Assignment = assignment;
         var validationResult = await _validator.ValidateAsync(feedback);
         if (!validationResult.IsValid)
         {
@@ -106,8 +152,7 @@ public class FeedbackService : IFeedbackService
     public async Task<Result<FeedbackResponse?, ValidationResponse>> Update(UpdateFeedbackRequest request, Guid id)
     {
         var feedback = await _dbContext.Feedbacks
-            .Include(f => f.Delivery!)
-            .ThenInclude(d => d.Assignment)
+            .Include(d => d.Assignment)
             .AsNoTracking()
             .FirstOrDefaultAsync(x => x.Id == id);
         if (feedback is null)
@@ -115,9 +160,9 @@ public class FeedbackService : IFeedbackService
             return default;
         }
 
-        var delivery = feedback.Delivery;
-        feedback = request.MapToFeedback(id, feedback.DeliveryId);
-        feedback.Delivery = delivery;
+        var assignment = feedback.Assignment;
+        feedback = request.MapToFeedback(id, feedback.AssignmentId, feedback.StudentId, feedback.TeamId);
+        feedback.Assignment = assignment;
 
         var validationResult = await _validator.ValidateAsync(feedback);
         if (!validationResult.IsValid)

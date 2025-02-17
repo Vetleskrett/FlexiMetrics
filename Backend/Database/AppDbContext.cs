@@ -63,7 +63,15 @@ public class AppDbContext : DbContext
             .HasOne(f => f.AssignmentField).WithMany();
 
         var feedback = modelBuilder.Entity<Feedback>();
-        feedback.HasOne(f => f.Delivery).WithOne();
+        feedback.HasOne(d => d.Assignment).WithMany();
+        feedback.HasOne(d => d.Student).WithMany().IsRequired(false).OnDelete(DeleteBehavior.Cascade);
+        feedback.HasOne(d => d.Team).WithMany().IsRequired(false).OnDelete(DeleteBehavior.Cascade);
+        feedback.HasIndex(d => new
+        {
+            d.AssignmentId,
+            d.StudentId,
+            d.TeamId,
+        }).IsUnique();
 
         modelBuilder.Entity<ApprovalFeedback>();
         modelBuilder.Entity<LetterFeedback>();

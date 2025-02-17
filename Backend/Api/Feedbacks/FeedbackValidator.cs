@@ -10,16 +10,13 @@ public class FeedbackValidator : AbstractValidator<Feedback>
         RuleFor(x => x.Id)
             .NotEmpty();
 
-        RuleFor(x => x.Delivery)
-            .NotEmpty();
-
-        RuleFor(x => x.Delivery!.Assignment)
+        RuleFor(x => x.Assignment)
             .NotEmpty();
 
         RuleFor(x => x)
             .Must(feedback =>
             {
-                var gradingType = feedback.Delivery!.Assignment!.GradingType;
+                var gradingType = feedback.Assignment!.GradingType;
                 if (feedback is ApprovalFeedback approvalFeedback)
                 {
                     return gradingType == GradingType.ApprovalGrading;
@@ -33,7 +30,7 @@ public class FeedbackValidator : AbstractValidator<Feedback>
                 {
                     return gradingType == GradingType.PointsGrading &&
                         pointsFeedback.Points >= 0 &&
-                        pointsFeedback.Points <= feedback.Delivery.Assignment.MaxPoints;
+                        pointsFeedback.Points <= feedback.Assignment.MaxPoints;
                 }
                 return gradingType == GradingType.NoGrading;
             })
