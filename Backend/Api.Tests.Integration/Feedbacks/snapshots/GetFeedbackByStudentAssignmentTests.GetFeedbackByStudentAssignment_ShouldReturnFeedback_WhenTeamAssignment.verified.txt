@@ -7,7 +7,9 @@
     Value: {
       id: Guid_1,
       comment: Looks good to me,
-      deliveryId: Guid_2,
+      assignmentId: Guid_2,
+      studentId: null,
+      teamId: Guid_3,
       isApproved: null,
       letterGrade: null,
       points: null

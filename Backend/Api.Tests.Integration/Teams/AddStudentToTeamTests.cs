@@ -20,7 +20,7 @@ public class AddStudentToTeamTests(ApiFactory factory) : BaseIntegrationTest(fac
             Email = student.Email
         };
 
-        var response = Client.PostAsJsonAsync($"teams/{team.Id}/students", request);
+        var response = await Client.PostAsJsonAsync($"teams/{team.Id}/students", request);
 
         await Verify(response);
         Assert.True(await DbContext.Teams.AnyAsync(
@@ -41,7 +41,7 @@ public class AddStudentToTeamTests(ApiFactory factory) : BaseIntegrationTest(fac
             Email = "new@ntnu.no"
         };
 
-        var response = Client.PostAsJsonAsync($"teams/{team.Id}/students", request);
+        var response = await Client.PostAsJsonAsync($"teams/{team.Id}/students", request);
 
         Assert.True(await DbContext.Teams.AnyAsync(t =>
             t.Id == team.Id &&
@@ -68,7 +68,7 @@ public class AddStudentToTeamTests(ApiFactory factory) : BaseIntegrationTest(fac
             Email = student.Email
         };
 
-        var response = Client.PostAsJsonAsync($"teams/{team.Id}/students", request);
+        var response = await Client.PostAsJsonAsync($"teams/{team.Id}/students", request);
 
         await Verify(response);
     }
@@ -82,7 +82,7 @@ public class AddStudentToTeamTests(ApiFactory factory) : BaseIntegrationTest(fac
             Email = "new@ntnu.no"
         };
 
-        var response = Client.PostAsJsonAsync($"teams/{teamId}/students", request);
+        var response = await Client.PostAsJsonAsync($"teams/{teamId}/students", request);
 
         await Verify(response);
     }

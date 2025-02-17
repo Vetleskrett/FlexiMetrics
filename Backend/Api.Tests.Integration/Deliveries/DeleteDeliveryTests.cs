@@ -54,22 +54,6 @@ public class DeleteDeliveryTests(ApiFactory factory) : BaseIntegrationTest(facto
     }
 
     [Fact]
-    public async Task DeleteDelivery_ShouldDeleteFeedback_WhenValidDelivery()
-    {
-        var course = ModelFactory.CreateCourse();
-        var assignment = ModelFactory.CreateAssignment(course.Id, collaboration: CollaborationType.Individual);
-        var student = ModelFactory.CreateStudent();
-        ModelFactory.CreateCourseStudent(course.Id, student.Id);
-        var delivery = ModelFactory.CreateStudentDelivery(assignment.Id, student.Id);
-        ModelFactory.CreateFeedback(delivery.Id);
-        await DbContext.SaveChangesAsync();
-
-        var response = await Client.DeleteAsync($"deliveries/{delivery.Id}");
-
-        Assert.False(await DbContext.Feedbacks.AnyAsync(f => f.DeliveryId == delivery.Id));
-    }
-
-    [Fact]
     public async Task DeleteDelivery_ShouldReturnNotFound_WhenInvalidDelivery()
     {
         var deliveryId = Guid.NewGuid();

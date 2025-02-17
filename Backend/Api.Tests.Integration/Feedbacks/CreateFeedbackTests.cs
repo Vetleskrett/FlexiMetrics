@@ -18,12 +18,12 @@ public class CreateFeedbackTests(ApiFactory factory) : BaseIntegrationTest(facto
             gradingType: GradingType.NoGrading,
             offset: TimeSpan.FromDays(-7)
         );
-        var delivery = ModelFactory.CreateStudentDelivery(assignment.Id, student.Id);
         await DbContext.SaveChangesAsync();
 
         var request = new CreateFeedbackRequest
         {
-            DeliveryId = delivery.Id,
+            AssignmentId = assignment.Id,
+            StudentId = student.Id,
             Comment = "Looks good to me"
         };
 
@@ -33,7 +33,8 @@ public class CreateFeedbackTests(ApiFactory factory) : BaseIntegrationTest(facto
         Assert.True(await DbContext.Feedbacks
             .OfType<Feedback>()
             .AnyAsync(f =>
-                f.DeliveryId == request.DeliveryId &&
+                f.AssignmentId == request.AssignmentId &&
+                f.StudentId == request.StudentId &&
                 f.Comment == request.Comment
             )
         );
@@ -50,12 +51,12 @@ public class CreateFeedbackTests(ApiFactory factory) : BaseIntegrationTest(facto
             gradingType: GradingType.ApprovalGrading,
             offset: TimeSpan.FromDays(-7)
         );
-        var delivery = ModelFactory.CreateStudentDelivery(assignment.Id, student.Id);
         await DbContext.SaveChangesAsync();
 
         var request = new CreateFeedbackRequest
         {
-            DeliveryId = delivery.Id,
+            AssignmentId = assignment.Id,
+            StudentId = student.Id,
             Comment = "Looks good to me",
             IsApproved = true,
         };
@@ -66,7 +67,8 @@ public class CreateFeedbackTests(ApiFactory factory) : BaseIntegrationTest(facto
         Assert.True(await DbContext.Feedbacks
             .OfType<ApprovalFeedback>()
             .AnyAsync(f =>
-                f.DeliveryId == request.DeliveryId &&
+                f.AssignmentId == request.AssignmentId &&
+                f.StudentId == request.StudentId &&
                 f.Comment == request.Comment &&
                 f.IsApproved == request.IsApproved
             )
@@ -84,12 +86,12 @@ public class CreateFeedbackTests(ApiFactory factory) : BaseIntegrationTest(facto
             gradingType: GradingType.LetterGrading,
             offset: TimeSpan.FromDays(-7)
         );
-        var delivery = ModelFactory.CreateStudentDelivery(assignment.Id, student.Id);
         await DbContext.SaveChangesAsync();
 
         var request = new CreateFeedbackRequest
         {
-            DeliveryId = delivery.Id,
+            AssignmentId = assignment.Id,
+            StudentId = student.Id,
             Comment = "Looks good to me",
             LetterGrade = LetterGrade.C
         };
@@ -100,7 +102,8 @@ public class CreateFeedbackTests(ApiFactory factory) : BaseIntegrationTest(facto
         Assert.True(await DbContext.Feedbacks
             .OfType<LetterFeedback>()
             .AnyAsync(f =>
-                f.DeliveryId == request.DeliveryId &&
+                f.AssignmentId == request.AssignmentId &&
+                f.StudentId == request.StudentId &&
                 f.Comment == request.Comment &&
                 f.LetterGrade == request.LetterGrade
             )
@@ -119,12 +122,12 @@ public class CreateFeedbackTests(ApiFactory factory) : BaseIntegrationTest(facto
             maxPoints: 100,
             offset: TimeSpan.FromDays(-7)
         );
-        var delivery = ModelFactory.CreateStudentDelivery(assignment.Id, student.Id);
         await DbContext.SaveChangesAsync();
 
         var request = new CreateFeedbackRequest
         {
-            DeliveryId = delivery.Id,
+            AssignmentId = assignment.Id,
+            StudentId = student.Id,
             Comment = "Looks good to me",
             Points = 75
         };
@@ -135,9 +138,43 @@ public class CreateFeedbackTests(ApiFactory factory) : BaseIntegrationTest(facto
         Assert.True(await DbContext.Feedbacks
             .OfType<PointsFeedback>()
             .AnyAsync(f =>
-                f.DeliveryId == request.DeliveryId &&
+                f.AssignmentId == request.AssignmentId &&
+                f.StudentId == request.StudentId &&
                 f.Comment == request.Comment &&
                 f.Points == request.Points
+            )
+        );
+    }
+
+    [Fact]
+    public async Task CreateFeedback_ShouldCreateTeamFeedback_WhenValidRequest()
+    {
+        var course = ModelFactory.CreateCourse();
+        var team = ModelFactory.CreateTeam(course.Id);
+        var assignment = ModelFactory.CreateAssignment(
+            course.Id,
+            collaboration: CollaborationType.Teams,
+            gradingType: GradingType.NoGrading,
+            offset: TimeSpan.FromDays(-7)
+        );
+        await DbContext.SaveChangesAsync();
+
+        var request = new CreateFeedbackRequest
+        {
+            AssignmentId = assignment.Id,
+            TeamId = team.Id,
+            Comment = "Looks good to me"
+        };
+
+        var response = await Client.PostAsJsonAsync("feedbacks", request);
+
+        await Verify(response);
+        Assert.True(await DbContext.Feedbacks
+            .OfType<Feedback>()
+            .AnyAsync(f =>
+                f.AssignmentId == request.AssignmentId &&
+                f.TeamId == request.TeamId &&
+                f.Comment == request.Comment
             )
         );
     }
@@ -153,12 +190,12 @@ public class CreateFeedbackTests(ApiFactory factory) : BaseIntegrationTest(facto
             gradingType: GradingType.LetterGrading,
             offset: TimeSpan.FromDays(-7)
         );
-        var delivery = ModelFactory.CreateStudentDelivery(assignment.Id, student.Id);
         await DbContext.SaveChangesAsync();
 
         var request = new CreateFeedbackRequest
         {
-            DeliveryId = delivery.Id,
+            AssignmentId = assignment.Id,
+            StudentId = student.Id,
             Comment = "Looks good to me",
             IsApproved = true
         };
@@ -179,12 +216,12 @@ public class CreateFeedbackTests(ApiFactory factory) : BaseIntegrationTest(facto
             gradingType: GradingType.NoGrading,
             offset: TimeSpan.FromDays(7)
         );
-        var delivery = ModelFactory.CreateStudentDelivery(assignment.Id, student.Id);
         await DbContext.SaveChangesAsync();
 
         var request = new CreateFeedbackRequest
         {
-            DeliveryId = delivery.Id,
+            AssignmentId = assignment.Id,
+            StudentId = student.Id,
             Comment = "Looks good to me"
         };
 
@@ -194,13 +231,65 @@ public class CreateFeedbackTests(ApiFactory factory) : BaseIntegrationTest(facto
     }
 
     [Fact]
-    public async Task CreateFeedback_ShouldReturnNotFound_WhenInvalidDelivery()
+    public async Task CreateFeedback_ShouldReturnNotFound_WhenInvalidAssignment()
     {
-        var deliveryId = Guid.NewGuid();
+        var student = ModelFactory.CreateStudent();
+        await DbContext.SaveChangesAsync();
+        var assignmentId = Guid.NewGuid();
 
         var request = new CreateFeedbackRequest
         {
-            DeliveryId = deliveryId,
+            AssignmentId = assignmentId,
+            StudentId = student.Id,
+            Comment = "Looks good to me"
+        };
+
+        var response = await Client.PostAsJsonAsync("feedbacks", request);
+
+        await Verify(response);
+    }
+
+    [Fact]
+    public async Task CreateFeedback_ShouldReturnNotFound_WhenInvalidStudent()
+    {
+        var course = ModelFactory.CreateCourse();
+        var assignment = ModelFactory.CreateAssignment(
+            course.Id,
+            gradingType: GradingType.NoGrading,
+            offset: TimeSpan.FromDays(-7)
+        );
+        await DbContext.SaveChangesAsync();
+        var studentId = Guid.NewGuid();
+
+        var request = new CreateFeedbackRequest
+        {
+            AssignmentId = assignment.Id,
+            StudentId = studentId,
+            Comment = "Looks good to me"
+        };
+
+        var response = await Client.PostAsJsonAsync("feedbacks", request);
+
+        await Verify(response);
+    }
+
+    [Fact]
+    public async Task CreateFeedback_ShouldReturnNotFound_WhenInvalidTeam()
+    {
+        var course = ModelFactory.CreateCourse();
+        var assignment = ModelFactory.CreateAssignment(
+            course.Id,
+            collaboration: CollaborationType.Teams,
+            gradingType: GradingType.NoGrading,
+            offset: TimeSpan.FromDays(-7)
+        );
+        await DbContext.SaveChangesAsync();
+        var teamId = Guid.NewGuid();
+
+        var request = new CreateFeedbackRequest
+        {
+            AssignmentId = assignment.Id,
+            TeamId = teamId,
             Comment = "Looks good to me"
         };
 

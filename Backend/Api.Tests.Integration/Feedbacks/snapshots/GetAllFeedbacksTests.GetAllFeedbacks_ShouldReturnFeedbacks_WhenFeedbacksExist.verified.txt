@@ -8,55 +8,79 @@
       {
         id: Guid_1,
         comment: Looks good to me,
-        deliveryId: Guid_2,
-        isApproved: true,
-        letterGrade: null,
-        points: null
-      },
-      {
-        id: Guid_3,
-        comment: Looks good to me,
-        deliveryId: Guid_4,
-        isApproved: true,
-        letterGrade: null,
-        points: null
-      },
-      {
-        id: Guid_5,
-        comment: Looks good to me,
-        deliveryId: Guid_6,
-        isApproved: true,
-        letterGrade: null,
-        points: null
-      },
-      {
-        id: Guid_7,
-        comment: Looks good to me,
-        deliveryId: Guid_8,
+        assignmentId: Guid_2,
+        studentId: Guid_3,
+        teamId: null,
         isApproved: null,
         letterGrade: null,
         points: null
       },
       {
-        id: Guid_9,
+        id: Guid_4,
         comment: Looks good to me,
-        deliveryId: Guid_10,
+        assignmentId: Guid_2,
+        studentId: Guid_5,
+        teamId: null,
         isApproved: null,
+        letterGrade: null,
+        points: null
+      },
+      {
+        id: Guid_6,
+        comment: Looks good to me,
+        assignmentId: Guid_2,
+        studentId: Guid_7,
+        teamId: null,
+        isApproved: null,
+        letterGrade: null,
+        points: null
+      },
+      {
+        id: Guid_8,
+        comment: Looks good to me,
+        assignmentId: Guid_9,
+        studentId: Guid_3,
+        teamId: null,
+        isApproved: true,
+        letterGrade: null,
+        points: null
+      },
+      {
+        id: Guid_10,
+        comment: Looks good to me,
+        assignmentId: Guid_9,
+        studentId: Guid_5,
+        teamId: null,
+        isApproved: true,
         letterGrade: null,
         points: null
       },
       {
         id: Guid_11,
         comment: Looks good to me,
-        deliveryId: Guid_12,
-        isApproved: null,
+        assignmentId: Guid_9,
+        studentId: Guid_7,
+        teamId: null,
+        isApproved: true,
         letterGrade: null,
         points: null
       },
       {
-        id: Guid_13,
+        id: Guid_12,
         comment: Looks good to me,
-        deliveryId: Guid_14,
+        assignmentId: Guid_13,
+        studentId: Guid_3,
+        teamId: null,
+        isApproved: null,
+        letterGrade: C,
+        points: null
+      },
+      {
+        id: Guid_14,
+        comment: Looks good to me,
+        assignmentId: Guid_13,
+        studentId: Guid_5,
+        teamId: null,
         isApproved: null,
         letterGrade: C,
         points: null
@@ -64,39 +88,39 @@
       {
         id: Guid_15,
         comment: Looks good to me,
-        deliveryId: Guid_16,
+        assignmentId: Guid_13,
+        studentId: Guid_7,
+        teamId: null,
         isApproved: null,
         letterGrade: C,
         points: null
       },
       {
-        id: Guid_17,
+        id: Guid_16,
         comment: Looks good to me,
-        deliveryId: Guid_18,
+        assignmentId: Guid_17,
+        studentId: Guid_3,
+        teamId: null,
         isApproved: null,
-        letterGrade: C,
-        points: null
+        letterGrade: null,
+        points: 75
+      },
+      {
+        id: Guid_18,
+        comment: Looks good to me,
+        assignmentId: Guid_17,
+        studentId: Guid_5,
+        teamId: null,
+        isApproved: null,
+        letterGrade: null,
+        points: 75
       },
       {
         id: Guid_19,
         comment: Looks good to me,
-        deliveryId: Guid_20,
-        isApproved: null,
-        letterGrade: null,
-        points: 75
-      },
-      {
-        id: Guid_21,
-        comment: Looks good to me,
-        deliveryId: Guid_22,
-        isApproved: null,
-        letterGrade: null,
-        points: 75
-      },
-      {
-        id: Guid_23,
-        comment: Looks good to me,
-        deliveryId: Guid_24,
+        assignmentId: Guid_17,
+        studentId: Guid_7,
+        teamId: null,
         isApproved: null,
         letterGrade: null,
         points: 75

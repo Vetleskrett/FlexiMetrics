@@ -33,7 +33,13 @@ public class FeedbackService : IFeedbackService
 
     public async Task<IEnumerable<FeedbackResponse>> GetAll()
     {
-        var feedbacks = await _dbContext.Feedbacks.AsNoTracking().ToListAsync();
+        var feedbacks = await _dbContext.Feedbacks
+            .AsNoTracking()
+            .OrderBy(f => f.Assignment!.Name)
+            .ThenBy(f => f.Assignment!.GradingType)
+            .ThenBy(f => f.StudentId)
+            .ThenBy(f => f.TeamId)
+            .ToListAsync();
         return feedbacks.MapToResponse();
     }
 
@@ -110,7 +116,7 @@ public class FeedbackService : IFeedbackService
 
         if (team.CourseId != assignment.CourseId)
         {
-            return new ValidationError("Team is in the course").MapToResponse();
+            return new ValidationError("Team is not in the course").MapToResponse();
         }
 
         var feedback = await _dbContext.Feedbacks
@@ -128,6 +134,34 @@ public class FeedbackService : IFeedbackService
         if (assignment is null)
         {
             return default;
+        }
+
+        if (assignment.CollaborationType == CollaborationType.Individual)
+        {
+            var student = await _dbContext.Users.FindAsync(request.StudentId);
+            if (student is null)
+            {
+                return default;
+            }
+
+            var courseStudent = await _dbContext.CourseStudents
+                .FirstOrDefaultAsync(cs => cs.CourseId == assignment.CourseId && cs.StudentId == student.Id);
+            if (courseStudent is null)
+            {
+                return new ValidationError("Student is not enrolled in the course").MapToResponse();
+            }
+        }
+        else
+        {
+            var team = await _dbContext.Teams.FindAsync(request.TeamId);
+            if (team is null)
+            {
+                return default;
+            }
+            if (team.CourseId != assignment.CourseId)
+            {
+                return new ValidationError("Team is not in the course").MapToResponse();
+            }
         }
 
         if (assignment.DueDate > DateTime.UtcNow)

@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Database.Models;
+using Microsoft.EntityFrameworkCore;
 
 namespace Api.Tests.Integration.Assignments;
 
@@ -42,6 +43,21 @@ public class DeleteAssignmentTests(ApiFactory factory) : BaseIntegrationTest(fac
         await Client.DeleteAsync($"assignments/{assignment.Id}");
 
         Assert.False(await DbContext.Deliveries.AnyAsync());
+    }
+
+    [Fact]
+    public async Task DeleteAssignment_ShouldDeleteFeedback_WhenValidAssignment()
+    {
+        var course = ModelFactory.CreateCourse();
+        var assignment = ModelFactory.CreateAssignment(course.Id, collaboration: CollaborationType.Individual);
+        var student = ModelFactory.CreateStudent();
+        ModelFactory.CreateCourseStudent(course.Id, student.Id);
+        ModelFactory.CreateFeedback(assignment.Id, student.Id, null);
+        await DbContext.SaveChangesAsync();
+
+        await Client.DeleteAsync($"assignments/{assignment.Id}");
+
+        Assert.False(await DbContext.Feedbacks.AnyAsync());
     }
 
     [Fact]

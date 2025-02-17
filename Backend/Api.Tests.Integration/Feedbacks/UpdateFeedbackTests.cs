@@ -19,7 +19,7 @@ public class UpdateFeedbackTests(ApiFactory factory) : BaseIntegrationTest(facto
             offset: TimeSpan.FromDays(-7)
         );
         var delivery = ModelFactory.CreateStudentDelivery(assignment.Id, student.Id);
-        var feedback = ModelFactory.CreateFeedback(delivery.Id);
+        var feedback = ModelFactory.CreateFeedback(assignment.Id, student.Id, null);
         await DbContext.SaveChangesAsync();
 
         var request = new UpdateFeedbackRequest
@@ -34,7 +34,8 @@ public class UpdateFeedbackTests(ApiFactory factory) : BaseIntegrationTest(facto
             .OfType<Feedback>()
             .AnyAsync(f =>
                 f.Id == feedback.Id &&
-                f.DeliveryId == delivery.Id &&
+                f.AssignmentId == assignment.Id &&
+                f.StudentId == student.Id &&
                 f.Comment == request.Comment
             )
         );
@@ -51,8 +52,7 @@ public class UpdateFeedbackTests(ApiFactory factory) : BaseIntegrationTest(facto
             gradingType: GradingType.ApprovalGrading,
             offset: TimeSpan.FromDays(-7)
         );
-        var delivery = ModelFactory.CreateStudentDelivery(assignment.Id, student.Id);
-        var feedback = ModelFactory.CreateApprovalFeedback(delivery.Id);
+        var feedback = ModelFactory.CreateApprovalFeedback(assignment.Id, student.Id, null);
         await DbContext.SaveChangesAsync();
 
         var request = new UpdateFeedbackRequest
@@ -68,7 +68,8 @@ public class UpdateFeedbackTests(ApiFactory factory) : BaseIntegrationTest(facto
             .OfType<ApprovalFeedback>()
             .AnyAsync(f =>
                 f.Id == feedback.Id &&
-                f.DeliveryId == delivery.Id &&
+                f.AssignmentId == assignment.Id &&
+                f.StudentId == student.Id &&
                 f.Comment == request.Comment &&
                 f.IsApproved == request.IsApproved
             )
@@ -86,8 +87,7 @@ public class UpdateFeedbackTests(ApiFactory factory) : BaseIntegrationTest(facto
             gradingType: GradingType.LetterGrading,
             offset: TimeSpan.FromDays(-7)
         );
-        var delivery = ModelFactory.CreateStudentDelivery(assignment.Id, student.Id);
-        var feedback = ModelFactory.CreateLetterFeedback(delivery.Id);
+        var feedback = ModelFactory.CreateLetterFeedback(assignment.Id, student.Id, null);
         await DbContext.SaveChangesAsync();
 
         var request = new UpdateFeedbackRequest
@@ -103,7 +103,8 @@ public class UpdateFeedbackTests(ApiFactory factory) : BaseIntegrationTest(facto
             .OfType<LetterFeedback>()
             .AnyAsync(f =>
                 f.Id == feedback.Id &&
-                f.DeliveryId == delivery.Id &&
+                f.AssignmentId == assignment.Id &&
+                f.StudentId == student.Id &&
                 f.Comment == request.Comment &&
                 f.LetterGrade == request.LetterGrade
             )
@@ -122,8 +123,7 @@ public class UpdateFeedbackTests(ApiFactory factory) : BaseIntegrationTest(facto
             maxPoints: 100,
             offset: TimeSpan.FromDays(-7)
         );
-        var delivery = ModelFactory.CreateStudentDelivery(assignment.Id, student.Id);
-        var feedback = ModelFactory.CreatePointsFeedback(delivery.Id);
+        var feedback = ModelFactory.CreatePointsFeedback(assignment.Id, student.Id, null);
         await DbContext.SaveChangesAsync();
 
         var request = new UpdateFeedbackRequest
@@ -139,7 +139,8 @@ public class UpdateFeedbackTests(ApiFactory factory) : BaseIntegrationTest(facto
             .OfType<PointsFeedback>()
             .AnyAsync(f =>
                 f.Id == feedback.Id &&
-                f.DeliveryId == delivery.Id &&
+                f.AssignmentId == assignment.Id &&
+                f.StudentId == student.Id &&
                 f.Comment == request.Comment &&
                 f.Points == request.Points
             )
@@ -157,8 +158,7 @@ public class UpdateFeedbackTests(ApiFactory factory) : BaseIntegrationTest(facto
             gradingType: GradingType.LetterGrading,
             offset: TimeSpan.FromDays(-7)
         );
-        var delivery = ModelFactory.CreateStudentDelivery(assignment.Id, student.Id);
-        var feedback = ModelFactory.CreateLetterFeedback(delivery.Id);
+        var feedback = ModelFactory.CreateLetterFeedback(assignment.Id, student.Id, null);
         await DbContext.SaveChangesAsync();
 
         var request = new UpdateFeedbackRequest
