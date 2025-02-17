@@ -32,8 +32,8 @@ public static class FeedbackEndpoints
             return feedbacks is not null ? Results.Ok(feedbacks) : Results.NotFound();
         })
         .Produces<IEnumerable<FeedbackResponse>>()
-        .WithName("GetFeedbackByAssignment")
-        .WithSummary("Get feedback by assignment id");
+        .WithName("GetAllFeedbacksByAssignment")
+        .WithSummary("Get all feedbacks by assignment id");
 
         group.MapGet("students/{studentId:guid}/assignments/{assignmentId:guid}/feedbacks", async (IFeedbackService feedbackService, Guid studentId, Guid assignmentId) =>
         {

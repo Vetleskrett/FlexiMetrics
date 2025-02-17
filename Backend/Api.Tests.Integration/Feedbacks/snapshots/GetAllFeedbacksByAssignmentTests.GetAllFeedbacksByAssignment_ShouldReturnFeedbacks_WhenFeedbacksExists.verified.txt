@@ -1,0 +1,40 @@
+﻿{
+  Status: 200 OK,
+  Content: {
+    Headers: {
+      Content-Type: application/json; charset=utf-8
+    },
+    Value: [
+      {
+        id: Guid_1,
+        comment: Looks good to me,
+        assignmentId: Guid_2,
+        studentId: Guid_3,
+        teamId: null,
+        isApproved: null,
+        letterGrade: null,
+        points: null
+      },
+      {
+        id: Guid_4,
+        comment: Looks good to me,
+        assignmentId: Guid_2,
+        studentId: Guid_5,
+        teamId: null,
+        isApproved: null,
+        letterGrade: null,
+        points: null
+      },
+      {
+        id: Guid_6,
+        comment: Looks good to me,
+        assignmentId: Guid_2,
+        studentId: Guid_7,
+        teamId: null,
+        isApproved: null,
+        letterGrade: null,
+        points: null
+      }
+    ]
+  }
+}
