@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Database.Models;
+using Microsoft.EntityFrameworkCore;
 
 namespace Api.Tests.Integration.Teams;
 
@@ -29,6 +30,20 @@ public class DeleteTeamTests(ApiFactory factory) : BaseIntegrationTest(factory)
         await Client.DeleteAsync($"teams/{team.Id}");
 
         Assert.False(await DbContext.Deliveries.AnyAsync(d => d.Id == delivery.Id));
+    }
+
+    [Fact]
+    public async Task DeleteAssignment_ShouldDeleteFeedback_WhenValidAssignment()
+    {
+        var course = ModelFactory.CreateCourse();
+        var assignment = ModelFactory.CreateAssignment(course.Id, collaboration: CollaborationType.Individual);
+        var team = ModelFactory.CreateTeam(course.Id);
+        ModelFactory.CreateFeedback(assignment.Id, null, team.Id);
+        await DbContext.SaveChangesAsync();
+
+        await Client.DeleteAsync($"teams/{team.Id}");
+
+        Assert.False(await DbContext.Feedbacks.AnyAsync());
     }
 
     [Fact]

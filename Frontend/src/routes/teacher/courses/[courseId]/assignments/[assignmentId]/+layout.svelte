@@ -29,6 +29,16 @@
 		<h2>Deliveries</h2>
 	</MenuRow>
 
+	<MenuRow href="/teacher/courses/{courseId}/assignments/{assignmentId}/feedback">
+		<img
+			width="24"
+			height="24"
+			src="https://img.icons8.com/fluency/480/popular-topic--v1.png"
+			alt="knowledge-sharing"
+		/>
+		<h2>Feedback</h2>
+	</MenuRow>
+
 	<div class="mt-12 flex items-center gap-2 pl-6">
 		<img
 			width="24"

@@ -40,7 +40,7 @@ public static class TeamEndpoints
             var result = await teamService.GetByStudentCourse(studentId, courseId);
             return result.Match
             (
-                team => team is not null ? Results.Ok(team) : Results.NoContent(),
+                team => team is not null ? Results.Ok(team) : Results.NotFound(),
                 failure => Results.BadRequest(failure)
             );
         })

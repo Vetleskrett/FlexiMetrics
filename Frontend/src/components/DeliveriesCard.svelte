@@ -58,7 +58,12 @@
 				{#each ids as id}
 					{@const delivery = deliveries.find((x) => x.studentId == id || x.teamId == id)}
 
-					<Table.Row>
+					<a
+						href={assignment.collaborationType == 'Individual'
+							? `/teacher/courses/${assignment.courseId}/assignments/${assignment.id}/students/${id}`
+							: `/teacher/courses/${assignment.courseId}/assignments/${assignment.id}/teams/${id}`}
+						class="table-row hover:bg-blue-50"
+					>
 						{#if assignment.collaborationType == 'Individual'}
 							<Table.Cell>
 								<p>
@@ -66,7 +71,7 @@
 								</p>
 							</Table.Cell>
 						{:else}
-							<Table.Cell class="h-fulls flex items-center justify-center">
+							<Table.Cell class="flex h-full items-center justify-center">
 								<p>{teams.find((x) => x.id == id)?.teamNr}</p>
 							</Table.Cell>
 						{/if}
@@ -109,7 +114,7 @@
 								<Table.Cell></Table.Cell>
 							{/each}
 						{/if}
-					</Table.Row>
+					</a>
 				{/each}
 			</Table.Body>
 		</Table.Root>

@@ -200,21 +200,31 @@ namespace Database.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
+                    b.Property<Guid>("AssignmentId")
+                        .HasColumnType("uuid");
+
                     b.Property<string>("Comment")
                         .IsRequired()
                         .HasColumnType("text");
-
-                    b.Property<Guid>("DeliveryId")
-                        .HasColumnType("uuid");
 
                     b.Property<string>("Discriminator")
                         .IsRequired()
                         .HasMaxLength(21)
                         .HasColumnType("character varying(21)");
 
+                    b.Property<Guid?>("StudentId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid?>("TeamId")
+                        .HasColumnType("uuid");
+
                     b.HasKey("Id");
 
-                    b.HasIndex("DeliveryId")
+                    b.HasIndex("StudentId");
+
+                    b.HasIndex("TeamId");
+
+                    b.HasIndex("AssignmentId", "StudentId", "TeamId")
                         .IsUnique();
 
                     b.ToTable("Feedbacks");
@@ -419,13 +429,27 @@ namespace Database.Migrations
 
             modelBuilder.Entity("Database.Models.Feedback", b =>
                 {
-                    b.HasOne("Database.Models.Delivery", "Delivery")
-                        .WithOne()
-                        .HasForeignKey("Database.Models.Feedback", "DeliveryId")
+                    b.HasOne("Database.Models.Assignment", "Assignment")
+                        .WithMany()
+                        .HasForeignKey("AssignmentId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("Delivery");
+                    b.HasOne("Database.Models.User", "Student")
+                        .WithMany()
+                        .HasForeignKey("StudentId")
+                        .OnDelete(DeleteBehavior.Cascade);
+
+                    b.HasOne("Database.Models.Team", "Team")
+                        .WithMany()
+                        .HasForeignKey("TeamId")
+                        .OnDelete(DeleteBehavior.Cascade);
+
+                    b.Navigation("Assignment");
+
+                    b.Navigation("Student");
+
+                    b.Navigation("Team");
                 });
 
             modelBuilder.Entity("Database.Models.Team", b =>

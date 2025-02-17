@@ -337,82 +337,118 @@ public class ModelFactory
         return deliveries;
     }
 
-    public Feedback CreateFeedback(Guid deliveryId)
+    public Feedback CreateFeedback(Guid assignmentId, Guid? studentId, Guid? teamId)
     {
         var feedback = new Feedback
         {
             Id = Guid.NewGuid(),
             Comment = "Looks good to me",
-            DeliveryId = deliveryId
+            AssignmentId = assignmentId,
+            StudentId = studentId,
+            TeamId = teamId,
         };
         _dbContext.Feedbacks.Add(feedback);
         return feedback;
     }
 
-    public List<Feedback> CreateFeedbacks(List<Delivery> deliveries)
+    public List<Feedback> CreateFeedbacks(Guid assignmentId, List<User> students)
     {
-        return deliveries
-            .Select(delivery => CreateFeedback(delivery.Id))
+        return students
+            .Select(student => CreateFeedback(assignmentId, student.Id, null))
             .ToList();
     }
 
-    public ApprovalFeedback CreateApprovalFeedback(Guid deliveryId)
+    public List<Feedback> CreateFeedbacks(Guid assignmentId, List<Team> teams)
+    {
+        return teams
+            .Select(team => CreateFeedback(assignmentId, null, team.Id))
+            .ToList();
+    }
+
+    public ApprovalFeedback CreateApprovalFeedback(Guid assignmentId, Guid? studentId, Guid? teamId)
     {
         var feedback = new ApprovalFeedback
         {
             Id = Guid.NewGuid(),
             Comment = "Looks good to me",
-            DeliveryId = deliveryId,
+            AssignmentId = assignmentId,
+            StudentId = studentId,
+            TeamId = teamId,
             IsApproved = true
         };
         _dbContext.Feedbacks.Add(feedback);
         return feedback;
     }
 
-    public List<ApprovalFeedback> CreateApprovalFeedbacks(List<Delivery> deliveries)
+    public List<ApprovalFeedback> CreateApprovalFeedbacks(Guid assignmentId, List<User> students)
     {
-        return deliveries
-            .Select(delivery => CreateApprovalFeedback(delivery.Id))
+        return students
+            .Select(student => CreateApprovalFeedback(assignmentId, student.Id, null))
             .ToList();
     }
 
-    public LetterFeedback CreateLetterFeedback(Guid deliveryId)
+    public List<ApprovalFeedback> CreateApprovalFeedbacks(Guid assignmentId, List<Team> teams)
+    {
+        return teams
+            .Select(team => CreateApprovalFeedback(assignmentId, null, team.Id))
+            .ToList();
+    }
+
+    public LetterFeedback CreateLetterFeedback(Guid assignmentId, Guid? studentId, Guid? teamId)
     {
         var feedback = new LetterFeedback
         {
             Id = Guid.NewGuid(),
             Comment = "Looks good to me",
-            DeliveryId = deliveryId,
+            AssignmentId = assignmentId,
+            StudentId = studentId,
+            TeamId = teamId,
             LetterGrade = LetterGrade.C
         };
         _dbContext.Feedbacks.Add(feedback);
         return feedback;
     }
 
-    public List<LetterFeedback> CreateLetterFeedbacks(List<Delivery> deliveries)
+    public List<LetterFeedback> CreateLetterFeedbacks(Guid assignmentId, List<User> students)
     {
-        return deliveries
-            .Select(delivery => CreateLetterFeedback(delivery.Id))
+        return students
+            .Select(student => CreateLetterFeedback(assignmentId, student.Id, null))
             .ToList();
     }
 
-    public PointsFeedback CreatePointsFeedback(Guid deliveryId)
+    public List<LetterFeedback> CreateLetterFeedbacks(Guid assignmentId, List<Team> teams)
+    {
+        return teams
+            .Select(team => CreateLetterFeedback(assignmentId, null, team.Id))
+            .ToList();
+    }
+
+    public PointsFeedback CreatePointsFeedback(Guid assignmentId, Guid? studentId, Guid? teamId)
     {
         var feedback = new PointsFeedback
         {
             Id = Guid.NewGuid(),
             Comment = "Looks good to me",
-            DeliveryId = deliveryId,
+            AssignmentId = assignmentId,
+            StudentId = studentId,
+            TeamId = teamId,
             Points = 75
         };
         _dbContext.Feedbacks.Add(feedback);
         return feedback;
     }
 
-    public List<PointsFeedback> CreatePointsFeedbacks(List<Delivery> deliveries)
+    public List<PointsFeedback> CreatePointsFeedbacks(Guid assignmentId, List<User> students)
     {
-        return deliveries
-            .Select(delivery => CreatePointsFeedback(delivery.Id))
+        return students
+            .Select(student => CreatePointsFeedback(assignmentId, student.Id, null))
+            .ToList();
+    }
+
+    public List<PointsFeedback> CreatePointsFeedbacks(Guid assignmentId, List<Team> teams)
+    {
+        return teams
+            .Select(team => CreatePointsFeedback(assignmentId, null, team.Id))
             .ToList();
     }
 }

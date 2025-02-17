@@ -15,7 +15,7 @@
 		course: Course;
 		assignments: StudentAssignment[];
 		team: Team | null;
-		teams: Team[] | null
+		teams: Team[] | null;
 		teachers: Teacher[];
 	};
 </script>
@@ -60,7 +60,7 @@
 			{#if data.team}
 				<TeamCard team={data.team} />
 			{:else if data.teams}
-				<TeamsCard courseId={courseId} numTeams={data.teams.length} userRole={Role.Student}/>
+				<TeamsCard {courseId} numTeams={data.teams.length} userRole={Role.Student} />
 			{/if}
 			<TeachersCard userRole={Role.Student} teachers={data.teachers} />
 		</div>

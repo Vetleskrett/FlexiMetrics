@@ -22,15 +22,10 @@ public class GetAllFeedbacksTests(ApiFactory factory) : BaseIntegrationTest(fact
         var letterAssignment = ModelFactory.CreateAssignment(course.Id, gradingType: GradingType.LetterGrading);
         var pointsAssignment = ModelFactory.CreateAssignment(course.Id, gradingType: GradingType.PointsGrading, maxPoints: 100);
 
-        var noGradingDeliveries = ModelFactory.CreateStudentDeliveries(noGradingAssignment.Id, students);
-        var approvalDeliveries = ModelFactory.CreateStudentDeliveries(approvalAssignment.Id, students);
-        var letterDeliveries = ModelFactory.CreateStudentDeliveries(letterAssignment.Id, students);
-        var pointsDeliveries = ModelFactory.CreateStudentDeliveries(pointsAssignment.Id, students);
-
-        ModelFactory.CreateFeedbacks(noGradingDeliveries);
-        ModelFactory.CreateApprovalFeedbacks(approvalDeliveries);
-        ModelFactory.CreateLetterFeedbacks(letterDeliveries);
-        ModelFactory.CreatePointsFeedbacks(pointsDeliveries);
+        ModelFactory.CreateFeedbacks(noGradingAssignment.Id, students);
+        ModelFactory.CreateApprovalFeedbacks(approvalAssignment.Id, students);
+        ModelFactory.CreateLetterFeedbacks(letterAssignment.Id, students);
+        ModelFactory.CreatePointsFeedbacks(pointsAssignment.Id, students);
 
         await DbContext.SaveChangesAsync();
 

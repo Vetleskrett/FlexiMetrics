@@ -6,24 +6,24 @@ export const load = async ({ params }: {params: {courseId: string}}) => {
         courseResponse,
         assignmentsResponse,
         teachersResponse,
+        teamResponse,
     ] = await Promise.all([
         getCourse(params.courseId),
         getStudentAssignments(studentId, params.courseId),
         getTeachers(params.courseId),
+        getStudentTeam(params.courseId, studentId).catch(e => null)
     ])
 
-    let teams = null
-    let studentTeam = await getStudentTeam(params.courseId, studentId)
-    if (studentTeam.status == 204){
-        teams = await getTeams(params.courseId)
+    let teamsResponse = null;
+    if (teamResponse == null) {
+        teamsResponse = await getTeams(params.courseId)
     }
-
 
     return { 
         course: courseResponse.data,
         assignments: assignmentsResponse.data,
-        team: studentTeam.status == 204 ? null : studentTeam.data,
-        teams: teams ? teams.data : null,
+        team: teamResponse?.data,
+        teams: teamsResponse?.data,
         teachers: teachersResponse.data,
     }
 };

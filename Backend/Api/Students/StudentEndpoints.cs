@@ -8,10 +8,19 @@ public static class StudentEndpoints
     {
         var group = app.MapGroup("").WithTags("Students");
 
+        group.MapGet("students/{studentId:guid}", async (IStudentService studentService, Guid studentId) =>
+        {
+            var student = await studentService.GetById(studentId);
+            return student is not null ? Results.Ok(student) : Results.NotFound();
+        })
+        .Produces<StudentResponse>()
+        .WithName("GetStudent")
+        .WithSummary("Get student by id");
+
         group.MapGet("courses/{courseId:guid}/students", async (IStudentService studentService, Guid courseId) =>
         {
-            var courses = await studentService.GetAllByCourse(courseId);
-            return courses is not null ? Results.Ok(courses) : Results.NotFound();
+            var students = await studentService.GetAllByCourse(courseId);
+            return students is not null ? Results.Ok(students) : Results.NotFound();
         })
         .Produces<IEnumerable<StudentResponse>>()
         .WithName("GetAllStudentsByCourse")

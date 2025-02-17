@@ -1,0 +1,13 @@
+﻿{
+  Status: 200 OK,
+  Content: {
+    Headers: {
+      Content-Type: application/json; charset=utf-8
+    },
+    Value: {
+      id: Guid_1,
+      email: student@ntnu.no,
+      name: Student Studentsen
+    }
+  }
+}

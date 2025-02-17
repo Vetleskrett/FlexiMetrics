@@ -11,8 +11,7 @@ public class GetFeedbackTests(ApiFactory factory) : BaseIntegrationTest(factory)
         var student = ModelFactory.CreateStudent();
         ModelFactory.CreateCourseStudent(course.Id, student.Id);
         var assignment = ModelFactory.CreateAssignment(course.Id, gradingType: GradingType.NoGrading);
-        var delivery = ModelFactory.CreateStudentDelivery(assignment.Id, student.Id);
-        var feedback = ModelFactory.CreateFeedback(delivery.Id);
+        var feedback = ModelFactory.CreateFeedback(assignment.Id, student.Id, null);
         await DbContext.SaveChangesAsync();
 
         var response = await Client.GetAsync($"feedbacks/{feedback.Id}");
@@ -27,8 +26,7 @@ public class GetFeedbackTests(ApiFactory factory) : BaseIntegrationTest(factory)
         var student = ModelFactory.CreateStudent();
         ModelFactory.CreateCourseStudent(course.Id, student.Id);
         var assignment = ModelFactory.CreateAssignment(course.Id, gradingType: GradingType.ApprovalGrading);
-        var delivery = ModelFactory.CreateStudentDelivery(assignment.Id, student.Id);
-        var feedback = ModelFactory.CreateApprovalFeedback(delivery.Id);
+        var feedback = ModelFactory.CreateApprovalFeedback(assignment.Id, student.Id, null);
         await DbContext.SaveChangesAsync();
 
         var response = await Client.GetAsync($"feedbacks/{feedback.Id}");
@@ -43,8 +41,7 @@ public class GetFeedbackTests(ApiFactory factory) : BaseIntegrationTest(factory)
         var student = ModelFactory.CreateStudent();
         ModelFactory.CreateCourseStudent(course.Id, student.Id);
         var assignment = ModelFactory.CreateAssignment(course.Id, gradingType: GradingType.LetterGrading);
-        var delivery = ModelFactory.CreateStudentDelivery(assignment.Id, student.Id);
-        var feedback = ModelFactory.CreateLetterFeedback(delivery.Id);
+        var feedback = ModelFactory.CreateLetterFeedback(assignment.Id, student.Id, null);
         await DbContext.SaveChangesAsync();
 
         var response = await Client.GetAsync($"feedbacks/{feedback.Id}");
@@ -59,8 +56,7 @@ public class GetFeedbackTests(ApiFactory factory) : BaseIntegrationTest(factory)
         var student = ModelFactory.CreateStudent();
         ModelFactory.CreateCourseStudent(course.Id, student.Id);
         var assignment = ModelFactory.CreateAssignment(course.Id, gradingType: GradingType.PointsGrading, maxPoints: 100);
-        var delivery = ModelFactory.CreateStudentDelivery(assignment.Id, student.Id);
-        var feedback = ModelFactory.CreatePointsFeedback(delivery.Id);
+        var feedback = ModelFactory.CreatePointsFeedback(assignment.Id, student.Id, null);
         await DbContext.SaveChangesAsync();
 
         var response = await Client.GetAsync($"feedbacks/{feedback.Id}");
