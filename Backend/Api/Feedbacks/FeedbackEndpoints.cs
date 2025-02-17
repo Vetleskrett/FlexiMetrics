@@ -40,7 +40,7 @@ public static class FeedbackEndpoints
             var result = await feedbackService.GetByStudentAssignment(studentId, assignmentId);
             return result.Match
             (
-                feedback => feedback is not null ? Results.Ok(feedback) : Results.NotFound(),
+                feedback => feedback is not null ? Results.Ok(feedback) : Results.NoContent(),
                 failure => Results.BadRequest(failure)
             );
         })

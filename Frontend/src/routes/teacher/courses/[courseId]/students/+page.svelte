@@ -5,7 +5,7 @@
 	import Trash2 from 'lucide-svelte/icons/trash-2';
 	import * as DropdownMenu from '$lib/components/ui/dropdown-menu';
 	import * as Breadcrumb from '$lib/components/ui/breadcrumb/index.js';
-	import { getStudents, postStudentsCourse } from 'src/api';
+	import { postStudentsCourse } from 'src/api';
 	import AllStudentsCard from 'src/components/AllStudentsCard.svelte';
 	import AddStudentsCard from 'src/components/AddStudentsCard.svelte';
 
@@ -96,7 +96,7 @@
 	</div>
 	<div class="flex flex-row gap-8">
 		<div class="flex w-[700px] flex-col gap-8">
-			<AllStudentsCard students={data.students} />
+			<AllStudentsCard students={data.students} courseId={courseId}/>
 		</div>
 		<div class="flex w-[400px] flex-col gap-8">
 			<AddStudentsCard addFunction={addStudents} />

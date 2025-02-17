@@ -5,8 +5,28 @@
 	import Ellipsis from 'lucide-svelte/icons/ellipsis';
 	import * as DropdownMenu from '$lib/components/ui/dropdown-menu';
 	import Trash2 from 'lucide-svelte/icons/trash-2';
+	import { deleteStudentTeam } from 'src/api';
 
-	export let students: Student[];
+	export let students: Student[], teamId: string;
+
+	//TODO: Maybe turn this into a helper function or find a better solution for updating the list
+	function deleteStudentFromList(student: Student) {
+		const index = students.indexOf(student, 0);
+		if (index > -1) {
+			students.splice(index, 1);
+			students = students;
+		}
+	}
+
+	async function removeTeamMember(student: Student) {
+		try{
+			await deleteStudentTeam(teamId, student.id)
+			deleteStudentFromList(student)
+		}
+		catch{
+			console.error("Could not remove team member")
+		}
+	}
 </script>
 
 <Card.Root class="w-full overflow-hidden p-0">
@@ -39,7 +59,7 @@
 								<Ellipsis />
 							</DropdownMenu.Trigger>
 							<DropdownMenu.Content>
-								<DropdownMenu.Item>
+								<DropdownMenu.Item on:click={() => removeTeamMember(student)}>
 									<Trash2 class="h-4" />
 									<p>Remove member</p>
 								</DropdownMenu.Item>

@@ -39,6 +39,19 @@ public static class AssignmentEndpoints
         .WithName("GetAllAssignmentsByStudentCourse")
         .WithSummary("Get all assignments by student id and course id");
 
+        group.MapGet("courses/{courseId:guid}/teams/{teamId:guid}/assignments", async (IAssignmentService assignmentService, Guid courseId, Guid teamId) =>
+        {
+            var result = await assignmentService.GetAllByTeamCourse(courseId, teamId);
+            return result.Match
+            (
+                assignment => assignment is not null ? Results.Ok(assignment) : Results.NotFound(),
+                failure => Results.BadRequest(failure)
+            );
+        })
+        .Produces<IEnumerable<StudentAssignmentResponse>>()
+        .WithName("GetAllAssignmentsByTeamCourse")
+        .WithSummary("Get all assignments by team id and course id");
+
         group.MapGet("assignments/{id:guid}", async (IAssignmentService assignmentService, Guid id) =>
         {
             var assignment = await assignmentService.GetById(id);

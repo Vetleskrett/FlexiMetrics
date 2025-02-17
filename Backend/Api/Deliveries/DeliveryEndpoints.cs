@@ -33,7 +33,7 @@ public static class DeliveryEndpoints
             var result = await deliveryService.GetByStudentAssignment(studentId, assignmentId);
             return result.Match
             (
-                delivery => delivery is not null ? Results.Ok(delivery) : Results.NotFound(),
+                delivery => delivery is not null ? Results.Ok(delivery) : Results.NoContent(),
                 failure => Results.BadRequest(failure)
             );
         })
@@ -47,7 +47,7 @@ public static class DeliveryEndpoints
             var result = await deliveryService.GetByTeamAssignment(teamId, assignmentId);
             return result.Match
             (
-                delivery => delivery is not null ? Results.Ok(delivery) : Results.NotFound(),
+                delivery => delivery is not null ? Results.Ok(delivery) : Results.NoContent(),
                 failure => Results.BadRequest(failure)
             );
         })

@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { page } from '$app/stores';
-	import type { Team, Student, AssignmentTeam } from 'src/types';
+	import type { Team, Student, AssignmentTeam, Course, StudentAssignment } from 'src/types';
 	import EllipsisVertical from 'lucide-svelte/icons/ellipsis-vertical';
 	import Trash2 from 'lucide-svelte/icons/trash-2';
 	import * as DropdownMenu from '$lib/components/ui/dropdown-menu';
@@ -9,50 +9,28 @@
 	import SimpleAddCard from 'src/components/SimpleAddCard.svelte';
 	import TeamMembersCard from 'src/components/TeamMembersCard.svelte';
 	import TeamAssignmentsCard from 'src/components/TeamAssignmentsCard.svelte';
+	import { postStudentEmailTeam, getTeam } from 'src/api';
 
 	const courseId = $page.params.courseId;
-	const teamId = $page.params.teamId;
 
-	const course = {
-		id: '1',
-		code: 'TDT101',
-		name: 'Programmering',
-		year: 2024,
-		semester: 'Autumn'
+	export let data: {
+		course: Course
+		team: Team;
+		assignments: StudentAssignment[]
 	};
-	const students: Student[] = [
-		{
-			id: 'abc',
-			name: 'Ola Nordmann',
-			email: 'OlaNordmann@ntnu.no'
-		},
-		{
-			id: 'abc',
-			name: 'Ola Nordmann',
-			email: 'OlaNordmann@ntnu.no'
-		},
-		{
-			id: 'abc',
-			name: 'Ola Nordmann',
-			email: 'OlaNordmann@ntnu.no'
-		}
-	];
 
-	const team: Team = {
-		id: '1',
-		teamNr: 1,
-		students: students,
-		complete: Math.floor(Math.random() * 5)
-	};
-	const assignments: AssignmentTeam[] = [];
-	for (let i = 1; i <= 10; i++) {
-		if (i % 2 == 1) {
-			assignments.push({
-				id: (assignments.length + 1).toString(),
-				name: 'Assignment ' + (assignments.length + 1).toString(),
-				due: '10.0' + i.toString() + '.2024',
-				completed: i % 4 == 1
-			});
+	let completed = data.assignments.filter(item => item.isDelivered).length
+
+	async function addStudent(input: string) {
+		if (input && input.trim().length > 0) {
+			try {
+				const result = await postStudentEmailTeam(data.team.id, {
+					email: input
+				});
+				data.team = result.data;
+			} catch (error) {
+				console.error('Could not add student!');
+			}
 		}
 	}
 </script>
@@ -66,7 +44,7 @@
 			<Breadcrumb.Separator />
 			<Breadcrumb.Item>
 				<Breadcrumb.Link href="/teacher/courses/{courseId}"
-					>{course.code} - {course.name}</Breadcrumb.Link
+					>{data.course.code} - {data.course.name}</Breadcrumb.Link
 				>
 			</Breadcrumb.Item>
 			<Breadcrumb.Separator />
@@ -75,7 +53,7 @@
 			</Breadcrumb.Item>
 			<Breadcrumb.Separator />
 			<Breadcrumb.Item>
-				<Breadcrumb.Page>Team {team.teamNr}</Breadcrumb.Page>
+				<Breadcrumb.Page>Team {data.team.teamNr}</Breadcrumb.Page>
 			</Breadcrumb.Item>
 		</Breadcrumb.List>
 	</Breadcrumb.Root>
@@ -83,7 +61,7 @@
 		<div class="flex items-center">
 			<img width="60" height="60" src="https://img.icons8.com/fluency/480/group.png" alt="group" />
 			<div>
-				<h1 class="ml-4 text-4xl font-semibold">Team {team.teamNr}</h1>
+				<h1 class="ml-4 text-4xl font-semibold">Team {data.team.teamNr}</h1>
 			</div>
 		</div>
 
@@ -101,8 +79,8 @@
 	</div>
 	<div class="flex flex-row gap-8">
 		<div class="flex w-[700px] flex-col gap-8">
-			<TeamMembersCard {students} />
-			<TeamAssignmentsCard assignmentsTeam={assignments} />
+			<TeamMembersCard students={data.team.students} teamId={data.team.id}/>
+			<TeamAssignmentsCard assignmentsTeam={data.assignments} />
 		</div>
 		<div class="flex w-[400px] flex-col gap-8">
 			<SimpleAddCard
@@ -110,11 +88,11 @@
 				actionString="Add"
 				inputString="Email"
 				inputType="String"
-				addFunction={() => {}}
+				addFunction={addStudent}
 			/>
 			<CompletedTotalCard
-				completed={team.complete ?? 0}
-				total={5}
+				completed={completed}
+				total={data.assignments.length}
 				headline={'Assignments Delivered'}
 			/>
 		</div>

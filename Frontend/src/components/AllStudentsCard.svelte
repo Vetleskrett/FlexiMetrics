@@ -2,8 +2,29 @@
 	import type { Student } from 'src/types.js';
 	import * as Card from '$lib/components/ui/card/index.js';
 	import * as Table from '$lib/components/ui/table';
+	import CustomButton from './CustomButton.svelte';
+	import Trash_2 from 'lucide-svelte/icons/trash-2';
+	import { deleteStudentCourse } from 'src/api';
 
-	export let students: Student[];
+	export let students: Student[], courseId: string;
+	async function removeStudent(student: Student) {
+		try{
+			await deleteStudentCourse(courseId, student.id)
+			deleteStudentFromList(student)
+		}
+		catch{
+			console.error("Could not delete student")
+		}
+	}
+
+	function deleteStudentFromList(student: Student) {
+		const index = students.indexOf(student, 0);
+		if (index > -1) {
+			students.splice(index, 1);
+			students = students;
+		}
+	}
+
 </script>
 
 <Card.Root class="w-full overflow-hidden p-0">
@@ -27,6 +48,11 @@
 						</Table.Cell>
 						<Table.Cell class="px-6">
 							<p>TBD</p>
+						</Table.Cell>
+						<Table.Cell>
+							<CustomButton color="red" on:click={() => removeStudent(student)}>
+								<Trash_2/>
+							</CustomButton>
 						</Table.Cell>
 					</Table.Row>
 				{/each}
