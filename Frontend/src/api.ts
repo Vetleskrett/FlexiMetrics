@@ -124,6 +124,10 @@ export function postStudentsCourse(courseId: string, emails: AddStudentsToCourse
   return instance.post(`/courses/${courseId}/students`, emails)
 }
 
+export function deleteStudentCourse(courseId: string, studentId: string){
+  return instance.delete(`/courses/${courseId}/students/${studentId}`)
+}
+
 export function postStudentsTeam(teams: AddStudentsToTeams) : Promise<AxiosResponse> {
   return instance.post(`/teams/bulk`, teams)
 }
