@@ -10,14 +10,14 @@ namespace Api.Assignments;
 
 public interface IAssignmentService
 {
-    Task<IEnumerable<AssignmentResponse>> GetAll();
-    Task<IEnumerable<AssignmentResponse>?> GetAllByCourse(Guid courseId);
-    Task<Result<IEnumerable<StudentAssignmentResponse>?, ValidationResponse>> GetAllByStudentCourse(Guid studentId, Guid courseId);
-    Task<AssignmentResponse?> GetById(Guid id);
-    Task<Result<AssignmentResponse, ValidationResponse>> Create(CreateAssignmentRequest request);
-    Task<Result<AssignmentResponse?, ValidationResponse>> Update(UpdateAssignmentRequest request, Guid id);
-    Task<Result<AssignmentResponse?, ValidationResponse>> Publish(Guid id);
-    Task<bool> DeleteById(Guid id);
+    Task<Result<IEnumerable<AssignmentResponse>>> GetAll();
+    Task<Result<IEnumerable<AssignmentResponse>>> GetAllByCourse(Guid courseId);
+    Task<Result<IEnumerable<StudentAssignmentResponse>>> GetAllByStudentCourse(Guid studentId, Guid courseId);
+    Task<Result<AssignmentResponse>> GetById(Guid id);
+    Task<Result<AssignmentResponse>> Create(CreateAssignmentRequest request);
+    Task<Result<AssignmentResponse>> Update(UpdateAssignmentRequest request, Guid id);
+    Task<Result<AssignmentResponse>> Publish(Guid id);
+    Task<Result> DeleteById(Guid id);
 }
 
 public class AssignmentService : IAssignmentService
@@ -31,7 +31,7 @@ public class AssignmentService : IAssignmentService
         _validator = validator;
     }
 
-    public async Task<IEnumerable<AssignmentResponse>> GetAll()
+    public async Task<Result<IEnumerable<AssignmentResponse>>> GetAll()
     {
         var assignments = await _dbContext.Assignments
             .AsNoTracking()
@@ -40,12 +40,12 @@ public class AssignmentService : IAssignmentService
         return assignments.MapToResponse();
     }
 
-    public async Task<IEnumerable<AssignmentResponse>?> GetAllByCourse(Guid courseId)
+    public async Task<Result<IEnumerable<AssignmentResponse>>> GetAllByCourse(Guid courseId)
     {
         var course = await _dbContext.Courses.FindAsync(courseId);
         if (course is null)
         {
-            return default;
+            return Result<IEnumerable<AssignmentResponse>>.NotFound();
         }
 
         var assignments = await _dbContext.Assignments
@@ -56,18 +56,18 @@ public class AssignmentService : IAssignmentService
         return assignments.MapToResponse();
     }
 
-    public async Task<Result<IEnumerable<StudentAssignmentResponse>?, ValidationResponse>> GetAllByStudentCourse(Guid studentId, Guid courseId)
+    public async Task<Result<IEnumerable<StudentAssignmentResponse>>> GetAllByStudentCourse(Guid studentId, Guid courseId)
     {
         var course = await _dbContext.Courses.FindAsync(courseId);
         if (course is null)
         {
-            return default;
+            return Result<IEnumerable<StudentAssignmentResponse>>.NotFound();
         }
 
         var student = await _dbContext.Users.FindAsync(studentId);
         if (student is null)
         {
-            return default;
+            return Result<IEnumerable<StudentAssignmentResponse>>.NotFound();
         }
 
         var courseStudent = await _dbContext.CourseStudents
@@ -100,20 +100,24 @@ public class AssignmentService : IAssignmentService
         return assignments;
     }
 
-    public async Task<AssignmentResponse?> GetById(Guid id)
+    public async Task<Result<AssignmentResponse>> GetById(Guid id)
     {
         var assignment = await _dbContext.Assignments.FindAsync(id);
-        return assignment?.MapToResponse();
+        if (assignment is null)
+        {
+            return Result<AssignmentResponse>.NotFound();
+        }
+        return assignment.MapToResponse();
     }
 
-    public async Task<Result<AssignmentResponse?, ValidationResponse>> Create(CreateAssignmentRequest request)
+    public async Task<Result<AssignmentResponse>> Create(CreateAssignmentRequest request)
     {
         var assignment = request.MapToAssignment();
         var course = await _dbContext.Courses.FindAsync(assignment.CourseId);
 
         if (course is null)
         {
-            return default;
+            return Result<AssignmentResponse>.NotFound();
         }
 
         var validationResult = await _validator.ValidateAsync(assignment);
@@ -130,14 +134,14 @@ public class AssignmentService : IAssignmentService
         return assignment.MapToResponse();
     }
 
-    public async Task<Result<AssignmentResponse?, ValidationResponse>> Update(UpdateAssignmentRequest request, Guid id)
+    public async Task<Result<AssignmentResponse>> Update(UpdateAssignmentRequest request, Guid id)
     {
         var assignment = await _dbContext.Assignments
             .AsNoTracking()
             .FirstOrDefaultAsync(x => x.Id == id);
         if (assignment is null)
         {
-            return default;
+            return Result<AssignmentResponse>.NotFound();
         }
 
         assignment = request.MapToAssignment(assignment.Id, assignment.CourseId);
@@ -154,14 +158,14 @@ public class AssignmentService : IAssignmentService
         return assignment.MapToResponse();
     }
 
-    public async Task<Result<AssignmentResponse?, ValidationResponse>> Publish(Guid id)
+    public async Task<Result<AssignmentResponse>> Publish(Guid id)
     {
         var assignment = await _dbContext.Assignments
            .AsNoTracking()
            .FirstOrDefaultAsync(x => x.Id == id);
         if (assignment is null || assignment.Published)
         {
-            return default;
+            return Result<AssignmentResponse>.NotFound();
         }
 
         assignment.Published = true;
@@ -172,9 +176,9 @@ public class AssignmentService : IAssignmentService
         return assignment.MapToResponse();
     }
 
-    public async Task<bool> DeleteById(Guid id)
+    public async Task<Result> DeleteById(Guid id)
     {
-        var result = await _dbContext.Assignments.Where(x => x.Id == id).ExecuteDeleteAsync();
-        return result > 0;
+        var deleted = await _dbContext.Assignments.Where(x => x.Id == id).ExecuteDeleteAsync();
+        return deleted > 0 ? Result.Success() : Result.NotFound();
     }
 }

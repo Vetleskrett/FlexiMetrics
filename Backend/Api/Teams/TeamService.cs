@@ -9,16 +9,16 @@ namespace Api.Teams;
 
 public interface ITeamService
 {
-    Task<IEnumerable<TeamResponse>> GetAll();
-    Task<IEnumerable<TeamResponse>?> GetAllByCourse(Guid courseId);
-    Task<TeamResponse?> GetById(Guid id);
-    Task<Result<TeamResponse?, ValidationResponse>> GetByStudentCourse(Guid studentId, Guid courseId);
-    Task<Result<IEnumerable<TeamResponse>?, ValidationResponse>> Create(CreateTeamsRequest request);
-    Task<IEnumerable<TeamResponse>?> BulkAddToTeams(BulkAddStudentsToTeamsRequest request);
-    Task<Result<TeamResponse?, ValidationResponse>> AddToTeam(Guid teamId, AddStudentToTeamRequest request);
-    Task<Result<TeamResponse?, ValidationResponse>> AddToTeam(Guid teamId, Guid studentId);
-    Task<Result<TeamResponse?, ValidationResponse>> RemoveFromTeam(Guid teamId, Guid studentId);
-    Task<bool> DeleteById(Guid id);
+    Task<Result<IEnumerable<TeamResponse>>> GetAll();
+    Task<Result<IEnumerable<TeamResponse>>> GetAllByCourse(Guid courseId);
+    Task<Result<TeamResponse>> GetById(Guid id);
+    Task<Result<TeamResponse>> GetByStudentCourse(Guid studentId, Guid courseId);
+    Task<Result<IEnumerable<TeamResponse>>> Create(CreateTeamsRequest request);
+    Task<Result<IEnumerable<TeamResponse>>> BulkAddToTeams(BulkAddStudentsToTeamsRequest request);
+    Task<Result<TeamResponse>> AddToTeam(Guid teamId, AddStudentToTeamRequest request);
+    Task<Result<TeamResponse>> AddToTeam(Guid teamId, Guid studentId);
+    Task<Result<TeamResponse>> RemoveFromTeam(Guid teamId, Guid studentId);
+    Task<Result> DeleteById(Guid id);
 }
 
 public class TeamService : ITeamService
@@ -30,7 +30,7 @@ public class TeamService : ITeamService
         _dbContext = dbContext;
     }
 
-    public async Task<IEnumerable<TeamResponse>> GetAll()
+    public async Task<Result<IEnumerable<TeamResponse>>> GetAll()
     {
         var teams = await _dbContext.Teams
             .Include(t => t.Students.OrderBy(s => s.Email))
@@ -41,7 +41,7 @@ public class TeamService : ITeamService
         return teams.MapToResponse();
     }
 
-    public async Task<IEnumerable<TeamResponse>?> GetAllByCourse(Guid courseId)
+    public async Task<Result<IEnumerable<TeamResponse>>> GetAllByCourse(Guid courseId)
     {
         var course = await _dbContext.Courses
             .Include(c => c.Teams!.OrderBy(t => t.TeamNr))
@@ -50,32 +50,38 @@ public class TeamService : ITeamService
 
         if (course is null)
         {
-            return default;
+            return Result<IEnumerable<TeamResponse>>.NotFound();
         }
 
         return course.Teams!.MapToResponse();
     }
 
-    public async Task<TeamResponse?> GetById(Guid id)
+    public async Task<Result<TeamResponse>> GetById(Guid id)
     {
         var team = await _dbContext.Teams
             .Include(t => t.Students.OrderBy(s => s.Email))
             .FirstOrDefaultAsync(t => t.Id == id);
-        return team?.MapToResponse();
+
+        if (team is null)
+        {
+            return Result<TeamResponse>.NotFound();
+        }
+
+        return team.MapToResponse();
     }
 
-    public async Task<Result<TeamResponse?, ValidationResponse>> GetByStudentCourse(Guid studentId, Guid courseId)
+    public async Task<Result<TeamResponse>> GetByStudentCourse(Guid studentId, Guid courseId)
     {
         var course = await _dbContext.Courses.FindAsync(courseId);
         if (course is null)
         {
-            return default;
+            return Result<TeamResponse>.NotFound();
         }
 
         var student = await _dbContext.Users.FindAsync(studentId);
         if (student is null)
         {
-            return default;
+            return Result<TeamResponse>.NotFound();
         }
 
         var courseStudent = await _dbContext.CourseStudents
@@ -92,10 +98,15 @@ public class TeamService : ITeamService
             .Where(t => t.Students.Any(s => s.Id == studentId))
             .FirstOrDefaultAsync();
 
-        return team?.MapToResponse();
+        if (team is null)
+        {
+            return Result<TeamResponse>.NoContent();
+        }
+
+        return team.MapToResponse();
     }
 
-    public async Task<Result<IEnumerable<TeamResponse>?, ValidationResponse>> Create(CreateTeamsRequest request)
+    public async Task<Result<IEnumerable<TeamResponse>>> Create(CreateTeamsRequest request)
     {
         if (request.NumTeams <= 0)
         {
@@ -113,7 +124,7 @@ public class TeamService : ITeamService
 
         if (course is null)
         {
-            return default;
+            return Result<IEnumerable<TeamResponse>>.NotFound();
         }
 
         var existingTeamNrs = course.Teams!
@@ -213,7 +224,7 @@ public class TeamService : ITeamService
         }
     }
 
-    public async Task<IEnumerable<TeamResponse>?> BulkAddToTeams(BulkAddStudentsToTeamsRequest request)
+    public async Task<Result<IEnumerable<TeamResponse>>> BulkAddToTeams(BulkAddStudentsToTeamsRequest request)
     {
         var course = await _dbContext.Courses
             .Include(c => c.CourseStudents!)
@@ -223,7 +234,7 @@ public class TeamService : ITeamService
 
         if (course is null)
         {
-            return default;
+            return Result<IEnumerable<TeamResponse>>.NotFound();
         }
 
         var emails = request.Teams
@@ -251,7 +262,7 @@ public class TeamService : ITeamService
             .MapToResponse();
     }
 
-    public async Task<Result<TeamResponse?, ValidationResponse>> AddToTeam(Guid teamId, AddStudentToTeamRequest request)
+    public async Task<Result<TeamResponse>> AddToTeam(Guid teamId, AddStudentToTeamRequest request)
     {
         var team = await _dbContext.Teams
             .Include(t => t.Students)
@@ -261,7 +272,7 @@ public class TeamService : ITeamService
 
         if (team is null)
         {
-            return default;
+            return Result<TeamResponse>.NotFound();
         }
 
         var student = await _dbContext.Users.FirstOrDefaultAsync(u => u.Email == request.Email);
@@ -298,7 +309,7 @@ public class TeamService : ITeamService
         return team.MapToResponse();
     }
 
-    public async Task<Result<TeamResponse?, ValidationResponse>> AddToTeam(Guid teamId, Guid studentId)
+    public async Task<Result<TeamResponse>> AddToTeam(Guid teamId, Guid studentId)
     {
         var team = await _dbContext.Teams
             .Include(t => t.Students)
@@ -308,13 +319,13 @@ public class TeamService : ITeamService
 
         if (team is null)
         {
-            return default;
+            return Result<TeamResponse>.NotFound();
         }
 
         var student = await _dbContext.Users.FirstOrDefaultAsync(u => u.Id == studentId);
         if (student is null)
         {
-            return default;
+            return Result<TeamResponse>.NotFound();
         }
 
         if (team.Students.Any(s => s.Id == student.Id))
@@ -334,20 +345,20 @@ public class TeamService : ITeamService
         return team.MapToResponse();
     }
 
-    public async Task<Result<TeamResponse?, ValidationResponse>> RemoveFromTeam(Guid teamId, Guid studentId)
+    public async Task<Result<TeamResponse>> RemoveFromTeam(Guid teamId, Guid studentId)
     {
         var team = await _dbContext.Teams
             .Include(t => t.Students)
             .FirstOrDefaultAsync(t => t.Id == teamId);
         if (team is null)
         {
-            return default;
+            return Result<TeamResponse>.NotFound();
         }
 
         var student = await _dbContext.Users.FindAsync(studentId);
         if (student is null)
         {
-            return default;
+            return Result<TeamResponse>.NotFound();
         }
 
         var inTeam = team.Students.Any(s => s.Id == studentId);
@@ -362,11 +373,9 @@ public class TeamService : ITeamService
         return team.MapToResponse();
     }
 
-    public async Task<bool> DeleteById(Guid id)
+    public async Task<Result> DeleteById(Guid id)
     {
-        var result = await _dbContext.Teams
-            .Where(x => x.Id == id)
-            .ExecuteDeleteAsync();
-        return result > 0;
+        var deleted = await _dbContext.Teams.Where(x => x.Id == id).ExecuteDeleteAsync();
+        return deleted > 0 ? Result.Success() : Result.NotFound();
     }
 }

@@ -10,8 +10,8 @@ public static class FeedbackEndpoints
 
         group.MapGet("feedbacks", async (IFeedbackService feedbackService) =>
         {
-            var feedbacks = await feedbackService.GetAll();
-            return Results.Ok(feedbacks);
+            var result = await feedbackService.GetAll();
+            return result.MapToResponse(feedbacks => Results.Ok(feedbacks));
         })
         .Produces<IEnumerable<FeedbackResponse>>()
         .WithName("GetAllFeedbacks")
@@ -19,8 +19,8 @@ public static class FeedbackEndpoints
 
         group.MapGet("/feedbacks/{id:guid}", async (IFeedbackService feedbackService, Guid id) =>
         {
-            var feedback = await feedbackService.GetById(id);
-            return feedback is not null ? Results.Ok(feedback) : Results.NotFound();
+            var result = await feedbackService.GetById(id);
+            return result.MapToResponse(feedback => Results.Ok(feedback));
         })
         .Produces<FeedbackResponse>()
         .WithName("GetFeedback")
@@ -28,8 +28,8 @@ public static class FeedbackEndpoints
 
         group.MapGet("assignments/{assignmentId:guid}/feedbacks", async (IFeedbackService feedbackService, Guid assignmentId) =>
         {
-            var feedbacks = await feedbackService.GetByAssignment(assignmentId);
-            return feedbacks is not null ? Results.Ok(feedbacks) : Results.NotFound();
+            var result = await feedbackService.GetByAssignment(assignmentId);
+            return result.MapToResponse(feedbacks => Results.Ok(feedbacks));
         })
         .Produces<IEnumerable<FeedbackResponse>>()
         .WithName("GetAllFeedbacksByAssignment")
@@ -38,11 +38,7 @@ public static class FeedbackEndpoints
         group.MapGet("students/{studentId:guid}/assignments/{assignmentId:guid}/feedbacks", async (IFeedbackService feedbackService, Guid studentId, Guid assignmentId) =>
         {
             var result = await feedbackService.GetByStudentAssignment(studentId, assignmentId);
-            return result.Match
-            (
-                feedback => feedback is not null ? Results.Ok(feedback) : Results.NotFound(),
-                failure => Results.BadRequest(failure)
-            );
+            return result.MapToResponse(feedback => Results.Ok(feedback));
         })
         .Produces<FeedbackResponse>()
         .WithName("GetFeedbackByStudentAssignment")
@@ -51,11 +47,7 @@ public static class FeedbackEndpoints
         group.MapGet("teams/{teamId:guid}/assignments/{assignmentId:guid}/feedbacks", async (IFeedbackService feedbackService, Guid teamId, Guid assignmentId) =>
         {
             var result = await feedbackService.GetByTeamAssignment(teamId, assignmentId);
-            return result.Match
-            (
-                feedback => feedback is not null ? Results.Ok(feedback) : Results.NotFound(),
-                failure => Results.BadRequest(failure)
-            );
+            return result.MapToResponse(feedback => Results.Ok(feedback));
         })
         .Produces<FeedbackResponse>()
         .WithName("GetFeedbackByTeamAssignment")
@@ -64,17 +56,12 @@ public static class FeedbackEndpoints
         group.MapPost("feedbacks", async (IFeedbackService feedbackService, CreateFeedbackRequest request) =>
         {
             var result = await feedbackService.Create(request);
-
-            return result.Match
+            return result.MapToResponse(feedback => Results.CreatedAtRoute
             (
-                feedback => feedback is not null ? Results.CreatedAtRoute
-                (
-                    "GetFeedback",
-                    new { id = feedback.Id },
-                    feedback
-                ) : Results.NotFound(),
-                failure => Results.BadRequest(failure)
-            );
+                "GetFeedback",
+                new { id = feedback.Id },
+                feedback
+            ));
         })
         .Produces<FeedbackResponse>()
         .WithName("CreateFeedback")
@@ -83,12 +70,7 @@ public static class FeedbackEndpoints
         group.MapPut("feedbacks/{id:guid}", async (IFeedbackService feedbackService, Guid id, UpdateFeedbackRequest request) =>
         {
             var result = await feedbackService.Update(request, id);
-
-            return result.Match
-            (
-                feedback => feedback is not null ? Results.Ok(feedback) : Results.NotFound(),
-                failure => Results.BadRequest(failure)
-            );
+            return result.MapToResponse(feedback => Results.Ok(feedback));
         })
         .Produces<FeedbackResponse>()
         .WithName("UpdateFeedback")
@@ -96,8 +78,8 @@ public static class FeedbackEndpoints
 
         group.MapDelete("feedbacks/{id:guid}", async (IFeedbackService feedbackService, Guid id) =>
         {
-            var deleted = await feedbackService.DeleteById(id);
-            return deleted ? Results.Ok() : Results.NotFound();
+            var result = await feedbackService.DeleteById(id);
+            return result.MapToResponse(() => Results.Ok());
         })
         .WithName("DeleteFeedback")
         .WithSummary("Delete feedback by id");

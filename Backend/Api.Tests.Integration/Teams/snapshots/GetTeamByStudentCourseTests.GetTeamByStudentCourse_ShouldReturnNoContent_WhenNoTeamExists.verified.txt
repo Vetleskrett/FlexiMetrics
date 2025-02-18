@@ -1,5 +1,5 @@
 ﻿{
   Version: 1.1,
-  Status: 404 Not Found,
+  Status: 204 No Content,
   RequestMessage: http://localhost/students/Guid_1/courses/Guid_2/teams
 }

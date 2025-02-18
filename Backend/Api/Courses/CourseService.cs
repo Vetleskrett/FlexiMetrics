@@ -10,13 +10,13 @@ namespace Api.Courses;
 
 public interface ICourseService
 {
-    Task<IEnumerable<CourseResponse>> GetAll();
-    Task<IEnumerable<CourseResponse>?> GetAllByTeacher(Guid teacherId);
-    Task<IEnumerable<CourseResponse>?> GetAllByStudent(Guid studentId);
-    Task<CourseResponse?> GetById(Guid id);
-    Task<Result<CourseResponse?, ValidationResponse>> Create(CreateCourseRequest request);
-    Task<Result<CourseResponse?, ValidationResponse>> Update(UpdateCourseRequest request, Guid id);
-    Task<bool> DeleteById(Guid id);
+    Task<Result<IEnumerable<CourseResponse>>> GetAll();
+    Task<Result<IEnumerable<CourseResponse>>> GetAllByTeacher(Guid teacherId);
+    Task<Result<IEnumerable<CourseResponse>>> GetAllByStudent(Guid studentId);
+    Task<Result<CourseResponse>> GetById(Guid id);
+    Task<Result<CourseResponse>> Create(CreateCourseRequest request);
+    Task<Result<CourseResponse>> Update(UpdateCourseRequest request, Guid id);
+    Task<Result> DeleteById(Guid id);
 }
 
 public class CourseService : ICourseService
@@ -30,7 +30,7 @@ public class CourseService : ICourseService
         _validator = validator;
     }
 
-    public async Task<IEnumerable<CourseResponse>> GetAll()
+    public async Task<Result<IEnumerable<CourseResponse>>> GetAll()
     {
         var courses = await _dbContext.Courses
             .AsNoTracking()
@@ -41,12 +41,12 @@ public class CourseService : ICourseService
         return courses.MapToResponse();
     }
 
-    public async Task<IEnumerable<CourseResponse>?> GetAllByTeacher(Guid teacherId)
+    public async Task<Result<IEnumerable<CourseResponse>>> GetAllByTeacher(Guid teacherId)
     {
         var teacher = await _dbContext.Users.FindAsync(teacherId);
         if (teacher is null)
         {
-            return default;
+            return Result<IEnumerable<CourseResponse>>.NotFound();
         }
 
         var courses = await _dbContext.CourseTeachers
@@ -62,15 +62,16 @@ public class CourseService : ICourseService
         return courses!.MapToResponse();
     }
 
-    public async Task<IEnumerable<CourseResponse>?> GetAllByStudent(Guid studentId)
+    public async Task<Result<IEnumerable<CourseResponse>>> GetAllByStudent(Guid studentId)
     {
         var student = await _dbContext.Users.FindAsync(studentId);
         if (student is null)
         {
-            return default;
+            return Result<IEnumerable<CourseResponse>>.NotFound();
         }
 
         var courses = await _dbContext.CourseStudents
+            .AsNoTracking()
             .Include(x => x.Course)
             .Where(x => x.StudentId == studentId)
             .Select(x => x.Course!)
@@ -82,18 +83,22 @@ public class CourseService : ICourseService
         return courses.MapToResponse();
     }
 
-    public async Task<CourseResponse?> GetById(Guid id)
+    public async Task<Result<CourseResponse>> GetById(Guid id)
     {
         var course = await _dbContext.Courses.FindAsync(id);
-        return course?.MapToResponse();
+        if (course is null)
+        {
+            return Result<CourseResponse>.NotFound();
+        }
+        return course.MapToResponse();
     }
 
-    public async Task<Result<CourseResponse?, ValidationResponse>> Create(CreateCourseRequest request)
+    public async Task<Result<CourseResponse>> Create(CreateCourseRequest request)
     {
         var teacher = await _dbContext.Users.FindAsync(request.TeacherId);
         if (teacher is null)
         {
-            return default;
+            return Result<CourseResponse>.NotFound();
         }
 
         var course = request.MapToCourse();
@@ -114,14 +119,14 @@ public class CourseService : ICourseService
         return course.MapToResponse();
     }
 
-    public async Task<Result<CourseResponse?, ValidationResponse>> Update(UpdateCourseRequest request, Guid id)
+    public async Task<Result<CourseResponse>> Update(UpdateCourseRequest request, Guid id)
     {
         var course = await _dbContext.Courses
             .AsNoTracking()
             .FirstOrDefaultAsync(x => x.Id == id);
         if (course is null)
         {
-            return default;
+            return Result<CourseResponse>.NotFound();
         }
 
         course = request.MapToCourse(id);
@@ -133,14 +138,14 @@ public class CourseService : ICourseService
         }
 
         _dbContext.Courses.Update(course);
-        var numEntriesUpdated = await _dbContext.SaveChangesAsync();
+        await _dbContext.SaveChangesAsync();
 
-        return numEntriesUpdated > 0 ? course.MapToResponse() : default;
+        return course.MapToResponse();
     }
 
-    public async Task<bool> DeleteById(Guid id)
+    public async Task<Result> DeleteById(Guid id)
     {
-        var result = await _dbContext.Courses.Where(x => x.Id == id).ExecuteDeleteAsync();
-        return result > 0;
+        var deleted = await _dbContext.Courses.Where(x => x.Id == id).ExecuteDeleteAsync();
+        return deleted > 0 ? Result.Success() : Result.NotFound();
     }
 }

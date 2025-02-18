@@ -20,7 +20,7 @@ public class GetDeliveryByTeamAssignmentTests(ApiFactory factory) : BaseIntegrat
     }
 
     [Fact]
-    public async Task GetDeliveryByTeamAssignment_ShouldReturnNotFound_WhenNoDeliveryExists()
+    public async Task GetDeliveryByTeamAssignment_ShouldReturnNoContent_WhenNoDeliveryExists()
     {
         var course = ModelFactory.CreateCourse();
         var assignment = ModelFactory.CreateAssignment(course.Id, collaboration: CollaborationType.Teams);

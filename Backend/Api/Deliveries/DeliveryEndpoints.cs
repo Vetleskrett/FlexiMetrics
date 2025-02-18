@@ -10,19 +10,18 @@ public static class DeliveryEndpoints
 
         group.MapGet("deliveries", async (IDeliveryService deliveryService) =>
         {
-            var deliveries = await deliveryService.GetAll();
-            return Results.Ok(deliveries);
+            var result = await deliveryService.GetAll();
+            return result.MapToResponse(deliveries => Results.Ok(deliveries));
         })
         .Produces<IEnumerable<DeliveryResponse>>()
         .WithName("GetAllDeliveries")
         .WithSummary("Get all deliveries");
 
-        group.MapGet("deliveries/{id:guid}",
-            async (IDeliveryService deliveryService, Guid id) =>
-            {
-                var delivery = await deliveryService.GetById(id);
-                return delivery is not null ? Results.Ok(delivery) : Results.NotFound();
-            })
+        group.MapGet("deliveries/{id:guid}", async (IDeliveryService deliveryService, Guid id) =>
+        {
+            var result = await deliveryService.GetById(id);
+            return result.MapToResponse(delivery => Results.Ok(delivery));
+        })
         .Produces<DeliveryResponse>()
         .WithName("GetDelivery")
         .WithSummary("Get delivery by id");
@@ -31,11 +30,7 @@ public static class DeliveryEndpoints
             async (IDeliveryService deliveryService, Guid studentId, Guid assignmentId) =>
         {
             var result = await deliveryService.GetByStudentAssignment(studentId, assignmentId);
-            return result.Match
-            (
-                delivery => delivery is not null ? Results.Ok(delivery) : Results.NotFound(),
-                failure => Results.BadRequest(failure)
-            );
+            return result.MapToResponse(delivery => Results.Ok(delivery));
         })
         .Produces<DeliveryResponse>()
         .WithName("GetDeliveryByStudentAssignment")
@@ -45,11 +40,7 @@ public static class DeliveryEndpoints
             async (IDeliveryService deliveryService, Guid teamId, Guid assignmentId) =>
         {
             var result = await deliveryService.GetByTeamAssignment(teamId, assignmentId);
-            return result.Match
-            (
-                delivery => delivery is not null ? Results.Ok(delivery) : Results.NotFound(),
-                failure => Results.BadRequest(failure)
-            );
+            return result.MapToResponse(delivery => Results.Ok(delivery));
         })
         .Produces<DeliveryResponse>()
         .WithName("GetDeliveryByTeamAssignment")
@@ -57,8 +48,8 @@ public static class DeliveryEndpoints
 
         group.MapGet("assignments/{assignmentId:guid}/deliveries", async (IDeliveryService deliveryService, Guid assignmentId) =>
         {
-            var deliveries = await deliveryService.GetAllByAssignment(assignmentId);
-            return deliveries is not null ? Results.Ok(deliveries) : Results.NotFound();
+            var result = await deliveryService.GetAllByAssignment(assignmentId);
+            return result.MapToResponse(deliveries => Results.Ok(deliveries));
         })
         .Produces<IEnumerable<DeliveryResponse>>()
         .WithName("GetAllDeliveriesByAssignment")
@@ -67,17 +58,12 @@ public static class DeliveryEndpoints
         group.MapPost("deliveries", async (IDeliveryService deliveryService, CreateDeliveryRequest request) =>
         {
             var result = await deliveryService.Create(request);
-
-            return result.Match
+            return result.MapToResponse(delivery => Results.CreatedAtRoute
             (
-                delivery => delivery is not null ? Results.CreatedAtRoute
-                (
-                    "GetDelivery",
-                    new { id = delivery.Id },
-                    delivery
-                ) : Results.NotFound(),
-                failure => Results.BadRequest(failure)
-            );
+                "GetDelivery",
+                new { id = delivery.Id },
+                delivery
+            ));
         })
         .Produces<DeliveryResponse>()
         .WithName("CreateDelivery")
@@ -85,8 +71,8 @@ public static class DeliveryEndpoints
 
         group.MapDelete("deliveries/{id:guid}", async (IDeliveryService deliveryService, Guid id) =>
         {
-            var deleted = await deliveryService.DeleteById(id);
-            return deleted ? Results.Ok() : Results.NotFound();
+            var result = await deliveryService.DeleteById(id);
+            return result.MapToResponse(() => Results.Ok());
         })
         .WithName("DeleteDelivery")
         .WithSummary("Delete delivery by id");

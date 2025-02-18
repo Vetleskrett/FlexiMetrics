@@ -11,8 +11,8 @@ public static class AssignmentFieldEndpoints
 
         group.MapGet("assignment-fields", async (IAssignmentFieldService assignmentFieldService) =>
         {
-            var fields = await assignmentFieldService.GetAll();
-            return Results.Ok(fields);
+            var result = await assignmentFieldService.GetAll();
+            return result.MapToResponse(fields => Results.Ok(fields));
         })
         .Produces<IEnumerable<AssignmentFieldResponse>>()
         .WithName("GetAllAssignmentFields")
@@ -20,8 +20,8 @@ public static class AssignmentFieldEndpoints
 
         group.MapGet("/assignments/{assignmentId:guid}/fields", async (IAssignmentFieldService assignmentFieldService, Guid assignmentId) =>
         {
-            var fields = await assignmentFieldService.GetAllByAssignment(assignmentId);
-            return fields is not null ? Results.Ok(fields) : Results.NotFound();
+            var result = await assignmentFieldService.GetAllByAssignment(assignmentId);
+            return result.MapToResponse(fields => Results.Ok(fields));
         })
         .Produces<IEnumerable<AssignmentFieldResponse>>()
         .WithName("GetAllAssignmentFieldsByAssignment")
@@ -30,17 +30,12 @@ public static class AssignmentFieldEndpoints
         group.MapPost("assignment-fields", async (IAssignmentFieldService assignmentFieldService, CreateAssignmentFieldRequest request) =>
         {
             var result = await assignmentFieldService.Create(request);
-
-            return result.Match
+            return result.MapToResponse(field => Results.CreatedAtRoute
             (
-                field => field is not null ? Results.CreatedAtRoute
-                    (
-                        "GetAllAssignmentFieldsByAssignment",
-                        new { assignmentId = field.AssignmentId },
-                        field
-                    ) : Results.NotFound(),
-                failure => Results.BadRequest(failure)
-            );
+                "GetAllAssignmentFieldsByAssignment",
+                new { assignmentId = field.AssignmentId },
+                field
+            ));
         })
         .Produces<AssignmentFieldResponse>()
         .WithName("CreateAssignmentField")
@@ -49,12 +44,7 @@ public static class AssignmentFieldEndpoints
         group.MapPost("assignment-fields/bulk-add", async (IAssignmentFieldService assignmentFieldService, CreateAssignmentFieldsRequest request) =>
         {
             var result = await assignmentFieldService.Create(request);
-
-            return result.Match
-            (
-                fields => fields is not null ? Results.Ok(fields) : Results.NotFound(),
-                failure => Results.BadRequest(failure)
-            );
+            return result.MapToResponse(fields => Results.Ok(fields));
         })
         .Produces<IEnumerable<AssignmentFieldResponse>>()
         .WithName("CreateAssignmentFields")
@@ -63,12 +53,7 @@ public static class AssignmentFieldEndpoints
         group.MapPut("assignment-fields/{id:guid}", async (IAssignmentFieldService assignmentFieldService, Guid id, UpdateAssignmentFieldRequest request) =>
         {
             var result = await assignmentFieldService.Update(request, id);
-
-            return result.Match
-            (
-                field => field is not null ? Results.Ok(field) : Results.NotFound(),
-                failure => Results.BadRequest(failure)
-            );
+            return result.MapToResponse(field => Results.Ok(field));
         })
         .Produces<AssignmentResponse>()
         .WithName("UpdateAssignmentField")
@@ -76,8 +61,8 @@ public static class AssignmentFieldEndpoints
 
         group.MapDelete("assignment-fields/{id:guid}", async (IAssignmentFieldService assignmentFieldService, Guid id) =>
         {
-            var deleted = await assignmentFieldService.DeleteById(id);
-            return deleted ? Results.Ok() : Results.NotFound();
+            var result = await assignmentFieldService.DeleteById(id);
+            return result.MapToResponse(() => Results.Ok());
         })
         .WithName("DeleteAssignmentField")
         .WithSummary("Delete assignment field by id");

@@ -1,14 +1,15 @@
 ﻿{
-  Version: 1.1,
   Status: 200 OK,
-  RequestMessage: {
-    Method: POST,
-    Uri: http://localhost/courses/Guid_1/teachers,
-    Content: {
-      Headers: {
-        Content-Type: application/json; charset=utf-8
-      },
-      Value: 
-    }
+  Content: {
+    Headers: {
+      Content-Type: application/json; charset=utf-8
+    },
+    Value: [
+      {
+        id: Guid_1,
+        email: teacher@ntnu.no,
+        name: Teacher Teachersen
+      }
+    ]
   }
 }

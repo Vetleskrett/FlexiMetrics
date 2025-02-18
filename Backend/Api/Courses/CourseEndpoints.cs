@@ -10,8 +10,8 @@ public static class CourseEndpoints
 
         group.MapGet("courses", async (ICourseService courseService) =>
         {
-            var courses = await courseService.GetAll();
-            return Results.Ok(courses);
+            var result = await courseService.GetAll();
+            return result.MapToResponse(courses =>Results.Ok(courses));
         })
         .Produces<IEnumerable<CourseResponse>>()
         .WithName("GetAllCourses")
@@ -19,8 +19,8 @@ public static class CourseEndpoints
 
         group.MapGet("teachers/{teacherId:guid}/courses", async (ICourseService courseService, Guid teacherId) =>
         {
-            var courses = await courseService.GetAllByTeacher(teacherId);
-            return courses is not null ? Results.Ok(courses) : Results.NotFound();
+            var result = await courseService.GetAllByTeacher(teacherId);
+            return result.MapToResponse(courses => Results.Ok(courses));
         })
         .Produces<IEnumerable<CourseResponse>>()
         .WithName("GetAllCoursesByTeacher")
@@ -28,8 +28,8 @@ public static class CourseEndpoints
 
         group.MapGet("students/{studentId:guid}/courses", async (ICourseService courseService, Guid studentId) =>
         {
-            var courses = await courseService.GetAllByStudent(studentId);
-            return courses is not null ? Results.Ok(courses) : Results.NotFound();
+            var result = await courseService.GetAllByStudent(studentId);
+            return result.MapToResponse(courses => Results.Ok(courses));
         })
         .Produces<IEnumerable<CourseResponse>>()
         .WithName("GetAllCoursesByStudent")
@@ -37,8 +37,8 @@ public static class CourseEndpoints
 
         group.MapGet("/courses/{id:guid}", async (ICourseService courseService, Guid id) =>
         {
-            var course = await courseService.GetById(id);
-            return course is not null ? Results.Ok(course) : Results.NotFound();
+            var result = await courseService.GetById(id);
+            return result.MapToResponse(course => Results.Ok(course));
         })
         .Produces<CourseResponse>()
         .WithName("GetCourse")
@@ -47,17 +47,12 @@ public static class CourseEndpoints
         group.MapPost("courses", async (ICourseService courseService, CreateCourseRequest request) =>
         {
             var result = await courseService.Create(request);
-
-            return result.Match
+            return result.MapToResponse(course => Results.CreatedAtRoute
             (
-                course => course is not null ? Results.CreatedAtRoute
-                (
-                    "GetCourse",
-                    new { id = course.Id },
-                    course
-                ) : Results.NotFound(),
-                failure => Results.BadRequest(failure)
-            );
+                "GetCourse",
+                new { id = course.Id },
+                course
+            ));
         })
         .Produces<CourseResponse>()
         .WithName("CreateCourse")
@@ -66,12 +61,7 @@ public static class CourseEndpoints
         group.MapPut("courses/{id:guid}", async (ICourseService courseService, Guid id, UpdateCourseRequest request) =>
         {
             var result = await courseService.Update(request, id);
-
-            return result.Match
-            (
-                course => course is not null ? Results.Ok(course) : Results.NotFound(),
-                failure => Results.BadRequest(failure)
-            );
+            return result.MapToResponse(course => Results.Ok(course));
         })
         .Produces<CourseResponse>()
         .WithName("UpdateCourse")
@@ -79,8 +69,8 @@ public static class CourseEndpoints
 
         group.MapDelete("courses/{id:guid}", async (ICourseService courseService, Guid id) =>
         {
-            var deleted = await courseService.DeleteById(id);
-            return deleted ? Results.Ok() : Results.NotFound();
+            var result = await courseService.DeleteById(id);
+            return result.MapToResponse(() => Results.Ok());
         })
         .WithName("DeleteCourse")
         .WithSummary("Delete course by id");
