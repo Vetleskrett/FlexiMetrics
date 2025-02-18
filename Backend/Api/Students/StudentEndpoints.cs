@@ -10,8 +10,8 @@ public static class StudentEndpoints
 
         group.MapGet("students/{studentId:guid}", async (IStudentService studentService, Guid studentId) =>
         {
-            var student = await studentService.GetById(studentId);
-            return student is not null ? Results.Ok(student) : Results.NotFound();
+            var result = await studentService.GetById(studentId);
+            return result.MapToResponse(student => Results.Ok(student));
         })
         .Produces<StudentResponse>()
         .WithName("GetStudent")
@@ -19,8 +19,8 @@ public static class StudentEndpoints
 
         group.MapGet("courses/{courseId:guid}/students", async (IStudentService studentService, Guid courseId) =>
         {
-            var students = await studentService.GetAllByCourse(courseId);
-            return students is not null ? Results.Ok(students) : Results.NotFound();
+            var result = await studentService.GetAllByCourse(courseId);
+            return result.MapToResponse(students => Results.Ok(students));
         })
         .Produces<IEnumerable<StudentResponse>>()
         .WithName("GetAllStudentsByCourse")
@@ -28,8 +28,8 @@ public static class StudentEndpoints
 
         group.MapPost("courses/{courseId:guid}/students", async (IStudentService studentService, Guid courseId, AddStudentsToCourseRequest request) =>
         {
-            var students = await studentService.AddToCourse(courseId, request);
-            return students is not null ? Results.Ok(students) : Results.NotFound();
+            var result = await studentService.AddToCourse(courseId, request);
+            return result.MapToResponse(students => Results.Ok(students));
         })
         .Produces<IEnumerable<StudentResponse>>()
         .WithName("AddStudentsToCourse")
@@ -38,11 +38,7 @@ public static class StudentEndpoints
         group.MapDelete("courses/{courseId:guid}/students/{studentId:guid}", async (IStudentService studentService, Guid courseId, Guid studentId) =>
         {
             var result = await studentService.RemoveFromCourse(courseId, studentId);
-            return result.Match
-            (
-                deleted => deleted ? Results.Ok() : Results.NotFound(),
-                failure => Results.BadRequest(failure)
-            );
+            return result.MapToResponse(() => Results.Ok());
         })
         .WithName("RemoveStudentFromCourse")
         .WithSummary("Remove student from course");

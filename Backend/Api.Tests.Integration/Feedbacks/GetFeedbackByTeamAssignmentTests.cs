@@ -31,7 +31,7 @@ public class GetFeedbackByTeamAssignmentTests(ApiFactory factory) : BaseIntegrat
     }
 
     [Fact]
-    public async Task GetFeedbackByTeamAssignment_ShouldReturnNotFound_WhenNoFeedbackExists()
+    public async Task GetFeedbackByTeamAssignment_ShouldReturnNoContent_WhenNoFeedbackExists()
     {
         var course = ModelFactory.CreateCourse();
         var team = ModelFactory.CreateTeam(course.Id);

@@ -8,10 +8,10 @@ namespace Api.Students;
 
 public interface IStudentService
 {
-    Task<StudentResponse?> GetById(Guid studentId);
-    Task<IEnumerable<StudentResponse>?> GetAllByCourse(Guid courseId);
-    Task<IEnumerable<StudentResponse>?> AddToCourse(Guid courseId, AddStudentsToCourseRequest request);
-    Task<Result<bool, ValidationResponse>> RemoveFromCourse(Guid courseId, Guid studentId);
+    Task<Result<StudentResponse>> GetById(Guid studentId);
+    Task<Result<IEnumerable<StudentResponse>>> GetAllByCourse(Guid courseId);
+    Task<Result<IEnumerable<StudentResponse>>> AddToCourse(Guid courseId, AddStudentsToCourseRequest request);
+    Task<Result> RemoveFromCourse(Guid courseId, Guid studentId);
 }
 
 public class StudentService : IStudentService
@@ -23,13 +23,19 @@ public class StudentService : IStudentService
         _dbContext = dbContext;
     }
 
-    public async Task<StudentResponse?> GetById(Guid studentId)
+    public async Task<Result<StudentResponse>> GetById(Guid studentId)
     {
         var student = await _dbContext.Users.FindAsync(studentId);
-        return student?.MapToStudentResponse();
+
+        if (student is null)
+        {
+            return Result<StudentResponse>.NotFound();
+        }
+
+        return student.MapToStudentResponse();
     }
 
-    public async Task<IEnumerable<StudentResponse>?> GetAllByCourse(Guid courseId)
+    public async Task<Result<IEnumerable<StudentResponse>>> GetAllByCourse(Guid courseId)
     {
         var course = await _dbContext.Courses
             .Include(c => c.CourseStudents!)
@@ -38,7 +44,7 @@ public class StudentService : IStudentService
 
         if (course is null)
         {
-            return default;
+            return Result<IEnumerable<StudentResponse>>.NotFound();
         }
 
         var students = course.CourseStudents!
@@ -48,7 +54,7 @@ public class StudentService : IStudentService
         return students.MapToStudentResponse();
     }
 
-    public async Task<IEnumerable<StudentResponse>?> AddToCourse(Guid courseId, AddStudentsToCourseRequest request)
+    public async Task<Result<IEnumerable<StudentResponse>>> AddToCourse(Guid courseId, AddStudentsToCourseRequest request)
     {
         var course = await _dbContext.Courses
             .Include(c => c.CourseStudents!)
@@ -57,7 +63,7 @@ public class StudentService : IStudentService
 
         if (course is null)
         {
-            return default;
+            return Result<IEnumerable<StudentResponse>>.NotFound();
         }
 
         var existingUsers = await _dbContext.Users
@@ -96,23 +102,28 @@ public class StudentService : IStudentService
         await _dbContext.SaveChangesAsync();
 
         var students = course.CourseStudents!
-            .Select(ct => ct.Student!)
+            .Select(cs => cs.Student!)
             .OrderBy(t => t.Email);
 
         return students.MapToStudentResponse();
     }
 
-    public async Task<Result<bool, ValidationResponse>> RemoveFromCourse(Guid courseId, Guid studentId)
+    public async Task<Result> RemoveFromCourse(Guid courseId, Guid studentId)
     {
         var course = await _dbContext.Courses
             .Include(c => c.CourseStudents)
             .FirstOrDefaultAsync(c => c.Id == courseId);
 
+        if (course is null)
+        {
+            return Result.NotFound();
+        }
+
         var student = await _dbContext.Users.FindAsync(studentId);
 
-        if (course is null || student is null)
+        if (student is null)
         {
-            return false;
+            return Result.NotFound();
         }
 
         if (!course.CourseStudents!.Any(ct => ct.StudentId == studentId))
@@ -123,6 +134,6 @@ public class StudentService : IStudentService
         course.CourseStudents!.RemoveAll(ct => ct.StudentId == studentId);
         await _dbContext.SaveChangesAsync();
 
-        return true;
+        return Result.Success();
     }
 }

@@ -10,8 +10,8 @@ public static class AssignmentEndpoints
 
         group.MapGet("assignments", async (IAssignmentService assignmentService) =>
         {
-            var assignments = await assignmentService.GetAll();
-            return Results.Ok(assignments);
+            var result = await assignmentService.GetAll();
+            return result.MapToResponse(assignments => Results.Ok(assignments));
         })
         .Produces<IEnumerable<AssignmentResponse>>()
         .WithName("GetAllAssignments")
@@ -19,8 +19,8 @@ public static class AssignmentEndpoints
 
         group.MapGet("course/{courseId:guid}/assignments", async (IAssignmentService assignmentService, Guid courseId) =>
         {
-            var assignments = await assignmentService.GetAllByCourse(courseId);
-            return assignments is not null ? Results.Ok(assignments) : Results.NotFound();
+            var result = await assignmentService.GetAllByCourse(courseId);
+            return result.MapToResponse(assignments => Results.Ok(assignments));
         })
         .Produces<IEnumerable<AssignmentResponse>>()
         .WithName("GetAllAssignmentsByCourse")
@@ -29,11 +29,7 @@ public static class AssignmentEndpoints
         group.MapGet("students/{studentId:guid}/course/{courseId:guid}/assignments", async (IAssignmentService assignmentService, Guid studentId, Guid courseId) =>
         {
             var result = await assignmentService.GetAllByStudentCourse(studentId, courseId);
-            return result.Match
-            (
-                assignment => assignment is not null ? Results.Ok(assignment) : Results.NotFound(),
-                failure => Results.BadRequest(failure)
-            );
+            return result.MapToResponse(assignments => Results.Ok(assignments));
         })
         .Produces<IEnumerable<StudentAssignmentResponse>>()
         .WithName("GetAllAssignmentsByStudentCourse")
@@ -42,11 +38,7 @@ public static class AssignmentEndpoints
         group.MapGet("courses/{courseId:guid}/teams/{teamId:guid}/assignments", async (IAssignmentService assignmentService, Guid courseId, Guid teamId) =>
         {
             var result = await assignmentService.GetAllByTeamCourse(courseId, teamId);
-            return result.Match
-            (
-                assignment => assignment is not null ? Results.Ok(assignment) : Results.NotFound(),
-                failure => Results.BadRequest(failure)
-            );
+            return result.MapToResponse(assignments => Results.Ok(assignments));
         })
         .Produces<IEnumerable<StudentAssignmentResponse>>()
         .WithName("GetAllAssignmentsByTeamCourse")
@@ -54,8 +46,8 @@ public static class AssignmentEndpoints
 
         group.MapGet("assignments/{id:guid}", async (IAssignmentService assignmentService, Guid id) =>
         {
-            var assignment = await assignmentService.GetById(id);
-            return assignment is not null ? Results.Ok(assignment) : Results.NotFound();
+            var result = await assignmentService.GetById(id);
+            return result.MapToResponse(assignment => Results.Ok(assignment));
         })
         .Produces<AssignmentResponse>()
         .WithName("GetAssignment")
@@ -64,17 +56,12 @@ public static class AssignmentEndpoints
         group.MapPost("assignments", async (IAssignmentService assignmentService, CreateAssignmentRequest request) =>
         {
             var result = await assignmentService.Create(request);
-
-            return result.Match
+            return result.MapToResponse(assignment => Results.CreatedAtRoute
             (
-                assignment => assignment is not null ? Results.CreatedAtRoute
-                    (
-                        "GetAssignment",
-                        new { id = assignment.Id },
-                        assignment
-                    ) : Results.NotFound(),
-                failure => Results.BadRequest(failure)
-            );
+                "GetAssignment",
+                new { id = assignment.Id },
+                assignment
+            ));
         })
         .Produces<AssignmentResponse>()
         .WithName("CreateAssignment")
@@ -83,12 +70,7 @@ public static class AssignmentEndpoints
         group.MapPut("assignments/{id:guid}", async (IAssignmentService assignmentService, Guid id, UpdateAssignmentRequest request) =>
         {
             var result = await assignmentService.Update(request, id);
-
-            return result.Match
-            (
-                assignment => assignment is not null ? Results.Ok(assignment) : Results.NotFound(),
-                failure => Results.BadRequest(failure)
-            );
+            return result.MapToResponse(assignment => Results.Ok(assignment));
         })
         .Produces<AssignmentResponse>()
         .WithName("UpdateAssignment")
@@ -97,12 +79,7 @@ public static class AssignmentEndpoints
         group.MapPut("assignments/{id:guid}/publish", async (IAssignmentService assignmentService, Guid id) =>
         {
             var result = await assignmentService.Publish(id);
-
-            return result.Match
-            (
-                assignment => assignment is not null ? Results.Ok(assignment) : Results.NotFound(),
-                failure => Results.BadRequest(failure)
-            );
+            return result.MapToResponse(assignment => Results.Ok(assignment));
         })
       .Produces<AssignmentResponse>()
       .WithName("PublishAssignment")
@@ -110,8 +87,8 @@ public static class AssignmentEndpoints
 
         group.MapDelete("assignments/{id:guid}", async (IAssignmentService assignmentService, Guid id) =>
         {
-            var deleted = await assignmentService.DeleteById(id);
-            return deleted ? Results.Ok() : Results.NotFound();
+            var result = await assignmentService.DeleteById(id);
+            return result.MapToResponse(() => Results.Ok());
         })
         .WithName("DeleteAssignment")
         .WithSummary("Delete assignment by id");

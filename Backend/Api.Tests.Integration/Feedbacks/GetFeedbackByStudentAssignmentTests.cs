@@ -46,7 +46,7 @@ public class GetFeedbackByStudentAssignmentTests(ApiFactory factory) : BaseInteg
 	}
 
 	[Fact]
-	public async Task GetFeedbackByStudentAssignment_ShouldReturnNotFound_WhenNoFeedbackExists()
+	public async Task GetFeedbackByStudentAssignment_ShouldReturnNoContent_WhenNoFeedbackExists()
 	{
 		var course = ModelFactory.CreateCourse();
 		var student = ModelFactory.CreateStudent();

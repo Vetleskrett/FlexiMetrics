@@ -37,7 +37,7 @@ public class GetDeliveryByStudentAssignmentTests(ApiFactory factory) : BaseInteg
     }
 
     [Fact]
-    public async Task GetDeliveryByStudentAssignment_ShouldReturnNotFound_WhenNoDeliveryExists()
+    public async Task GetDeliveryByStudentAssignment_ShouldReturnNoContent_WhenNoDeliveryExists()
     {
         var course = ModelFactory.CreateCourse();
         var assignment = ModelFactory.CreateAssignment(course.Id);

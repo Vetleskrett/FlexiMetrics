@@ -1,31 +1,89 @@
 ﻿namespace Api.Validation;
 
-public readonly struct Result<TValue, TError>
+public enum ResultState
 {
-    public bool IsError { get; }
-    public bool IsSuccess => !IsError;
+    Success,
+    NoContent,
+    NotFound,
+    ValidationError,
+    PermissionDenied
+}
 
+public sealed class Result
+{
+    private readonly ValidationResponse? _errors;
+    private readonly ResultState _state;
+
+    public Result(ValidationResponse errors)
+    {
+        _errors = errors;
+        _state = ResultState.ValidationError;
+    }
+
+    private Result(ResultState state)
+    {
+        _state = state;
+    }
+
+    public static Result Success() => new(ResultState.Success);
+    public static implicit operator Result(ValidationResponse errors) => new(errors);
+    public static Result NoContent() => new(ResultState.NoContent);
+    public static Result NotFound() => new(ResultState.NotFound);
+    public static Result PermissionDenied() => new(ResultState.PermissionDenied);
+
+    public IResult MapToResponse(Func<IResult> func)
+    {
+        return _state switch
+        {
+            ResultState.Success => func(),
+            ResultState.NoContent => Results.NoContent(),
+            ResultState.NotFound => Results.NotFound(),
+            ResultState.ValidationError => Results.BadRequest(_errors!),
+            ResultState.PermissionDenied => Results.Forbid(),
+            _ => Results.InternalServerError("Unexpected ResultState"),
+        };
+    }
+}
+
+public sealed class Result<TValue> where TValue : notnull
+{
     private readonly TValue? _value;
-    private readonly TError? _error;
+    private readonly ValidationResponse? _errors;
+    private readonly ResultState _state;
 
     public Result(TValue value)
     {
-        IsError = false;
         _value = value;
-        _error = default;
+        _state = ResultState.Success;
     }
 
-    public Result(TError error)
+    public Result(ValidationResponse errors)
     {
-        IsError = true;
-        _error = error;
-        _value = default;
+        _errors = errors;
+        _state = ResultState.ValidationError;
     }
 
-    public static implicit operator Result<TValue, TError>(TValue value) => new(value);
+    private Result(ResultState state)
+    {
+        _state = state;
+    }
 
-    public static implicit operator Result<TValue, TError>(TError error) => new(error);
+    public static implicit operator Result<TValue>(TValue value) => new(value);
+    public static implicit operator Result<TValue>(ValidationResponse errors) => new(errors);
+    public static Result<TValue> NoContent() => new(ResultState.NoContent);
+    public static Result<TValue> NotFound() => new(ResultState.NotFound);
+    public static Result<TValue> PermissionDenied() => new(ResultState.PermissionDenied);
 
-    public TResult Match<TResult>(Func<TValue, TResult> success, Func<TError, TResult> failure) =>
-        !IsError ? success(_value!) : failure(_error!);
+    public IResult MapToResponse(Func<TValue, IResult> func)
+    {
+        return _state switch
+        {
+            ResultState.Success => func(_value!),
+            ResultState.NoContent => Results.NoContent(),
+            ResultState.NotFound => Results.NotFound(),
+            ResultState.ValidationError => Results.BadRequest(_errors!),
+            ResultState.PermissionDenied => Results.Forbid(),
+            _ => Results.InternalServerError("Unexpected ResultState"),
+        };
+    }
 }

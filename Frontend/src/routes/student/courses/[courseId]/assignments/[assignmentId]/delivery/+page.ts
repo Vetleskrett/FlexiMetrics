@@ -11,13 +11,13 @@ export const load = async ({ params }: {params: { courseId: string; assignmentId
         getCourse(params.courseId),
         getAssignment(params.assignmentId),
         getAssignmentFields(params.assignmentId),
-        getStudentDelivery(studentId, params.assignmentId).catch(e => null),
+        getStudentDelivery(studentId, params.assignmentId),
     ])
 
     return { 
         course: courseResponse.data,
         assignment: assignmentResponse.data,
         assignmentFields: assignmentFieldsResponse.data,
-        delivery: deliveryResponse?.data,
+        delivery: deliveryResponse.status == 204 ? null : deliveryResponse?.data,
     }
 };

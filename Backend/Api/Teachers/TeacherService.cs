@@ -8,9 +8,9 @@ namespace Api.Teachers;
 
 public interface ITeacherService
 {
-    Task<IEnumerable<TeacherResponse>?> GetAllByCourse(Guid courseId);
-    Task<Result<bool, ValidationResponse>> AddToCourse(Guid courseId, AddTeacherRequest request);
-    Task<Result<bool, ValidationResponse>> RemoveFromCourse(Guid courseId, Guid teacherId);
+    Task<Result<IEnumerable<TeacherResponse>>> GetAllByCourse(Guid courseId);
+    Task<Result<IEnumerable<TeacherResponse>>> AddToCourse(Guid courseId, AddTeacherRequest request);
+    Task<Result> RemoveFromCourse(Guid courseId, Guid teacherId);
 }
 
 public class TeacherService : ITeacherService
@@ -22,7 +22,7 @@ public class TeacherService : ITeacherService
         _dbContext = dbContext;
     }
 
-    public async Task<IEnumerable<TeacherResponse>?> GetAllByCourse(Guid courseId)
+    public async Task<Result<IEnumerable<TeacherResponse>>> GetAllByCourse(Guid courseId)
     {
         var course = await _dbContext.Courses
             .Include(c => c.CourseTeachers!)
@@ -31,7 +31,7 @@ public class TeacherService : ITeacherService
 
         if (course is null)
         {
-            return default;
+            return Result<IEnumerable<TeacherResponse>>.NotFound();
         }
 
         var teachers = course.CourseTeachers!
@@ -41,47 +41,66 @@ public class TeacherService : ITeacherService
         return teachers.MapToTeacherResponse();
     }
 
-    public async Task<Result<bool, ValidationResponse>> AddToCourse(Guid courseId, AddTeacherRequest request)
+    public async Task<Result<IEnumerable<TeacherResponse>>> AddToCourse(Guid courseId, AddTeacherRequest request)
     {
+        var course = await _dbContext.Courses
+            .Include (c => c.CourseTeachers!)
+            .ThenInclude (ct => ct.Teacher)
+            .FirstOrDefaultAsync(c => c.Id == courseId);
+
+        if (course is null)
+        {
+            return Result<IEnumerable<TeacherResponse>>.NotFound();
+        }
+
         var teacher = await _dbContext.Users
             .FirstOrDefaultAsync(u => u.Email == request.Email);
 
-        var course = await _dbContext.Courses.FindAsync(courseId);
-
-        if (teacher is null || course is null)
+        if (teacher is null)
         {
-            return false;
+            return Result<IEnumerable<TeacherResponse>>.NotFound();
         }
 
-        var alreadyInCourse = await _dbContext.CourseTeachers
-            .AnyAsync(ct => ct.CourseId == courseId && ct.TeacherId == teacher.Id);
+        var alreadyInCourse = course.CourseTeachers!.Any(ct =>
+            ct.CourseId == courseId &&
+            ct.TeacherId == teacher.Id
+        );
 
         if (alreadyInCourse)
         {
             return new ValidationError("Teacher already in course").MapToResponse();
         }
 
-        _dbContext.CourseTeachers.Add(new CourseTeacher
+        course.CourseTeachers!.Add(new CourseTeacher
         {
             CourseId = courseId,
             TeacherId = teacher.Id
         });
         await _dbContext.SaveChangesAsync();
 
-        return true;
+        var teachers = course.CourseTeachers!
+            .Select(ct => ct.Teacher!)
+            .OrderBy(t => t.Email);
+
+        return teachers.MapToTeacherResponse();
     }
 
-    public async Task<Result<bool, ValidationResponse>> RemoveFromCourse(Guid courseId, Guid teacherId)
+    public async Task<Result> RemoveFromCourse(Guid courseId, Guid teacherId)
     {
         var course = await _dbContext.Courses
             .Include(c => c.CourseTeachers)
             .FirstOrDefaultAsync(c => c.Id == courseId);
 
+        if (course is null)
+        {
+            return Result.NotFound();
+        }
+
         var teacher = await _dbContext.Users.FindAsync(teacherId);
 
-        if (course is null || teacher is null)
+        if (teacher is null)
         {
-            return false;
+            return Result.NotFound();
         }
 
         if (!course.CourseTeachers!.Any(ct => ct.TeacherId == teacherId))
@@ -97,6 +116,6 @@ public class TeacherService : ITeacherService
         course.CourseTeachers.RemoveAll(ct => ct.TeacherId == teacherId);
         await _dbContext.SaveChangesAsync();
 
-        return true;
+        return Result.Success();
     }
 }

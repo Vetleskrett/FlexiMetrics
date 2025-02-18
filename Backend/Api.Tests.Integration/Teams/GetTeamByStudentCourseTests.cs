@@ -16,7 +16,7 @@ public class GetTeamByStudentCourseTests(ApiFactory factory) : BaseIntegrationTe
     }
 
     [Fact]
-    public async Task GetTeamByStudentCourse_ShouldReturnNotFound_WhenNoTeamExists()
+    public async Task GetTeamByStudentCourse_ShouldReturnNoContent_WhenNoTeamExists()
     {
         var course = ModelFactory.CreateCourse();
         var student = ModelFactory.CreateStudent();
