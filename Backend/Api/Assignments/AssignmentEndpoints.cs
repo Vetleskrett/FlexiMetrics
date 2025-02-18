@@ -29,11 +29,20 @@ public static class AssignmentEndpoints
         group.MapGet("students/{studentId:guid}/course/{courseId:guid}/assignments", async (IAssignmentService assignmentService, Guid studentId, Guid courseId) =>
         {
             var result = await assignmentService.GetAllByStudentCourse(studentId, courseId);
-            return result.MapToResponse(assignment => Results.Ok(assignment));
+            return result.MapToResponse(assignments => Results.Ok(assignments));
         })
         .Produces<IEnumerable<StudentAssignmentResponse>>()
         .WithName("GetAllAssignmentsByStudentCourse")
         .WithSummary("Get all assignments by student id and course id");
+
+        group.MapGet("courses/{courseId:guid}/teams/{teamId:guid}/assignments", async (IAssignmentService assignmentService, Guid courseId, Guid teamId) =>
+        {
+            var result = await assignmentService.GetAllByTeamCourse(courseId, teamId);
+            return result.MapToResponse(assignments => Results.Ok(assignments));
+        })
+        .Produces<IEnumerable<StudentAssignmentResponse>>()
+        .WithName("GetAllAssignmentsByTeamCourse")
+        .WithSummary("Get all assignments by team id and course id");
 
         group.MapGet("assignments/{id:guid}", async (IAssignmentService assignmentService, Guid id) =>
         {

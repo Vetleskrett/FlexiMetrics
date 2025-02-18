@@ -188,6 +188,7 @@ export type StudentToTeam = {
     teamNr: number,
     emails: string[],
 }
+
 export type CreateCourse = {
     code: string,
     name: string,
@@ -203,7 +204,7 @@ export type EditCourse = {
     semester: string,
 }
 
-export type AddTeacherToCourse = {
+export type EmailAdd = {
     email: string,
 }
 

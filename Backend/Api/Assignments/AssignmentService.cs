@@ -13,6 +13,7 @@ public interface IAssignmentService
     Task<Result<IEnumerable<AssignmentResponse>>> GetAll();
     Task<Result<IEnumerable<AssignmentResponse>>> GetAllByCourse(Guid courseId);
     Task<Result<IEnumerable<StudentAssignmentResponse>>> GetAllByStudentCourse(Guid studentId, Guid courseId);
+    Task<Result<IEnumerable<StudentAssignmentResponse>>> GetAllByTeamCourse(Guid courseId, Guid teamId);
     Task<Result<AssignmentResponse>> GetById(Guid id);
     Task<Result<AssignmentResponse>> Create(CreateAssignmentRequest request);
     Task<Result<AssignmentResponse>> Update(UpdateAssignmentRequest request, Guid id);
@@ -93,6 +94,49 @@ public class AssignmentService : IAssignmentService
                         .Any(d =>
                             (d.StudentId == studentId) ||
                             (d.Team != null && d.Team.Students.Any(s => s.Id == studentId))
+                        ),
+            })
+            .ToListAsync();
+
+        return assignments;
+    }
+
+    public async Task<Result<IEnumerable<StudentAssignmentResponse>>> GetAllByTeamCourse(Guid courseId, Guid teamId)
+    {
+        var course = await _dbContext.Courses.FindAsync(courseId);
+        if (course is null)
+        {
+            return Result<IEnumerable<StudentAssignmentResponse>>.NotFound();
+        }
+
+        var team = await _dbContext.Teams.FindAsync(teamId);
+        if (team is null)
+        {
+            return Result<IEnumerable<StudentAssignmentResponse>>.NotFound();
+        }
+
+        var teamCourse = await _dbContext.Teams
+            .FirstOrDefaultAsync(tc => tc.Id == teamId && tc.CourseId == courseId);
+
+        if (teamCourse is null)
+        {
+            return new ValidationError("This team is not in the course").MapToResponse();
+        }
+
+        var assignments = await _dbContext.Assignments
+            .Where(x => x.CourseId == courseId && x.Published == true && x.CollaborationType == CollaborationType.Teams)
+            .OrderBy(x => x.DueDate)
+            .Select(a => new StudentAssignmentResponse
+            {
+                Id = a.Id,
+                Name = a.Name,
+                DueDate = a.DueDate,
+                CollaborationType = a.CollaborationType,
+                CourseId = a.CourseId,
+                IsDelivered = _dbContext.Deliveries
+                        .Where(d => d.AssignmentId == a.Id)
+                        .Any(d =>
+                            (d.Team != null && d.Team.Id == teamId)
                         ),
             })
             .ToListAsync();
