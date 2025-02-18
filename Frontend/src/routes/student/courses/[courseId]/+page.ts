@@ -11,11 +11,11 @@ export const load = async ({ params }: {params: {courseId: string}}) => {
         getCourse(params.courseId),
         getStudentAssignments(studentId, params.courseId),
         getTeachers(params.courseId),
-        getStudentTeam(params.courseId, studentId).catch(e => null)
+        getStudentTeam(params.courseId, studentId)
     ])
 
     let teamsResponse = null;
-    if (teamResponse == null) {
+    if (teamResponse.status == 204) {
         teamsResponse = await getTeams(params.courseId)
     }
 

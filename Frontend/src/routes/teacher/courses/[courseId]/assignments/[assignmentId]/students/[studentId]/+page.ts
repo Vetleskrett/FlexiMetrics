@@ -12,8 +12,8 @@ export const load = async ({ params }: { params: { courseId: string; assignmentI
         getCourse(params.courseId),
         getAssignment(params.assignmentId),
         getAssignmentFields(params.assignmentId),
-        getStudentDelivery(params.studentId, params.assignmentId).catch(e => null),
-        getStudentFeedback(params.studentId, params.assignmentId).catch(e => null),
+        getStudentDelivery(params.studentId, params.assignmentId),
+        getStudentFeedback(params.studentId, params.assignmentId),
         getStudent(params.studentId),
     ])
 
@@ -21,8 +21,8 @@ export const load = async ({ params }: { params: { courseId: string; assignmentI
         course: courseResponse.data,
         assignment: assignmentResponse.data,
         assignmentFields: assignmentFieldsResponse.data,
-        delivery: deliveryResponse?.data,
-        feedback: feedbackResponse?.data,
+        delivery: deliveryResponse.status == 204 ? null : deliveryResponse?.data,
+        feedback: feedbackResponse.status == 204 ? null : feedbackResponse?.data,
         student: studentResponse.data,
     }
 };

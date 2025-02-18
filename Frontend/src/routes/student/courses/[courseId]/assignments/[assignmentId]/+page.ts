@@ -12,15 +12,15 @@ export const load = async ({ params }: {params: { courseId: string; assignmentId
         getCourse(params.courseId),
         getAssignment(params.assignmentId),
         getAssignmentFields(params.assignmentId),
-        getStudentDelivery(studentId, params.assignmentId).catch(e => null),
-        getStudentFeedback(studentId, params.assignmentId).catch(e => null)
+        getStudentDelivery(studentId, params.assignmentId),
+        getStudentFeedback(studentId, params.assignmentId)
     ])
 
     return { 
         course: courseResponse.data,
         assignment: assignmentResponse.data,
         assignmentFields: assignmentFieldsResponse.data,
-        delivery: deliveryResponse?.data,
-        feedback: feedbackResponse?.data,
+        delivery: deliveryResponse.status == 204 ? null : deliveryResponse?.data,
+        feedback: feedbackResponse.status == 204 ? null : feedbackResponse?.data,
     }
 };
