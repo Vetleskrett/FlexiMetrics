@@ -6,7 +6,7 @@
 		Course,
 		GradingType,
 		AssignmentField,
-		AssignmentFieldType
+		AssignmentFieldFormData
 	} from 'src/types';
 	import CustomButton from './CustomButton.svelte';
 	import Save from 'lucide-svelte/icons/save';
@@ -15,30 +15,20 @@
 	import { Input } from '$lib/components/ui/input';
 	import { Textarea } from '$lib/components/ui/textarea';
 	import * as RadioGroup from '$lib/components/ui/radio-group';
-	import Trash_2 from 'lucide-svelte/icons/trash-2';
-	import Plus from 'lucide-svelte/icons/plus';
 	import { editAssignment, postAssignment } from 'src/api';
 	import { goto } from '$app/navigation';
 	import * as Form from 'src/lib/components/ui/form';
 	import { superForm } from 'sveltekit-superforms';
 	import { CalendarDate } from '@internationalized/date';
 	import DatePicker from './DatePicker.svelte';
-	import * as Select from '$lib/components/ui/select/index';
+	import AssignmentFieldsForm from './AssignmentFieldsForm.svelte';
+	import { transformErrors } from 'src/utils';
 
 	const today = new Date();
 
 	export let edit: boolean;
 	export let course: Course;
 	export let assignment: Assignment | undefined = undefined;
-	export let fields: AssignmentField[] | undefined = undefined;
-
-	type AssignmentFieldFormData = {
-		name: string;
-		type: {
-			label: AssignmentFieldType;
-			value: AssignmentFieldType;
-		};
-	};
 
 	type AssignmentFormData = {
 		name: string;
@@ -80,37 +70,10 @@
 			gradingType: assignment!.gradingType,
 			maxPoints: assignment!.maxPoints,
 			description: assignment!.description,
-			fields: fields!.map((field) => {
-				return {
-					name: field.name,
-					type: {
-						label: field.type,
-						value: field.type
-					}
-				};
-			})
+			fields: []
 		};
 	}
-
-	function addField() {
-		assignmentFormData.fields.push({
-			name: '',
-			type: {
-				label: 'String',
-				value: 'String'
-			}
-		});
-		assignmentFormData.fields = assignmentFormData.fields;
-	}
-
-	function removeField(field: AssignmentFieldFormData) {
-		const index = assignmentFormData.fields.indexOf(field, 0);
-		if (index > -1) {
-			assignmentFormData.fields.splice(index, 1);
-			assignmentFormData.fields = assignmentFormData.fields;
-		}
-	}
-
+	
 	const onSubmitEdit = async () => {
 		return editAssignment(assignment!.id, {
 			name: assignmentFormData.name,
@@ -137,38 +100,12 @@
 			collaborationType: assignmentFormData.collaborationType,
 			fields: assignmentFormData.fields.map((fieldFormData) => {
 				return {
-					name: fieldFormData.name,
+					...fieldFormData,
 					type: fieldFormData.type.value
 				};
 			})
 		});
 	};
-
-	function transformErrors(errors: { propertyName: string; message: string }[]) {
-		const result: Record<string, any> = {};
-
-		for (const error of errors) {
-			const path = error.propertyName
-				.toLowerCase()
-				.replace(/\[(\d+)\]/g, '.$1') // Convert array-like paths
-				.split('.');
-
-			let current = result;
-			while (path.length > 1) {
-				const key = path.shift()!;
-				current[key] = current[key] || (isNaN(Number(path[0])) ? {} : []);
-				current = current[key];
-			}
-
-			const finalKey = path.shift()!;
-			if (!current[finalKey]) {
-				current[finalKey] = [];
-			}
-			current[finalKey].push(error.message);
-		}
-
-		return result;
-	}
 
 	const onSubmit = async (formEvent: any) => {
 		formEvent.cancel();
@@ -180,9 +117,13 @@
 				goto(`/teacher/courses/${course.id}/assignments/${assignment.id}`);
 			})
 			.catch((exception) => {
-				const validationErrors = transformErrors(exception.response.data.errors);
-				console.log(validationErrors);
-				errors.set(validationErrors);
+				if (exception?.response?.data?.errors) {
+					const validationErrors = transformErrors(exception.response.data.errors);
+					console.error(validationErrors);
+					errors.set(validationErrors);
+				} else {
+					console.error(exception);
+				}
 			});
 	};
 
@@ -301,53 +242,9 @@
 			{/if}
 
 			{#if !edit}
-				<div class="mt-4 flex flex-col gap-2">
-					<h1 class="text-lg font-medium">Fields</h1>
-					{#each assignmentFormData.fields as field, i}
-						<div class="flex w-full gap-2">
-							<Form.Field {form} name="fields[{i}].name" class="w-full">
-								<Form.Control let:attrs>
-									<Form.Label for="fields[{i}].name">Name</Form.Label>
-									<Input
-										{...attrs}
-										id="fields[{i}].name"
-										bind:value={assignmentFormData.fields[i].name}
-									/>
-								</Form.Control>
-								<Form.FieldErrors />
-							</Form.Field>
-
-							<Form.Field {form} name="fields[{i}].type" class="w-full">
-								<Form.Control let:attrs>
-									<Form.Label for="fields[{i}].type">Type</Form.Label>
-									<Select.Root {...attrs} bind:selected={assignmentFormData.fields[i].type}>
-										<Select.Trigger>
-											<Select.Value />
-										</Select.Trigger>
-										<Select.Content>
-											<Select.Item value="String" label="String">String</Select.Item>
-											<Select.Item value="Integer" label="Integer">Integer</Select.Item>
-											<Select.Item value="Double" label="Double">Double</Select.Item>
-											<Select.Item value="Boolean" label="Boolean">Boolean</Select.Item>
-											<Select.Item value="File" label="File">File</Select.Item>
-										</Select.Content>
-									</Select.Root>
-								</Form.Control>
-								<Form.FieldErrors />
-							</Form.Field>
-
-							<div class="mt-8">
-								<CustomButton color="red" outline={true} on:click={() => removeField(field)}>
-									<Trash_2 size="16" on:click={() => removeField(field)} />
-								</CustomButton>
-							</div>
-						</div>
-					{/each}
-					<div class="flex items-center justify-center">
-						<CustomButton color={'green'} outline={true} on:click={addField}>
-							<Plus size="16" />
-						</CustomButton>
-					</div>
+				<div class="mt-4 flex flex-col">
+					<h1 class="text-lg font-medium">Format</h1>
+					<AssignmentFieldsForm {form} bind:fields={assignmentFormData.fields} />
 				</div>
 			{/if}
 		</Card.Content>

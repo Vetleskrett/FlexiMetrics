@@ -12,18 +12,16 @@ public interface IAssignmentFieldService
 {
     Task<Result<IEnumerable<AssignmentFieldResponse>>> GetAll();
     Task<Result<IEnumerable<AssignmentFieldResponse>>> GetAllByAssignment(Guid assignmentId);
-    Task<Result<AssignmentFieldResponse>> Create(CreateAssignmentFieldRequest request);
-    Task<Result<IEnumerable<AssignmentFieldResponse>>> Create(CreateAssignmentFieldsRequest requests);
-    Task<Result<AssignmentFieldResponse>> Update(UpdateAssignmentFieldRequest request, Guid id);
+    Task<Result<IEnumerable<AssignmentFieldResponse>>> Update(UpdateAssignmentFieldsRequest request, Guid assignmentId);
     Task<Result> DeleteById(Guid id);
 }
 
 public class AssignmentFieldService : IAssignmentFieldService
 {
     private readonly AppDbContext _dbContext;
-    private readonly IValidator<AssignmentField> _validator;
+    private readonly IValidator<Assignment> _validator;
 
-    public AssignmentFieldService(AppDbContext dbContext, IValidator<AssignmentField> validator)
+    public AssignmentFieldService(AppDbContext dbContext, IValidator<Assignment> validator)
     {
         _dbContext = dbContext;
         _validator = validator;
@@ -52,75 +50,51 @@ public class AssignmentFieldService : IAssignmentFieldService
         return assignment.Fields!.MapToResponse();
     }
 
-    public async Task<Result<AssignmentFieldResponse>> Create(CreateAssignmentFieldRequest request)
+    public async Task<Result<IEnumerable<AssignmentFieldResponse>>> Update(UpdateAssignmentFieldsRequest request, Guid assignmentId)
     {
-        var field = request.MapToAssignmentField();
-        var assignment = await _dbContext.Assignments.FindAsync(field.AssignmentId);
-
+        var assignment = await _dbContext.Assignments
+            .Include(a => a.Fields)
+            .FirstOrDefaultAsync(a => a.Id == assignmentId);
         if (assignment is null)
         {
-            return Result<AssignmentFieldResponse>.NotFound();
+            return Result<IEnumerable<AssignmentFieldResponse>>.NotFound();
         }
 
-        var validationResult = await _validator.ValidateAsync(field);
-        if (!validationResult.IsValid)
+        var fieldsToBeUpdated = request.Fields
+            .Where(f => f.Id.HasValue)
+            .MapToAssignmentField(assignmentId);
+
+        var fieldsToBeDeleted = assignment.Fields!.Where(field => !fieldsToBeUpdated.Any(f => f.Id == field.Id));
+        _dbContext.AssignmentFields.RemoveRange(fieldsToBeDeleted);
+
+        foreach (var field in fieldsToBeUpdated)
         {
-            return validationResult.Errors.MapToResponse();
-        }
-
-        _dbContext.AssignmentFields.Add(field);
-        await _dbContext.SaveChangesAsync();
-
-        return field.MapToResponse();
-    }
-
-    public async Task<Result<IEnumerable<AssignmentFieldResponse>>> Create(CreateAssignmentFieldsRequest requests)
-    {
-        var fields = requests.Fields.MapToAssignmentField();
-        foreach (var field in fields)
-        {
-            var assignment = await _dbContext.Assignments.FindAsync(field.AssignmentId);
-
-            if (assignment is null)
+            var exisingField = assignment.Fields!.FirstOrDefault(f => f.Id == field.Id);
+            if (exisingField is null)
             {
                 return Result<IEnumerable<AssignmentFieldResponse>>.NotFound();
             }
 
-            var validationResult = await _validator.ValidateAsync(field);
-            if (!validationResult.IsValid)
-            {
-                return validationResult.Errors.MapToResponse();
-            }
+            exisingField.Name = field.Name;
+            exisingField.Type = field.Type;
+            exisingField.RangeMin = field.RangeMin;
+            exisingField.RangeMax = field.RangeMax;
         }
 
-        _dbContext.AssignmentFields.AddRange(fields);
-        await _dbContext.SaveChangesAsync();
+        var fieldsToBeCreated = request.Fields
+            .Where(f => !f.Id.HasValue)
+            .MapToAssignmentField(assignmentId);
+        _dbContext.AssignmentFields.AddRange(fieldsToBeCreated);
 
-        return fields.MapToResponse();
-    }
-
-    public async Task<Result<AssignmentFieldResponse>> Update(UpdateAssignmentFieldRequest request, Guid id)
-    {
-        var field = await _dbContext.AssignmentFields
-            .AsNoTracking()
-            .FirstOrDefaultAsync(x => x.Id == id);
-        if (field is null)
-        {
-            return Result<AssignmentFieldResponse>.NotFound();
-        }
-
-        field = request.MapToAssignmentField(id, field.AssignmentId);
-
-        var validationResult = await _validator.ValidateAsync(field);
+        var validationResult = await _validator.ValidateAsync(assignment);
         if (!validationResult.IsValid)
         {
             return validationResult.Errors.MapToResponse();
         }
 
-        _dbContext.AssignmentFields.Update(field);
         await _dbContext.SaveChangesAsync();
 
-        return field.MapToResponse();
+        return assignment.Fields!.MapToResponse();
     }
 
     public async Task<Result> DeleteById(Guid id)

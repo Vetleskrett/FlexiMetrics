@@ -10,4 +10,7 @@ public class AssignmentField
     public Assignment? Assignment { get; set; }
     public required AssignmentDataType Type { get; set; }
     public required string Name { get; set; }
+
+    public required int? RangeMin { get; set; }
+    public required int? RangeMax { get; set; }
 }

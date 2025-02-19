@@ -72,6 +72,7 @@ public class DeliveryValidator : AbstractValidator<Delivery>
                         AssignmentDataType.Integer => field.JsonValue?.Deserialize<int>(),
                         AssignmentDataType.Double => field.JsonValue?.Deserialize<double>(),
                         AssignmentDataType.Boolean => field.JsonValue?.Deserialize<bool>(),
+                        AssignmentDataType.Range => field.JsonValue?.Deserialize<int>(),
                         _ => null,
                     };
                     return value is not null;
@@ -82,5 +83,18 @@ public class DeliveryValidator : AbstractValidator<Delivery>
                 }
             })
             .WithMessage("Delivery field data type must match assignment field data type");
+
+        RuleForEach(x => x.Fields)
+            .Must((delivery, field) =>
+            {
+                var assignmentField = delivery.Assignment!.Fields!.First(f => f.Id == field.AssignmentFieldId);
+                if (assignmentField.Type == AssignmentDataType.Range)
+                {
+                    var value = field.JsonValue?.Deserialize<int>();
+                    return value is not null && value.Value >= assignmentField.RangeMin && value.Value <= assignmentField.RangeMax;
+                }
+                return true;
+            })
+            .WithMessage("Delivery field value must be between min and max for Range");
     }
 }

@@ -18,10 +18,11 @@ import type {
   Teacher,
   CreateAssignment,
   EditAssignment,
-  RegisterAssignmentFields,
+  UpdateAssignmentFields,
   CreateFeedback,
   EditFeedback,
   EmailAdd,
+  UpdateAssignmentField,
 } from "./types";
 
 const instance = axios.create({
@@ -184,8 +185,8 @@ export async function deleteAssigment(assignmentId: string) : Promise<AxiosRespo
   return instance.delete(`/assignments/${assignmentId}`)
 }
 
-export async function addAssignmentFields(fields: RegisterAssignmentFields):Promise<AxiosResponse<AssignmentField[]>> {
-  return instance.post(`/assignment-fields/bulk-add`, fields)
+export async function editAssignmentFields(assignmentId: string, request: UpdateAssignmentFields):Promise<AxiosResponse<AssignmentField[]>> {
+  return instance.put(`/assignments/${assignmentId}/fields`, request)
 }
 
 export async function deleteAssigmentField(assignmentFieldId: string) : Promise<AxiosResponse>{

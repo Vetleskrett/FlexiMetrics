@@ -2,8 +2,8 @@
   Version: 1.1,
   Status: 404 Not Found,
   RequestMessage: {
-    Method: POST,
-    Uri: http://localhost/assignment-fields,
+    Method: PUT,
+    Uri: http://localhost/assignments/Guid_1/fields,
     Content: {
       Headers: {
         Content-Type: application/json; charset=utf-8

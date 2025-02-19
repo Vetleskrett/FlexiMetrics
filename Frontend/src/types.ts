@@ -83,27 +83,39 @@ export type Team = {
     complete: number | null | undefined;
 }
 
-export type AssignmentFieldType = 'String' | 'Integer' | 'Double' | 'Boolean' | 'File';
+export type AssignmentFieldType = 'String' | 'Integer' | 'Double' | 'Boolean' | 'Range' | 'File';
 
 export type AssignmentField = {
     id: string;
     name: string;
     type: AssignmentFieldType;
+
+    rangeMin?: number;
+    rangeMax?: number;
 }
 
-export type NewAssignmentField = {
+export type AssignmentFieldFormData = {
+    id?: string;
+    name: string;
+    type: {
+        label: AssignmentFieldType;
+        value: AssignmentFieldType;
+    };
+
+    rangeMin?: number;
+    rangeMax?: number;
+};
+
+export type UpdateAssignmentField = {
+    id?: string;
     name: string;
     type: AssignmentFieldType;
+    rangeMin?: number;
+    rangeMax?: number;
 }
 
-export type RegisterAssignmentField =  {
-    name: string;
-    type: string;
-    assignmentId: string;
-}
-
-export type RegisterAssignmentFields = {
-    fields: RegisterAssignmentField[]
+export type UpdateAssignmentFields = {
+    fields: UpdateAssignmentField[]
 }
 
 export type DeliveryField = {
@@ -228,7 +240,7 @@ export type CreateAssignment = {
     mandatory: boolean,
     published: boolean,
     collaborationType: CollaborationType,
-    fields: NewAssignmentField[]
+    fields: UpdateAssignmentField[]
 }
 
 export type EditAssignment = {

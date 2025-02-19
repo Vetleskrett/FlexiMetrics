@@ -192,7 +192,9 @@ public class ModelFactory
             Id = Guid.NewGuid(),
             AssignmentId = assignmentId,
             Type = dataType,
-            Name = "Project title"
+            Name = "Project title",
+            RangeMin = dataType != AssignmentDataType.Range ? null : 0,
+            RangeMax = dataType != AssignmentDataType.Range ? null : 100,
         };
         _dbContext.AssignmentFields.Add(assignmentField);
         return assignmentField;

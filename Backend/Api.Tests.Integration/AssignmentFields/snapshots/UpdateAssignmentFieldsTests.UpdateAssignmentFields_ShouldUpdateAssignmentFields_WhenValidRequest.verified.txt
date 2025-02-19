@@ -7,24 +7,16 @@
     Value: [
       {
         id: Guid_1,
-        type: String,
-        name: Project title,
+        type: Integer,
+        name: Updated field,
         assignmentId: Guid_2,
         rangeMin: null,
         rangeMax: null
       },
       {
         id: Guid_3,
-        type: String,
-        name: Project title,
-        assignmentId: Guid_2,
-        rangeMin: null,
-        rangeMax: null
-      },
-      {
-        id: Guid_4,
-        type: String,
-        name: Project title,
+        type: Boolean,
+        name: New field,
         assignmentId: Guid_2,
         rangeMin: null,
         rangeMax: null
