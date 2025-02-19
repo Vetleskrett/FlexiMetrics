@@ -50,8 +50,8 @@
 							<p>{field.name}</p>
 						</Table.Cell>
 						<Table.Cell class="px-6">
-							{#if field.type == 'Range'}
-								<p>Range ({field.rangeMin}-{field.rangeMax})</p>
+							{#if field.min != undefined && field.max != undefined}
+								<p>{field.type} ({field.min}-{field.max})</p>
 							{:else}
 								<p>{field.type}</p>
 							{/if}

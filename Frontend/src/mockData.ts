@@ -95,7 +95,7 @@ export const assignmentFields: AssignmentField[] = [
     {
         id: '1',
         name: 'Project Title',
-        type: 'String'
+        type: 'ShortText'
     },
     {
         id: '2',
@@ -105,7 +105,7 @@ export const assignmentFields: AssignmentField[] = [
     {
         id: '3',
         name: 'Url',
-        type: 'String'
+        type: 'ShortText'
     },
     {
         id: '4',

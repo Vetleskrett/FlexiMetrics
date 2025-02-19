@@ -13,8 +13,9 @@ public static class AssignmentFieldMapping
             AssignmentId = assignmentId,
             Type = request.Type,
             Name = request.Name,
-            RangeMin = request.RangeMin,
-            RangeMax = request.RangeMax
+            Min = request.Min,
+            Max = request.Max,
+            Regex = request.Regex
         };
     }
 
@@ -31,8 +32,9 @@ public static class AssignmentFieldMapping
             AssignmentId = assignmentId,
             Type = request.Type,
             Name = request.Name,
-            RangeMin = request.RangeMin,
-            RangeMax = request.RangeMax
+            Min = request.Min,
+            Max = request.Max,
+            Regex = request.Regex
         };
     }
 
@@ -44,8 +46,9 @@ public static class AssignmentFieldMapping
             Name = field.Name,
             Type = field.Type,
             AssignmentId = field.AssignmentId,
-            RangeMin = field.RangeMin,
-            RangeMax = field.RangeMax
+            Min = field.Min,
+            Max = field.Max,
+            Regex = field.Regex
         };
     }
 

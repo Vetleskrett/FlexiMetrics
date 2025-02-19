@@ -64,7 +64,7 @@ public class UpdateAssignmentFieldsTests(ApiFactory factory) : BaseIntegrationTe
                 new AssignmentFieldRequest
                 {
                     Name = "Project title",
-                    Type = AssignmentDataType.String,
+                    Type = AssignmentDataType.ShortText,
                 }
             ]
 
@@ -93,7 +93,7 @@ public class UpdateAssignmentFieldsTests(ApiFactory factory) : BaseIntegrationTe
                 {
                     Id = otherField.Id,
                     Name = "Project title",
-                    Type = AssignmentDataType.String,
+                    Type = AssignmentDataType.ShortText,
                 }
             ]
 
@@ -119,13 +119,6 @@ public class UpdateAssignmentFieldsTests(ApiFactory factory) : BaseIntegrationTe
                 {
                     Name = "",
                     Type = (AssignmentDataType)100,
-                },
-                new AssignmentFieldRequest
-                {
-                    Name = "",
-                    Type = AssignmentDataType.Range,
-                    RangeMin = null,
-                    RangeMax = null,
                 }
             ]
 

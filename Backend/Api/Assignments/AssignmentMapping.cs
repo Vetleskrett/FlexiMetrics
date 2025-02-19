@@ -37,8 +37,9 @@ public static class AssignmentMapping
             AssignmentId = assignmentId,
             Type = request.Type,
             Name = request.Name,
-            RangeMin = request.RangeMin,
-            RangeMax = request.RangeMax
+            Min = request.Min,
+            Max = request.Max,
+            Regex = request.Regex,
         };
     }
 

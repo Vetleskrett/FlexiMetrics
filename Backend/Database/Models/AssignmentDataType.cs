@@ -2,10 +2,11 @@
 
 public enum AssignmentDataType
 {
-    String,
+    ShortText,
+    LongText,
     Integer,
-    Double,
+    Float,
     Boolean,
-    Range,
+    URL,
     File,
 }

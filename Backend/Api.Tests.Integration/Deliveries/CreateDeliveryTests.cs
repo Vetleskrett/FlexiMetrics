@@ -17,9 +17,9 @@ public class CreateDeliveryTests(ApiFactory factory) : BaseIntegrationTest(facto
         ModelFactory.CreateCourseStudent(course.Id, student.Id);
         var assignment = ModelFactory.CreateAssignment(course.Id, collaboration: CollaborationType.Individual);
 
-        var stringField = ModelFactory.CreateAssignmentField(assignment.Id, AssignmentDataType.String);
+        var stringField = ModelFactory.CreateAssignmentField(assignment.Id, AssignmentDataType.ShortText);
         var intField = ModelFactory.CreateAssignmentField(assignment.Id, AssignmentDataType.Integer);
-        var doubleField = ModelFactory.CreateAssignmentField(assignment.Id, AssignmentDataType.Double);
+        var doubleField = ModelFactory.CreateAssignmentField(assignment.Id, AssignmentDataType.Float);
         var boolField = ModelFactory.CreateAssignmentField(assignment.Id, AssignmentDataType.Boolean);
 
         await DbContext.SaveChangesAsync();
@@ -77,9 +77,9 @@ public class CreateDeliveryTests(ApiFactory factory) : BaseIntegrationTest(facto
         ModelFactory.CreateTeam(course.Id, students: students);
         var assignment = ModelFactory.CreateAssignment(course.Id, collaboration: CollaborationType.Teams);
 
-        var stringField = ModelFactory.CreateAssignmentField(assignment.Id, AssignmentDataType.String);
+        var stringField = ModelFactory.CreateAssignmentField(assignment.Id, AssignmentDataType.ShortText);
         var intField = ModelFactory.CreateAssignmentField(assignment.Id, AssignmentDataType.Integer);
-        var doubleField = ModelFactory.CreateAssignmentField(assignment.Id, AssignmentDataType.Double);
+        var doubleField = ModelFactory.CreateAssignmentField(assignment.Id, AssignmentDataType.Float);
         var boolField = ModelFactory.CreateAssignmentField(assignment.Id, AssignmentDataType.Boolean);
 
         await DbContext.SaveChangesAsync();
@@ -188,9 +188,9 @@ public class CreateDeliveryTests(ApiFactory factory) : BaseIntegrationTest(facto
         ModelFactory.CreateAssignmentField(assignment.Id); // Missing field
         var repeatField = ModelFactory.CreateAssignmentField(assignment.Id);
 
-        var stringField = ModelFactory.CreateAssignmentField(assignment.Id, AssignmentDataType.String);
+        var stringField = ModelFactory.CreateAssignmentField(assignment.Id, AssignmentDataType.ShortText);
         var intField = ModelFactory.CreateAssignmentField(assignment.Id, AssignmentDataType.Integer);
-        var doubleField = ModelFactory.CreateAssignmentField(assignment.Id, AssignmentDataType.Double);
+        var doubleField = ModelFactory.CreateAssignmentField(assignment.Id, AssignmentDataType.Float);
         var boolField = ModelFactory.CreateAssignmentField(assignment.Id, AssignmentDataType.Boolean);
 
         await DbContext.SaveChangesAsync();

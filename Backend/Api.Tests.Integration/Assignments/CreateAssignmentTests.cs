@@ -27,7 +27,7 @@ public class CreateAssignmentTests(ApiFactory factory) : BaseIntegrationTest(fac
                 new CreateAssignmentFieldRequest
                 {
                     Name = "Project title",
-                    Type = AssignmentDataType.String
+                    Type = AssignmentDataType.ShortText
                 }
             ],
         };
@@ -68,7 +68,7 @@ public class CreateAssignmentTests(ApiFactory factory) : BaseIntegrationTest(fac
                 new CreateAssignmentFieldRequest
                 {
                     Name = "Project title",
-                    Type = AssignmentDataType.String
+                    Type = AssignmentDataType.ShortText
                 }
             ],
         };

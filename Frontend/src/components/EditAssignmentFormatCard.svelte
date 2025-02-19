@@ -10,7 +10,7 @@
 	import { superForm } from 'sveltekit-superforms';
 	import AssignmentFieldsForm from './AssignmentFieldsForm.svelte';
 	import { editAssignmentFields } from 'src/api';
-	import { transformErrors } from 'src/utils';
+	import { cleanOptional, transformErrors } from 'src/utils';
 	import { goto } from '$app/navigation';
 
 	export let courseId: string;
@@ -38,7 +38,10 @@
 			fields: formData.fields.map((fieldFormData) => {
 				return {
 					...fieldFormData,
-					type: fieldFormData.type.value
+					type: fieldFormData.type.value,
+					min: cleanOptional(fieldFormData.min),
+					max: cleanOptional(fieldFormData.max),
+					regex: cleanOptional(fieldFormData.regex)
 				};
 			})
 		})
@@ -66,7 +69,7 @@
 
 <form method="post" use:enhance>
 	<Card.Root class="m-auto w-[700px] overflow-hidden p-0">
-		<Card.Header class="mb-6 flex flex-row items-center justify-between">
+		<Card.Header class="flex flex-row items-center justify-between">
 			<div class="flex items-center">
 				<img
 					width="48"
@@ -77,7 +80,7 @@
 				<Card.Title class="ml-4 text-3xl">Edit Format</Card.Title>
 			</div>
 		</Card.Header>
-		<Card.Content class="flex flex-col gap-4 px-6 py-0">
+		<Card.Content class="flex flex-col gap-4 p-0">
 			<AssignmentFieldsForm {form} bind:fields={formData.fields} />
 		</Card.Content>
 		<Card.Footer class="items-middle mt-8 flex flex-col p-0">

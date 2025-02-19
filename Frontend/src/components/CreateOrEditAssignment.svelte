@@ -5,7 +5,6 @@
 		CollaborationType,
 		Course,
 		GradingType,
-		AssignmentField,
 		AssignmentFieldFormData
 	} from 'src/types';
 	import CustomButton from './CustomButton.svelte';
@@ -22,7 +21,7 @@
 	import { CalendarDate } from '@internationalized/date';
 	import DatePicker from './DatePicker.svelte';
 	import AssignmentFieldsForm from './AssignmentFieldsForm.svelte';
-	import { transformErrors } from 'src/utils';
+	import { cleanOptional, transformErrors } from 'src/utils';
 
 	const today = new Date();
 
@@ -53,8 +52,8 @@
 			{
 				name: '',
 				type: {
-					label: 'String',
-					value: 'String'
+					label: 'Short Text',
+					value: 'ShortText'
 				}
 			}
 		]
@@ -101,7 +100,10 @@
 			fields: assignmentFormData.fields.map((fieldFormData) => {
 				return {
 					...fieldFormData,
-					type: fieldFormData.type.value
+					type: fieldFormData.type.value,
+					min: cleanOptional(fieldFormData.min),
+					max: cleanOptional(fieldFormData.max),
+					regex: cleanOptional(fieldFormData.regex)
 				};
 			})
 		});
@@ -147,103 +149,105 @@
 				<Card.Title class="ml-4 text-3xl">{edit ? 'Edit Assignment' : 'New Assignment'}</Card.Title>
 			</div>
 		</Card.Header>
-		<Card.Content class="flex flex-col gap-4 px-6 py-0">
-			<Form.Field {form} name="name">
-				<Form.Control let:attrs>
-					<Form.Label for="name">Name</Form.Label>
-					<Input {...attrs} id="name" bind:value={assignmentFormData.name} />
-				</Form.Control>
-				<Form.FieldErrors />
-			</Form.Field>
-
-			<Form.Field {form} name="description">
-				<Form.Control let:attrs>
-					<Form.Label for="description">Description</Form.Label>
-					<Textarea {...attrs} id="description" bind:value={assignmentFormData.description} />
-				</Form.Control>
-				<Form.FieldErrors />
-			</Form.Field>
-
-			<Form.Field {form} name="dueDate" class="flex flex-col">
-				<Form.Control let:attrs>
-					<Form.Label for="dueDate">Due Date</Form.Label>
-					<DatePicker {...attrs} id="dueDate" bind:value={assignmentFormData.dueDate} />
-				</Form.Control>
-				<Form.FieldErrors />
-			</Form.Field>
-
-			<Form.Field {form} name="mandatory" class="flex flex-col">
-				<Form.Control let:attrs>
-					<Form.Label for="mandatory">Mandatory</Form.Label>
-					<Checkbox {...attrs} id="mandatory" bind:checked={assignmentFormData.mandatory} />
-				</Form.Control>
-				<Form.FieldErrors />
-			</Form.Field>
-
-			<Form.Field {form} name="collaborationType" class="flex flex-col">
-				<Form.Control let:attrs>
-					<Form.Label for="collaborationType">Collaboration</Form.Label>
-					<RadioGroup.Root
-						{...attrs}
-						id="collaborationType"
-						bind:value={assignmentFormData.collaborationType}
-					>
-						<div class="flex items-center gap-1">
-							<RadioGroup.Item {...attrs} id="individual" value="Individual" />
-							<label for="spring">Individual</label>
-						</div>
-						<div class="flex items-center gap-1">
-							<RadioGroup.Item {...attrs} id="teams" value="Teams" />
-							<label for="autumn">Teams</label>
-						</div>
-					</RadioGroup.Root>
-				</Form.Control>
-				<Form.FieldErrors />
-			</Form.Field>
-
-			<Form.Field {form} name="gradingType" class="flex flex-col">
-				<Form.Control let:attrs>
-					<Form.Label for="gradingType">Grading</Form.Label>
-					<RadioGroup.Root {...attrs} id="gradingType" bind:value={assignmentFormData.gradingType}>
-						<div class="flex items-center gap-1">
-							<RadioGroup.Item {...attrs} id="noGrading" value="NoGrading" />
-							<label for="spring">None</label>
-						</div>
-						<div class="flex items-center gap-1">
-							<RadioGroup.Item {...attrs} id="approvalGrading" value="ApprovalGrading" />
-							<label for="autumn">Approval</label>
-						</div>
-						<div class="flex items-center gap-1">
-							<RadioGroup.Item {...attrs} id="letterGrading" value="LetterGrading" />
-							<label for="spring">Letter</label>
-						</div>
-						<div class="flex items-center gap-1">
-							<RadioGroup.Item {...attrs} id="pointsGrading" value="PointsGrading" />
-							<label for="spring">Points</label>
-						</div>
-					</RadioGroup.Root>
-				</Form.Control>
-				<Form.FieldErrors />
-			</Form.Field>
-
-			{#if assignmentFormData.gradingType == 'PointsGrading'}
-				<Form.Field {form} name="maxPoints">
+		<Card.Content class="p-0">
+			<div class="flex flex-col gap-4 px-6 py-0">
+				<Form.Field {form} name="name">
 					<Form.Control let:attrs>
-						<Form.Label for="maxPoints">Max Points</Form.Label>
-						<Input
-							{...attrs}
-							type="number"
-							id="maxPoints"
-							bind:value={assignmentFormData.maxPoints}
-						/>
+						<Form.Label for="name">Name</Form.Label>
+						<Input {...attrs} id="name" bind:value={assignmentFormData.name} />
 					</Form.Control>
 					<Form.FieldErrors />
 				</Form.Field>
-			{/if}
+
+				<Form.Field {form} name="description">
+					<Form.Control let:attrs>
+						<Form.Label for="description">Description</Form.Label>
+						<Textarea {...attrs} id="description" bind:value={assignmentFormData.description} />
+					</Form.Control>
+					<Form.FieldErrors />
+				</Form.Field>
+
+				<Form.Field {form} name="dueDate" class="flex flex-col">
+					<Form.Control let:attrs>
+						<Form.Label for="dueDate">Due Date</Form.Label>
+						<DatePicker {...attrs} id="dueDate" bind:value={assignmentFormData.dueDate} />
+					</Form.Control>
+					<Form.FieldErrors />
+				</Form.Field>
+
+				<Form.Field {form} name="mandatory" class="flex flex-col">
+					<Form.Control let:attrs>
+						<Form.Label for="mandatory">Mandatory</Form.Label>
+						<Checkbox {...attrs} id="mandatory" bind:checked={assignmentFormData.mandatory} />
+					</Form.Control>
+					<Form.FieldErrors />
+				</Form.Field>
+
+				<Form.Field {form} name="collaborationType" class="flex flex-col">
+					<Form.Control let:attrs>
+						<Form.Label for="collaborationType">Collaboration</Form.Label>
+						<RadioGroup.Root
+							{...attrs}
+							id="collaborationType"
+							bind:value={assignmentFormData.collaborationType}
+						>
+							<div class="flex items-center gap-1">
+								<RadioGroup.Item {...attrs} id="individual" value="Individual" />
+								<label for="spring">Individual</label>
+							</div>
+							<div class="flex items-center gap-1">
+								<RadioGroup.Item {...attrs} id="teams" value="Teams" />
+								<label for="autumn">Teams</label>
+							</div>
+						</RadioGroup.Root>
+					</Form.Control>
+					<Form.FieldErrors />
+				</Form.Field>
+
+				<Form.Field {form} name="gradingType" class="flex flex-col">
+					<Form.Control let:attrs>
+						<Form.Label for="gradingType">Grading</Form.Label>
+						<RadioGroup.Root {...attrs} id="gradingType" bind:value={assignmentFormData.gradingType}>
+							<div class="flex items-center gap-1">
+								<RadioGroup.Item {...attrs} id="noGrading" value="NoGrading" />
+								<label for="spring">None</label>
+							</div>
+							<div class="flex items-center gap-1">
+								<RadioGroup.Item {...attrs} id="approvalGrading" value="ApprovalGrading" />
+								<label for="autumn">Approval</label>
+							</div>
+							<div class="flex items-center gap-1">
+								<RadioGroup.Item {...attrs} id="letterGrading" value="LetterGrading" />
+								<label for="spring">Letter</label>
+							</div>
+							<div class="flex items-center gap-1">
+								<RadioGroup.Item {...attrs} id="pointsGrading" value="PointsGrading" />
+								<label for="spring">Points</label>
+							</div>
+						</RadioGroup.Root>
+					</Form.Control>
+					<Form.FieldErrors />
+				</Form.Field>
+
+				{#if assignmentFormData.gradingType == 'PointsGrading'}
+					<Form.Field {form} name="maxPoints">
+						<Form.Control let:attrs>
+							<Form.Label for="maxPoints">Max Points</Form.Label>
+							<Input
+								{...attrs}
+								type="number"
+								id="maxPoints"
+								bind:value={assignmentFormData.maxPoints}
+							/>
+						</Form.Control>
+						<Form.FieldErrors />
+					</Form.Field>
+				{/if}
+			</div>
 
 			{#if !edit}
-				<div class="mt-4 flex flex-col">
-					<h1 class="text-lg font-medium">Format</h1>
+				<div class="mt-4">
+					<h1 class="mx-6 text-lg font-medium">Format</h1>
 					<AssignmentFieldsForm {form} bind:fields={assignmentFormData.fields} />
 				</div>
 			{/if}

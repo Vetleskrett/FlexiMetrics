@@ -257,10 +257,12 @@ public static class Seed
                     {
                         return field.Type switch
                         {
-                            AssignmentDataType.String => f.Lorem.Sentence(),
+                            AssignmentDataType.ShortText => f.Lorem.Sentence(3),
+                            AssignmentDataType.LongText => f.Lorem.Paragraph(),
                             AssignmentDataType.Integer => f.Random.Int(0, 100),
-                            AssignmentDataType.Double => f.Random.Double(0, 100),
+                            AssignmentDataType.Float => f.Random.Double(0, 100),
                             AssignmentDataType.Boolean => f.Random.Bool(),
+                            AssignmentDataType.URL => f.Internet.Url(),
                             AssignmentDataType.File => f.Lorem.Word() + ".zip",
                             _ => f.Lorem.Sentence()
                         };

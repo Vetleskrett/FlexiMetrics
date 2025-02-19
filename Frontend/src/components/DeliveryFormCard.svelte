@@ -10,6 +10,7 @@
 	import { studentId } from 'src/store';
 	import { postDelivery } from 'src/api';
 	import { goto } from '$app/navigation';
+	import Undo_2 from 'lucide-svelte/icons/undo-2';
 
 	export let assignment: Assignment;
 	export let assignmentFields: AssignmentField[];
@@ -33,7 +34,7 @@
 				return {
 					assignmentFieldId: assignmentField.id,
 					value:
-						assignmentField.type == 'Integer' || assignmentField.type == 'Double'
+						assignmentField.type == 'Integer' || assignmentField.type == 'Float'
 							? Number(values[assignmentField.id])
 							: values[assignmentField.id]
 				};
@@ -63,26 +64,33 @@
 		<div class="flex flex-col">
 			<form method="POST" on:submit|preventDefault={onSubmit}>
 				{#each assignmentFields as assignmentField}
-					<div class="flex flex-col px-6 py-4">
-						<label for={assignmentField.name} class="font-semibold">
-							{assignmentField.name}
+					<div class="flex flex-col gap-1 px-6 py-4">
+						<label for={assignmentField.name}>
+							<span class="font-semibold">{assignmentField.name}</span>
+							<span class="text-gray-500">({assignmentField.type.replace(/([A-Z])/g, ' $1').substring(1)})</span>
 						</label>
 
-						{#if assignmentField.type == 'String'}
-							<Textarea bind:value={values[assignmentField.id]} />
+						{#if assignmentField.type == 'ShortText'}
+							<Input bind:value={values[assignmentField.id]} />
+						{:else if assignmentField.type == 'LongText'}
+							<Textarea class="h-[200px]" bind:value={values[assignmentField.id]} />
 						{:else if assignmentField.type == 'Integer'}
 							<Input type="number" bind:value={values[assignmentField.id]} />
-						{:else if assignmentField.type == 'Double'}
+						{:else if assignmentField.type == 'Float'}
 							<Input type="number" step="any" bind:value={values[assignmentField.id]} />
 						{:else if assignmentField.type == 'Boolean'}
 							<Checkbox bind:checked={values[assignmentField.id]} />
+						{:else if assignmentField.type == 'URL'}
+							<Input bind:value={values[assignmentField.id]} />
+						{:else if assignmentField.type == 'File'}
+							<Input type="file" />
 						{/if}
 					</div>
 				{/each}
-				<div class="mx-6 my-4 flex justify-end gap-4">
-					<CustomButton color="red" href="./">
-						<X size="20" />
-						<p>Cancel</p>
+				<div class="mt-4 mb-8 flex justify-center w-full gap-4">
+					<CustomButton color="yellow" href="./">
+						<Undo_2 size="20" />
+						<p>Return</p>
 					</CustomButton>
 					<CustomButton color="submit">
 						<Save size="20" />

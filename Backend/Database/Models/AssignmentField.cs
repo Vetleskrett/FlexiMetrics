@@ -11,6 +11,7 @@ public class AssignmentField
     public required AssignmentDataType Type { get; set; }
     public required string Name { get; set; }
 
-    public required int? RangeMin { get; set; }
-    public required int? RangeMax { get; set; }
+    public required int? Min { get; set; }
+    public required int? Max { get; set; }
+    public required string? Regex { get; set; }
 }

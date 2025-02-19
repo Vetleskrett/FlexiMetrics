@@ -1,5 +1,5 @@
 <script lang="ts">
-	import type { AssignmentFieldType, AssignmentFieldFormData } from 'src/types';
+	import type { AssignmentFieldFormData } from 'src/types';
 	import CustomButton from './CustomButton.svelte';
 	import { Input } from '$lib/components/ui/input';
 	import Trash_2 from 'lucide-svelte/icons/trash-2';
@@ -7,6 +7,7 @@
 	import * as Form from 'src/lib/components/ui/form';
 	import type { SuperForm } from 'sveltekit-superforms';
 	import * as Select from '$lib/components/ui/select/index';
+	import Separator from 'src/lib/components/ui/separator/separator.svelte';
 
 	export let form: SuperForm<any, any>;
 	export let fields: AssignmentFieldFormData[];
@@ -15,8 +16,8 @@
 		fields.push({
 			name: '',
 			type: {
-				label: 'String',
-				value: 'String'
+				label: 'Short Text',
+				value: 'ShortText'
 			}
 		});
 		fields = fields;
@@ -31,9 +32,10 @@
 	}
 </script>
 
-<div class="mt-4 flex flex-col gap-2">
+<div class="mt-4 flex flex-col gap-6">
 	{#each fields as field, i}
-		<div class="flex w-full gap-2">
+		<Separator/>
+		<div class="flex flex-col gap-2 px-6 py-0">
 			<Form.Field {form} name="fields[{i}].name" class="w-full">
 				<Form.Control let:attrs>
 					<Form.Label for="fields[{i}].name">Name</Form.Label>
@@ -46,60 +48,77 @@
 				<Form.FieldErrors />
 			</Form.Field>
 
-			<Form.Field {form} name="fields[{i}].type" class="w-full">
+			<Form.Field {form} name="fields[{i}].type" class="w-[280px]">
 				<Form.Control let:attrs>
 					<Form.Label for="fields[{i}].type">Type</Form.Label>
 					<Select.Root {...attrs} bind:selected={field.type}>
 						<Select.Trigger>
-							<Select.Value />
+							<Select.Value/>
 						</Select.Trigger>
 						<Select.Content>
-							<Select.Item value="String" label="String">String</Select.Item>
+							<Select.Item value="ShortText" label="Short Text">Short Text</Select.Item>
+							<Select.Item value="LongText" label="Long Text">Long Text</Select.Item>
 							<Select.Item value="Integer" label="Integer">Integer</Select.Item>
-							<Select.Item value="Double" label="Double">Double</Select.Item>
+							<Select.Item value="Float" label="Float">Float</Select.Item>
 							<Select.Item value="Boolean" label="Boolean">Boolean</Select.Item>
-							<Select.Item value="Range" label="Range">Range</Select.Item>
 							<Select.Item value="File" label="File">File</Select.Item>
 						</Select.Content>
 					</Select.Root>
 				</Form.Control>
 				<Form.FieldErrors />
-			</Form.Field>
+			</Form.Field>	
 
-			{#if field.type.value == 'Range'}
-				<Form.Field {form} name="fields[{i}].rangeMin" class="w-full">
+			{#if field.type.value == 'Integer' || field.type.value == 'Float' || field.type.value == 'ShortText' || field.type.value == 'LongText'}
+				<Form.Field {form} name="fields[{i}].min" class="w-[280px]">
 					<Form.Control let:attrs>
-						<Form.Label for="fields[{i}].rangeMin">Min</Form.Label>
+						<Form.Label for="fields[{i}].min">
+							{field.type.value == 'ShortText' || field.type.value == 'LongText' ? 'Min Length' : 'Min'}
+						</Form.Label>
 						<Input
 							{...attrs}
 							type="number"
-							id="fields[{i}].rangeMin"
-							bind:value={field.rangeMin}
+							id="fields[{i}].min"
+							bind:value={field.min}
 						/>
 					</Form.Control>
 					<Form.FieldErrors />
 				</Form.Field>
-				<Form.Field {form} name="fields[{i}].rangeMax" class="w-full">
+				<Form.Field {form} name="fields[{i}].max" class="w-[280px]">
 					<Form.Control let:attrs>
-						<Form.Label for="fields[{i}].rangeMax">Max</Form.Label>
+						<Form.Label for="fields[{i}].max">
+							{field.type.value == 'ShortText' || field.type.value == 'LongText' ? 'Max Length' : 'Max'}
+						</Form.Label>
 						<Input
 							{...attrs}
 							type="number"
-							id="fields[{i}].rangeMax"
-							bind:value={field.rangeMax}
+							id="fields[{i}].max"
+							bind:value={field.max}
 						/>
 					</Form.Control>
 					<Form.FieldErrors />
 				</Form.Field>
 			{/if}
-
-			<div class="mt-8">
+			{#if field.type.value == 'ShortText' || field.type.value == 'LongText' || field.type.value == 'URL'}
+				<Form.Field {form} name="fields[{i}].regex">
+					<Form.Control let:attrs>
+						<Form.Label for="fields[{i}].regex">Regex</Form.Label>
+						<Input
+							{...attrs}
+							id="fields[{i}].regex"
+							bind:value={field.regex}
+						/>
+					</Form.Control>
+					<Form.FieldErrors />
+				</Form.Field>
+			{/if}
+			<div class="self-center">
 				<CustomButton color="red" outline={true} on:click={() => removeField(field)}>
 					<Trash_2 size="16" on:click={() => removeField(field)} />
 				</CustomButton>
 			</div>
 		</div>
 	{/each}
+	<Separator/>
 	<div class="flex items-center justify-center">
 		<CustomButton color={'green'} outline={true} on:click={addField}>
 			<Plus size="16" />

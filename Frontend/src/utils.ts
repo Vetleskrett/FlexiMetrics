@@ -23,3 +23,10 @@ export function transformErrors(errors: { propertyName: string; message: string 
 
     return result;
 }
+
+export const cleanOptional = (value: any) => {
+    if (value == '') {
+        return undefined;
+    }
+    return value;
+}

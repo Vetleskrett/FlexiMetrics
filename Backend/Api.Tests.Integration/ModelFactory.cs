@@ -185,7 +185,7 @@ public class ModelFactory
             .ToList();
     }
 
-    public AssignmentField CreateAssignmentField(Guid assignmentId, AssignmentDataType dataType = AssignmentDataType.String)
+    public AssignmentField CreateAssignmentField(Guid assignmentId, AssignmentDataType dataType = AssignmentDataType.ShortText)
     {
         var assignmentField = new AssignmentField
         {
@@ -193,8 +193,8 @@ public class ModelFactory
             AssignmentId = assignmentId,
             Type = dataType,
             Name = "Project title",
-            RangeMin = dataType != AssignmentDataType.Range ? null : 0,
-            RangeMax = dataType != AssignmentDataType.Range ? null : 100,
+            Min = dataType != AssignmentDataType.Range ? null : 0,
+            Max = dataType != AssignmentDataType.Range ? null : 100,
         };
         _dbContext.AssignmentFields.Add(assignmentField);
         return assignmentField;
@@ -268,9 +268,9 @@ public class ModelFactory
             DeliveryId = deliveryId,
             Value = assignmentField.Type switch
             {
-                AssignmentDataType.String => "My Frontend Project",
+                AssignmentDataType.ShortText => "My Frontend Project",
                 AssignmentDataType.Integer => 16,
-                AssignmentDataType.Double => 5.7,
+                AssignmentDataType.Float => 5.7,
                 AssignmentDataType.Boolean => true,
                 _ => throw new ArgumentException(),
             }

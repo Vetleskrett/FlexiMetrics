@@ -1,5 +1,3 @@
-import type { DateValue } from "@internationalized/date";
-
 export type Course = {
     id: string;
     name: string;
@@ -83,35 +81,37 @@ export type Team = {
     complete: number | null | undefined;
 }
 
-export type AssignmentFieldType = 'String' | 'Integer' | 'Double' | 'Boolean' | 'Range' | 'File';
+export type AssignmentFieldType = 'ShortText' | 'LongText' | 'Integer' | 'Float' | 'Boolean' | 'URL' | 'File';
 
 export type AssignmentField = {
     id: string;
     name: string;
     type: AssignmentFieldType;
-
-    rangeMin?: number;
-    rangeMax?: number;
+    min?: number;
+    max?: number;
+    regex?: string;
 }
 
 export type AssignmentFieldFormData = {
     id?: string;
     name: string;
     type: {
-        label: AssignmentFieldType;
+        label: string;
         value: AssignmentFieldType;
     };
 
-    rangeMin?: number;
-    rangeMax?: number;
+    min?: number;
+    max?: number;
+    regex?: string;
 };
 
 export type UpdateAssignmentField = {
     id?: string;
     name: string;
     type: AssignmentFieldType;
-    rangeMin?: number;
-    rangeMax?: number;
+    min?: number;
+    max?: number;
+    regex?: string;
 }
 
 export type UpdateAssignmentFields = {

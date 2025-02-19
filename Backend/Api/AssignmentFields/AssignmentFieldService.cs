@@ -77,8 +77,9 @@ public class AssignmentFieldService : IAssignmentFieldService
 
             exisingField.Name = field.Name;
             exisingField.Type = field.Type;
-            exisingField.RangeMin = field.RangeMin;
-            exisingField.RangeMax = field.RangeMax;
+            exisingField.Min = field.Min;
+            exisingField.Max = field.Max;
+            exisingField.Regex = field.Regex;
         }
 
         var fieldsToBeCreated = request.Fields

@@ -104,6 +104,8 @@
 										{:else}
 											<X color="red" class="mx-auto" />
 										{/if}
+									{:else if assignmentField.type == 'URL'}
+										<a class="text-blue-500" target="_blank" href={deliveryField?.value}>{deliveryField?.value}</a>
 									{:else}
 										<p>{deliveryField?.value}</p>
 									{/if}

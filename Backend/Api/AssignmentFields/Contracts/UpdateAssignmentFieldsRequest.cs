@@ -13,6 +13,7 @@ public class AssignmentFieldRequest
     public required AssignmentDataType Type { get; init; }
     public required string Name { get; init; }
 
-    public int? RangeMin { get; init; }
-    public int? RangeMax { get; init; }
+    public int? Min { get; init; }
+    public int? Max { get; init; }
+    public string? Regex { get; init; }
 }

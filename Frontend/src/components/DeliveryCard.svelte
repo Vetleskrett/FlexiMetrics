@@ -27,13 +27,18 @@
 	<Card.Content class="p-0">
 		<div class="flex flex-col">
 			{#if delivery}
-				{#each delivery.fields as deilveryField}
+				{#each assignmentFields as assignmentField}
+				{@const deliveryField = delivery.fields.find(f => f.assignmentFieldId == assignmentField.id)}
 					<Separator class="w-full" />
 					<div class="px-6 py-4">
 						<h1 class="font-semibold">
-							{assignmentFieldName(deilveryField)}
+							{assignmentField.name}
 						</h1>
-						<h1>{deilveryField.value}</h1>
+						{#if assignmentField.type == 'URL'}
+							<a class="text-blue-500" target="_blank" href={deliveryField?.value}>{deliveryField?.value}</a>
+						{:else}
+							<h1>{deliveryField?.value}</h1>
+						{/if}
 					</div>
 				{/each}
 			{:else}
