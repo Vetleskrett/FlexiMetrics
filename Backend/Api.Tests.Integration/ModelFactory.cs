@@ -193,8 +193,9 @@ public class ModelFactory
             AssignmentId = assignmentId,
             Type = dataType,
             Name = "Project title",
-            Min = dataType != AssignmentDataType.Range ? null : 0,
-            Max = dataType != AssignmentDataType.Range ? null : 100,
+            Min = null,
+            Max = null,
+            Regex = null
         };
         _dbContext.AssignmentFields.Add(assignmentField);
         return assignmentField;

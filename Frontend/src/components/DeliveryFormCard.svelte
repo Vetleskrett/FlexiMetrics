@@ -11,6 +11,7 @@
 	import { postDelivery } from 'src/api';
 	import { goto } from '$app/navigation';
 	import Undo_2 from 'lucide-svelte/icons/undo-2';
+	import FileUpload from './FileUpload.svelte';
 
 	export let assignment: Assignment;
 	export let assignmentFields: AssignmentField[];
@@ -83,7 +84,7 @@
 						{:else if assignmentField.type == 'URL'}
 							<Input bind:value={values[assignmentField.id]} />
 						{:else if assignmentField.type == 'File'}
-							<Input type="file" />
+							<FileUpload/>
 						{/if}
 					</div>
 				{/each}

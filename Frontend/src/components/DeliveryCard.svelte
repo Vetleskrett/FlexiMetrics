@@ -2,14 +2,11 @@
 	import { type AssignmentField, type Delivery, type DeliveryField } from 'src/types.js';
 	import * as Card from '$lib/components/ui/card/index.js';
 	import { Separator } from '$lib/components/ui/separator/index.js';
+	import { getDeliveryFieldFile } from 'src/api';
+	import ArrowDownToLine from 'lucide-svelte/icons/arrow-down-to-line';
 
 	export let assignmentFields: AssignmentField[];
 	export let delivery: Delivery | null;
-
-	const assignmentFieldName = (deliveryField: DeliveryField) =>
-		assignmentFields.find(
-			(assignmentField) => assignmentField.id == deliveryField.assignmentFieldId
-		)?.name;
 </script>
 
 <Card.Root class="w-full overflow-hidden p-0">
@@ -36,6 +33,11 @@
 						</h1>
 						{#if assignmentField.type == 'URL'}
 							<a class="text-blue-500" target="_blank" href={deliveryField?.value}>{deliveryField?.value}</a>
+						{:else if assignmentField.type == 'File'}
+							<a class="flex items-center text-blue-500" download href={getDeliveryFieldFile(deliveryField?.id || '')}>
+								<ArrowDownToLine size="20" />
+								{deliveryField?.value?.FileName}
+							</a>
 						{:else}
 							<h1>{deliveryField?.value}</h1>
 						{/if}

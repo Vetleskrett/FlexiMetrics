@@ -17,7 +17,12 @@ public class DeliveryField
     [NotMapped]
     public required object Value
     {
-        get => JsonSerializer.Deserialize<JsonElement>(JsonValue!).Deserialize<object>()!;
+        get => JsonValue!.Deserialize<object>()!;
         set => JsonValue = JsonSerializer.SerializeToDocument(value);
+    }
+
+    public T GetValue<T>()
+    {
+        return JsonValue!.Deserialize<T>()!;
     }
 }

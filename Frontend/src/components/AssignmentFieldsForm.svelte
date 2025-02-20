@@ -61,6 +61,7 @@
 							<Select.Item value="Integer" label="Integer">Integer</Select.Item>
 							<Select.Item value="Float" label="Float">Float</Select.Item>
 							<Select.Item value="Boolean" label="Boolean">Boolean</Select.Item>
+							<Select.Item value="URL" label="URL">URL</Select.Item>
 							<Select.Item value="File" label="File">File</Select.Item>
 						</Select.Content>
 					</Select.Root>

@@ -9,6 +9,7 @@ using Api.Students;
 using Api.AssignmentFields;
 using Api.Deliveries;
 using Api.Feedbacks;
+using FileStorage;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -24,6 +25,8 @@ builder.Services.AddScoped<IAssignmentService, AssignmentService>();
 builder.Services.AddScoped<IAssignmentFieldService, AssignmentFieldService>();
 builder.Services.AddScoped<IDeliveryService, DeliveryService>();
 builder.Services.AddScoped<IFeedbackService, FeedbackService>();
+
+builder.Services.AddSingleton<IFileStorage, LocalFileStorage>();
 
 builder.Services.AddValidatorsFromAssemblyContaining<Program>();
 

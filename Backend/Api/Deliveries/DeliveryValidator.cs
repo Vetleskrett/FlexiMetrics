@@ -75,6 +75,7 @@ public class DeliveryValidator : AbstractValidator<Delivery>
                         AssignmentDataType.Float => field.JsonValue?.Deserialize<double>(),
                         AssignmentDataType.Boolean => field.JsonValue?.Deserialize<bool>(),
                         AssignmentDataType.URL => field.JsonValue?.Deserialize<string>(),
+                        AssignmentDataType.File => field.JsonValue?.Deserialize<FileMetadata>(),
                         _ => null,
                     };
                     return value is not null;

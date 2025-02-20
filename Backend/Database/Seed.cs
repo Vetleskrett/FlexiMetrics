@@ -1,6 +1,9 @@
 ﻿using Bogus;
 using Database.Models;
+using FileStorage;
 using Microsoft.EntityFrameworkCore;
+using System.Net.Mime;
+using System.Text;
 
 namespace Database;
 
@@ -8,7 +11,7 @@ public static class Seed
 {
     private const int SEED = 123;
 
-    public static async Task SeedDatabaseAsync(this DbContext dbContext)
+    public static async Task SeedDatabaseAsync(this DbContext dbContext, IFileStorage fileStorage)
     {
         var userFaker = new Faker<User>()
             .UseSeed(SEED)
@@ -244,6 +247,10 @@ public static class Seed
 
         var deliveryFields = deliveries.Select(delivery =>
         {
+            var deliveryId = delivery.Id;
+            var assignmentId = delivery.AssignmentId;
+            var courseId = assignments.First(a => a.Id == assignmentId).CourseId;
+
             var fieldsInAssignment = assignmentFields
                 .Where(f => f.AssignmentId == delivery.AssignmentId)
                 .ToList();
@@ -253,8 +260,27 @@ public static class Seed
                 return deliveryFieldFaker
                     .RuleFor(f => f.DeliveryId, delivery.Id)
                     .RuleFor(f => f.AssignmentFieldId, field.Id)
-                    .RuleFor(f => f.Value, f =>
+                    .RuleFor(f => f.Value, (f, deliveryField) =>
                     {
+                        if (field.Type == AssignmentDataType.File)
+                        {
+                            var stream = new MemoryStream(Encoding.UTF8.GetBytes(f.Lorem.Paragraph(10)));
+                            fileStorage.WriteDeliveryFile
+                            (
+                                courseId,
+                                assignmentId,
+                                deliveryId,
+                                deliveryField.Id,
+                                stream
+                            );
+
+                            return new FileMetadata
+                            {
+                                FileName = f.Lorem.Word() + ".txt",
+                                ContentType  = MediaTypeNames.Text.Plain,
+                            };
+                        }
+
                         return field.Type switch
                         {
                             AssignmentDataType.ShortText => f.Lorem.Sentence(3),
@@ -263,7 +289,6 @@ public static class Seed
                             AssignmentDataType.Float => f.Random.Double(0, 100),
                             AssignmentDataType.Boolean => f.Random.Bool(),
                             AssignmentDataType.URL => f.Internet.Url(),
-                            AssignmentDataType.File => f.Lorem.Word() + ".zip",
                             _ => f.Lorem.Sentence()
                         };
                     })

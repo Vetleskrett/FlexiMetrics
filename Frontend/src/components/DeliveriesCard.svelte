@@ -6,6 +6,7 @@
 	import Check from 'lucide-svelte/icons/check';
 	import X from 'lucide-svelte/icons/x';
 	import Separator from 'src/lib/components/ui/separator/separator.svelte';
+	import { getDeliveryFieldFile } from 'src/api';
 
 	export let assignment: Assignment;
 	export let assignmentFields: AssignmentField[];
@@ -88,13 +89,9 @@
 
 								<Table.Cell>
 									{#if assignmentField.type == 'File'}
-										<a
-											href="TODO: add url here"
-											download="TODO"
-											class="flex items-center text-blue-500"
-										>
+										<a class="flex items-center text-blue-500" download href={getDeliveryFieldFile(deliveryField?.id || '')}>
 											<ArrowDownToline size="20" />
-											{deliveryField?.value}
+											{deliveryField?.value?.FileName}
 										</a>
 									{:else if assignmentField.type == 'Integer'}
 										<p class="text-right">{deliveryField?.value}</p>

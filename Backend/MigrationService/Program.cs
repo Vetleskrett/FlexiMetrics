@@ -1,5 +1,6 @@
 using MigrationService;
 using Database;
+using FileStorage;
 
 var builder = Host.CreateApplicationBuilder(args);
 
@@ -11,15 +12,19 @@ builder.Services.AddOpenTelemetry()
 
 builder.AddNpgsqlDbContext<AppDbContext>("postgresdb", _ => { }, options =>
 {
+
+
     if (builder.Environment.IsDevelopment())
     {
+        var fileStorage = new LocalFileStorage();
+
         options.UseAsyncSeeding(async (dbContext, _, cancellationToken) =>
         {
-            await dbContext.SeedDatabaseAsync();
+            await dbContext.SeedDatabaseAsync(fileStorage);
         });
         options.UseSeeding((dbContext, _) =>
         {
-            dbContext.SeedDatabaseAsync().Wait();
+            dbContext.SeedDatabaseAsync(fileStorage).Wait();
         });
     }
 });

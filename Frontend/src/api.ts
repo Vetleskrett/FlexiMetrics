@@ -77,6 +77,10 @@ export function getDeliveries(assignmentId: string) : Promise<AxiosResponse<Deli
   return instance.get(`/assignments/${assignmentId}/deliveries`)
 }
 
+export function getDeliveryFieldFile(deliveryFieldId: string): string {
+  return instance.defaults.baseURL + `/delivery-fields/${deliveryFieldId}`;
+}
+
 export function getFeedbacks(assignmentId: string) : Promise<AxiosResponse<Feedback[]>> {
   return instance.get(`/assignments/${assignmentId}/feedbacks`)
 }

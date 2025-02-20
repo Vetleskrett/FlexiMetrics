@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using Database.Models;
 using Database;
 using Api.Deliveries.Contracts;
+using FileStorage;
 
 namespace Api.Deliveries;
 
@@ -15,6 +16,8 @@ public interface IDeliveryService
     Task<Result<DeliveryResponse>> GetByTeamAssignment(Guid teamId, Guid assignmentId);
     Task<Result<IEnumerable<DeliveryResponse>>> GetAllByAssignment(Guid assignmentId);
     Task<Result<DeliveryResponse>> Create(CreateDeliveryRequest request);
+    Task<Result> UploadFile(IFormFile file, Guid deliveryFieldId);
+    Task<Result<FileResponse>> DownloadFile(Guid deliveryFieldId);
     Task<Result> DeleteById(Guid id);
 }
 
@@ -22,11 +25,13 @@ public class DeliveryService : IDeliveryService
 {
     private readonly AppDbContext _dbContext;
     private readonly IValidator<Delivery> _validator;
+    private readonly IFileStorage _fileStorage;
 
-    public DeliveryService(AppDbContext dbContext, IValidator<Delivery> validator)
+    public DeliveryService(AppDbContext dbContext, IValidator<Delivery> validator, IFileStorage fileStorage)
     {
         _dbContext = dbContext;
         _validator = validator;
+        _fileStorage = fileStorage;
     }
 
     public async Task<Result<IEnumerable<DeliveryResponse>>> GetAll()
@@ -228,6 +233,80 @@ public class DeliveryService : IDeliveryService
         await _dbContext.SaveChangesAsync();
 
         return delivery.MapToResponse();
+    }
+
+    public async Task<Result> UploadFile(IFormFile file, Guid deliveryFieldId)
+    {
+        var deliveryField = await _dbContext.DeliveryFields
+            .Include(f => f.AssignmentField)
+            .Include(f => f.Delivery!)
+            .ThenInclude(d => d.Assignment)
+            .FirstOrDefaultAsync(f => f.Id == deliveryFieldId);
+
+        if (deliveryField is null)
+        {
+            return Result.NotFound();
+        } 
+
+        if (deliveryField.AssignmentField!.Type != AssignmentDataType.File)
+        {
+            return new ValidationError("Assignment field type is not file").MapToResponse();
+        }
+
+        try
+        {
+            await _fileStorage.WriteDeliveryFile
+            (
+                deliveryField.Delivery!.Assignment!.CourseId,
+                deliveryField.Delivery!.AssignmentId,
+                deliveryField.DeliveryId,
+                deliveryFieldId,
+                file.OpenReadStream()
+            );
+        }
+        catch (Exception e)
+        {
+            return new ValidationError($"Could not save file: {e.Message}").MapToResponse();
+        }
+
+        return Result.Success();
+    }
+
+    public async Task<Result<FileResponse>> DownloadFile(Guid deliveryFieldId)
+    {
+        var deliveryField = await _dbContext.DeliveryFields
+            .Include(f => f.AssignmentField)
+            .Include(f => f.Delivery!)
+            .ThenInclude(d => d.Assignment)
+            .FirstOrDefaultAsync(f => f.Id == deliveryFieldId);
+
+        if (deliveryField is null)
+        {
+            return Result<FileResponse>.NotFound();
+        }
+
+        try
+        {
+            var metadata = deliveryField.GetValue<FileMetadata>();
+
+            var stream = _fileStorage.ReadDeliveryFile
+            (
+                deliveryField.Delivery!.Assignment!.CourseId,
+                deliveryField.Delivery!.AssignmentId,
+                deliveryField.DeliveryId,
+                deliveryFieldId
+            );
+
+            return new FileResponse
+            {
+                Stream = stream,
+                Metadata = metadata!
+            };
+        }
+        catch (Exception e)
+        {
+            return new ValidationError($"Could not read file: {e.Message}").MapToResponse();
+        }
     }
 
     public async Task<Result> DeleteById(Guid id)
