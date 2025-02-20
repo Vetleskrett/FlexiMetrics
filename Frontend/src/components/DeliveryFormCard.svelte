@@ -1,14 +1,13 @@
 <script lang="ts">
-	import type { Assignment, AssignmentField, CreateDelivery, Delivery, Team } from 'src/types.js';
+	import type { Assignment, AssignmentField, CreateDelivery, UpdateDelivery, Delivery } from 'src/types.js';
 	import * as Card from '$lib/components/ui/card/index.js';
 	import { Checkbox } from 'src/lib/components/ui/checkbox';
 	import { Input } from 'src/lib/components/ui/input';
 	import Textarea from 'src/lib/components/ui/textarea/textarea.svelte';
 	import Save from 'lucide-svelte/icons/save';
 	import CustomButton from './CustomButton.svelte';
-	import X from 'lucide-svelte/icons/x';
 	import { studentId } from 'src/store';
-	import { postDelivery } from 'src/api';
+	import { postDelivery, putDelivery, postDeliveryFieldFile } from 'src/api';
 	import { goto } from '$app/navigation';
 	import Undo_2 from 'lucide-svelte/icons/undo-2';
 	import FileUpload from './FileUpload.svelte';
@@ -17,36 +16,109 @@
 	export let assignmentFields: AssignmentField[];
 	export let delivery: Delivery | null;
 
+	type FileField = {
+		assignmentFieldId: string;
+		file: File;
+	};
+
 	let values = Object.fromEntries(
-		assignmentFields.map((assignmentField) => [
-			assignmentField.id,
-			delivery
-				? delivery.fields.find((x) => x.assignmentFieldId == assignmentField.id)?.value
-				: undefined
-		])
+		assignmentFields.map((assignmentField) => {
+			const field = delivery
+					? delivery.fields.find((x) => x.assignmentFieldId == assignmentField.id)?.value
+					: undefined;
+			return [
+				assignmentField.id,
+				field
+			]
+		})
 	);
 
-	const onSubmit = async () => {
-		console.log(values);
-		const delivery: CreateDelivery = {
-			assignmentId: assignment.id,
-			studentId: studentId,
+	const onSubmitEdit = async () => {
+		const request: UpdateDelivery = {
 			fields: assignmentFields.map((assignmentField) => {
+				let value = values[assignmentField.id];
+
+				if (assignmentField.type == 'Integer' || assignmentField.type == 'Float') {
+					value = Number(value);
+				}
+
+				if (assignmentField.type == 'File' && value instanceof File) {
+					value = {
+						FileName: value.name,
+						ContentType: value.type
+					}
+				}
+
 				return {
 					assignmentFieldId: assignmentField.id,
-					value:
-						assignmentField.type == 'Integer' || assignmentField.type == 'Float'
-							? Number(values[assignmentField.id])
-							: values[assignmentField.id]
+					value: value
 				};
 			})
 		};
-		await postDelivery(delivery);
-		goto('./');
+		const response = await putDelivery(delivery?.id || '', request);
+		delivery = response.data;
+	}
+
+	const onSubmitCreate = async () => {
+		const request: CreateDelivery = {
+			assignmentId: assignment.id,
+			studentId: studentId,
+			fields: assignmentFields.map((assignmentField) => {
+				let value = values[assignmentField.id];
+
+				if (assignmentField.type == 'Integer' || assignmentField.type == 'Float') {
+					value = Number(value);
+				}
+
+				if (assignmentField.type == 'File' && value instanceof File) {
+					value = {
+						FileName: value.name,
+						ContentType: value.type
+					}
+				}
+
+				return {
+					assignmentFieldId: assignmentField.id,
+					value: value
+				};
+			})
+		};
+		const response = await postDelivery(request);
+		delivery = response.data;
 	};
+
+	const onSubmit = async () => {
+		const fileFields: FileField[] = [];
+
+		for(let assignmentField of assignmentFields) {
+			const value = values[assignmentField.id];
+			if (assignmentField.type == 'File' && value instanceof File) {
+				fileFields.push({
+					assignmentFieldId: assignmentField.id,
+					file: value
+				});
+			}
+		}
+
+		if (delivery == null) {
+			await onSubmitCreate();
+		} else {
+			await onSubmitEdit();
+		}
+
+		for(let fileField of fileFields) {
+			const deliveryField = delivery!.fields.find(f => f.assignmentFieldId == fileField.assignmentFieldId);
+			if (deliveryField) {
+				await postDeliveryFieldFile(deliveryField.id, fileField.file);
+			}
+		}
+
+		goto('./');
+	}
+
 </script>
 
-<Card.Root class="w-full overflow-hidden p-0">
+<Card.Root class="w-[800px] overflow-hidden p-0">
 	<Card.Header class="mb-6 flex flex-row items-center justify-between">
 		<div class="flex items-center">
 			<img
@@ -84,7 +156,7 @@
 						{:else if assignmentField.type == 'URL'}
 							<Input bind:value={values[assignmentField.id]} />
 						{:else if assignmentField.type == 'File'}
-							<FileUpload/>
+							<FileUpload bind:file={values[assignmentField.id]}/>
 						{/if}
 					</div>
 				{/each}

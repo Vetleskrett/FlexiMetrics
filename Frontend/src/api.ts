@@ -23,6 +23,7 @@ import type {
   EditFeedback,
   EmailAdd,
   UpdateAssignmentField,
+  UpdateDelivery,
 } from "./types";
 
 const instance = axios.create({
@@ -95,6 +96,16 @@ export function putFeedback(feedbackId: string, feedback: EditFeedback) : Promis
 
 export function postDelivery(delivery: CreateDelivery) : Promise<AxiosResponse<Delivery>> {
   return instance.post(`/deliveries`, delivery)
+}
+
+export function putDelivery(deliveryId:string, delivery: UpdateDelivery) : Promise<AxiosResponse<Delivery>> {
+  return instance.put(`/deliveries/${deliveryId}`, delivery)
+}
+
+export function postDeliveryFieldFile(deliveryFieldId: string, file: File) : Promise<AxiosResponse> {
+  var formData = new FormData();
+  formData.append("file", file);
+  return instance.postForm(`/delivery-fields/${deliveryFieldId}`, formData)
 }
 
 export function getStudentFeedback(studentId: string, assignmentId: string): Promise<AxiosResponse<Feedback>> {

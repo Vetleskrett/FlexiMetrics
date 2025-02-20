@@ -29,22 +29,22 @@ public class CreateDeliveryTests(ApiFactory factory) : BaseIntegrationTest(facto
             AssignmentId = assignment.Id,
             StudentId = student.Id,
             Fields = [
-                new CreateDeliveryFieldRequest
+                new DeliveryFieldRequest
                 {
                     AssignmentFieldId = stringField.Id,
                     Value = "Value"
                 },
-                new CreateDeliveryFieldRequest
+                new DeliveryFieldRequest
                 {
                     AssignmentFieldId = intField.Id,
                     Value = 16
                 },
-                new CreateDeliveryFieldRequest
+                new DeliveryFieldRequest
                 {
                     AssignmentFieldId = doubleField.Id,
                     Value = 5.7
                 },
-                new CreateDeliveryFieldRequest
+                new DeliveryFieldRequest
                 {
                     AssignmentFieldId = boolField.Id,
                     Value = false
@@ -89,22 +89,22 @@ public class CreateDeliveryTests(ApiFactory factory) : BaseIntegrationTest(facto
             AssignmentId = assignment.Id,
             StudentId = students[0].Id,
             Fields = [
-                new CreateDeliveryFieldRequest
+                new DeliveryFieldRequest
                 {
                     AssignmentFieldId = stringField.Id,
                     Value = "Value"
                 },
-                new CreateDeliveryFieldRequest
+                new DeliveryFieldRequest
                 {
                     AssignmentFieldId = intField.Id,
                     Value = 16
                 },
-                new CreateDeliveryFieldRequest
+                new DeliveryFieldRequest
                 {
                     AssignmentFieldId = doubleField.Id,
                     Value = 5.7
                 },
-                new CreateDeliveryFieldRequest
+                new DeliveryFieldRequest
                 {
                     AssignmentFieldId = boolField.Id,
                     Value = false
@@ -200,39 +200,39 @@ public class CreateDeliveryTests(ApiFactory factory) : BaseIntegrationTest(facto
             AssignmentId = assignment.Id,
             StudentId = student.Id,
             Fields = [
-               new CreateDeliveryFieldRequest
+               new DeliveryFieldRequest
                 {
                     AssignmentFieldId = otherField.Id,
                     Value = "Value"
                 },
 
-                new CreateDeliveryFieldRequest
+                new DeliveryFieldRequest
                 {
                     AssignmentFieldId = repeatField.Id,
                     Value = "Value"
                 },
-                new CreateDeliveryFieldRequest
+                new DeliveryFieldRequest
                 {
                     AssignmentFieldId = repeatField.Id,
                     Value = "Value"
                 },
 
-                new CreateDeliveryFieldRequest
+                new DeliveryFieldRequest
                 {
                     AssignmentFieldId = stringField.Id,
                     Value = false
                 },
-                new CreateDeliveryFieldRequest
+                new DeliveryFieldRequest
                 {
                     AssignmentFieldId = intField.Id,
                     Value = 5.7
                 },
-                new CreateDeliveryFieldRequest
+                new DeliveryFieldRequest
                 {
                     AssignmentFieldId = doubleField.Id,
                     Value = "Value"
                 },
-                new CreateDeliveryFieldRequest
+                new DeliveryFieldRequest
                 {
                     AssignmentFieldId = boolField.Id,
                     Value = 16

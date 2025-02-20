@@ -31,7 +31,7 @@ public static class DeliveryMapping
         };
     }
 
-    public static DeliveryField MapToDeliveryField(this CreateDeliveryFieldRequest request, Guid deliveryId)
+    public static DeliveryField MapToDeliveryField(this DeliveryFieldRequest request, Guid deliveryId)
     {
         return new DeliveryField
         {
@@ -42,7 +42,7 @@ public static class DeliveryMapping
         };
     }
 
-    public static List<DeliveryField> MapToDeliveryFields(this IEnumerable<CreateDeliveryFieldRequest> fields, Guid deliveryId)
+    public static List<DeliveryField> MapToDeliveryFields(this IEnumerable<DeliveryFieldRequest> fields, Guid deliveryId)
     {
         return fields.Select(field => field.MapToDeliveryField(deliveryId)).ToList();
     }

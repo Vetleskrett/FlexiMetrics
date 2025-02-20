@@ -226,10 +226,15 @@ export type CreateDelivery = {
     fields: CreateDeliveryField[];
 }
 
+export type UpdateDelivery = {
+    fields: CreateDeliveryField[];
+}
+
 export type CreateDeliveryField = {
     assignmentFieldId: string;
     value: any;
 }
+
 export type CreateAssignment = {
     name: string,
     description: string,

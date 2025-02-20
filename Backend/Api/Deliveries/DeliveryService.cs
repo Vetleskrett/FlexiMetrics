@@ -16,6 +16,7 @@ public interface IDeliveryService
     Task<Result<DeliveryResponse>> GetByTeamAssignment(Guid teamId, Guid assignmentId);
     Task<Result<IEnumerable<DeliveryResponse>>> GetAllByAssignment(Guid assignmentId);
     Task<Result<DeliveryResponse>> Create(CreateDeliveryRequest request);
+    Task<Result<DeliveryResponse>> Update(UpdateDeliveryRequest request, Guid id);
     Task<Result> UploadFile(IFormFile file, Guid deliveryFieldId);
     Task<Result<FileResponse>> DownloadFile(Guid deliveryFieldId);
     Task<Result> DeleteById(Guid id);
@@ -230,6 +231,51 @@ public class DeliveryService : IDeliveryService
         }
 
         _dbContext.Deliveries.Add(delivery);
+        await _dbContext.SaveChangesAsync();
+
+        return delivery.MapToResponse();
+    }
+
+    public async Task<Result<DeliveryResponse>> Update(UpdateDeliveryRequest request, Guid id)
+    {
+        var delivery = await _dbContext.Deliveries
+            .Include(d => d.Fields)
+            .Include(d => d.Assignment!)
+            .ThenInclude(a => a.Fields)
+            .Include(d => d.Student)
+            .Include(d => d.Team)
+            .FirstOrDefaultAsync(d => d.Id == id);
+
+        if (delivery is null)
+        {
+            return Result<DeliveryResponse>.NotFound();
+        }
+
+        if (delivery.Assignment!.DueDate < DateTime.UtcNow)
+        {
+            return new ValidationError("Cannot deliver after assignment due date").MapToResponse();
+        }
+
+        foreach(var fieldRequest in request.Fields)
+        {
+            var assignmentField = delivery.Assignment!.Fields!.FirstOrDefault(f => f.Id == fieldRequest.AssignmentFieldId);
+            if (assignmentField is null)
+            {
+                return Result<DeliveryResponse>.NotFound();
+            }
+
+            var deliveryField = delivery.Fields!.FirstOrDefault(f => f.AssignmentFieldId == fieldRequest.AssignmentFieldId);
+            if (deliveryField is null)
+            {
+                deliveryField = fieldRequest.MapToDeliveryField(delivery.Id);
+                delivery.Fields!.Add(deliveryField);
+            }
+            else
+            {
+                deliveryField.Value = fieldRequest.Value;
+            }
+        }
+
         await _dbContext.SaveChangesAsync();
 
         return delivery.MapToResponse();

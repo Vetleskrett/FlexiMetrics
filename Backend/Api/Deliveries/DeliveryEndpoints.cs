@@ -70,6 +70,15 @@ public static class DeliveryEndpoints
         .WithName("CreateDelivery")
         .WithSummary("Create new delivery");
 
+        group.MapPut("deliveries/{id}", async (IDeliveryService deliveryService, Guid id, UpdateDeliveryRequest request) =>
+        {
+            var result = await deliveryService.Update(request, id);
+            return result.MapToResponse(delivery => Results.Ok(delivery));
+        })
+        .Produces<DeliveryResponse>()
+        .WithName("UpdateDelivery")
+        .WithSummary("Update delivery by id");
+
         group.MapGet("delivery-fields/{deliveryFieldId:guid}", async (IDeliveryService deliveryService, Guid deliveryFieldId) =>
         {
             var result = await deliveryService.DownloadFile(deliveryFieldId);

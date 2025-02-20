@@ -28,7 +28,7 @@ public class LocalFileStorage : IFileStorage
         Directory.CreateDirectory(dirPath);
         
         var filePath = Path.Combine(dirPath, deliveryFieldId.ToString());
-        using var fileStream = new FileStream(filePath, FileMode.OpenOrCreate);
+        using var fileStream = new FileStream(filePath, FileMode.Create);
         await data.CopyToAsync(fileStream);
     }
 
