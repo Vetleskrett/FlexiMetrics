@@ -13,6 +13,7 @@ public static class Seed
 
     public static async Task SeedDatabaseAsync(this DbContext dbContext, IFileStorage fileStorage)
     {
+        fileStorage.DeleteAll();
         await dbContext.Set<Course>().ExecuteDeleteAsync();
         await dbContext.Set<User>().ExecuteDeleteAsync();
 
@@ -138,6 +139,12 @@ public static class Seed
         {
             return assignmentFieldFaker
                 .RuleFor(x => x.Type, f => f.Random.Enum<AssignmentDataType>())
+                .RuleFor(f => f.SubType, (f, field) =>
+                {
+                    return field.Type == AssignmentDataType.List ?
+                        f.Random.Enum<AssignmentDataType>(exclude: [AssignmentDataType.List, AssignmentDataType.File]) :
+                        null;
+                })
                 .RuleFor(x => x.Name, f =>
                 {
                     var name = string.Join(" ", f.Lorem.Words());
@@ -212,6 +219,20 @@ public static class Seed
             .UseSeed(SEED)
             .RuleFor(x => x.Id, f => f.Random.Guid());
 
+        static object GetValue(AssignmentDataType type, Faker f)
+        {
+            return type switch
+            {
+                AssignmentDataType.ShortText => f.Lorem.Sentence(3),
+                AssignmentDataType.LongText => f.Lorem.Paragraph(),
+                AssignmentDataType.Integer => f.Random.Int(0, 100),
+                AssignmentDataType.Float => f.Random.Double(0, 100),
+                AssignmentDataType.Boolean => f.Random.Bool(),
+                AssignmentDataType.URL => f.Internet.Url(),
+                _ => f.Lorem.Sentence()
+            };
+        }
+
         var deliveryFields = deliveries.Select(delivery =>
         {
             var deliveryId = delivery.Id;
@@ -248,16 +269,14 @@ public static class Seed
                             };
                         }
 
-                        return field.Type switch
+                        if (field.Type == AssignmentDataType.List)
                         {
-                            AssignmentDataType.ShortText => f.Lorem.Sentence(3),
-                            AssignmentDataType.LongText => f.Lorem.Paragraph(),
-                            AssignmentDataType.Integer => f.Random.Int(0, 100),
-                            AssignmentDataType.Float => f.Random.Double(0, 100),
-                            AssignmentDataType.Boolean => f.Random.Bool(),
-                            AssignmentDataType.URL => f.Internet.Url(),
-                            _ => f.Lorem.Sentence()
-                        };
+                            return Enumerable.Range(0, f.Random.Int(1, 4))
+                                .Select(_ => GetValue(field.SubType!.Value, f))
+                                .ToList();
+                        }
+
+                        return GetValue(field.Type, f);
                     })
                     .Generate();
             });

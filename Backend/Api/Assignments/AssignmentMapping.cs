@@ -40,6 +40,7 @@ public static class AssignmentMapping
             Min = request.Min,
             Max = request.Max,
             Regex = request.Regex,
+            SubType = request.SubType,
         };
     }
 

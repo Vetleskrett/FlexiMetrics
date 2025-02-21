@@ -15,7 +15,8 @@ public static class AssignmentFieldMapping
             Name = request.Name,
             Min = request.Min,
             Max = request.Max,
-            Regex = request.Regex
+            Regex = request.Regex,
+            SubType = request.SubType
         };
     }
 
@@ -34,7 +35,8 @@ public static class AssignmentFieldMapping
             Name = request.Name,
             Min = request.Min,
             Max = request.Max,
-            Regex = request.Regex
+            Regex = request.Regex,
+            SubType = request.SubType
         };
     }
 
@@ -48,7 +50,8 @@ public static class AssignmentFieldMapping
             AssignmentId = field.AssignmentId,
             Min = field.Min,
             Max = field.Max,
-            Regex = field.Regex
+            Regex = field.Regex,
+            SubType = field.SubType
         };
     }
 

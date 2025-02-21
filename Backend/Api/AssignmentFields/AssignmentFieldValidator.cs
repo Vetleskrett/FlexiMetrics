@@ -1,6 +1,5 @@
 ﻿using Database.Models;
 using FluentValidation;
-using System.Text.RegularExpressions;
 
 namespace Api.AssignmentFields;
 
@@ -22,5 +21,15 @@ public class AssignmentFieldValidator : AbstractValidator<AssignmentField>
 
         RuleFor(x => x.Regex)
             .NotEqual(string.Empty);
+
+        RuleFor(x => x.SubType)
+            .IsInEnum()
+            .NotEqual(AssignmentDataType.List)
+            .NotEqual(AssignmentDataType.File)
+            .When(x => x.Type == AssignmentDataType.List);
+
+        RuleFor(x => x.SubType)
+            .Null()
+            .When(x => x.Type != AssignmentDataType.List);
     }
 }

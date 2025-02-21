@@ -12,4 +12,5 @@ public class AssignmentFieldResponse
     public required int? Min { get; init; }
     public required int? Max { get; init; }
     public required string? Regex { get; init; }
+    public required AssignmentDataType? SubType { get; init; }
 }
