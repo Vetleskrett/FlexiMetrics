@@ -3,6 +3,7 @@ using Api.Assignments.Contracts;
 using Api.Validation;
 using Database;
 using Database.Models;
+using FileStorage;
 using FluentValidation;
 using Microsoft.EntityFrameworkCore;
 
@@ -25,11 +26,13 @@ public class AssignmentService : IAssignmentService
 {
     private readonly AppDbContext _dbContext;
     private readonly IValidator<Assignment> _validator;
+    private readonly IFileStorage _fileStorage;
 
-    public AssignmentService(AppDbContext dbContext, IValidator<Assignment> validator)
+    public AssignmentService(AppDbContext dbContext, IValidator<Assignment> validator, IFileStorage fileStorage)
     {
         _dbContext = dbContext;
         _validator = validator;
+        _fileStorage = fileStorage;
     }
 
     public async Task<Result<IEnumerable<AssignmentResponse>>> GetAll()
@@ -222,7 +225,13 @@ public class AssignmentService : IAssignmentService
 
     public async Task<Result> DeleteById(Guid id)
     {
-        var deleted = await _dbContext.Assignments.Where(x => x.Id == id).ExecuteDeleteAsync();
-        return deleted > 0 ? Result.Success() : Result.NotFound();
+        var assignment = await _dbContext.Assignments.FindAsync(id);
+        if (assignment is null)
+        {
+            return Result.NotFound();
+        }
+        _fileStorage.DeleteAssignment(assignment.CourseId, assignment.Id);
+        await _dbContext.Assignments.Where(x => x.Id == id).ExecuteDeleteAsync();
+        return Result.Success();
     }
 }

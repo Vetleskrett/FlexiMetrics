@@ -12,8 +12,6 @@ builder.Services.AddOpenTelemetry()
 
 builder.AddNpgsqlDbContext<AppDbContext>("postgresdb", _ => { }, options =>
 {
-
-
     if (builder.Environment.IsDevelopment())
     {
         var fileStorage = new LocalFileStorage();

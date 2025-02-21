@@ -140,7 +140,13 @@
 					<div class="flex flex-col gap-1 px-6 py-4">
 						<label for={assignmentField.name}>
 							<span class="font-semibold">{assignmentField.name}</span>
-							<span class="text-gray-500">({assignmentField.type.replace(/([A-Z])/g, ' $1').substring(1)})</span>
+							<span class="text-gray-500">
+								{#if assignmentField.type == 'ShortText' || assignmentField.type == 'LongText'}
+									(Text)
+								{:else}
+									({assignmentField.type})
+								{/if}
+							</span>
 						</label>
 
 						{#if assignmentField.type == 'ShortText'}

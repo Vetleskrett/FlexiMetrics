@@ -2,6 +2,7 @@
 using Api.Validation;
 using Database;
 using Database.Models;
+using FileStorage;
 using Microsoft.EntityFrameworkCore;
 
 namespace Api.Students;
@@ -17,10 +18,12 @@ public interface IStudentService
 public class StudentService : IStudentService
 {
     private readonly AppDbContext _dbContext;
+    private readonly IFileStorage _fileStorage;
 
-    public StudentService(AppDbContext dbContext)
+    public StudentService(AppDbContext dbContext, IFileStorage fileStorage)
     {
         _dbContext = dbContext;
+        _fileStorage = fileStorage;
     }
 
     public async Task<Result<StudentResponse>> GetById(Guid studentId)
@@ -129,6 +132,16 @@ public class StudentService : IStudentService
         if (!course.CourseStudents!.Any(ct => ct.StudentId == studentId))
         {
             return new ValidationError("Student is not enrolled in the course").MapToResponse();
+        }
+
+        var deliveries = await _dbContext.Deliveries
+            .Where(d => d.StudentId == studentId)
+            .Where(d => d.Assignment!.CourseId == courseId)
+            .ToListAsync();
+
+        foreach (var delivery in deliveries)
+        {
+            _fileStorage.DeleteDelivery(courseId, delivery.AssignmentId, delivery.Id);
         }
 
         course.CourseStudents!.RemoveAll(ct => ct.StudentId == studentId);

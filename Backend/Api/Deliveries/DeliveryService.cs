@@ -301,7 +301,7 @@ public class DeliveryService : IDeliveryService
 
         try
         {
-            await _fileStorage.WriteDeliveryFile
+            await _fileStorage.WriteDeliveryField
             (
                 deliveryField.Delivery!.Assignment!.CourseId,
                 deliveryField.Delivery!.AssignmentId,
@@ -335,7 +335,7 @@ public class DeliveryService : IDeliveryService
         {
             var metadata = deliveryField.GetValue<FileMetadata>();
 
-            var stream = _fileStorage.ReadDeliveryFile
+            var stream = _fileStorage.ReadDeliveryField
             (
                 deliveryField.Delivery!.Assignment!.CourseId,
                 deliveryField.Delivery!.AssignmentId,
@@ -357,7 +357,18 @@ public class DeliveryService : IDeliveryService
 
     public async Task<Result> DeleteById(Guid id)
     {
-        var deleted = await _dbContext.Deliveries.Where(x => x.Id == id).ExecuteDeleteAsync();
-        return deleted > 0 ? Result.Success() : Result.NotFound();
+        var delivery = await _dbContext.Deliveries
+            .Include(d => d.Assignment)
+            .FirstOrDefaultAsync(d => d.Id == id);
+
+        if (delivery is null)
+        {
+            return Result.NotFound();
+        }
+
+        _fileStorage.DeleteDelivery(delivery.Assignment!.CourseId, delivery.AssignmentId, delivery.Id);
+
+        await _dbContext.Deliveries.Where(x => x.Id == id).ExecuteDeleteAsync();
+        return Result.Success();
     }
 }

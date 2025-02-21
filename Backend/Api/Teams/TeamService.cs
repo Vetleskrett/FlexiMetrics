@@ -2,6 +2,7 @@
 using Api.Validation;
 using Database;
 using Database.Models;
+using FileStorage;
 using FluentValidation;
 using Microsoft.EntityFrameworkCore;
 
@@ -24,10 +25,11 @@ public interface ITeamService
 public class TeamService : ITeamService
 {
     private readonly AppDbContext _dbContext;
-
-    public TeamService(AppDbContext dbContext)
+    private readonly IFileStorage _fileStorage;
+    public TeamService(AppDbContext dbContext, IFileStorage fileStorage)
     {
         _dbContext = dbContext;
+        _fileStorage = fileStorage;
     }
 
     public async Task<Result<IEnumerable<TeamResponse>>> GetAll()
@@ -375,6 +377,16 @@ public class TeamService : ITeamService
 
     public async Task<Result> DeleteById(Guid id)
     {
+        var deliveries = await _dbContext.Deliveries
+            .Include(d => d.Team)
+            .Where(d => d.TeamId == id)
+            .ToListAsync();
+
+        foreach (var delivery in deliveries)
+        {
+            _fileStorage.DeleteDelivery(delivery.Team!.CourseId, delivery.AssignmentId, delivery.Id);
+        }
+
         var deleted = await _dbContext.Teams.Where(x => x.Id == id).ExecuteDeleteAsync();
         return deleted > 0 ? Result.Success() : Result.NotFound();
     }

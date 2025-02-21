@@ -5,6 +5,7 @@ using Database.Models;
 using Database;
 using Api.Courses.Contracts;
 using Api.Teams;
+using FileStorage;
 
 namespace Api.Courses;
 
@@ -23,11 +24,13 @@ public class CourseService : ICourseService
 {
     private readonly AppDbContext _dbContext;
     private readonly IValidator<Course> _validator;
+    private readonly IFileStorage _fileStorage;
 
-    public CourseService(AppDbContext dbContext, IValidator<Course> validator)
+    public CourseService(AppDbContext dbContext, IValidator<Course> validator, IFileStorage fileStorage)
     {
         _dbContext = dbContext;
         _validator = validator;
+        _fileStorage = fileStorage;
     }
 
     public async Task<Result<IEnumerable<CourseResponse>>> GetAll()
@@ -145,6 +148,7 @@ public class CourseService : ICourseService
 
     public async Task<Result> DeleteById(Guid id)
     {
+        _fileStorage.DeleteCourse(id);
         var deleted = await _dbContext.Courses.Where(x => x.Id == id).ExecuteDeleteAsync();
         return deleted > 0 ? Result.Success() : Result.NotFound();
     }
