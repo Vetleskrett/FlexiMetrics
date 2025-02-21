@@ -188,9 +188,9 @@ public class CreateDeliveryTests(ApiFactory factory) : BaseIntegrationTest(facto
         ModelFactory.CreateAssignmentField(assignment.Id); // Missing field
         var repeatField = ModelFactory.CreateAssignmentField(assignment.Id);
 
-        var stringField = ModelFactory.CreateAssignmentField(assignment.Id, AssignmentDataType.ShortText);
+        var textField = ModelFactory.CreateAssignmentField(assignment.Id, AssignmentDataType.ShortText);
         var intField = ModelFactory.CreateAssignmentField(assignment.Id, AssignmentDataType.Integer);
-        var doubleField = ModelFactory.CreateAssignmentField(assignment.Id, AssignmentDataType.Float);
+        var floatField = ModelFactory.CreateAssignmentField(assignment.Id, AssignmentDataType.Float);
         var boolField = ModelFactory.CreateAssignmentField(assignment.Id, AssignmentDataType.Boolean);
 
         await DbContext.SaveChangesAsync();
@@ -219,7 +219,7 @@ public class CreateDeliveryTests(ApiFactory factory) : BaseIntegrationTest(facto
 
                 new DeliveryFieldRequest
                 {
-                    AssignmentFieldId = stringField.Id,
+                    AssignmentFieldId = textField.Id,
                     Value = false
                 },
                 new DeliveryFieldRequest
@@ -229,7 +229,7 @@ public class CreateDeliveryTests(ApiFactory factory) : BaseIntegrationTest(facto
                 },
                 new DeliveryFieldRequest
                 {
-                    AssignmentFieldId = doubleField.Id,
+                    AssignmentFieldId = floatField.Id,
                     Value = "Value"
                 },
                 new DeliveryFieldRequest

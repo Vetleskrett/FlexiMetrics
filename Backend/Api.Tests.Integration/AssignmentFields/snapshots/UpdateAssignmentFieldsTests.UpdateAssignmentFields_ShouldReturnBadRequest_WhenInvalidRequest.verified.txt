@@ -13,18 +13,6 @@
         {
           propertyName: Fields[0].Type,
           message: 'Type' has a range of values which does not include '100'.
-        },
-        {
-          propertyName: Fields[1].Name,
-          message: 'Name' must not be empty.
-        },
-        {
-          propertyName: Fields[1].RangeMin,
-          message: 'RangeMin' must not be empty when 'Type' is Range
-        },
-        {
-          propertyName: Fields[1].RangeMax,
-          message: 'RangeMax' must not be empty when 'Type' is Range
         }
       ]
     }

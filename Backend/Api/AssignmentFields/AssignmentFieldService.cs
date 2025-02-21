@@ -130,7 +130,7 @@ public class AssignmentFieldService : IAssignmentFieldService
 
         foreach (var deliveryField in deliveryFields)
         {
-            _fileStorage.DeleteDeliveryField(deliveryField.Delivery!.Assignment!.CourseId, deliveryField.AssignmentField!.AssignmentId, deliveryField.Delivery.Id, deliveryField.Id);
+            _fileStorage.DeleteDeliveryField(deliveryField.Delivery!.Assignment!.CourseId, deliveryField.Delivery!.AssignmentId, deliveryField.Delivery.Id, deliveryField.Id);
         }
 
         var deleted = await _dbContext.AssignmentFields.Where(x => x.Id == id).ExecuteDeleteAsync();

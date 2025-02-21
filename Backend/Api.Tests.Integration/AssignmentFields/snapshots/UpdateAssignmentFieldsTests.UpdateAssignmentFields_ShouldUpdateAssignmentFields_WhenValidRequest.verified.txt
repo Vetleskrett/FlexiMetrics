@@ -10,16 +10,18 @@
         type: Integer,
         name: Updated field,
         assignmentId: Guid_2,
-        rangeMin: null,
-        rangeMax: null
+        min: null,
+        max: null,
+        regex: null
       },
       {
         id: Guid_3,
         type: Boolean,
         name: New field,
         assignmentId: Guid_2,
-        rangeMin: null,
-        rangeMax: null
+        min: null,
+        max: null,
+        regex: null
       }
     ]
   }

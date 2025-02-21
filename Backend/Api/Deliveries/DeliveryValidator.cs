@@ -90,8 +90,8 @@ public class DeliveryValidator : AbstractValidator<Delivery>
         RuleForEach(x => x.Fields)
             .Must((delivery, field) =>
             {
-                var assignmentField = delivery.Assignment!.Fields!.First(f => f.Id == field.AssignmentFieldId);
-                if (assignmentField.Min is not null)
+                var assignmentField = delivery.Assignment!.Fields!.FirstOrDefault(f => f.Id == field.AssignmentFieldId);
+                if (assignmentField?.Min is not null)
                 {
                     switch(assignmentField.Type)
                     {
@@ -112,8 +112,8 @@ public class DeliveryValidator : AbstractValidator<Delivery>
         RuleForEach(x => x.Fields)
             .Must((delivery, field) =>
             {
-                var assignmentField = delivery.Assignment!.Fields!.First(f => f.Id == field.AssignmentFieldId);
-                if (assignmentField.Min is not null)
+                var assignmentField = delivery.Assignment!.Fields!.FirstOrDefault(f => f.Id == field.AssignmentFieldId);
+                if (assignmentField?.Min is not null)
                 {
                     switch (assignmentField.Type)
                     {
@@ -132,8 +132,8 @@ public class DeliveryValidator : AbstractValidator<Delivery>
         RuleForEach(x => x.Fields)
             .Must((delivery, field) =>
             {
-                var assignmentField = delivery.Assignment!.Fields!.First(f => f.Id == field.AssignmentFieldId);
-                if (assignmentField.Max is not null)
+                var assignmentField = delivery.Assignment!.Fields!.FirstOrDefault(f => f.Id == field.AssignmentFieldId);
+                if (assignmentField?.Max is not null)
                 {
                     switch (assignmentField.Type)
                     {
@@ -154,8 +154,8 @@ public class DeliveryValidator : AbstractValidator<Delivery>
         RuleForEach(x => x.Fields)
             .Must((delivery, field) =>
             {
-                var assignmentField = delivery.Assignment!.Fields!.First(f => f.Id == field.AssignmentFieldId);
-                if (assignmentField.Max is not null)
+                var assignmentField = delivery.Assignment!.Fields!.FirstOrDefault(f => f.Id == field.AssignmentFieldId);
+                if (assignmentField?.Max is not null)
                 {
                     switch (assignmentField.Type)
                     {
@@ -174,8 +174,8 @@ public class DeliveryValidator : AbstractValidator<Delivery>
         RuleForEach(x => x.Fields)
             .Must((delivery, field) =>
             {
-                var assignmentField = delivery.Assignment!.Fields!.First(f => f.Id == field.AssignmentFieldId);
-                if (assignmentField.Regex is not null)
+                var assignmentField = delivery.Assignment!.Fields!.FirstOrDefault(f => f.Id == field.AssignmentFieldId);
+                if (assignmentField?.Regex is not null)
                 {
                     switch (assignmentField.Type)
                     {
