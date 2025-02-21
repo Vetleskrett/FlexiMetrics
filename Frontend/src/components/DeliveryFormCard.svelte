@@ -1,16 +1,13 @@
 <script lang="ts">
 	import type { Assignment, AssignmentField, CreateDelivery, UpdateDelivery, Delivery } from 'src/types.js';
 	import * as Card from '$lib/components/ui/card/index.js';
-	import { Checkbox } from 'src/lib/components/ui/checkbox';
-	import { Input } from 'src/lib/components/ui/input';
-	import Textarea from 'src/lib/components/ui/textarea/textarea.svelte';
 	import Save from 'lucide-svelte/icons/save';
 	import CustomButton from './CustomButton.svelte';
 	import { studentId } from 'src/store';
 	import { postDelivery, putDelivery, postDeliveryFieldFile } from 'src/api';
 	import { goto } from '$app/navigation';
 	import Undo_2 from 'lucide-svelte/icons/undo-2';
-	import FileUpload from './FileUpload.svelte';
+	import DeliveryFieldInput from './inputs/DeliveryFieldInput.svelte';
 
 	export let assignment: Assignment;
 	export let assignmentFields: AssignmentField[];
@@ -143,27 +140,23 @@
 							<span class="text-gray-500">
 								{#if assignmentField.type == 'ShortText' || assignmentField.type == 'LongText'}
 									(Text)
+								{:else if assignmentField.type == 'List'}
+									{#if assignmentField.subType == 'ShortText' || assignmentField.subType == 'LongText'}
+										(List of Text)
+									{:else}
+										(List of {assignmentField.subType}s)
+									{/if}
 								{:else}
 									({assignmentField.type})
 								{/if}
 							</span>
 						</label>
 
-						{#if assignmentField.type == 'ShortText'}
-							<Input bind:value={values[assignmentField.id]} />
-						{:else if assignmentField.type == 'LongText'}
-							<Textarea class="h-[200px]" bind:value={values[assignmentField.id]} />
-						{:else if assignmentField.type == 'Integer'}
-							<Input type="number" bind:value={values[assignmentField.id]} />
-						{:else if assignmentField.type == 'Float'}
-							<Input type="number" step="any" bind:value={values[assignmentField.id]} />
-						{:else if assignmentField.type == 'Boolean'}
-							<Checkbox bind:checked={values[assignmentField.id]} />
-						{:else if assignmentField.type == 'URL'}
-							<Input bind:value={values[assignmentField.id]} />
-						{:else if assignmentField.type == 'File'}
-							<FileUpload bind:file={values[assignmentField.id]}/>
-						{/if}
+						<DeliveryFieldInput
+							bind:value={values[assignmentField.id]}
+							type={assignmentField.type}
+							subType={assignmentField.subType}
+						/>
 					</div>
 				{/each}
 				<div class="mt-4 mb-8 flex justify-center w-full gap-4">

@@ -19,7 +19,7 @@
 	import * as Form from 'src/lib/components/ui/form';
 	import { superForm } from 'sveltekit-superforms';
 	import { CalendarDate } from '@internationalized/date';
-	import DatePicker from './DatePicker.svelte';
+	import DatePicker from './inputs/DatePicker.svelte';
 	import AssignmentFieldsForm from './AssignmentFieldsForm.svelte';
 	import { cleanOptional, transformErrors } from 'src/utils';
 
@@ -103,7 +103,8 @@
 					type: fieldFormData.type.value,
 					min: cleanOptional(fieldFormData.min),
 					max: cleanOptional(fieldFormData.max),
-					regex: cleanOptional(fieldFormData.regex)
+					regex: cleanOptional(fieldFormData.regex),
+					subType: fieldFormData.subType?.value,
 				};
 			})
 		});

@@ -81,7 +81,7 @@ export type Team = {
     complete: number | null | undefined;
 }
 
-export type AssignmentFieldType = 'ShortText' | 'LongText' | 'Integer' | 'Float' | 'Boolean' | 'URL' | 'File';
+export type AssignmentFieldType = 'ShortText' | 'LongText' | 'Integer' | 'Float' | 'Boolean' | 'URL' | 'File' | 'List';
 
 export type AssignmentField = {
     id: string;
@@ -90,6 +90,7 @@ export type AssignmentField = {
     min?: number;
     max?: number;
     regex?: string;
+    subType?: AssignmentFieldType;
 }
 
 export type AssignmentFieldFormData = {
@@ -103,7 +104,10 @@ export type AssignmentFieldFormData = {
     min?: number;
     max?: number;
     regex?: string;
-};
+    subType?: {
+        label: string;
+        value: AssignmentFieldType;
+    };};
 
 export type UpdateAssignmentField = {
     id?: string;
@@ -112,6 +116,7 @@ export type UpdateAssignmentField = {
     min?: number;
     max?: number;
     regex?: string;
+    subType?: AssignmentFieldType;
 }
 
 export type UpdateAssignmentFields = {

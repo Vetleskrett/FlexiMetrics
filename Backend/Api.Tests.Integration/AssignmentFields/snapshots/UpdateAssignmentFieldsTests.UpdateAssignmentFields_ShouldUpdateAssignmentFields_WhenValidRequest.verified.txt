@@ -12,7 +12,8 @@
         assignmentId: Guid_2,
         min: null,
         max: null,
-        regex: null
+        regex: null,
+        subType: null
       },
       {
         id: Guid_3,
@@ -21,7 +22,8 @@
         assignmentId: Guid_2,
         min: null,
         max: null,
-        regex: null
+        regex: null,
+        subType: null
       }
     ]
   }

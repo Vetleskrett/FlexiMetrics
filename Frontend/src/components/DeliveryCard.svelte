@@ -1,9 +1,8 @@
 <script lang="ts">
-	import { type AssignmentField, type Delivery, type DeliveryField } from 'src/types.js';
+	import type { AssignmentField, Delivery } from 'src/types.js';
 	import * as Card from '$lib/components/ui/card/index.js';
 	import { Separator } from '$lib/components/ui/separator/index.js';
-	import { getDeliveryFieldFile } from 'src/api';
-	import ArrowDownToLine from 'lucide-svelte/icons/arrow-down-to-line';
+	import DeliveryFieldValue from './DeliveryFieldValue.svelte';
 
 	export let assignmentFields: AssignmentField[];
 	export let delivery: Delivery | null;
@@ -31,15 +30,13 @@
 						<h1 class="font-semibold">
 							{assignmentField.name}
 						</h1>
-						{#if assignmentField.type == 'URL'}
-							<a class="text-blue-500" target="_blank" href={deliveryField?.value}>{deliveryField?.value}</a>
-						{:else if assignmentField.type == 'File'}
-							<a class="flex items-center text-blue-500" download href={getDeliveryFieldFile(deliveryField?.id || '')}>
-								<ArrowDownToLine size="20" />
-								{deliveryField?.value?.FileName}
-							</a>
-						{:else}
-							<h1>{deliveryField?.value}</h1>
+						{#if deliveryField}
+							<DeliveryFieldValue
+								id={deliveryField.id}
+								value={deliveryField.value}
+								type={assignmentField.type}
+								subType={assignmentField.subType}
+							/>
 						{/if}
 					</div>
 				{/each}

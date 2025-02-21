@@ -25,6 +25,16 @@ public class LocalFileStorage : IFileStorage
         return File.OpenRead(filePath);
     }
 
+    public bool DeleteAll()
+    {
+        var exists = Directory.Exists(AppDataPath);
+        if (exists)
+        {
+            Directory.Delete(AppDataPath, true);
+        }
+        return exists;
+    }
+
     public bool DeleteCourse(Guid courseId)
     {
         var dirPath = GetCourseDirectoryPath(courseId);

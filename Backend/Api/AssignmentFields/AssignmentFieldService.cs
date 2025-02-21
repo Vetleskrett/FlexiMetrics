@@ -91,6 +91,7 @@ public class AssignmentFieldService : IAssignmentFieldService
             exisingField.Min = field.Min;
             exisingField.Max = field.Max;
             exisingField.Regex = field.Regex;
+            exisingField.SubType = field.SubType;
         }
 
         var fieldsToBeCreated = request.Fields

@@ -9,4 +9,5 @@ public enum AssignmentDataType
     Boolean,
     URL,
     File,
+    List
 }

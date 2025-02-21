@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { Upload } from "lucide-svelte";
-    import CustomButton from "./CustomButton.svelte";
+	import CustomButton from "../CustomButton.svelte";
 
     let fileInput: HTMLInputElement;
     let isDragOver = false;

@@ -69,13 +69,23 @@ public class DeliveryValidator : AbstractValidator<Delivery>
                 {
                     object? value = assignmentField.Type switch
                     {
-                        AssignmentDataType.ShortText => field.JsonValue?.Deserialize<string>(),
-                        AssignmentDataType.LongText => field.JsonValue?.Deserialize<string>(),
-                        AssignmentDataType.Integer => field.JsonValue?.Deserialize<int>(),
-                        AssignmentDataType.Float => field.JsonValue?.Deserialize<double>(),
-                        AssignmentDataType.Boolean => field.JsonValue?.Deserialize<bool>(),
-                        AssignmentDataType.URL => field.JsonValue?.Deserialize<string>(),
-                        AssignmentDataType.File => field.JsonValue?.Deserialize<FileMetadata>(),
+                        AssignmentDataType.ShortText => field.GetValue<string>(),
+                        AssignmentDataType.LongText => field.GetValue<string>(),
+                        AssignmentDataType.Integer => field.GetValue<int>(),
+                        AssignmentDataType.Float => field.GetValue<double>(),
+                        AssignmentDataType.Boolean => field.GetValue<bool>(),
+                        AssignmentDataType.URL => field.GetValue<string>(),
+                        AssignmentDataType.File => field.GetValue<FileMetadata>(),
+                            AssignmentDataType.List => assignmentField.SubType switch
+                            {
+                                AssignmentDataType.ShortText => field.GetValue<List<string>>(),
+                                AssignmentDataType.LongText => field.GetValue<List<string>>(),
+                                AssignmentDataType.Integer => field.GetValue<List<int>>(),
+                                AssignmentDataType.Float => field.GetValue<List<double>>(),
+                                AssignmentDataType.Boolean => field.GetValue<List<bool>>(),
+                                AssignmentDataType.URL => field.GetValue<List<string>>(),
+                                _ => null,
+                            },
                         _ => null,
                     };
                     return value is not null;

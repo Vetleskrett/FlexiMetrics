@@ -14,4 +14,5 @@ public class AssignmentField
     public required int? Min { get; set; }
     public required int? Max { get; set; }
     public required string? Regex { get; set; }
+    public required AssignmentDataType? SubType { get; set; }
 }

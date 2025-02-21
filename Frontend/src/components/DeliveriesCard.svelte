@@ -1,12 +1,9 @@
 <script lang="ts">
 	import * as Card from '$lib/components/ui/card/index.js';
 	import * as Table from '$lib/components/ui/table';
-	import ArrowDownToline from 'lucide-svelte/icons/arrow-down-to-line';
 	import type { Delivery, AssignmentField, Assignment, Student, Team } from 'src/types';
-	import Check from 'lucide-svelte/icons/check';
-	import X from 'lucide-svelte/icons/x';
 	import Separator from 'src/lib/components/ui/separator/separator.svelte';
-	import { getDeliveryFieldFile } from 'src/api';
+	import DeliveryFieldValue from './DeliveryFieldValue.svelte';
 
 	export let assignment: Assignment;
 	export let assignmentFields: AssignmentField[];
@@ -44,13 +41,7 @@
 
 					{#each assignmentFields as field}
 						<Table.Head class="h-8">
-							{#if field.type == 'Integer'}
-								<p class="text-right font-bold text-black">{field.name}</p>
-							{:else if field.type == 'Boolean'}
-								<p class="text-center font-bold text-black">{field.name}</p>
-							{:else}
-								<p class="font-bold text-black">{field.name}</p>
-							{/if}
+							<p class="font-bold text-black">{field.name}</p>
 						</Table.Head>
 					{/each}
 				</Table.Row>
@@ -86,25 +77,14 @@
 								{@const deliveryField = delivery.fields.find(
 									(x) => x.assignmentFieldId == assignmentField.id
 								)}
-
 								<Table.Cell>
-									{#if assignmentField.type == 'File'}
-										<a class="flex items-center text-blue-500" download href={getDeliveryFieldFile(deliveryField?.id || '')}>
-											<ArrowDownToline size="20" />
-											{deliveryField?.value?.FileName}
-										</a>
-									{:else if assignmentField.type == 'Integer'}
-										<p class="text-right">{deliveryField?.value}</p>
-									{:else if assignmentField.type == 'Boolean'}
-										{#if deliveryField?.value}
-											<Check color="green" class="mx-auto" />
-										{:else}
-											<X color="red" class="mx-auto" />
-										{/if}
-									{:else if assignmentField.type == 'URL'}
-										<a class="text-blue-500" target="_blank" href={deliveryField?.value}>{deliveryField?.value}</a>
-									{:else}
-										<p>{deliveryField?.value}</p>
+									{#if deliveryField}
+										<DeliveryFieldValue
+											id={deliveryField.id}
+											value={deliveryField.value}
+											type={assignmentField.type}
+											subType={assignmentField.subType}
+										/>
 									{/if}
 								</Table.Cell>
 							{/each}

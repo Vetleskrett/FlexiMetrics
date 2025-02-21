@@ -63,6 +63,7 @@
 							<Select.Item value="Boolean" label="Boolean">Boolean</Select.Item>
 							<Select.Item value="URL" label="URL">URL</Select.Item>
 							<Select.Item value="File" label="File">File</Select.Item>
+							<Select.Item value="List" label="List">List</Select.Item>
 						</Select.Content>
 					</Select.Root>
 				</Form.Control>
@@ -112,9 +113,31 @@
 					<Form.FieldErrors />
 				</Form.Field>
 			{/if}
+			{#if field.type.value == 'List'}
+				<Form.Field {form} name="fields[{i}].subType" class="w-[280px]">
+					<Form.Control let:attrs>
+						<Form.Label for="fields[{i}].subType">Sub Type</Form.Label>
+						<Select.Root {...attrs} bind:selected={field.subType}>
+							<Select.Trigger>
+								<Select.Value/>
+							</Select.Trigger>
+							<Select.Content>
+								<Select.Item value="ShortText" label="Short Text">Short Text</Select.Item>
+								<Select.Item value="LongText" label="Long Text">Long Text</Select.Item>
+								<Select.Item value="Integer" label="Integer">Integer</Select.Item>
+								<Select.Item value="Float" label="Float">Float</Select.Item>
+								<Select.Item value="Boolean" label="Boolean">Boolean</Select.Item>
+								<Select.Item value="URL" label="URL">URL</Select.Item>
+							</Select.Content>
+						</Select.Root>
+					</Form.Control>
+					<Form.FieldErrors />
+				</Form.Field>	
+			{/if}
+
 			<div class="self-center">
 				<CustomButton color="red" outline={true} on:click={() => removeField(field)}>
-					<Trash_2 size="16" on:click={() => removeField(field)} />
+					<Trash_2 size="16" />
 				</CustomButton>
 			</div>
 		</div>

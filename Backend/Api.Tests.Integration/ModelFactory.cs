@@ -195,7 +195,8 @@ public class ModelFactory
             Name = "Project title",
             Min = null,
             Max = null,
-            Regex = null
+            Regex = null,
+            SubType = dataType == AssignmentDataType.List ? AssignmentDataType.ShortText : null,
         };
         _dbContext.AssignmentFields.Add(assignmentField);
         return assignmentField;
