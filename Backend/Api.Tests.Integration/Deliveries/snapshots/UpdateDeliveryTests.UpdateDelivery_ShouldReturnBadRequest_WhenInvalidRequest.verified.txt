@@ -1,0 +1,28 @@
+﻿{
+  Status: 400 Bad Request,
+  Content: {
+    Headers: {
+      Content-Type: application/json; charset=utf-8
+    },
+    Value: {
+      errors: [
+        {
+          propertyName: Fields[0],
+          message: Delivery field data type must match assignment field data type
+        },
+        {
+          propertyName: Fields[1],
+          message: Delivery field data type must match assignment field data type
+        },
+        {
+          propertyName: Fields[2],
+          message: Delivery field data type must match assignment field data type
+        },
+        {
+          propertyName: Fields[3],
+          message: Delivery field data type must match assignment field data type
+        }
+      ]
+    }
+  }
+}

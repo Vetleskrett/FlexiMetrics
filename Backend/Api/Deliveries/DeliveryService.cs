@@ -200,10 +200,24 @@ public class DeliveryService : IDeliveryService
                 return Result<DeliveryResponse>.NotFound();
             }
 
+            var existingDelivery = await _dbContext.Deliveries
+                .AnyAsync(d => d.AssignmentId == assignment.Id && d.TeamId == team.Id);
+            if (existingDelivery)
+            {
+                return new ValidationError("Delivery already exists").MapToResponse();
+            }
+
             delivery = request.MapToTeamDelivery(team.Id);
         }
         else
         {
+            var existingDelivery = await _dbContext.Deliveries
+                .AnyAsync(d => d.AssignmentId == assignment.Id && d.StudentId == student.Id);
+            if (existingDelivery)
+            {
+                return new ValidationError("Delivery already exists").MapToResponse();
+            }
+
             delivery = request.MapToStudentDelivery();
         }
 
@@ -215,21 +229,6 @@ public class DeliveryService : IDeliveryService
             return validationResult.Errors.MapToResponse();
         }
 
-        if (assignment.CollaborationType == CollaborationType.Individual)
-        {
-            await _dbContext.Deliveries
-                .Where(d => d.AssignmentId == assignment.Id)
-                .Where(d => d.StudentId == delivery.StudentId)
-                .ExecuteDeleteAsync();
-        }
-        else
-        {
-            await _dbContext.Deliveries
-                .Where(d => d.AssignmentId == assignment.Id)
-                .Where(d => d.TeamId != null && d.TeamId == delivery.TeamId)
-                .ExecuteDeleteAsync();
-        }
-
         _dbContext.Deliveries.Add(delivery);
         await _dbContext.SaveChangesAsync();
 
@@ -239,11 +238,9 @@ public class DeliveryService : IDeliveryService
     public async Task<Result<DeliveryResponse>> Update(UpdateDeliveryRequest request, Guid id)
     {
         var delivery = await _dbContext.Deliveries
-            .Include(d => d.Fields)
+            .Include(d => d.Fields!.OrderBy(f => f.AssignmentField!.Type))
             .Include(d => d.Assignment!)
             .ThenInclude(a => a.Fields)
-            .Include(d => d.Student)
-            .Include(d => d.Team)
             .FirstOrDefaultAsync(d => d.Id == id);
 
         if (delivery is null)
@@ -274,6 +271,12 @@ public class DeliveryService : IDeliveryService
             {
                 deliveryField.Value = fieldRequest.Value;
             }
+        }
+
+        var validationResult = await _validator.ValidateAsync(delivery);
+        if (!validationResult.IsValid)
+        {
+            return validationResult.Errors.MapToResponse();
         }
 
         await _dbContext.SaveChangesAsync();
