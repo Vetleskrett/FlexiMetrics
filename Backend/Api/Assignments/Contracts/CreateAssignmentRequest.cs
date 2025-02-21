@@ -13,11 +13,15 @@ public class CreateAssignmentRequest
     public required GradingType GradingType { get; init; }
     public int? MaxPoints { get; init; }
     public required string Description { get; init; }
-    public required List<NewAssignmentFieldRequest> Fields { get; init; }
+    public required List<CreateAssignmentFieldRequest> Fields { get; init; }
 }
 
-public class NewAssignmentFieldRequest
+public class CreateAssignmentFieldRequest
 {
     public required AssignmentDataType Type { get; init; }
     public required string Name { get; init; }
+
+    public int? Min { get; init; }
+    public int? Max { get; init; }
+    public string? Regex { get; init; }
 }

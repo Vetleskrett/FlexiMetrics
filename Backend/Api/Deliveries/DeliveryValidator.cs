@@ -1,6 +1,7 @@
 ﻿using Database.Models;
 using FluentValidation;
 using System.Text.Json;
+using System.Text.RegularExpressions;
 
 namespace Api.Deliveries;
 
@@ -68,10 +69,13 @@ public class DeliveryValidator : AbstractValidator<Delivery>
                 {
                     object? value = assignmentField.Type switch
                     {
-                        AssignmentDataType.String => field.JsonValue?.Deserialize<string>(),
+                        AssignmentDataType.ShortText => field.JsonValue?.Deserialize<string>(),
+                        AssignmentDataType.LongText => field.JsonValue?.Deserialize<string>(),
                         AssignmentDataType.Integer => field.JsonValue?.Deserialize<int>(),
-                        AssignmentDataType.Double => field.JsonValue?.Deserialize<double>(),
+                        AssignmentDataType.Float => field.JsonValue?.Deserialize<double>(),
                         AssignmentDataType.Boolean => field.JsonValue?.Deserialize<bool>(),
+                        AssignmentDataType.URL => field.JsonValue?.Deserialize<string>(),
+                        AssignmentDataType.File => field.JsonValue?.Deserialize<FileMetadata>(),
                         _ => null,
                     };
                     return value is not null;
@@ -82,5 +86,109 @@ public class DeliveryValidator : AbstractValidator<Delivery>
                 }
             })
             .WithMessage("Delivery field data type must match assignment field data type");
+
+        RuleForEach(x => x.Fields)
+            .Must((delivery, field) =>
+            {
+                var assignmentField = delivery.Assignment!.Fields!.FirstOrDefault(f => f.Id == field.AssignmentFieldId);
+                if (assignmentField?.Min is not null)
+                {
+                    switch(assignmentField.Type)
+                    {
+                        case AssignmentDataType.Integer:
+                            var intValue = field.JsonValue?.Deserialize<int>();
+                            return intValue is not null && intValue.Value >= assignmentField.Min;
+                        case AssignmentDataType.Float:
+                            var floatValue = field.JsonValue?.Deserialize<double>();
+                            return floatValue is not null && floatValue.Value >= assignmentField.Min;
+                        default:
+                            return true;
+                    }
+                }
+                return true;
+            })
+            .WithMessage("Delivery field value must be between min and max");
+
+        RuleForEach(x => x.Fields)
+            .Must((delivery, field) =>
+            {
+                var assignmentField = delivery.Assignment!.Fields!.FirstOrDefault(f => f.Id == field.AssignmentFieldId);
+                if (assignmentField?.Min is not null)
+                {
+                    switch (assignmentField.Type)
+                    {
+                        case AssignmentDataType.ShortText:
+                        case AssignmentDataType.LongText:
+                            var stringValue = field.JsonValue?.Deserialize<string>();
+                            return stringValue is not null && stringValue.Length >= assignmentField.Min;
+                        default:
+                            return true;
+                    }
+                }
+                return true;
+            })
+            .WithMessage("Delivery field text length must be between min and max");
+
+        RuleForEach(x => x.Fields)
+            .Must((delivery, field) =>
+            {
+                var assignmentField = delivery.Assignment!.Fields!.FirstOrDefault(f => f.Id == field.AssignmentFieldId);
+                if (assignmentField?.Max is not null)
+                {
+                    switch (assignmentField.Type)
+                    {
+                        case AssignmentDataType.Integer:
+                            var intValue = field.JsonValue?.Deserialize<int>();
+                            return intValue is not null && intValue.Value <= assignmentField.Max;
+                        case AssignmentDataType.Float:
+                            var floatValue = field.JsonValue?.Deserialize<double>();
+                            return floatValue is not null && floatValue.Value <= assignmentField.Max;
+                        default:
+                            return true;
+                    }
+                }
+                return true;
+            })
+            .WithMessage("Delivery field value must be between min and max");
+
+        RuleForEach(x => x.Fields)
+            .Must((delivery, field) =>
+            {
+                var assignmentField = delivery.Assignment!.Fields!.FirstOrDefault(f => f.Id == field.AssignmentFieldId);
+                if (assignmentField?.Max is not null)
+                {
+                    switch (assignmentField.Type)
+                    {
+                        case AssignmentDataType.ShortText:
+                        case AssignmentDataType.LongText:
+                            var stringValue = field.JsonValue?.Deserialize<string>();
+                            return stringValue is not null && stringValue.Length <= assignmentField.Min;
+                        default:
+                            return true;
+                    }
+                }
+                return true;
+            })
+            .WithMessage("Delivery field text length must be between min and max");
+
+        RuleForEach(x => x.Fields)
+            .Must((delivery, field) =>
+            {
+                var assignmentField = delivery.Assignment!.Fields!.FirstOrDefault(f => f.Id == field.AssignmentFieldId);
+                if (assignmentField?.Regex is not null)
+                {
+                    switch (assignmentField.Type)
+                    {
+                        case AssignmentDataType.ShortText:
+                        case AssignmentDataType.LongText:
+                            var stringValue = field.JsonValue?.Deserialize<string>();
+                            return stringValue is not null && Regex.IsMatch(stringValue, assignmentField.Regex);
+                        default:
+                            return true;
+                    }
+                }
+                return true;
+            })
+            .WithMessage("Delivery field text must match regex");
     }
 }

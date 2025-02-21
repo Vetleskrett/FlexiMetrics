@@ -15,4 +15,8 @@
 	  <Folder Include="Migrations\" />
 	</ItemGroup>
 
+	<ItemGroup>
+	  <ProjectReference Include="..\FileStorage\FileStorage.csproj" />
+	</ItemGroup>
+
 </Project>

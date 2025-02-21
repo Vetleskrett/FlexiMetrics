@@ -7,21 +7,30 @@
     Value: [
       {
         id: Guid_1,
-        type: String,
+        type: ShortText,
         name: Project title,
-        assignmentId: Guid_2
+        assignmentId: Guid_2,
+        min: null,
+        max: null,
+        regex: null
       },
       {
         id: Guid_3,
-        type: String,
+        type: ShortText,
         name: Project title,
-        assignmentId: Guid_2
+        assignmentId: Guid_2,
+        min: null,
+        max: null,
+        regex: null
       },
       {
         id: Guid_4,
-        type: String,
+        type: ShortText,
         name: Project title,
-        assignmentId: Guid_2
+        assignmentId: Guid_2,
+        min: null,
+        max: null,
+        regex: null
       }
     ]
   }

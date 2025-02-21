@@ -1,5 +1,3 @@
-import type { DateValue } from "@internationalized/date";
-
 export type Course = {
     id: string;
     name: string;
@@ -83,27 +81,41 @@ export type Team = {
     complete: number | null | undefined;
 }
 
-export type AssignmentFieldType = 'String' | 'Integer' | 'Double' | 'Boolean' | 'File';
+export type AssignmentFieldType = 'ShortText' | 'LongText' | 'Integer' | 'Float' | 'Boolean' | 'URL' | 'File';
 
 export type AssignmentField = {
     id: string;
     name: string;
     type: AssignmentFieldType;
+    min?: number;
+    max?: number;
+    regex?: string;
 }
 
-export type NewAssignmentField = {
+export type AssignmentFieldFormData = {
+    id?: string;
+    name: string;
+    type: {
+        label: string;
+        value: AssignmentFieldType;
+    };
+
+    min?: number;
+    max?: number;
+    regex?: string;
+};
+
+export type UpdateAssignmentField = {
+    id?: string;
     name: string;
     type: AssignmentFieldType;
+    min?: number;
+    max?: number;
+    regex?: string;
 }
 
-export type RegisterAssignmentField =  {
-    name: string;
-    type: string;
-    assignmentId: string;
-}
-
-export type RegisterAssignmentFields = {
-    fields: RegisterAssignmentField[]
+export type UpdateAssignmentFields = {
+    fields: UpdateAssignmentField[]
 }
 
 export type DeliveryField = {
@@ -214,10 +226,15 @@ export type CreateDelivery = {
     fields: CreateDeliveryField[];
 }
 
+export type UpdateDelivery = {
+    fields: CreateDeliveryField[];
+}
+
 export type CreateDeliveryField = {
     assignmentFieldId: string;
     value: any;
 }
+
 export type CreateAssignment = {
     name: string,
     description: string,
@@ -228,7 +245,7 @@ export type CreateAssignment = {
     mandatory: boolean,
     published: boolean,
     collaborationType: CollaborationType,
-    fields: NewAssignmentField[]
+    fields: UpdateAssignmentField[]
 }
 
 export type EditAssignment = {

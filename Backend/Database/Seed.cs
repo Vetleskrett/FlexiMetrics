@@ -1,6 +1,9 @@
 ﻿using Bogus;
 using Database.Models;
+using FileStorage;
 using Microsoft.EntityFrameworkCore;
+using System.Net.Mime;
+using System.Text;
 
 namespace Database;
 
@@ -8,8 +11,11 @@ public static class Seed
 {
     private const int SEED = 123;
 
-    public static async Task SeedDatabaseAsync(this DbContext dbContext)
+    public static async Task SeedDatabaseAsync(this DbContext dbContext, IFileStorage fileStorage)
     {
+        await dbContext.Set<Course>().ExecuteDeleteAsync();
+        await dbContext.Set<User>().ExecuteDeleteAsync();
+
         var userFaker = new Faker<User>()
             .UseSeed(SEED)
             .RuleFor(x => x.Id, f => f.Random.Guid())
@@ -24,12 +30,8 @@ public static class Seed
             .RuleFor(x => x.Role, Role.Teacher)
             .Generate(10);
 
-        await AddRangeIfNotExists
-        (
-            students.Union(teachers),
-            user => dbContext.Set<User>().AnyAsync(x => x.Id == user.Id),
-            user => dbContext.Set<User>().Add(user)
-        );
+        dbContext.AddRange(students);
+        dbContext.AddRange(teachers);
 
         var courses = new Faker<Course>()
             .UseSeed(SEED)
@@ -40,12 +42,7 @@ public static class Seed
             .RuleFor(x => x.Semester, Semester.Spring)
             .Generate(10);
 
-        await AddRangeIfNotExists
-        (
-            courses,
-            course => dbContext.Set<Course>().AnyAsync(x => x.Id == course.Id),
-            course => dbContext.Set<Course>().Add(course)
-        );
+        dbContext.AddRange(courses);
 
         var courseTeacherFaker = new Faker<CourseTeacher>()
             .UseSeed(SEED);
@@ -62,13 +59,7 @@ public static class Seed
         .SelectMany(x => x)
         .ToList();
 
-        await AddRangeIfNotExists
-        (
-            courseTeachers,
-            courseTeacher => dbContext.Set<CourseTeacher>()
-                .AnyAsync(x => x.CourseId == courseTeacher.CourseId && x.TeacherId == courseTeacher.TeacherId),
-            courseTeacher => dbContext.Set<CourseTeacher>().Add(courseTeacher)
-        );
+        dbContext.AddRange(courseTeachers);
 
         var courseStudentFaker = new Faker<CourseStudent>()
             .UseSeed(SEED);
@@ -85,13 +76,7 @@ public static class Seed
         .SelectMany(x => x)
         .ToList();
 
-        await AddRangeIfNotExists
-        (
-            courseStudents,
-            courseStudent => dbContext.Set<CourseStudent>()
-                .AnyAsync(x => x.CourseId == courseStudent.CourseId && x.StudentId == courseStudent.StudentId),
-            courseStudent => dbContext.Set<CourseStudent>().Add(courseStudent)
-        );
+        dbContext.AddRange(courseStudents);
 
         var teamFaker = new Faker<Team>()
             .UseSeed(SEED)
@@ -115,12 +100,7 @@ public static class Seed
         .SelectMany(x => x)
         .ToList();
 
-        await AddRangeIfNotExists
-        (
-            teams,
-            team => dbContext.Set<Team>().AnyAsync(x => x.Id == team.Id),
-            team => dbContext.Set<Team>().Add(team)
-        );
+        dbContext.AddRange(teams);
 
         var assignmentFaker = new Faker<Assignment>()
             .UseSeed(SEED)
@@ -130,7 +110,12 @@ public static class Seed
         {
             return assignmentFaker
                 .RuleFor(x => x.Name, f => f.PickRandom(ASSIGNMENTS))
-                .RuleFor(x => x.DueDate, f => f.Date.Between(new DateTime(2025, 1, 1, 0, 0, 0, DateTimeKind.Utc), new DateTime(2025, 6, 1, 0, 0, 0, DateTimeKind.Utc)))
+                .RuleFor(x => x.DueDate, f =>
+                {
+                    var start = DateTime.UtcNow - TimeSpan.FromDays(30);
+                    var end = DateTime.UtcNow + TimeSpan.FromDays(30);
+                    return f.Date.Between(start, end);
+                })
                 .RuleFor(x => x.Published, f => f.Random.Float() > 0.1)
                 .RuleFor(x => x.CollaborationType, f => f.Random.Enum<CollaborationType>())
                 .RuleFor(x => x.Mandatory, f => f.Random.Bool())
@@ -143,12 +128,7 @@ public static class Seed
         .SelectMany(x => x)
         .ToList();
 
-        await AddRangeIfNotExists
-        (
-            assignments,
-            assignment => dbContext.Set<Assignment>().AnyAsync(x => x.Id == assignment.Id),
-            assignment => dbContext.Set<Assignment>().Add(assignment)
-        );
+        dbContext.AddRange(assignments);
 
         var assignmentFieldFaker = new Faker<AssignmentField>()
             .UseSeed(SEED)
@@ -160,8 +140,8 @@ public static class Seed
                 .RuleFor(x => x.Type, f => f.Random.Enum<AssignmentDataType>())
                 .RuleFor(x => x.Name, f =>
                 {
-                    var word = f.Lorem.Word();
-                    return string.Concat(word.ToUpper().AsSpan(0, 1), word.AsSpan(1));
+                    var name = string.Join(" ", f.Lorem.Words());
+                    return string.Concat(name.ToUpper().AsSpan(0, 1), name.AsSpan(1));
                 })
                 .RuleFor(x => x.AssignmentId, assignment.Id)
                 .GenerateBetween(3, 6);
@@ -169,12 +149,7 @@ public static class Seed
         .SelectMany(x => x)
         .ToList();
 
-        await AddRangeIfNotExists
-        (
-            assignmentFields,
-            field => dbContext.Set<AssignmentField>().AnyAsync(x => x.Id == field.Id),
-            field => dbContext.Set<AssignmentField>().Add(field)
-        );
+        dbContext.AddRange(assignmentFields);
 
         var deliveryFaker = new Faker<Delivery>()
             .UseSeed(SEED)
@@ -231,12 +206,7 @@ public static class Seed
         .SelectMany(x => x)
         .ToList();
 
-        await AddRangeIfNotExists
-        (
-            deliveries,
-            delivery => dbContext.Set<Delivery>().AnyAsync(x => x.Id == delivery.Id),
-            delivery => dbContext.Set<Delivery>().Add(delivery)
-        );
+        dbContext.AddRange(deliveries);
 
         var deliveryFieldFaker = new Faker<DeliveryField>()
             .UseSeed(SEED)
@@ -244,6 +214,10 @@ public static class Seed
 
         var deliveryFields = deliveries.Select(delivery =>
         {
+            var deliveryId = delivery.Id;
+            var assignmentId = delivery.AssignmentId;
+            var courseId = assignments.First(a => a.Id == assignmentId).CourseId;
+
             var fieldsInAssignment = assignmentFields
                 .Where(f => f.AssignmentId == delivery.AssignmentId)
                 .ToList();
@@ -253,15 +227,35 @@ public static class Seed
                 return deliveryFieldFaker
                     .RuleFor(f => f.DeliveryId, delivery.Id)
                     .RuleFor(f => f.AssignmentFieldId, field.Id)
-                    .RuleFor(f => f.Value, f =>
+                    .RuleFor(f => f.Value, (f, deliveryField) =>
                     {
+                        if (field.Type == AssignmentDataType.File)
+                        {
+                            var stream = new MemoryStream(Encoding.UTF8.GetBytes(f.Lorem.Paragraph(10)));
+                            fileStorage.WriteDeliveryField
+                            (
+                                courseId,
+                                assignmentId,
+                                deliveryId,
+                                deliveryField.Id,
+                                stream
+                            );
+
+                            return new FileMetadata
+                            {
+                                FileName = f.Lorem.Word() + ".txt",
+                                ContentType  = MediaTypeNames.Text.Plain,
+                            };
+                        }
+
                         return field.Type switch
                         {
-                            AssignmentDataType.String => f.Lorem.Sentence(),
+                            AssignmentDataType.ShortText => f.Lorem.Sentence(3),
+                            AssignmentDataType.LongText => f.Lorem.Paragraph(),
                             AssignmentDataType.Integer => f.Random.Int(0, 100),
-                            AssignmentDataType.Double => f.Random.Double(0, 100),
+                            AssignmentDataType.Float => f.Random.Double(0, 100),
                             AssignmentDataType.Boolean => f.Random.Bool(),
-                            AssignmentDataType.File => f.Lorem.Word() + ".zip",
+                            AssignmentDataType.URL => f.Internet.Url(),
                             _ => f.Lorem.Sentence()
                         };
                     })
@@ -271,12 +265,7 @@ public static class Seed
         .SelectMany(x => x)
         .ToList();
 
-        await AddRangeIfNotExists
-        (
-            deliveryFields,
-            field => dbContext.Set<DeliveryField>().AnyAsync(x => x.Id == field.Id),
-            field => dbContext.Set<DeliveryField>().Add(field)
-        );
+        dbContext.AddRange(deliveryFields);
 
         var feedbackFaker = new Faker<Feedback>()
             .UseSeed(SEED + 0)
@@ -316,7 +305,7 @@ public static class Seed
                 .ToList();
 
             return assignmentsInCourse
-                .Take(assignmentsInCourse.Count - 1)
+                .Where(a => a.DueDate < DateTime.UtcNow)
                 .Select(assignment =>
                 {
                     var isIndividual = assignment.CollaborationType == CollaborationType.Individual;
@@ -325,7 +314,7 @@ public static class Seed
                         teamsInCourse.Select(s => s.Id).ToList();
 
                     return ids
-                        .Take(ids.Count - 1)
+                        .Take(ids.Count - 3)
                         .Select(id =>
                         {
                             return assignment.GradingType switch
@@ -362,26 +351,9 @@ public static class Seed
         .SelectMany(x => x)
         .ToList();
 
-        await AddRangeIfNotExists
-        (
-            feedbacks,
-            feedback => dbContext.Set<Feedback>().AnyAsync(x => x.Id == feedback.Id),
-            feedback => dbContext.Set<Feedback>().Add(feedback)
-        );
+        dbContext.AddRange(feedbacks);
 
         await dbContext.SaveChangesAsync();
-    }
-
-    private static async Task AddRangeIfNotExists<T>(IEnumerable<T> items, Func<T, Task<bool>> containsItem, Action<T> addItem)
-    {
-        foreach (var item in items)
-        {
-            var contains = await containsItem(item);
-            if (!contains)
-            {
-                addItem(item);
-            }
-        }
     }
 
     private static readonly string[] COURSES =

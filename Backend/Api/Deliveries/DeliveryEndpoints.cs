@@ -1,4 +1,5 @@
 ﻿using Api.Deliveries.Contracts;
+using Microsoft.AspNetCore.Http.HttpResults;
 
 namespace Api.Deliveries;
 
@@ -68,6 +69,34 @@ public static class DeliveryEndpoints
         .Produces<DeliveryResponse>()
         .WithName("CreateDelivery")
         .WithSummary("Create new delivery");
+
+        group.MapPut("deliveries/{id}", async (IDeliveryService deliveryService, Guid id, UpdateDeliveryRequest request) =>
+        {
+            var result = await deliveryService.Update(request, id);
+            return result.MapToResponse(delivery => Results.Ok(delivery));
+        })
+        .Produces<DeliveryResponse>()
+        .WithName("UpdateDelivery")
+        .WithSummary("Update delivery by id");
+
+        group.MapGet("delivery-fields/{deliveryFieldId:guid}", async (IDeliveryService deliveryService, Guid deliveryFieldId) =>
+        {
+            var result = await deliveryService.DownloadFile(deliveryFieldId);
+            return result.MapToResponse(file => Results.File(file.Stream, file.Metadata.ContentType, file.Metadata.FileName));
+        })
+        .Produces<FileStreamHttpResult>()
+        .WithName("DownloadDeliveryFile")
+        .WithSummary("Download delivery file");
+
+        group.MapPost("delivery-fields/{deliveryFieldId:guid}", async (IDeliveryService deliveryService, IFormFile file, Guid deliveryFieldId) =>
+        {
+            var result = await deliveryService.UploadFile(file, deliveryFieldId);
+            return result.MapToResponse(() => Results.Ok());
+        })
+        .Accepts<IFormFile>("multipart/form-data")
+        .DisableAntiforgery()
+        .WithName("UploadDeliveryFile")
+        .WithSummary("Upload delivery file");
 
         group.MapDelete("deliveries/{id:guid}", async (IDeliveryService deliveryService, Guid id) =>
         {

@@ -24,12 +24,12 @@ public static class AssignmentMapping
         };
     }
 
-    public static List<AssignmentField> MapToAssignmentField(this IEnumerable<NewAssignmentFieldRequest> fields, Guid assignmentId)
+    public static List<AssignmentField> MapToAssignmentField(this IEnumerable<CreateAssignmentFieldRequest> fields, Guid assignmentId)
     {
         return fields.Select(field => field.MapToAssignmentField(assignmentId)).ToList();
     }
 
-    public static AssignmentField MapToAssignmentField(this NewAssignmentFieldRequest request, Guid assignmentId)
+    public static AssignmentField MapToAssignmentField(this CreateAssignmentFieldRequest request, Guid assignmentId)
     {
         return new AssignmentField
         {
@@ -37,6 +37,9 @@ public static class AssignmentMapping
             AssignmentId = assignmentId,
             Type = request.Type,
             Name = request.Name,
+            Min = request.Min,
+            Max = request.Max,
+            Regex = request.Regex,
         };
     }
 

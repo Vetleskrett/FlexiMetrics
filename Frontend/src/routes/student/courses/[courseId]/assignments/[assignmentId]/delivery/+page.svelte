@@ -56,11 +56,9 @@
 			<h1 class="ml-4 text-4xl font-semibold">Delivery</h1>
 		</div>
 	</div>
-	<div class="flex w-[1080px] flex-col gap-8">
-		<DeliveryFormCard
-			assignment={data.assignment}
-			assignmentFields={data.assignmentFields}
-			delivery={data.delivery}
-		/>
-	</div>
+	<DeliveryFormCard
+		assignment={data.assignment}
+		assignmentFields={data.assignmentFields}
+		delivery={data.delivery}
+	/>
 </div>

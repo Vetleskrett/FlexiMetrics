@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using Database.Models;
 using Database;
 using Api.Deliveries.Contracts;
+using FileStorage;
 
 namespace Api.Deliveries;
 
@@ -15,6 +16,9 @@ public interface IDeliveryService
     Task<Result<DeliveryResponse>> GetByTeamAssignment(Guid teamId, Guid assignmentId);
     Task<Result<IEnumerable<DeliveryResponse>>> GetAllByAssignment(Guid assignmentId);
     Task<Result<DeliveryResponse>> Create(CreateDeliveryRequest request);
+    Task<Result<DeliveryResponse>> Update(UpdateDeliveryRequest request, Guid id);
+    Task<Result> UploadFile(IFormFile file, Guid deliveryFieldId);
+    Task<Result<FileResponse>> DownloadFile(Guid deliveryFieldId);
     Task<Result> DeleteById(Guid id);
 }
 
@@ -22,11 +26,13 @@ public class DeliveryService : IDeliveryService
 {
     private readonly AppDbContext _dbContext;
     private readonly IValidator<Delivery> _validator;
+    private readonly IFileStorage _fileStorage;
 
-    public DeliveryService(AppDbContext dbContext, IValidator<Delivery> validator)
+    public DeliveryService(AppDbContext dbContext, IValidator<Delivery> validator, IFileStorage fileStorage)
     {
         _dbContext = dbContext;
         _validator = validator;
+        _fileStorage = fileStorage;
     }
 
     public async Task<Result<IEnumerable<DeliveryResponse>>> GetAll()
@@ -194,10 +200,24 @@ public class DeliveryService : IDeliveryService
                 return Result<DeliveryResponse>.NotFound();
             }
 
+            var existingDelivery = await _dbContext.Deliveries
+                .AnyAsync(d => d.AssignmentId == assignment.Id && d.TeamId == team.Id);
+            if (existingDelivery)
+            {
+                return new ValidationError("Delivery already exists").MapToResponse();
+            }
+
             delivery = request.MapToTeamDelivery(team.Id);
         }
         else
         {
+            var existingDelivery = await _dbContext.Deliveries
+                .AnyAsync(d => d.AssignmentId == assignment.Id && d.StudentId == student.Id);
+            if (existingDelivery)
+            {
+                return new ValidationError("Delivery already exists").MapToResponse();
+            }
+
             delivery = request.MapToStudentDelivery();
         }
 
@@ -209,30 +229,149 @@ public class DeliveryService : IDeliveryService
             return validationResult.Errors.MapToResponse();
         }
 
-        if (assignment.CollaborationType == CollaborationType.Individual)
-        {
-            await _dbContext.Deliveries
-                .Where(d => d.AssignmentId == assignment.Id)
-                .Where(d => d.StudentId == delivery.StudentId)
-                .ExecuteDeleteAsync();
-        }
-        else
-        {
-            await _dbContext.Deliveries
-                .Where(d => d.AssignmentId == assignment.Id)
-                .Where(d => d.TeamId != null && d.TeamId == delivery.TeamId)
-                .ExecuteDeleteAsync();
-        }
-
         _dbContext.Deliveries.Add(delivery);
         await _dbContext.SaveChangesAsync();
 
         return delivery.MapToResponse();
     }
 
+    public async Task<Result<DeliveryResponse>> Update(UpdateDeliveryRequest request, Guid id)
+    {
+        var delivery = await _dbContext.Deliveries
+            .Include(d => d.Fields!.OrderBy(f => f.AssignmentField!.Type))
+            .Include(d => d.Assignment!)
+            .ThenInclude(a => a.Fields)
+            .FirstOrDefaultAsync(d => d.Id == id);
+
+        if (delivery is null)
+        {
+            return Result<DeliveryResponse>.NotFound();
+        }
+
+        if (delivery.Assignment!.DueDate < DateTime.UtcNow)
+        {
+            return new ValidationError("Cannot deliver after assignment due date").MapToResponse();
+        }
+
+        foreach(var fieldRequest in request.Fields)
+        {
+            var assignmentField = delivery.Assignment!.Fields!.FirstOrDefault(f => f.Id == fieldRequest.AssignmentFieldId);
+            if (assignmentField is null)
+            {
+                return Result<DeliveryResponse>.NotFound();
+            }
+
+            var deliveryField = delivery.Fields!.FirstOrDefault(f => f.AssignmentFieldId == fieldRequest.AssignmentFieldId);
+            if (deliveryField is null)
+            {
+                deliveryField = fieldRequest.MapToDeliveryField(delivery.Id);
+                delivery.Fields!.Add(deliveryField);
+            }
+            else
+            {
+                deliveryField.Value = fieldRequest.Value;
+            }
+        }
+
+        var validationResult = await _validator.ValidateAsync(delivery);
+        if (!validationResult.IsValid)
+        {
+            return validationResult.Errors.MapToResponse();
+        }
+
+        await _dbContext.SaveChangesAsync();
+
+        return delivery.MapToResponse();
+    }
+
+    public async Task<Result> UploadFile(IFormFile file, Guid deliveryFieldId)
+    {
+        var deliveryField = await _dbContext.DeliveryFields
+            .Include(f => f.AssignmentField)
+            .Include(f => f.Delivery!)
+            .ThenInclude(d => d.Assignment)
+            .FirstOrDefaultAsync(f => f.Id == deliveryFieldId);
+
+        if (deliveryField is null)
+        {
+            return Result.NotFound();
+        } 
+
+        if (deliveryField.AssignmentField!.Type != AssignmentDataType.File)
+        {
+            return new ValidationError("Assignment field type is not file").MapToResponse();
+        }
+
+        try
+        {
+            await _fileStorage.WriteDeliveryField
+            (
+                deliveryField.Delivery!.Assignment!.CourseId,
+                deliveryField.Delivery!.AssignmentId,
+                deliveryField.DeliveryId,
+                deliveryFieldId,
+                file.OpenReadStream()
+            );
+        }
+        catch (Exception e)
+        {
+            return new ValidationError($"Could not save file: {e.Message}").MapToResponse();
+        }
+
+        return Result.Success();
+    }
+
+    public async Task<Result<FileResponse>> DownloadFile(Guid deliveryFieldId)
+    {
+        var deliveryField = await _dbContext.DeliveryFields
+            .Include(f => f.AssignmentField)
+            .Include(f => f.Delivery!)
+            .ThenInclude(d => d.Assignment)
+            .FirstOrDefaultAsync(f => f.Id == deliveryFieldId);
+
+        if (deliveryField is null)
+        {
+            return Result<FileResponse>.NotFound();
+        }
+
+        try
+        {
+            var metadata = deliveryField.GetValue<FileMetadata>();
+
+            var stream = _fileStorage.ReadDeliveryField
+            (
+                deliveryField.Delivery!.Assignment!.CourseId,
+                deliveryField.Delivery!.AssignmentId,
+                deliveryField.DeliveryId,
+                deliveryFieldId
+            );
+
+            return new FileResponse
+            {
+                Stream = stream,
+                Metadata = metadata!
+            };
+        }
+        catch (Exception e)
+        {
+            return new ValidationError($"Could not read file: {e.Message}").MapToResponse();
+        }
+    }
+
     public async Task<Result> DeleteById(Guid id)
     {
-        var deleted = await _dbContext.Deliveries.Where(x => x.Id == id).ExecuteDeleteAsync();
-        return deleted > 0 ? Result.Success() : Result.NotFound();
+        var delivery = await _dbContext.Deliveries
+            .Include(d => d.Assignment)
+            .FirstOrDefaultAsync(d => d.Id == id);
+
+        if (delivery is null)
+        {
+            return Result.NotFound();
+        }
+
+        _fileStorage.DeleteDelivery(delivery.Assignment!.CourseId, delivery.AssignmentId, delivery.Id);
+
+        await _dbContext.Deliveries.Where(x => x.Id == id).ExecuteDeleteAsync();
+        return Result.Success();
     }
 }

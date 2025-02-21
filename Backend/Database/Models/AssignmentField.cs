@@ -10,4 +10,8 @@ public class AssignmentField
     public Assignment? Assignment { get; set; }
     public required AssignmentDataType Type { get; set; }
     public required string Name { get; set; }
+
+    public required int? Min { get; set; }
+    public required int? Max { get; set; }
+    public required string? Regex { get; set; }
 }

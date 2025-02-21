@@ -18,7 +18,7 @@ public static class AssignmentFieldEndpoints
         .WithName("GetAllAssignmentFields")
         .WithSummary("Get all assignment fields");
 
-        group.MapGet("/assignments/{assignmentId:guid}/fields", async (IAssignmentFieldService assignmentFieldService, Guid assignmentId) =>
+        group.MapGet("assignments/{assignmentId:guid}/fields", async (IAssignmentFieldService assignmentFieldService, Guid assignmentId) =>
         {
             var result = await assignmentFieldService.GetAllByAssignment(assignmentId);
             return result.MapToResponse(fields => Results.Ok(fields));
@@ -27,37 +27,14 @@ public static class AssignmentFieldEndpoints
         .WithName("GetAllAssignmentFieldsByAssignment")
         .WithSummary("Get all assignment fields by assignment id");
 
-        group.MapPost("assignment-fields", async (IAssignmentFieldService assignmentFieldService, CreateAssignmentFieldRequest request) =>
+        group.MapPut("assignments/{assignmentId:guid}/fields", async (IAssignmentFieldService assignmentFieldService, Guid assignmentId, UpdateAssignmentFieldsRequest request) =>
         {
-            var result = await assignmentFieldService.Create(request);
-            return result.MapToResponse(field => Results.CreatedAtRoute
-            (
-                "GetAllAssignmentFieldsByAssignment",
-                new { assignmentId = field.AssignmentId },
-                field
-            ));
-        })
-        .Produces<AssignmentFieldResponse>()
-        .WithName("CreateAssignmentField")
-        .WithSummary("Create new assignment field for assignment");
-
-        group.MapPost("assignment-fields/bulk-add", async (IAssignmentFieldService assignmentFieldService, CreateAssignmentFieldsRequest request) =>
-        {
-            var result = await assignmentFieldService.Create(request);
-            return result.MapToResponse(fields => Results.Ok(fields));
-        })
-        .Produces<IEnumerable<AssignmentFieldResponse>>()
-        .WithName("CreateAssignmentFields")
-        .WithSummary("Create new list of assignment field for assignment");
-
-        group.MapPut("assignment-fields/{id:guid}", async (IAssignmentFieldService assignmentFieldService, Guid id, UpdateAssignmentFieldRequest request) =>
-        {
-            var result = await assignmentFieldService.Update(request, id);
+            var result = await assignmentFieldService.Update(request, assignmentId);
             return result.MapToResponse(field => Results.Ok(field));
         })
         .Produces<AssignmentResponse>()
-        .WithName("UpdateAssignmentField")
-        .WithSummary("Update assignment field by id");
+        .WithName("UpdateAssignmentFields")
+        .WithSummary("Update assignment fields by assignment id");
 
         group.MapDelete("assignment-fields/{id:guid}", async (IAssignmentFieldService assignmentFieldService, Guid id) =>
         {

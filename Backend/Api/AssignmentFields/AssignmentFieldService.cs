@@ -5,6 +5,7 @@ using Database;
 using FluentValidation;
 using Microsoft.EntityFrameworkCore;
 using Api.Assignments;
+using FileStorage;
 
 namespace Api.AssignmentFields;
 
@@ -12,21 +13,21 @@ public interface IAssignmentFieldService
 {
     Task<Result<IEnumerable<AssignmentFieldResponse>>> GetAll();
     Task<Result<IEnumerable<AssignmentFieldResponse>>> GetAllByAssignment(Guid assignmentId);
-    Task<Result<AssignmentFieldResponse>> Create(CreateAssignmentFieldRequest request);
-    Task<Result<IEnumerable<AssignmentFieldResponse>>> Create(CreateAssignmentFieldsRequest requests);
-    Task<Result<AssignmentFieldResponse>> Update(UpdateAssignmentFieldRequest request, Guid id);
+    Task<Result<IEnumerable<AssignmentFieldResponse>>> Update(UpdateAssignmentFieldsRequest request, Guid assignmentId);
     Task<Result> DeleteById(Guid id);
 }
 
 public class AssignmentFieldService : IAssignmentFieldService
 {
     private readonly AppDbContext _dbContext;
-    private readonly IValidator<AssignmentField> _validator;
+    private readonly IValidator<Assignment> _validator;
+    private IFileStorage _fileStorage;
 
-    public AssignmentFieldService(AppDbContext dbContext, IValidator<AssignmentField> validator)
+    public AssignmentFieldService(AppDbContext dbContext, IValidator<Assignment> validator, IFileStorage fileStorage)
     {
         _dbContext = dbContext;
         _validator = validator;
+        _fileStorage = fileStorage;
     }
 
     public async Task<Result<IEnumerable<AssignmentFieldResponse>>> GetAll()
@@ -52,79 +53,86 @@ public class AssignmentFieldService : IAssignmentFieldService
         return assignment.Fields!.MapToResponse();
     }
 
-    public async Task<Result<AssignmentFieldResponse>> Create(CreateAssignmentFieldRequest request)
+    public async Task<Result<IEnumerable<AssignmentFieldResponse>>> Update(UpdateAssignmentFieldsRequest request, Guid assignmentId)
     {
-        var field = request.MapToAssignmentField();
-        var assignment = await _dbContext.Assignments.FindAsync(field.AssignmentId);
-
+        var assignment = await _dbContext.Assignments
+            .Include(a => a.Fields)
+            .FirstOrDefaultAsync(a => a.Id == assignmentId);
         if (assignment is null)
         {
-            return Result<AssignmentFieldResponse>.NotFound();
+            return Result<IEnumerable<AssignmentFieldResponse>>.NotFound();
         }
 
-        var validationResult = await _validator.ValidateAsync(field);
-        if (!validationResult.IsValid)
+        var deliveries = await _dbContext.Deliveries
+            .Include(a => a.Fields)
+            .Where(d => d.AssignmentId == assignmentId)
+            .ToListAsync();
+
+        var fieldsToBeUpdated = request.Fields
+            .Where(f => f.Id.HasValue)
+            .MapToAssignmentField(assignmentId);
+
+        var fieldsToBeDeleted = assignment.Fields!
+            .Where(field => !fieldsToBeUpdated.Any(f => f.Id == field.Id))
+            .ToList();
+
+        _dbContext.AssignmentFields.RemoveRange(fieldsToBeDeleted);
+
+        foreach (var field in fieldsToBeUpdated)
         {
-            return validationResult.Errors.MapToResponse();
-        }
-
-        _dbContext.AssignmentFields.Add(field);
-        await _dbContext.SaveChangesAsync();
-
-        return field.MapToResponse();
-    }
-
-    public async Task<Result<IEnumerable<AssignmentFieldResponse>>> Create(CreateAssignmentFieldsRequest requests)
-    {
-        var fields = requests.Fields.MapToAssignmentField();
-        foreach (var field in fields)
-        {
-            var assignment = await _dbContext.Assignments.FindAsync(field.AssignmentId);
-
-            if (assignment is null)
+            var exisingField = assignment.Fields!.FirstOrDefault(f => f.Id == field.Id);
+            if (exisingField is null)
             {
                 return Result<IEnumerable<AssignmentFieldResponse>>.NotFound();
             }
 
-            var validationResult = await _validator.ValidateAsync(field);
-            if (!validationResult.IsValid)
-            {
-                return validationResult.Errors.MapToResponse();
-            }
+            exisingField.Name = field.Name;
+            exisingField.Type = field.Type;
+            exisingField.Min = field.Min;
+            exisingField.Max = field.Max;
+            exisingField.Regex = field.Regex;
         }
 
-        _dbContext.AssignmentFields.AddRange(fields);
-        await _dbContext.SaveChangesAsync();
+        var fieldsToBeCreated = request.Fields
+            .Where(f => !f.Id.HasValue)
+            .MapToAssignmentField(assignmentId);
+        _dbContext.AssignmentFields.AddRange(fieldsToBeCreated);
 
-        return fields.MapToResponse();
-    }
-
-    public async Task<Result<AssignmentFieldResponse>> Update(UpdateAssignmentFieldRequest request, Guid id)
-    {
-        var field = await _dbContext.AssignmentFields
-            .AsNoTracking()
-            .FirstOrDefaultAsync(x => x.Id == id);
-        if (field is null)
-        {
-            return Result<AssignmentFieldResponse>.NotFound();
-        }
-
-        field = request.MapToAssignmentField(id, field.AssignmentId);
-
-        var validationResult = await _validator.ValidateAsync(field);
+        var validationResult = await _validator.ValidateAsync(assignment);
         if (!validationResult.IsValid)
         {
             return validationResult.Errors.MapToResponse();
         }
 
-        _dbContext.AssignmentFields.Update(field);
+        foreach (var delivery in deliveries)
+        {
+            foreach (var deliveryField in delivery.Fields!)
+            {
+                if (fieldsToBeDeleted.Any(f => f.Id == deliveryField.AssignmentFieldId))
+                {
+                    _fileStorage.DeleteDeliveryField(assignment.CourseId, assignmentId, delivery.Id, deliveryField.Id);
+                }
+            }
+        }
+
         await _dbContext.SaveChangesAsync();
 
-        return field.MapToResponse();
+        return assignment.Fields!.MapToResponse();
     }
 
     public async Task<Result> DeleteById(Guid id)
     {
+        var deliveryFields = await _dbContext.DeliveryFields
+            .Include(f => f.Delivery!)
+            .ThenInclude(d => d.Assignment)
+            .Where(f => f.AssignmentFieldId == id)
+            .ToListAsync();
+
+        foreach (var deliveryField in deliveryFields)
+        {
+            _fileStorage.DeleteDeliveryField(deliveryField.Delivery!.Assignment!.CourseId, deliveryField.Delivery!.AssignmentId, deliveryField.Delivery.Id, deliveryField.Id);
+        }
+
         var deleted = await _dbContext.AssignmentFields.Where(x => x.Id == id).ExecuteDeleteAsync();
         return deleted > 0 ? Result.Success() : Result.NotFound();
     }

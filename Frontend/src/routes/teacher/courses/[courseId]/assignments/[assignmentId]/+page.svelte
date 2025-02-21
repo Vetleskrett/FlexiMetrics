@@ -8,13 +8,13 @@
 	import * as Breadcrumb from '$lib/components/ui/breadcrumb/index.js';
 	import CompletedTotalCard from 'src/components/CompletedTotalCard.svelte';
 	import AssignmentInformationCard from 'src/components/AssignmentInformationCard.svelte';
-	import DeliveryFormatCard from 'src/components/DeliveryFormatCard.svelte';
+	import AssignmentFormatCard from 'src/components/AssignmentFormatCard.svelte';
 	import AnalyzersCard from 'src/components/AnalyzersCard.svelte';
 	import CustomButton from 'src/components/CustomButton.svelte';
-	import { analyzers, assignmentFields } from 'src/mockData';
-	import type { Assignment, Course, AssignmentField, Delivery, Student, Team, RegisterAssignmentField } from 'src/types';
+	import { analyzers } from 'src/mockData';
+	import type { Assignment, Course, AssignmentField, Delivery, Student, Team } from 'src/types';
 	import { Role } from 'src/types';
-	import { addAssignmentFields, deleteAssigment, publishAssignment } from 'src/api';
+	import { deleteAssigment, publishAssignment } from 'src/api';
 	import { goto } from '$app/navigation';
 
 	const courseId = $page.params.courseId;
@@ -106,7 +106,7 @@
 	</div>
 	<div class="flex w-[1080px] flex-row gap-8">
 		<div class="flex w-3/5 flex-col gap-8">
-			<DeliveryFormatCard assignmentFields={data.assignmentFields} {assignmentId} />
+			<AssignmentFormatCard assignmentFields={data.assignmentFields} {assignmentId} {courseId} />
 			<AnalyzersCard {analyzers} {assignmentId} {courseId} />
 		</div>
 

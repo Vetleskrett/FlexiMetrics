@@ -9,10 +9,13 @@ using Api.Students;
 using Api.AssignmentFields;
 using Api.Deliveries;
 using Api.Feedbacks;
+using FileStorage;
 
 var builder = WebApplication.CreateBuilder(args);
 
 builder.AddServiceDefaults();
+
+builder.Services.AddSingleton<IFileStorage, LocalFileStorage>();
 
 builder.AddNpgsqlDbContext<AppDbContext>("postgresdb");
 

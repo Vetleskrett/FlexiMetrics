@@ -1,0 +1,28 @@
+﻿{
+  Status: 200 OK,
+  Content: {
+    Headers: {
+      Content-Type: application/json; charset=utf-8
+    },
+    Value: [
+      {
+        id: Guid_1,
+        type: Integer,
+        name: Updated field,
+        assignmentId: Guid_2,
+        min: null,
+        max: null,
+        regex: null
+      },
+      {
+        id: Guid_3,
+        type: Boolean,
+        name: New field,
+        assignmentId: Guid_2,
+        min: null,
+        max: null,
+        regex: null
+      }
+    ]
+  }
+}

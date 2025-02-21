@@ -7,11 +7,11 @@
     Value: {
       errors: [
         {
-          propertyName: Name,
+          propertyName: Fields[0].Name,
           message: 'Name' must not be empty.
         },
         {
-          propertyName: Type,
+          propertyName: Fields[0].Type,
           message: 'Type' has a range of values which does not include '100'.
         }
       ]

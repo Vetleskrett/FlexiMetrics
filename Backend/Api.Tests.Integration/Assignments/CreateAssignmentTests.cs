@@ -24,10 +24,10 @@ public class CreateAssignmentTests(ApiFactory factory) : BaseIntegrationTest(fac
             Description = "Create a frontend project with svelte",
             CourseId = course.Id,
             Fields = [
-                new NewAssignmentFieldRequest
+                new CreateAssignmentFieldRequest
                 {
                     Name = "Project title",
-                    Type = AssignmentDataType.String
+                    Type = AssignmentDataType.ShortText
                 }
             ],
         };
@@ -65,10 +65,10 @@ public class CreateAssignmentTests(ApiFactory factory) : BaseIntegrationTest(fac
             Description = "Create a frontend project with svelte",
             CourseId = Guid.NewGuid(),
             Fields = [
-                new NewAssignmentFieldRequest
+                new CreateAssignmentFieldRequest
                 {
                     Name = "Project title",
-                    Type = AssignmentDataType.String
+                    Type = AssignmentDataType.ShortText
                 }
             ],
         };
@@ -95,7 +95,7 @@ public class CreateAssignmentTests(ApiFactory factory) : BaseIntegrationTest(fac
             Description = null!,
             CourseId = course.Id,
             Fields = [
-                new NewAssignmentFieldRequest
+                new CreateAssignmentFieldRequest
                 {
                     Name = "",
                     Type = (AssignmentDataType)100

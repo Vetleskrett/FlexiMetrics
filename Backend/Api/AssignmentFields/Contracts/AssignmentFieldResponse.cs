@@ -8,4 +8,8 @@ public class AssignmentFieldResponse
     public required AssignmentDataType Type { get; init; }
     public required string Name { get; init; }
     public required Guid AssignmentId { get; init; }
+
+    public required int? Min { get; init; }
+    public required int? Max { get; init; }
+    public required string? Regex { get; init; }
 }

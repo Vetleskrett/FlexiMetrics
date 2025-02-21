@@ -18,10 +18,12 @@ import type {
   Teacher,
   CreateAssignment,
   EditAssignment,
-  RegisterAssignmentFields,
+  UpdateAssignmentFields,
   CreateFeedback,
   EditFeedback,
   EmailAdd,
+  UpdateAssignmentField,
+  UpdateDelivery,
 } from "./types";
 
 const instance = axios.create({
@@ -76,6 +78,10 @@ export function getDeliveries(assignmentId: string) : Promise<AxiosResponse<Deli
   return instance.get(`/assignments/${assignmentId}/deliveries`)
 }
 
+export function getDeliveryFieldFile(deliveryFieldId: string): string {
+  return instance.defaults.baseURL + `/delivery-fields/${deliveryFieldId}`;
+}
+
 export function getFeedbacks(assignmentId: string) : Promise<AxiosResponse<Feedback[]>> {
   return instance.get(`/assignments/${assignmentId}/feedbacks`)
 }
@@ -90,6 +96,16 @@ export function putFeedback(feedbackId: string, feedback: EditFeedback) : Promis
 
 export function postDelivery(delivery: CreateDelivery) : Promise<AxiosResponse<Delivery>> {
   return instance.post(`/deliveries`, delivery)
+}
+
+export function putDelivery(deliveryId:string, delivery: UpdateDelivery) : Promise<AxiosResponse<Delivery>> {
+  return instance.put(`/deliveries/${deliveryId}`, delivery)
+}
+
+export function postDeliveryFieldFile(deliveryFieldId: string, file: File) : Promise<AxiosResponse> {
+  var formData = new FormData();
+  formData.append("file", file);
+  return instance.postForm(`/delivery-fields/${deliveryFieldId}`, formData)
 }
 
 export function getStudentFeedback(studentId: string, assignmentId: string): Promise<AxiosResponse<Feedback>> {
@@ -184,8 +200,8 @@ export async function deleteAssigment(assignmentId: string) : Promise<AxiosRespo
   return instance.delete(`/assignments/${assignmentId}`)
 }
 
-export async function addAssignmentFields(fields: RegisterAssignmentFields):Promise<AxiosResponse<AssignmentField[]>> {
-  return instance.post(`/assignment-fields/bulk-add`, fields)
+export async function editAssignmentFields(assignmentId: string, request: UpdateAssignmentFields):Promise<AxiosResponse<AssignmentField[]>> {
+  return instance.put(`/assignments/${assignmentId}/fields`, request)
 }
 
 export async function deleteAssigmentField(assignmentFieldId: string) : Promise<AxiosResponse>{

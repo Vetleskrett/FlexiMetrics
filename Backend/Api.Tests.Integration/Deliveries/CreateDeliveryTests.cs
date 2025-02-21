@@ -17,9 +17,9 @@ public class CreateDeliveryTests(ApiFactory factory) : BaseIntegrationTest(facto
         ModelFactory.CreateCourseStudent(course.Id, student.Id);
         var assignment = ModelFactory.CreateAssignment(course.Id, collaboration: CollaborationType.Individual);
 
-        var stringField = ModelFactory.CreateAssignmentField(assignment.Id, AssignmentDataType.String);
+        var textField = ModelFactory.CreateAssignmentField(assignment.Id, AssignmentDataType.ShortText);
         var intField = ModelFactory.CreateAssignmentField(assignment.Id, AssignmentDataType.Integer);
-        var doubleField = ModelFactory.CreateAssignmentField(assignment.Id, AssignmentDataType.Double);
+        var floatField = ModelFactory.CreateAssignmentField(assignment.Id, AssignmentDataType.Float);
         var boolField = ModelFactory.CreateAssignmentField(assignment.Id, AssignmentDataType.Boolean);
 
         await DbContext.SaveChangesAsync();
@@ -29,22 +29,22 @@ public class CreateDeliveryTests(ApiFactory factory) : BaseIntegrationTest(facto
             AssignmentId = assignment.Id,
             StudentId = student.Id,
             Fields = [
-                new CreateDeliveryFieldRequest
+                new DeliveryFieldRequest
                 {
-                    AssignmentFieldId = stringField.Id,
+                    AssignmentFieldId = textField.Id,
                     Value = "Value"
                 },
-                new CreateDeliveryFieldRequest
+                new DeliveryFieldRequest
                 {
                     AssignmentFieldId = intField.Id,
                     Value = 16
                 },
-                new CreateDeliveryFieldRequest
+                new DeliveryFieldRequest
                 {
-                    AssignmentFieldId = doubleField.Id,
+                    AssignmentFieldId = floatField.Id,
                     Value = 5.7
                 },
-                new CreateDeliveryFieldRequest
+                new DeliveryFieldRequest
                 {
                     AssignmentFieldId = boolField.Id,
                     Value = false
@@ -77,9 +77,9 @@ public class CreateDeliveryTests(ApiFactory factory) : BaseIntegrationTest(facto
         ModelFactory.CreateTeam(course.Id, students: students);
         var assignment = ModelFactory.CreateAssignment(course.Id, collaboration: CollaborationType.Teams);
 
-        var stringField = ModelFactory.CreateAssignmentField(assignment.Id, AssignmentDataType.String);
+        var textField = ModelFactory.CreateAssignmentField(assignment.Id, AssignmentDataType.ShortText);
         var intField = ModelFactory.CreateAssignmentField(assignment.Id, AssignmentDataType.Integer);
-        var doubleField = ModelFactory.CreateAssignmentField(assignment.Id, AssignmentDataType.Double);
+        var floatField = ModelFactory.CreateAssignmentField(assignment.Id, AssignmentDataType.Float);
         var boolField = ModelFactory.CreateAssignmentField(assignment.Id, AssignmentDataType.Boolean);
 
         await DbContext.SaveChangesAsync();
@@ -89,22 +89,22 @@ public class CreateDeliveryTests(ApiFactory factory) : BaseIntegrationTest(facto
             AssignmentId = assignment.Id,
             StudentId = students[0].Id,
             Fields = [
-                new CreateDeliveryFieldRequest
+                new DeliveryFieldRequest
                 {
-                    AssignmentFieldId = stringField.Id,
+                    AssignmentFieldId = textField.Id,
                     Value = "Value"
                 },
-                new CreateDeliveryFieldRequest
+                new DeliveryFieldRequest
                 {
                     AssignmentFieldId = intField.Id,
                     Value = 16
                 },
-                new CreateDeliveryFieldRequest
+                new DeliveryFieldRequest
                 {
-                    AssignmentFieldId = doubleField.Id,
+                    AssignmentFieldId = floatField.Id,
                     Value = 5.7
                 },
-                new CreateDeliveryFieldRequest
+                new DeliveryFieldRequest
                 {
                     AssignmentFieldId = boolField.Id,
                     Value = false
@@ -130,13 +130,13 @@ public class CreateDeliveryTests(ApiFactory factory) : BaseIntegrationTest(facto
     }
 
     [Fact]
-    public async Task CreateDelivery_ShouldDeleteExistingStudentDelivery_WhenDeliveryExists()
+    public async Task CreateDelivery_ShouldReturnBadRequest_WhenStudentDeliveryExists()
     {
         var course = ModelFactory.CreateCourse();
         var student = ModelFactory.CreateStudent();
         ModelFactory.CreateCourseStudent(course.Id, student.Id);
         var assignment = ModelFactory.CreateAssignment(course.Id, collaboration: CollaborationType.Individual);
-        var existingDelivery = ModelFactory.CreateStudentDelivery(assignment.Id, student.Id);
+        ModelFactory.CreateStudentDelivery(assignment.Id, student.Id);
         await DbContext.SaveChangesAsync();
 
         var request = new CreateDeliveryRequest
@@ -148,31 +148,30 @@ public class CreateDeliveryTests(ApiFactory factory) : BaseIntegrationTest(facto
 
         var response = await Client.PostAsJsonAsync("deliveries", request);
 
-        Assert.Equal(HttpStatusCode.Created, response.StatusCode);
-        Assert.False(await DbContext.Deliveries.AnyAsync(d => d.Id == existingDelivery.Id));
+        await Verify(response);
     }
 
     [Fact]
-    public async Task CreateDelivery_ShouldDeleteExistingTeamDelivery_WhenDeliveryExists()
+    public async Task CreateDelivery_ShouldReturnBadRequest_WhenTeamDeliveryExists()
     {
         var course = ModelFactory.CreateCourse();
-        var students = ModelFactory.CreateCourseStudents(course.Id, 2);
-        var team = ModelFactory.CreateTeam(course.Id, students: students);
+        var student = ModelFactory.CreateStudent();
+        ModelFactory.CreateCourseStudent(course.Id, student.Id);
+        var team = ModelFactory.CreateTeam(course.Id, students: [student]);
         var assignment = ModelFactory.CreateAssignment(course.Id, collaboration: CollaborationType.Teams);
-        var existingDelivery = ModelFactory.CreateTeamDelivery(assignment.Id, team.Id);
+        ModelFactory.CreateTeamDelivery(assignment.Id, team.Id);
         await DbContext.SaveChangesAsync();
 
         var request = new CreateDeliveryRequest
         {
             AssignmentId = assignment.Id,
-            StudentId = students[0].Id,
+            StudentId = student.Id,
             Fields = []
         };
 
         var response = await Client.PostAsJsonAsync("deliveries", request);
 
-        Assert.Equal(HttpStatusCode.Created, response.StatusCode);
-        Assert.False(await DbContext.Deliveries.AnyAsync(d => d.Id == existingDelivery.Id));
+        await Verify(response);
     }
 
     [Fact]
@@ -188,9 +187,9 @@ public class CreateDeliveryTests(ApiFactory factory) : BaseIntegrationTest(facto
         ModelFactory.CreateAssignmentField(assignment.Id); // Missing field
         var repeatField = ModelFactory.CreateAssignmentField(assignment.Id);
 
-        var stringField = ModelFactory.CreateAssignmentField(assignment.Id, AssignmentDataType.String);
+        var textField = ModelFactory.CreateAssignmentField(assignment.Id, AssignmentDataType.ShortText);
         var intField = ModelFactory.CreateAssignmentField(assignment.Id, AssignmentDataType.Integer);
-        var doubleField = ModelFactory.CreateAssignmentField(assignment.Id, AssignmentDataType.Double);
+        var floatField = ModelFactory.CreateAssignmentField(assignment.Id, AssignmentDataType.Float);
         var boolField = ModelFactory.CreateAssignmentField(assignment.Id, AssignmentDataType.Boolean);
 
         await DbContext.SaveChangesAsync();
@@ -200,39 +199,39 @@ public class CreateDeliveryTests(ApiFactory factory) : BaseIntegrationTest(facto
             AssignmentId = assignment.Id,
             StudentId = student.Id,
             Fields = [
-               new CreateDeliveryFieldRequest
+               new DeliveryFieldRequest
                 {
                     AssignmentFieldId = otherField.Id,
                     Value = "Value"
                 },
 
-                new CreateDeliveryFieldRequest
+                new DeliveryFieldRequest
                 {
                     AssignmentFieldId = repeatField.Id,
                     Value = "Value"
                 },
-                new CreateDeliveryFieldRequest
+                new DeliveryFieldRequest
                 {
                     AssignmentFieldId = repeatField.Id,
                     Value = "Value"
                 },
 
-                new CreateDeliveryFieldRequest
+                new DeliveryFieldRequest
                 {
-                    AssignmentFieldId = stringField.Id,
+                    AssignmentFieldId = textField.Id,
                     Value = false
                 },
-                new CreateDeliveryFieldRequest
+                new DeliveryFieldRequest
                 {
                     AssignmentFieldId = intField.Id,
                     Value = 5.7
                 },
-                new CreateDeliveryFieldRequest
+                new DeliveryFieldRequest
                 {
-                    AssignmentFieldId = doubleField.Id,
+                    AssignmentFieldId = floatField.Id,
                     Value = "Value"
                 },
-                new CreateDeliveryFieldRequest
+                new DeliveryFieldRequest
                 {
                     AssignmentFieldId = boolField.Id,
                     Value = 16
