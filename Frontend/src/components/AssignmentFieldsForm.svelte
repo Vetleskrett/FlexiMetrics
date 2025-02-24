@@ -34,16 +34,12 @@
 
 <div class="mt-4 flex flex-col gap-6">
 	{#each fields as field, i}
-		<Separator/>
+		<Separator />
 		<div class="flex flex-col gap-2 px-6 py-0">
 			<Form.Field {form} name="fields[{i}].name" class="w-full">
 				<Form.Control let:attrs>
 					<Form.Label for="fields[{i}].name">Name</Form.Label>
-					<Input
-						{...attrs}
-						id="fields[{i}].name"
-						bind:value={field.name}
-					/>
+					<Input {...attrs} id="fields[{i}].name" bind:value={field.name} />
 				</Form.Control>
 				<Form.FieldErrors />
 			</Form.Field>
@@ -53,7 +49,7 @@
 					<Form.Label for="fields[{i}].type">Type</Form.Label>
 					<Select.Root {...attrs} bind:selected={field.type}>
 						<Select.Trigger>
-							<Select.Value/>
+							<Select.Value />
 						</Select.Trigger>
 						<Select.Content>
 							<Select.Item value="ShortText" label="Short Text">Short Text</Select.Item>
@@ -62,40 +58,35 @@
 							<Select.Item value="Float" label="Float">Float</Select.Item>
 							<Select.Item value="Boolean" label="Boolean">Boolean</Select.Item>
 							<Select.Item value="URL" label="URL">URL</Select.Item>
+							<Select.Item value="JSON" label="JSON">JSON</Select.Item>
 							<Select.Item value="File" label="File">File</Select.Item>
 							<Select.Item value="List" label="List">List</Select.Item>
 						</Select.Content>
 					</Select.Root>
 				</Form.Control>
 				<Form.FieldErrors />
-			</Form.Field>	
+			</Form.Field>
 
 			{#if field.type.value == 'Integer' || field.type.value == 'Float' || field.type.value == 'ShortText' || field.type.value == 'LongText'}
 				<Form.Field {form} name="fields[{i}].min" class="w-[280px]">
 					<Form.Control let:attrs>
 						<Form.Label for="fields[{i}].min">
-							{field.type.value == 'ShortText' || field.type.value == 'LongText' ? 'Min Length' : 'Min'}
+							{field.type.value == 'ShortText' || field.type.value == 'LongText'
+								? 'Min Length'
+								: 'Min'}
 						</Form.Label>
-						<Input
-							{...attrs}
-							type="number"
-							id="fields[{i}].min"
-							bind:value={field.min}
-						/>
+						<Input {...attrs} type="number" id="fields[{i}].min" bind:value={field.min} />
 					</Form.Control>
 					<Form.FieldErrors />
 				</Form.Field>
 				<Form.Field {form} name="fields[{i}].max" class="w-[280px]">
 					<Form.Control let:attrs>
 						<Form.Label for="fields[{i}].max">
-							{field.type.value == 'ShortText' || field.type.value == 'LongText' ? 'Max Length' : 'Max'}
+							{field.type.value == 'ShortText' || field.type.value == 'LongText'
+								? 'Max Length'
+								: 'Max'}
 						</Form.Label>
-						<Input
-							{...attrs}
-							type="number"
-							id="fields[{i}].max"
-							bind:value={field.max}
-						/>
+						<Input {...attrs} type="number" id="fields[{i}].max" bind:value={field.max} />
 					</Form.Control>
 					<Form.FieldErrors />
 				</Form.Field>
@@ -104,11 +95,7 @@
 				<Form.Field {form} name="fields[{i}].regex">
 					<Form.Control let:attrs>
 						<Form.Label for="fields[{i}].regex">Regex</Form.Label>
-						<Input
-							{...attrs}
-							id="fields[{i}].regex"
-							bind:value={field.regex}
-						/>
+						<Input {...attrs} id="fields[{i}].regex" bind:value={field.regex} />
 					</Form.Control>
 					<Form.FieldErrors />
 				</Form.Field>
@@ -119,7 +106,7 @@
 						<Form.Label for="fields[{i}].subType">Sub Type</Form.Label>
 						<Select.Root {...attrs} bind:selected={field.subType}>
 							<Select.Trigger>
-								<Select.Value/>
+								<Select.Value />
 							</Select.Trigger>
 							<Select.Content>
 								<Select.Item value="ShortText" label="Short Text">Short Text</Select.Item>
@@ -128,11 +115,12 @@
 								<Select.Item value="Float" label="Float">Float</Select.Item>
 								<Select.Item value="Boolean" label="Boolean">Boolean</Select.Item>
 								<Select.Item value="URL" label="URL">URL</Select.Item>
+								<Select.Item value="JSON" label="JSON">JSON</Select.Item>
 							</Select.Content>
 						</Select.Root>
 					</Form.Control>
 					<Form.FieldErrors />
-				</Form.Field>	
+				</Form.Field>
 			{/if}
 
 			<div class="self-center">
@@ -142,7 +130,7 @@
 			</div>
 		</div>
 	{/each}
-	<Separator/>
+	<Separator />
 	<div class="flex items-center justify-center">
 		<CustomButton color={'green'} outline={true} on:click={addField}>
 			<Plus size="16" />

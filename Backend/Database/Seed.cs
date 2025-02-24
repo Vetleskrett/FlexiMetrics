@@ -4,6 +4,7 @@ using FileStorage;
 using Microsoft.EntityFrameworkCore;
 using System.Net.Mime;
 using System.Text;
+using System.Text.Json;
 
 namespace Database;
 
@@ -229,6 +230,15 @@ public static class Seed
                 AssignmentDataType.Float => f.Random.Double(0, 100),
                 AssignmentDataType.Boolean => f.Random.Bool(),
                 AssignmentDataType.URL => f.Internet.Url(),
+                AssignmentDataType.JSON => JsonSerializer.Serialize(new
+                {
+                    Value = f.Random.Int(),
+                    Collection = f.Random.WordsArray(2, 5),
+                    SubObject = new
+                    {
+                        Value = f.Random.Float()
+                    }
+                }),
                 _ => f.Lorem.Sentence()
             };
         }
@@ -265,7 +275,7 @@ public static class Seed
                             return new FileMetadata
                             {
                                 FileName = f.Lorem.Word() + ".txt",
-                                ContentType  = MediaTypeNames.Text.Plain,
+                                ContentType = MediaTypeNames.Text.Plain,
                             };
                         }
 

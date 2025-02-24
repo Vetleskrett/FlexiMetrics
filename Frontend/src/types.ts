@@ -81,7 +81,7 @@ export type Team = {
     complete: number | null | undefined;
 }
 
-export type AssignmentFieldType = 'ShortText' | 'LongText' | 'Integer' | 'Float' | 'Boolean' | 'URL' | 'File' | 'List';
+export type AssignmentFieldType = 'ShortText' | 'LongText' | 'Integer' | 'Float' | 'Boolean' | 'URL' | 'JSON' | 'File' | 'List';
 
 export type AssignmentField = {
     id: string;
@@ -107,7 +107,8 @@ export type AssignmentFieldFormData = {
     subType?: {
         label: string;
         value: AssignmentFieldType;
-    };};
+    };
+};
 
 export type UpdateAssignmentField = {
     id?: string;

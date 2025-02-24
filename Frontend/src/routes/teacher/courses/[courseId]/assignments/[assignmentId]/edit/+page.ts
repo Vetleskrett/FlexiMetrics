@@ -4,16 +4,13 @@ export const load = async ({ params }: {params: { courseId: string, assignmentId
     const [
         courseResponse,
         assignmentResponse,
-        assignmentFieldsResponse
     ] = await Promise.all([
         getCourse(params.courseId),
         getAssignment(params.assignmentId),
-        getAssignmentFields(params.assignmentId)
     ])
 
     return { 
         course: courseResponse.data,
         assignment: assignmentResponse.data,
-        assignmentFields: assignmentFieldsResponse.data
     }
 };

@@ -28,7 +28,9 @@
 				<EllipsisVertical size="20" />
 			</DropdownMenu.Trigger>
 			<DropdownMenu.Content>
-				<DropdownMenu.Item href="/teacher/courses/{courseId}/assignments/{assignmentId}/edit-format">
+				<DropdownMenu.Item
+					href="/teacher/courses/{courseId}/assignments/{assignmentId}/edit-format"
+				>
 					<Pencil class="h-4" />
 					<p>Edit format</p>
 				</DropdownMenu.Item>

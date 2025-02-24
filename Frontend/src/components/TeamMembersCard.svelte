@@ -19,12 +19,11 @@
 	}
 
 	async function removeTeamMember(student: Student) {
-		try{
-			await deleteStudentTeam(teamId, student.id)
-			deleteStudentFromList(student)
-		}
-		catch{
-			console.error("Could not remove team member")
+		try {
+			await deleteStudentTeam(teamId, student.id);
+			deleteStudentFromList(student);
+		} catch {
+			console.error('Could not remove team member');
 		}
 	}
 </script>

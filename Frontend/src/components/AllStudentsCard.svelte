@@ -8,12 +8,11 @@
 
 	export let students: Student[], courseId: string;
 	async function removeStudent(student: Student) {
-		try{
-			await deleteStudentCourse(courseId, student.id)
-			deleteStudentFromList(student)
-		}
-		catch{
-			console.error("Could not delete student")
+		try {
+			await deleteStudentCourse(courseId, student.id);
+			deleteStudentFromList(student);
+		} catch {
+			console.error('Could not delete student');
 		}
 	}
 
@@ -24,7 +23,6 @@
 			students = students;
 		}
 	}
-
 </script>
 
 <Card.Root class="w-full overflow-hidden p-0">
@@ -51,7 +49,7 @@
 						</Table.Cell>
 						<Table.Cell>
 							<CustomButton color="red" on:click={() => removeStudent(student)}>
-								<Trash_2/>
+								<Trash_2 />
 							</CustomButton>
 						</Table.Cell>
 					</Table.Row>

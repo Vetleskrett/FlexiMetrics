@@ -14,12 +14,12 @@
 	const courseId = $page.params.courseId;
 
 	export let data: {
-		course: Course
+		course: Course;
 		team: Team;
-		assignments: StudentAssignment[]
+		assignments: StudentAssignment[];
 	};
 
-	let completed = data.assignments.filter(item => item.isDelivered).length
+	let completed = data.assignments.filter((item) => item.isDelivered).length;
 
 	async function addStudent(input: string) {
 		if (input && input.trim().length > 0) {
@@ -79,7 +79,7 @@
 	</div>
 	<div class="flex flex-row gap-8">
 		<div class="flex w-[700px] flex-col gap-8">
-			<TeamMembersCard students={data.team.students} teamId={data.team.id}/>
+			<TeamMembersCard students={data.team.students} teamId={data.team.id} />
 			<TeamAssignmentsCard assignmentsTeam={data.assignments} />
 		</div>
 		<div class="flex w-[400px] flex-col gap-8">
@@ -91,7 +91,7 @@
 				addFunction={addStudent}
 			/>
 			<CompletedTotalCard
-				completed={completed}
+				{completed}
 				total={data.assignments.length}
 				headline={'Assignments Delivered'}
 			/>

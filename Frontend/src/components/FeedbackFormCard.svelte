@@ -263,7 +263,7 @@
 					{:else if assignment.gradingType == 'LetterGrading'}
 						<p>{feedback?.letterGrade}</p>
 					{:else if assignment.gradingType == 'PointsGrading'}
-						<p>{feedback?.points}</p>
+						<p>{feedback?.points} / {assignment?.maxPoints}</p>
 					{/if}
 				</div>
 			{/if}

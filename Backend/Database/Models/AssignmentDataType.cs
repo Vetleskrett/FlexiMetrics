@@ -8,6 +8,7 @@ public enum AssignmentDataType
     Float,
     Boolean,
     URL,
+    JSON,
     File,
     List
 }

@@ -77,7 +77,7 @@
 								{@const deliveryField = delivery.fields.find(
 									(x) => x.assignmentFieldId == assignmentField.id
 								)}
-								<Table.Cell>
+								<Table.Cell class="p-2">
 									{#if deliveryField}
 										<DeliveryFieldValue
 											id={deliveryField.id}
