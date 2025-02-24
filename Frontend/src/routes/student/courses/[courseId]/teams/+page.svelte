@@ -10,12 +10,11 @@
 	const courseId = $page.params.courseId;
 
 	async function joinTeam(teamNr: string) {
-		try{
-			await postStudentTeam(teamNr, studentId)
-			goto(`/student/courses/${courseId}`)
-		}
-		catch{
-			console.error("Could not join team")
+		try {
+			await postStudentTeam(teamNr, studentId);
+			goto(`/student/courses/${courseId}`);
+		} catch {
+			console.error('Could not join team');
 		}
 	}
 
@@ -53,7 +52,7 @@
 	</div>
 	<div class="flex flex-row gap-8">
 		<div class="flex w-[700px] flex-col gap-8">
-			<AllTeamCard teams={data.teams} {courseId} onJoin={joinTeam} userRole={Role.Student}/>
+			<AllTeamCard teams={data.teams} {courseId} onJoin={joinTeam} userRole={Role.Student} />
 		</div>
 	</div>
 </div>

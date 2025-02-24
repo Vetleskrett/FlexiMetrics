@@ -1,12 +1,11 @@
 <script lang="ts">
 	import * as Breadcrumb from '$lib/components/ui/breadcrumb/index.js';
-	import type { Assignment, AssignmentField, Course } from 'src/types';
+	import type { Assignment, Course } from 'src/types';
 	import CreateOrEditAssignment from 'src/components/CreateOrEditAssignment.svelte';
 
 	export let data: {
 		course: Course;
 		assignment: Assignment;
-		assignmentFields: AssignmentField[];
 	};
 </script>
 
@@ -34,10 +33,5 @@
 			</Breadcrumb.Item>
 		</Breadcrumb.List>
 	</Breadcrumb.Root>
-	<CreateOrEditAssignment
-		course={data.course}
-		assignment={data.assignment}
-		fields={data.assignmentFields}
-		edit={true}
-	/>
+	<CreateOrEditAssignment course={data.course} assignment={data.assignment} edit={true} />
 </div>

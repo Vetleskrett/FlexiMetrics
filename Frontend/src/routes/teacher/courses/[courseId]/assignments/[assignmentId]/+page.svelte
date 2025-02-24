@@ -23,7 +23,7 @@
 	async function publishAssignmentButton() {
 		try {
 			const response = await publishAssignment(assignmentId);
-			data.assignment = response.data
+			data.assignment = response.data;
 		} catch (exception) {
 			console.error('Something Went Wrong!');
 		}
@@ -32,7 +32,7 @@
 	async function deleteAssignmentButton() {
 		try {
 			await deleteAssigment(assignmentId);
-			goto(`/teacher/courses/${courseId}`)
+			goto(`/teacher/courses/${courseId}`);
 		} catch (exception) {
 			console.error('Something Went Wrong!');
 		}
@@ -97,7 +97,7 @@
 						<p>Edit assignment</p>
 					</DropdownMenu.Item>
 					<DropdownMenu.Item on:click={deleteAssignmentButton}>
-						<Trash2 class="h-4"/>
+						<Trash2 class="h-4" />
 						<p>Delete assignment</p>
 					</DropdownMenu.Item>
 				</DropdownMenu.Content>

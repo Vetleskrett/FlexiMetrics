@@ -1,5 +1,11 @@
 <script lang="ts">
-	import type { Assignment, AssignmentField, CreateDelivery, UpdateDelivery, Delivery } from 'src/types.js';
+	import type {
+		Assignment,
+		AssignmentField,
+		CreateDelivery,
+		UpdateDelivery,
+		Delivery
+	} from 'src/types.js';
 	import * as Card from '$lib/components/ui/card/index.js';
 	import Save from 'lucide-svelte/icons/save';
 	import CustomButton from './CustomButton.svelte';
@@ -21,12 +27,9 @@
 	let values = Object.fromEntries(
 		assignmentFields.map((assignmentField) => {
 			const field = delivery
-					? delivery.fields.find((x) => x.assignmentFieldId == assignmentField.id)?.value
-					: undefined;
-			return [
-				assignmentField.id,
-				field
-			]
+				? delivery.fields.find((x) => x.assignmentFieldId == assignmentField.id)?.value
+				: undefined;
+			return [assignmentField.id, field];
 		})
 	);
 
@@ -43,7 +46,7 @@
 					value = {
 						FileName: value.name,
 						ContentType: value.type
-					}
+					};
 				}
 
 				return {
@@ -54,7 +57,7 @@
 		};
 		const response = await putDelivery(delivery?.id || '', request);
 		delivery = response.data;
-	}
+	};
 
 	const onSubmitCreate = async () => {
 		const request: CreateDelivery = {
@@ -71,7 +74,7 @@
 					value = {
 						FileName: value.name,
 						ContentType: value.type
-					}
+					};
 				}
 
 				return {
@@ -87,7 +90,7 @@
 	const onSubmit = async () => {
 		const fileFields: FileField[] = [];
 
-		for(let assignmentField of assignmentFields) {
+		for (let assignmentField of assignmentFields) {
 			const value = values[assignmentField.id];
 			if (assignmentField.type == 'File' && value instanceof File) {
 				fileFields.push({
@@ -103,16 +106,17 @@
 			await onSubmitEdit();
 		}
 
-		for(let fileField of fileFields) {
-			const deliveryField = delivery!.fields.find(f => f.assignmentFieldId == fileField.assignmentFieldId);
+		for (let fileField of fileFields) {
+			const deliveryField = delivery!.fields.find(
+				(f) => f.assignmentFieldId == fileField.assignmentFieldId
+			);
 			if (deliveryField) {
 				await postDeliveryFieldFile(deliveryField.id, fileField.file);
 			}
 		}
 
 		goto('./');
-	}
-
+	};
 </script>
 
 <Card.Root class="w-[800px] overflow-hidden p-0">
@@ -159,7 +163,7 @@
 						/>
 					</div>
 				{/each}
-				<div class="mt-4 mb-8 flex justify-center w-full gap-4">
+				<div class="mb-8 mt-4 flex w-full justify-center gap-4">
 					<CustomButton color="yellow" href="./">
 						<Undo_2 size="20" />
 						<p>Return</p>

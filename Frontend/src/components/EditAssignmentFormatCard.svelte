@@ -1,9 +1,6 @@
 <script lang="ts">
 	import * as Card from '$lib/components/ui/card/index.js';
-	import type {
-		AssignmentField,
-		AssignmentFieldFormData
-	} from 'src/types';
+	import type { AssignmentField, AssignmentFieldFormData } from 'src/types';
 	import CustomButton from './CustomButton.svelte';
 	import Save from 'lucide-svelte/icons/save';
 	import Undo_2 from 'lucide-svelte/icons/undo-2';
@@ -18,16 +15,22 @@
 	export let fields: AssignmentField[];
 
 	let formData: {
-		fields: AssignmentFieldFormData[]
+		fields: AssignmentFieldFormData[];
 	} = {
-		fields: fields.map(f => {
+		fields: fields.map((f) => {
 			return {
 				...f,
 				type: {
 					label: f.type,
-					value: f.type,
-				}
-			}
+					value: f.type
+				},
+				subType: f.subType
+					? {
+							label: f.subType,
+							value: f.subType
+						}
+					: undefined
+			};
 		})
 	};
 
@@ -41,23 +44,24 @@
 					type: fieldFormData.type.value,
 					min: cleanOptional(fieldFormData.min),
 					max: cleanOptional(fieldFormData.max),
-					regex: cleanOptional(fieldFormData.regex)
+					regex: cleanOptional(fieldFormData.regex),
+					subType: cleanOptional(fieldFormData.subType?.value)
 				};
 			})
 		})
-		.then((response: any) => {
-			fields = response.data;
-			goto(`/teacher/courses/${courseId}/assignments/${assignmentId}`);
-		})
-		.catch((exception) => {
-			if (exception?.response?.data?.errors) {
-				const validationErrors = transformErrors(exception.response.data.errors);
-				console.error(validationErrors);
-				errors.set(validationErrors);
-			} else {
-				console.error(exception);
-			}
-		});
+			.then((response: any) => {
+				fields = response.data;
+				goto(`/teacher/courses/${courseId}/assignments/${assignmentId}`);
+			})
+			.catch((exception) => {
+				if (exception?.response?.data?.errors) {
+					const validationErrors = transformErrors(exception.response.data.errors);
+					console.error(validationErrors);
+					errors.set(validationErrors);
+				} else {
+					console.error(exception);
+				}
+			});
 	};
 
 	const form = superForm(formData, {

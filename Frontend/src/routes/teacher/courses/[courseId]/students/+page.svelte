@@ -96,7 +96,7 @@
 	</div>
 	<div class="flex flex-row gap-8">
 		<div class="flex w-[700px] flex-col gap-8">
-			<AllStudentsCard students={data.students} courseId={courseId}/>
+			<AllStudentsCard students={data.students} {courseId} />
 		</div>
 		<div class="flex w-[400px] flex-col gap-8">
 			<AddStudentsCard addFunction={addStudents} />

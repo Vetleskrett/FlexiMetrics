@@ -72,7 +72,7 @@
 			fields: []
 		};
 	}
-	
+
 	const onSubmitEdit = async () => {
 		return editAssignment(assignment!.id, {
 			name: assignmentFormData.name,
@@ -104,7 +104,7 @@
 					min: cleanOptional(fieldFormData.min),
 					max: cleanOptional(fieldFormData.max),
 					regex: cleanOptional(fieldFormData.regex),
-					subType: fieldFormData.subType?.value,
+					subType: fieldFormData.subType?.value
 				};
 			})
 		});
@@ -208,7 +208,11 @@
 				<Form.Field {form} name="gradingType" class="flex flex-col">
 					<Form.Control let:attrs>
 						<Form.Label for="gradingType">Grading</Form.Label>
-						<RadioGroup.Root {...attrs} id="gradingType" bind:value={assignmentFormData.gradingType}>
+						<RadioGroup.Root
+							{...attrs}
+							id="gradingType"
+							bind:value={assignmentFormData.gradingType}
+						>
 							<div class="flex items-center gap-1">
 								<RadioGroup.Item {...attrs} id="noGrading" value="NoGrading" />
 								<label for="spring">None</label>

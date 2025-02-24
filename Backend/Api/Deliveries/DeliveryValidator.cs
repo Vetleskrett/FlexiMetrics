@@ -75,17 +75,18 @@ public class DeliveryValidator : AbstractValidator<Delivery>
                         AssignmentDataType.Float => field.GetValue<double>(),
                         AssignmentDataType.Boolean => field.GetValue<bool>(),
                         AssignmentDataType.URL => field.GetValue<string>(),
+                        AssignmentDataType.JSON => JsonSerializer.Deserialize<object>(field.GetValue<string>()),
                         AssignmentDataType.File => field.GetValue<FileMetadata>(),
-                            AssignmentDataType.List => assignmentField.SubType switch
-                            {
-                                AssignmentDataType.ShortText => field.GetValue<List<string>>(),
-                                AssignmentDataType.LongText => field.GetValue<List<string>>(),
-                                AssignmentDataType.Integer => field.GetValue<List<int>>(),
-                                AssignmentDataType.Float => field.GetValue<List<double>>(),
-                                AssignmentDataType.Boolean => field.GetValue<List<bool>>(),
-                                AssignmentDataType.URL => field.GetValue<List<string>>(),
-                                _ => null,
-                            },
+                        AssignmentDataType.List => assignmentField.SubType switch
+                        {
+                            AssignmentDataType.ShortText => field.GetValue<List<string>>(),
+                            AssignmentDataType.LongText => field.GetValue<List<string>>(),
+                            AssignmentDataType.Integer => field.GetValue<List<int>>(),
+                            AssignmentDataType.Float => field.GetValue<List<double>>(),
+                            AssignmentDataType.Boolean => field.GetValue<List<bool>>(),
+                            AssignmentDataType.URL => field.GetValue<List<string>>(),
+                            _ => null,
+                        },
                         _ => null,
                     };
                     return value is not null;
@@ -103,7 +104,7 @@ public class DeliveryValidator : AbstractValidator<Delivery>
                 var assignmentField = delivery.Assignment!.Fields!.FirstOrDefault(f => f.Id == field.AssignmentFieldId);
                 if (assignmentField?.Min is not null)
                 {
-                    switch(assignmentField.Type)
+                    switch (assignmentField.Type)
                     {
                         case AssignmentDataType.Integer:
                             var intValue = field.JsonValue?.Deserialize<int>();

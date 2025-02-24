@@ -24,7 +24,9 @@
 		<div class="flex flex-col">
 			{#if delivery}
 				{#each assignmentFields as assignmentField}
-				{@const deliveryField = delivery.fields.find(f => f.assignmentFieldId == assignmentField.id)}
+					{@const deliveryField = delivery.fields.find(
+						(f) => f.assignmentFieldId == assignmentField.id
+					)}
 					<Separator class="w-full" />
 					<div class="px-6 py-4">
 						<h1 class="font-semibold">
