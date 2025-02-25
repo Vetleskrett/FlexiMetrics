@@ -1,6 +1,6 @@
 ﻿using Database.Models;
 
-namespace Api.Deliveries.Contracts;
+namespace Api.Common;
 
 public class FileResponse
 {

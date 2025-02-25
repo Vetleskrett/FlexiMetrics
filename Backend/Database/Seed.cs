@@ -382,8 +382,57 @@ public static class Seed
 
         dbContext.AddRange(feedbacks);
 
+        var analyzerFaker = new Faker<Analyzer>()
+            .UseSeed(SEED)
+            .RuleFor(x => x.Id, f => f.Random.Guid())
+            .RuleFor(x => x.Name, f =>
+            {
+                var name = string.Join(" ", f.Lorem.Words());
+                return string.Concat(name.ToUpper().AsSpan(0, 1), name.AsSpan(1));
+            })
+            .RuleFor(x => x.FileName, "analyzer.py");
+
+        var analyzers = assignments.Select(assignment =>
+        {
+            var assignmentAnalyzers = analyzerFaker
+                .RuleFor(x => x.AssignmentId, assignment.Id)
+                .GenerateBetween(1, 5);
+
+            foreach (var analyzer in assignmentAnalyzers)
+            {
+                var stream = new MemoryStream(Encoding.UTF8.GetBytes(ANALYZER_SCRIPT));
+                fileStorage.WriteAnalyzer(assignment.CourseId, assignment.Id, analyzer.Id, stream);
+            }
+
+            return assignmentAnalyzers;
+        })
+        .SelectMany(x => x)
+        .ToList();
+
+        dbContext.AddRange(analyzers);
+
         await dbContext.SaveChangesAsync();
     }
+
+    private const string ANALYZER_SCRIPT =
+    """
+    from fleximetrics import *
+
+
+    def main(delivery: Delivery) -> Analysis:
+        analysis = Analysis()
+
+        analysis.set_int("Num files", 5)
+        analysis.set_str("Title", "Weather app")
+
+        return analysis
+
+
+    if __name__ == "__main__":
+        delivery = Delivery.read_from_file()
+        analysis = main(delivery)
+        analysis.write_to_file()
+    """;
 
     private static readonly string[] COURSES =
     [
