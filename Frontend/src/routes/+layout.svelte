@@ -15,6 +15,12 @@
 	>
 		<h2 class="text-lg font-semibold">Courses (student)</h2>
 	</a>
+	<a
+		href="/auth/signout"
+		class="flex h-full w-28 items-center justify-center text-center hover:bg-black hover:bg-opacity-10"
+	>
+	<h2 class="text-lg font-semibold">Sign Out</h2>
+	</a>
 </div>
 <div class="py-16">
 	<slot />
