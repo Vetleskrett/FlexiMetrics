@@ -17,6 +17,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Api.Tests.Integration", "Ap
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FileStorage", "FileStorage\FileStorage.csproj", "{22CD8D23-210A-47D4-819D-A37658026F60}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SeedingService", "SeedingService\SeedingService.csproj", "{6ADECE1A-37B9-C763-00E9-218260681356}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -51,6 +53,10 @@ Global
 		{22CD8D23-210A-47D4-819D-A37658026F60}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{22CD8D23-210A-47D4-819D-A37658026F60}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{22CD8D23-210A-47D4-819D-A37658026F60}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6ADECE1A-37B9-C763-00E9-218260681356}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6ADECE1A-37B9-C763-00E9-218260681356}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6ADECE1A-37B9-C763-00E9-218260681356}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6ADECE1A-37B9-C763-00E9-218260681356}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
