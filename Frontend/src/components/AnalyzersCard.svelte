@@ -22,7 +22,10 @@
 			<Card.Title class="ml-4 text-3xl">Analyzers</Card.Title>
 		</div>
 
-		<CustomButton href="/courses/{courseId}/assignments/{assignmentId}/analyzers/new" color="green">
+		<CustomButton
+			href="/teacher/courses/{courseId}/assignments/{assignmentId}/analyzers/new"
+			color="green"
+		>
 			<Plus />
 			<p>New</p>
 		</CustomButton>
@@ -32,7 +35,7 @@
 			{#each analyzers as analyzer}
 				<Separator class="w-full" />
 				<a
-					href="/courses/{courseId}/assignments/{assignmentId}/analyzers/{analyzer.id}"
+					href="/teacher/courses/{courseId}/assignments/{assignmentId}/analyzers/{analyzer.id}"
 					class="h-18 flex w-full items-center justify-between p-6 hover:bg-blue-50"
 				>
 					<h1 class="text-xl">{analyzer.name}</h1>

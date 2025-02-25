@@ -59,7 +59,7 @@ public static class AnalyzerEndpoints
         .WithName("UpdateAnalyzer")
         .WithSummary("Update analyzer by id");
 
-        group.MapGet("analyzer/{id:guid}/script", async (IAnalyzerService analyzerService, Guid id) =>
+        group.MapGet("analyzers/{id:guid}/script", async (IAnalyzerService analyzerService, Guid id) =>
         {
             var result = await analyzerService.DownloadScript(id);
             return result.MapToResponse(file => Results.File(file.Stream, file.Metadata.ContentType, file.Metadata.FileName));
@@ -68,7 +68,7 @@ public static class AnalyzerEndpoints
         .WithName("DownloadAnalyzerScript")
         .WithSummary("Download analyzer script");
 
-        group.MapPost("analyzer/{id:guid}/script", async (IAnalyzerService analyzerService, IFormFile script, Guid id) =>
+        group.MapPost("analyzers/{id:guid}/script", async (IAnalyzerService analyzerService, IFormFile script, Guid id) =>
         {
             var result = await analyzerService.UploadScript(script, id);
             return result.MapToResponse(() => Results.Ok());

@@ -2,8 +2,7 @@
 	import { page } from '$app/stores';
 	import * as Breadcrumb from '$lib/components/ui/breadcrumb/index.js';
 	import * as DropdownMenu from '$lib/components/ui/dropdown-menu';
-
-	import { course, assignment, analyzerOutput, analyzer } from 'src/mockData';
+	import { analyzerOutput } from 'src/mockData';
 	import AnalyzerOutputCard from 'src/components/AnalyzerOutputCard.svelte';
 	import EllipsisVertical from 'lucide-svelte/icons/ellipsis-vertical';
 	import Pencil from 'lucide-svelte/icons/pencil';
@@ -12,10 +11,21 @@
 	import X from 'lucide-svelte/icons/x';
 	import CustomButton from 'src/components/CustomButton.svelte';
 	import AnalyzerRunningCard from 'src/components/AnalyzerRunningCard.svelte';
+	import type { Analyzer, Assignment, Course, Student, Team } from 'src/types';
+	import { ArrowDownToLine } from 'lucide-svelte';
+	import { getAnalyzerScriptUrl } from 'src/api';
 
 	const courseId = $page.params.courseId;
 	const assignmentId = $page.params.assignmentId;
 	const analyzerId = $page.params.analyzerId;
+
+	export let data: {
+		course: Course;
+		assignment: Assignment;
+		analyzer: Analyzer;
+		students: Student[];
+		teams: Team[];
+	};
 
 	let isRunning = false;
 
@@ -32,16 +42,16 @@
 			<Breadcrumb.Separator />
 			<Breadcrumb.Item>
 				<Breadcrumb.Link href="/teacher/courses/{courseId}"
-					>{course.code} - {course.name}</Breadcrumb.Link
+					>{data.course.code} - {data.course.name}</Breadcrumb.Link
 				>
 			</Breadcrumb.Item>
 			<Breadcrumb.Separator />
 			<Breadcrumb.Link href="/teacher/courses/{courseId}/assignments/{assignmentId}">
-				{assignment.name}
+				{data.assignment.name}
 			</Breadcrumb.Link>
 			<Breadcrumb.Separator />
 			<Breadcrumb.Item>
-				<Breadcrumb.Page>{analyzer.name}</Breadcrumb.Page>
+				<Breadcrumb.Page>{data.analyzer.name}</Breadcrumb.Page>
 			</Breadcrumb.Item>
 		</Breadcrumb.List>
 	</Breadcrumb.Root>
@@ -53,7 +63,7 @@
 				src="https://img.icons8.com/fluency/480/artificial-intelligence--v2.png"
 				alt="knowledge-sharing"
 			/>
-			<h1 class="ml-4 text-4xl font-semibold">{analyzer.name}</h1>
+			<h1 class="ml-4 text-4xl font-semibold">{data.analyzer.name}</h1>
 		</div>
 		<div class="flex items-center gap-2">
 			{#if isRunning}
@@ -72,8 +82,12 @@
 					<EllipsisVertical size={32} />
 				</DropdownMenu.Trigger>
 				<DropdownMenu.Content>
+					<DropdownMenu.Item download href={getAnalyzerScriptUrl(analyzerId)}>
+						<ArrowDownToLine class="h-4" />
+						<p>Download script</p>
+					</DropdownMenu.Item>
 					<DropdownMenu.Item
-						href="/courses/{courseId}/assignments/{assignmentId}/analyzers/{analyzerId}/edit"
+						href="/teacher/courses/{courseId}/assignments/{assignmentId}/analyzers/{analyzerId}/edit"
 					>
 						<Pencil class="h-4" />
 						<p>Edit analyzer</p>

@@ -22,8 +22,10 @@ import type {
   CreateFeedback,
   EditFeedback,
   EmailAdd,
-  UpdateAssignmentField,
   UpdateDelivery,
+  Analyzer,
+  CreateAnalyzer,
+  EditAnalyzer,
 } from "./types";
 
 const instance = axios.create({
@@ -206,4 +208,34 @@ export async function editAssignmentFields(assignmentId: string, request: Update
 
 export async function deleteAssigmentField(assignmentFieldId: string) : Promise<AxiosResponse>{
   return instance.delete(`/assignment-fields/${assignmentFieldId}`)
+}
+
+export async function getAnalyzer(analyzerId: string) : Promise<AxiosResponse<Analyzer>>{
+  return instance.get(`/analyzers/${analyzerId}`)
+}
+
+export async function getAnalyzers(assignmentId: string) : Promise<AxiosResponse<Analyzer[]>>{
+  return instance.get(`/assignments/${assignmentId}/analyzers`)
+}
+
+export async function postAnalyzer(request: CreateAnalyzer) : Promise<AxiosResponse<Analyzer>>{
+  return instance.post(`/analyzers`,request)
+}
+
+export async function editAnalyzer(analyzerId: string, request: EditAnalyzer) : Promise<AxiosResponse<Analyzer>>{
+  return instance.put(`/analyzers/${analyzerId}`, request)
+}
+
+export async function getAnalyzerScript(analyzerId: string) : Promise<AxiosResponse<File>>{
+  return instance.get(`/analyzers/${analyzerId}/script`)
+}
+
+export function getAnalyzerScriptUrl(analyzerId: string) : string {
+  return instance.defaults.baseURL + `/analyzers/${analyzerId}/script`;
+}
+
+export function postAnalyzerScript(analyzerId: string, script: File) : Promise<AxiosResponse> {
+  var formData = new FormData();
+  formData.append("script", script);
+  return instance.postForm(`/analyzers/${analyzerId}/script`, formData)
 }

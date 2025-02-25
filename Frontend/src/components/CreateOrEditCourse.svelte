@@ -11,6 +11,7 @@
 	import { teacherId } from 'src/store';
 	import * as Form from 'src/lib/components/ui/form';
 	import { superForm } from 'sveltekit-superforms';
+	import { transformErrors } from 'src/utils';
 
 	export let edit: boolean;
 	export let course: Course = {
@@ -50,18 +51,19 @@
 				goto(`/teacher/courses/${course.id}`);
 			})
 			.catch((exception) => {
-				const validationErrors = Object.fromEntries(
-					exception.response.data.errors.map((error: any) => [
-						error.propertyName.toLowerCase(),
-						[error.message]
-					])
-				);
-				errors.set(validationErrors);
+				if (exception?.response?.data?.errors) {
+					const validationErrors = transformErrors(exception.response.data.errors);
+					console.error(validationErrors);
+					errors.set(validationErrors);
+				} else {
+					console.error(exception);
+				}
 			});
 	};
 
 	const form = superForm(course, {
-		onSubmit: onSubmit
+		onSubmit: onSubmit,
+		dataType: 'json'
 	});
 	const { enhance, errors } = form;
 </script>

@@ -1,4 +1,4 @@
-import { getCourse, getAssignment, getAssignmentFields, getDeliveries, getStudents, getTeams } from "src/api";
+import { getCourse, getAssignment, getAssignmentFields, getDeliveries, getStudents, getTeams, getAnalyzers } from "src/api";
 
 export const load = async ({ params }: { params: { courseId: string; assignmentId: string; } }) => {
     const [
@@ -7,14 +7,16 @@ export const load = async ({ params }: { params: { courseId: string; assignmentI
         assignmentFieldsResponse,
         deliveriesResponse,
         studentsResponse,
-        teamsResponse
+        teamsResponse,
+        analyzersResponse
     ] = await Promise.all([
         getCourse(params.courseId),
         getAssignment(params.assignmentId),
         getAssignmentFields(params.assignmentId),
         getDeliveries(params.assignmentId),
         getStudents(params.courseId),
-        getTeams(params.courseId)
+        getTeams(params.courseId),
+        getAnalyzers(params.assignmentId),
     ])
 
     return { 
@@ -23,6 +25,7 @@ export const load = async ({ params }: { params: { courseId: string; assignmentI
         assignmentFields: assignmentFieldsResponse.data,
         deliveries: deliveriesResponse.data,
         students: studentsResponse.data,
-        teams: teamsResponse.data
+        teams: teamsResponse.data,
+        analyzers: analyzersResponse.data
     }
 };

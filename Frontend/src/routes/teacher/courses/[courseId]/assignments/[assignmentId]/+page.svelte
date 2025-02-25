@@ -11,8 +11,15 @@
 	import AssignmentFormatCard from 'src/components/AssignmentFormatCard.svelte';
 	import AnalyzersCard from 'src/components/AnalyzersCard.svelte';
 	import CustomButton from 'src/components/CustomButton.svelte';
-	import { analyzers } from 'src/mockData';
-	import type { Assignment, Course, AssignmentField, Delivery, Student, Team } from 'src/types';
+	import type {
+		Assignment,
+		Course,
+		AssignmentField,
+		Delivery,
+		Student,
+		Team,
+		Analyzer
+	} from 'src/types';
 	import { Role } from 'src/types';
 	import { deleteAssigment, publishAssignment } from 'src/api';
 	import { goto } from '$app/navigation';
@@ -45,6 +52,7 @@
 		deliveries: Delivery[];
 		students: Student[];
 		teams: Team[];
+		analyzers: Analyzer[];
 	};
 </script>
 
@@ -107,7 +115,7 @@
 	<div class="flex w-[1080px] flex-row gap-8">
 		<div class="flex w-3/5 flex-col gap-8">
 			<AssignmentFormatCard assignmentFields={data.assignmentFields} {assignmentId} {courseId} />
-			<AnalyzersCard {analyzers} {assignmentId} {courseId} />
+			<AnalyzersCard analyzers={data.analyzers} {assignmentId} {courseId} />
 		</div>
 
 		<div class="flex w-2/5 flex-col gap-8">
