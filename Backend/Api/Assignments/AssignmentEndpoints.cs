@@ -6,7 +6,7 @@ public static class AssignmentEndpoints
 {
     public static void MapAssignmentEndpoints(this WebApplication app)
     {
-        var group = app.MapGroup("").WithTags("Assignments");
+        var group = app.MapGroup("").WithTags("Assignments").RequireAuthorization();
 
         group.MapGet("assignments", async (IAssignmentService assignmentService) =>
         {

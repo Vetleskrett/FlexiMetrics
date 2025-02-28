@@ -7,7 +7,7 @@ public static class DeliveryEndpoints
 {
     public static void MapDeliveryEndpoints(this WebApplication app)
     {
-        var group = app.MapGroup("").WithTags("Deliveries");
+        var group = app.MapGroup("").WithTags("Deliveries").RequireAuthorization();
 
         group.MapGet("deliveries", async (IDeliveryService deliveryService) =>
         {

@@ -6,7 +6,7 @@ public static class TeamEndpoints
 {
     public static void MapTeamEndpoints(this WebApplication app)
     {
-        var group = app.MapGroup("").WithTags("Teams");
+        var group = app.MapGroup("").WithTags("Teams").RequireAuthorization();
 
         group.MapGet("teams", async (ITeamService teamService) =>
         {

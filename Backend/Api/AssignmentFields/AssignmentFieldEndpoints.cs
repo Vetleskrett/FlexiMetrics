@@ -7,7 +7,7 @@ public static class AssignmentFieldEndpoints
 {
     public static void MapAssignmentFieldEndpoints(this WebApplication app)
     {
-        var group = app.MapGroup("").WithTags("AssignmentFields");
+        var group = app.MapGroup("").WithTags("AssignmentFields").RequireAuthorization();
 
         group.MapGet("assignment-fields", async (IAssignmentFieldService assignmentFieldService) =>
         {
