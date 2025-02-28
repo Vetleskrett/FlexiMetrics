@@ -18,14 +18,14 @@ public class LocalFileStorage : IFileStorage
         await data.CopyToAsync(fileStream);
     }
 
-    public Stream ReadDeliveryField(Guid courseId, Guid assignmentId, Guid deliveryId, Guid deliveryFieldId)
+    public Stream GetDeliveryField(Guid courseId, Guid assignmentId, Guid deliveryId, Guid deliveryFieldId)
     {
         var dirPath = GetDeliveryDirectoryPath(courseId, assignmentId, deliveryId);
         var filePath = Path.Combine(dirPath, deliveryFieldId.ToString());
         return File.OpenRead(filePath);
     }
 
-    public async Task WriteAnalyzer(Guid courseId, Guid assignmentId, Guid analyzerId, Stream data)
+    public async Task WriteAnalyzerScript(Guid courseId, Guid assignmentId, Guid analyzerId, Stream data)
     {
         var dirPath = GetAnalyzerDirectoryPath(courseId, assignmentId);
         Directory.CreateDirectory(dirPath);
@@ -35,7 +35,7 @@ public class LocalFileStorage : IFileStorage
         await data.CopyToAsync(fileStream);
     }
 
-    public Stream ReadAnalyzer(Guid courseId, Guid assignmentId, Guid analyzerId)
+    public Stream GetAnalyzerScript(Guid courseId, Guid assignmentId, Guid analyzerId)
     {
         var dirPath = GetAnalyzerDirectoryPath(courseId, assignmentId);
         var filePath = Path.Combine(dirPath, analyzerId.ToString());

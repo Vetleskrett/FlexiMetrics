@@ -138,7 +138,7 @@ public class AnalyzerService : IAnalyzerService
 
         try
         {
-            await _fileStorage.WriteAnalyzer
+            await _fileStorage.WriteAnalyzerScript
             (
                 analyzer!.Assignment!.CourseId,
                 analyzer!.AssignmentId,
@@ -167,7 +167,7 @@ public class AnalyzerService : IAnalyzerService
 
         try
         {
-            var stream = _fileStorage.ReadAnalyzer
+            var stream = _fileStorage.GetAnalyzerScript
             (
                 analyzer!.Assignment!.CourseId,
                 analyzer!.AssignmentId,

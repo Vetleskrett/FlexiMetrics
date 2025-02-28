@@ -3,10 +3,10 @@
 public interface IFileStorage
 {
     Task WriteDeliveryField(Guid courseId, Guid assignmentId, Guid deliveryId, Guid deliveryFieldId, Stream data);
-    Stream ReadDeliveryField(Guid courseId, Guid assignmentId, Guid deliveryId, Guid deliveryFieldId);
+    Stream GetDeliveryField(Guid courseId, Guid assignmentId, Guid deliveryId, Guid deliveryFieldId);
 
-    Task WriteAnalyzer(Guid courseId, Guid assignmentId, Guid analyzerId, Stream data);
-    Stream ReadAnalyzer(Guid courseId, Guid assignmentId, Guid analyzerId);
+    Task WriteAnalyzerScript(Guid courseId, Guid assignmentId, Guid analyzerId, Stream data);
+    Stream GetAnalyzerScript(Guid courseId, Guid assignmentId, Guid analyzerId);
 
     bool DeleteAll();
     bool DeleteCourse(Guid courseId);

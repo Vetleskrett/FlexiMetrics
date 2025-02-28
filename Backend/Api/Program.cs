@@ -11,12 +11,16 @@ using Api.Deliveries;
 using Api.Feedbacks;
 using FileStorage;
 using Api.Analyzers;
+using Container;
 
 var builder = WebApplication.CreateBuilder(args);
+
+builder.Services.AddLogging();
 
 builder.AddServiceDefaults();
 
 builder.Services.AddSingleton<IFileStorage, LocalFileStorage>();
+builder.Services.AddContainer();
 
 builder.AddNpgsqlDbContext<AppDbContext>("postgresdb");
 
@@ -29,6 +33,7 @@ builder.Services.AddScoped<IAssignmentFieldService, AssignmentFieldService>();
 builder.Services.AddScoped<IDeliveryService, DeliveryService>();
 builder.Services.AddScoped<IFeedbackService, FeedbackService>();
 builder.Services.AddScoped<IAnalyzerService, AnalyzerService>();
+builder.Services.AddScoped<IAnalyzerActionService, AnalyzerActionService>();
 
 builder.Services.AddValidatorsFromAssemblyContaining<Program>();
 
@@ -56,6 +61,8 @@ builder.Services.ConfigureHttpJsonOptions(options =>
 });
 
 var app = builder.Build();
+
+await app.InitializeContainer();
 
 app.MapDefaultEndpoints();
 

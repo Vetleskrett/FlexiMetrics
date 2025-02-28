@@ -401,7 +401,7 @@ public static class Seed
             foreach (var analyzer in assignmentAnalyzers)
             {
                 var stream = new MemoryStream(Encoding.UTF8.GetBytes(ANALYZER_SCRIPT));
-                fileStorage.WriteAnalyzer(assignment.CourseId, assignment.Id, analyzer.Id, stream);
+                fileStorage.WriteAnalyzerScript(assignment.CourseId, assignment.Id, analyzer.Id, stream);
             }
 
             return assignmentAnalyzers;
