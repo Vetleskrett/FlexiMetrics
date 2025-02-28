@@ -1,7 +1,8 @@
 import { getCoursesByStudent } from "src/api";
 import { studentId } from "src/store";
+import type { PageServerLoad } from "./$types";
 
-export const load = async () => {
+export const load: PageServerLoad = async () => {
     const coursesResponse = await getCoursesByStudent(studentId);
     return { 
         courses: coursesResponse.data

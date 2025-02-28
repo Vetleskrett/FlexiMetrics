@@ -1,18 +1,17 @@
-import { getCourse, getAssignment, getAssignmentFields, getDeliveries, getStudents, getTeams } from "src/api";
+import { getCourse, getAssignment, getFeedbacks, getStudents, getTeams } from "src/api";
+import type { PageServerLoad } from "../$types";
 
-export const load = async ({ params }: { params: { courseId: string; assignmentId: string; } }) => {
+export const load: PageServerLoad = async ({ params }: { params: { courseId: string; assignmentId: string; } }) => {
     const [
         courseResponse,
         assignmentResponse,
-        assignmentFieldsResponse,
-        deliveriesResponse,
+        feedbacksResponse,
         studentsResponse,
         teamsResponse,
     ] = await Promise.all([
         getCourse(params.courseId),
         getAssignment(params.assignmentId),
-        getAssignmentFields(params.assignmentId),
-        getDeliveries(params.assignmentId),
+        getFeedbacks(params.assignmentId),
         getStudents(params.courseId),
         getTeams(params.courseId)
     ])
@@ -20,8 +19,7 @@ export const load = async ({ params }: { params: { courseId: string; assignmentI
     return { 
         course: courseResponse.data,
         assignment: assignmentResponse.data,
-        assignmentFields: assignmentFieldsResponse.data,
-        deliveries: deliveriesResponse.data,
+        feedbacks: feedbacksResponse.data,
         students: studentsResponse.data,
         teams: teamsResponse.data
     }

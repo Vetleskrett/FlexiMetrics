@@ -5,7 +5,6 @@
 	import Textarea from 'src/lib/components/ui/textarea/textarea.svelte';
 	import Save from 'lucide-svelte/icons/save';
 	import CustomButton from './CustomButton.svelte';
-	import { putFeedback, postFeedback } from 'src/api';
 	import * as Form from 'src/lib/components/ui/form';
 	import { superForm } from 'sveltekit-superforms';
 	import * as RadioGroup from '$lib/components/ui/radio-group';
@@ -15,6 +14,7 @@
 	import Pencil from 'lucide-svelte/icons/pencil';
 	import X from 'lucide-svelte/icons/x';
 	import Check from 'lucide-svelte/icons/check';
+	import axios from 'axios';
 
 	export let assignment: Assignment;
 	export let feedback: Feedback | null;
@@ -63,7 +63,7 @@
 	let feedbackFormData: FeedbackFormData = toFormData();
 
 	const onSubmitEdit = async () => {
-		return putFeedback(feedback!.id, {
+		return axios.put(`/api/feedback/${feedback!.id}`, {
 			comment: feedbackFormData.comment,
 			isApproved:
 				feedbackFormData.isApproved == undefined
@@ -75,7 +75,7 @@
 	};
 
 	const onSubmitCreate = async () => {
-		return postFeedback({
+		return axios.post(`/api/feedback`, {
 			comment: feedbackFormData.comment,
 			assignmentId: assignment.id,
 			studentId: studentId,

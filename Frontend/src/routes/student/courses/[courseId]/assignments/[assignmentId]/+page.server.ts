@@ -1,20 +1,20 @@
-import { getCourse, getAssignment, getAssignmentFields, getTeamDelivery, getTeamFeedback, getTeam } from "src/api";
+import { getCourse, getAssignment, getAssignmentFields, getStudentDelivery, getStudentFeedback } from "src/api";
+import { studentId } from "src/store";
+import type { PageServerLoad } from "./$types";
 
-export const load = async ({ params }: { params: { courseId: string; assignmentId: string; teamId: string; } }) => {
+export const load: PageServerLoad = async ({ params }: {params: { courseId: string; assignmentId: string; }}) => {
     const [
         courseResponse,
         assignmentResponse,
         assignmentFieldsResponse,
         deliveryResponse,
-        feedbackResponse,
-        teamResponse,
+        feedbackResponse
     ] = await Promise.all([
         getCourse(params.courseId),
         getAssignment(params.assignmentId),
         getAssignmentFields(params.assignmentId),
-        getTeamDelivery(params.teamId, params.assignmentId),
-        getTeamFeedback(params.teamId, params.assignmentId),
-        getTeam(params.teamId),
+        getStudentDelivery(studentId, params.assignmentId),
+        getStudentFeedback(studentId, params.assignmentId)
     ])
 
     return { 
@@ -23,6 +23,5 @@ export const load = async ({ params }: { params: { courseId: string; assignmentI
         assignmentFields: assignmentFieldsResponse.data,
         delivery: deliveryResponse.status == 204 ? null : deliveryResponse?.data,
         feedback: feedbackResponse.status == 204 ? null : feedbackResponse?.data,
-        team: teamResponse.data,
     }
 };

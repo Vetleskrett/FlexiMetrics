@@ -5,9 +5,9 @@
 	import Trash2 from 'lucide-svelte/icons/trash-2';
 	import * as DropdownMenu from '$lib/components/ui/dropdown-menu';
 	import * as Breadcrumb from '$lib/components/ui/breadcrumb/index.js';
-	import { postStudentsCourse } from 'src/api';
 	import AllStudentsCard from 'src/components/AllStudentsCard.svelte';
 	import AddStudentsCard from 'src/components/AddStudentsCard.svelte';
+	import axios from 'axios';
 
 	const courseId = $page.params.courseId;
 
@@ -23,7 +23,7 @@
 		const studentEmails = handleInput(input);
 		try {
 			if (studentEmails) {
-				var response = await postStudentsCourse(courseId, { emails: studentEmails });
+				var response = await axios.post(`/api/course/${courseId}/students`, { emails: studentEmails });
 				data.students = response.data;
 			}
 		} catch (error) {

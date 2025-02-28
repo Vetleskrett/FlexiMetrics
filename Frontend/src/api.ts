@@ -30,6 +30,14 @@ const instance = axios.create({
   baseURL: browser ? 'https://localhost:7255' : 'http://localhost:5041'
 })
 
+export function setAuthToken(token: string){
+  instance.defaults.headers.common["Authorization"] = `Bearer ${token}`
+}
+
+export function hasToken(){
+  return instance.defaults.headers.common["Authorization"]
+}
+
 export function getCourses() : Promise<AxiosResponse<Course[]>> {
   return instance.get("/courses")
 }

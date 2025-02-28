@@ -10,10 +10,11 @@
 	import Save from 'lucide-svelte/icons/save';
 	import CustomButton from './CustomButton.svelte';
 	import { studentId } from 'src/store';
-	import { postDelivery, putDelivery, postDeliveryFieldFile } from 'src/api';
+	import { putDelivery, postDeliveryFieldFile } from 'src/api';
 	import { goto } from '$app/navigation';
 	import Undo_2 from 'lucide-svelte/icons/undo-2';
 	import DeliveryFieldInput from './inputs/DeliveryFieldInput.svelte';
+	import axios from 'axios';
 
 	export let assignment: Assignment;
 	export let assignmentFields: AssignmentField[];
@@ -83,7 +84,7 @@
 				};
 			})
 		};
-		const response = await postDelivery(request);
+		const response = await axios.post(`/api/delivery`, delivery);;
 		delivery = response.data;
 	};
 
@@ -114,7 +115,6 @@
 				await postDeliveryFieldFile(deliveryField.id, fileField.file);
 			}
 		}
-
 		goto('./');
 	};
 </script>

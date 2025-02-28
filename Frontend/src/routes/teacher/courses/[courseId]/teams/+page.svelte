@@ -8,7 +8,7 @@
 	import * as Breadcrumb from '$lib/components/ui/breadcrumb/index.js';
 	import AddTeamMembersCard from 'src/components/AddTeamMembersCard.svelte';
 	import SimpleAddCard from 'src/components/SimpleAddCard.svelte';
-	import { getTeams, postStudentsTeam, postTeams } from 'src/api';
+	import axios from 'axios';
 
 	const courseId = $page.params.courseId;
 
@@ -20,12 +20,11 @@
 	async function addTeams(input: number) {
 		if (input && input > 0) {
 			try {
-				await postTeams({
+				const result = await axios.post(`/api/teams`, {
 					courseId: courseId,
 					numTeams: input
 				});
-				const teamsResponse = await getTeams(courseId);
-				data.teams = teamsResponse.data;
+				data.teams = result.data;
 			} catch (error) {
 				console.error('Something went wrong!');
 			}
@@ -48,12 +47,11 @@
 			allTeams.push({ teamNr: Number(info[0].trim()), emails: info.slice(1) });
 		}
 		try {
-			await postStudentsTeam({
+			const result = await axios.post(`/api/teams/bulk`, {
 				courseId: courseId,
 				teams: allTeams
 			});
-			const teamsResponse = await getTeams(courseId);
-			data.teams = teamsResponse.data;
+			data.teams = result.data;
 		} catch (error) {
 			console.error('Something went wrong!');
 		}

@@ -1,4 +1,5 @@
 import type { Provider } from "@auth/sveltekit/providers";
+import { setAuthToken } from "src/api";
 
 export const FEIDE_PROVIDER: Provider = {
     id: 'feide',
@@ -12,7 +13,7 @@ export const FEIDE_PROVIDER: Provider = {
         },
     },
     clientId: "CLIENTID",
-    clientSecret: "ACLIENTSECRET",
+    clientSecret: "CLIENTSECRET",
     token: 'https://auth.dataporten.no/oauth/token',
     authorization: 'https://auth.dataporten.no/oauth/authorization',
     userinfo: 'https://auth.dataporten.no/openid/userinfo',
@@ -22,6 +23,7 @@ export const FEIDE_PROVIDER: Provider = {
         logo: "https://www.feide.no/sites/default/files/Logo.png",
     },
     async profile(profile, _tokens) {
-        return { id: profile.sub }
+        setAuthToken(_tokens.id_token!)
+        return { ...profile, id: profile }
     }
 }

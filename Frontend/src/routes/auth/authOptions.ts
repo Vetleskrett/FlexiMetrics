@@ -1,24 +1,15 @@
 import type { SvelteKitAuthConfig } from "@auth/sveltekit/";
 import { FEIDE_PROVIDER } from "./providers/feide";
 
-export const authOptions : SvelteKitAuthConfig  = {
-    providers: [FEIDE_PROVIDER], 
+export const authOptions : SvelteKitAuthConfig = {
+    providers: [FEIDE_PROVIDER],
     callbacks: {
-        async session({ token, session }) {
-            if(token){
+        async session(params: any) {
+            if(params.token){
                 //const JWT = (token.token as { token: {sub: string}}).token
-                return{
-                    ...session,
-                    user: {
-                        ...session.user,
-                        sub: token.sub,
-                        
-                    }, 
-                    test: token
-                    
-                };
+                return {...params};
             }
-            return session
+            return params.session
         },
         async jwt({ token }) {
             return token
