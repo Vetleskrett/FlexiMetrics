@@ -7,6 +7,7 @@ using Api.Analyzers.Contracts;
 using FileStorage;
 using Api.Common;
 using System.Net.Mime;
+using Container;
 
 namespace Api.Analyzers;
 
@@ -19,6 +20,7 @@ public interface IAnalyzerService
     Task<Result<AnalyzerResponse>> Update(UpdateAnalyzerRequest request, Guid id);
     Task<Result> UploadScript(IFormFile script, Guid analyzerFieldId);
     Task<Result<FileResponse>> DownloadScript(Guid analyzerFieldId);
+    Task<Result> StartAction(AnalyzerActionRequest request, Guid id);
     Task<Result> DeleteById(Guid id);
 }
 
@@ -27,12 +29,14 @@ public class AnalyzerService : IAnalyzerService
     private readonly AppDbContext _dbContext;
     private readonly IValidator<Analyzer> _validator;
     private readonly IFileStorage _fileStorage;
+    private readonly IContainerService _containerService;
 
-    public AnalyzerService(AppDbContext dbContext, IValidator<Analyzer> validator, IFileStorage fileStorage)
+    public AnalyzerService(AppDbContext dbContext, IValidator<Analyzer> validator, IFileStorage fileStorage, IContainerService containerService)
     {
         _dbContext = dbContext;
         _validator = validator;
         _fileStorage = fileStorage;
+        _containerService = containerService;
     }
 
     public async Task<Result<IEnumerable<AnalyzerResponse>>> GetAll()
@@ -187,6 +191,33 @@ public class AnalyzerService : IAnalyzerService
         catch (Exception e)
         {
             return new ValidationError($"Could not read file: {e.Message}").MapToResponse();
+        }
+    }
+
+    public async Task<Result> StartAction(AnalyzerActionRequest request, Guid id)
+    {
+        if (request.Action == AnalyzerAction.Run)
+        {
+            var analyzer = await _dbContext.Analyzers
+                .Include(a => a.Assignment)
+                .FirstOrDefaultAsync(a => a.Id == id);
+
+            if (analyzer is null)
+            {
+                return Result.NotFound();
+            }
+
+            // TODO:
+            // Get latest analysis
+            // If status is running: return error
+            // Create an analysis with status running
+
+            await _containerService.StartAnalyzer(analyzer.Assignment!.CourseId, analyzer.AssignmentId, analyzer.Id);
+            return Result.Success();
+        }
+        else
+        {
+            throw new NotImplementedException();
         }
     }
 

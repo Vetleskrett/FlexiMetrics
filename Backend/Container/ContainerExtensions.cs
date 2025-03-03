@@ -1,6 +1,7 @@
 ﻿using Docker.DotNet;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
+using System.Threading.Channels;
+
 namespace Container;
 
 public static class ContainerExtensions
@@ -9,12 +10,11 @@ public static class ContainerExtensions
     {
         services.AddSingleton<IDockerClient>(new DockerClientConfiguration().CreateClient());
         services.AddScoped<IContainerService, ContainerService>();
-    }
-
-    public static async Task InitializeContainer(this IHost app)
-    {
-        using var scope = app.Services.CreateScope();
-        var containerService = scope.ServiceProvider.GetRequiredService<IContainerService>();
-        await containerService.Initialize();
+        services.AddSingleton(Channel.CreateUnbounded<RunAnalyzerRequest>(new()
+        {
+            SingleReader = true,
+            SingleWriter = false
+        }));
+        services.AddHostedService<ContainerWorker>();
     }
 }

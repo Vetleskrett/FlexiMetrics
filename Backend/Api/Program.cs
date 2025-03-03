@@ -33,7 +33,6 @@ builder.Services.AddScoped<IAssignmentFieldService, AssignmentFieldService>();
 builder.Services.AddScoped<IDeliveryService, DeliveryService>();
 builder.Services.AddScoped<IFeedbackService, FeedbackService>();
 builder.Services.AddScoped<IAnalyzerService, AnalyzerService>();
-builder.Services.AddScoped<IAnalyzerActionService, AnalyzerActionService>();
 
 builder.Services.AddValidatorsFromAssemblyContaining<Program>();
 
@@ -61,8 +60,6 @@ builder.Services.ConfigureHttpJsonOptions(options =>
 });
 
 var app = builder.Build();
-
-await app.InitializeContainer();
 
 app.MapDefaultEndpoints();
 

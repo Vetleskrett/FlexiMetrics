@@ -27,9 +27,9 @@ public static class AnalyzerEndpoints
         .WithName("GetAnalyzer")
         .WithSummary("Get analyzer by id");
 
-        group.MapPost("analyzers/{id:guid}/action", async (IAnalyzerActionService actionService, Guid id, AnalyzerActionRequest request) =>
+        group.MapPost("analyzers/{id:guid}/action", async (IAnalyzerService analyzerService, Guid id, AnalyzerActionRequest request) =>
         {
-            var result = await actionService.StartAction(request, id);
+            var result = await analyzerService.StartAction(request, id);
             return result.MapToResponse(() => Results.Ok());
         });
 

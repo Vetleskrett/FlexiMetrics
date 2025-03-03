@@ -4,17 +4,17 @@ using System.Text.Json;
 using Microsoft.EntityFrameworkCore;
 using Docker.DotNet;
 using Docker.DotNet.Models;
-using SharpCompress.Common;
-using SharpCompress.Writers;
-using SharpCompress.Readers;
 using Microsoft.Extensions.Logging;
-using System.Text;
+using System.Threading.Channels;
+using Database.Models;
+
 namespace Container;
 
 public interface IContainerService
 {
     Task Initialize();
-    Task StartAnalyzer(Guid id);
+    Task StartAnalyzer(Guid CourseId, Guid AssignmentId, Guid AnalyzerId);
+    Task RunAnalyzer(RunAnalyzerRequest request, CancellationToken cancellationToken);
 }
 
 public class ContainerService : IContainerService
@@ -25,13 +25,15 @@ public class ContainerService : IContainerService
 
     private readonly AppDbContext _dbContext;
     private readonly IFileStorage _fileStorage;
+    private readonly Channel<RunAnalyzerRequest> _channel;
     private readonly IDockerClient _dockerClient;
     private readonly ILogger<ContainerService> _logger;
 
-    public ContainerService(AppDbContext dbContext, IFileStorage fileStorage, IDockerClient dockerClient, ILogger<ContainerService> logger)
+    public ContainerService(AppDbContext dbContext, IFileStorage fileStorage, Channel<RunAnalyzerRequest> channel, IDockerClient dockerClient, ILogger<ContainerService> logger)
     {
         _dbContext = dbContext;
         _fileStorage = fileStorage;
+        _channel = channel;
         _dockerClient = dockerClient;
         _logger = logger;
     }
@@ -57,92 +59,80 @@ public class ContainerService : IContainerService
                 }
             })
         );
+
+        var containers = await _dockerClient.Containers.ListContainersAsync(new());
+        foreach (var container in containers)
+        {
+            if (container.Names.Any(n => n.StartsWith("analyzer")))
+            {
+                await _dockerClient.Containers.RemoveContainerAsync(container.ID, new());
+            }
+        }
     }
 
-    public async Task StartAnalyzer(Guid id)
+    public async Task StartAnalyzer(Guid CourseId, Guid AssignmentId, Guid AnalyzerId)
     {
-        var analyzer = await _dbContext.Analyzers
-            .Include(a => a.Assignment)
-            .FirstOrDefaultAsync(a => a.Id == id);
+        await _channel.Writer.WriteAsync(new(CourseId, AssignmentId, AnalyzerId));
+    }
 
-        if (analyzer is null)
-        {
-            return;
-        }
-
-        // Get latest analysis
-        // If status is running: return error
-
-        // Create an analysis with status running
-
-        // Add items to queue and return success
-
-        // In background: process queue
-
+    public async Task RunAnalyzer(RunAnalyzerRequest request, CancellationToken cancellationToken)
+    {
         var deliveries = await _dbContext.Deliveries
             .Include(d => d.Student)
             .Include(d => d.Team)
             .ThenInclude(t => t!.Students)
-            .Include(d => d.Fields)
-            .Where(d => d.AssignmentId == analyzer.AssignmentId)
+            .Include(d => d.Fields!)
+            .ThenInclude(f => f.AssignmentField)
+            .Where(d => d.AssignmentId == request.AssignmentId)
             .ToListAsync();
 
-        await Parallel.ForEachAsync(deliveries, async (delivery, _) =>
+        await Parallel.ForEachAsync(deliveries, cancellationToken, async (delivery, cancellationToken) =>
         {
-            var container = await CreateContainer($"analyzer-{id}-{delivery.Id}");
-
-            try
-            {
-                using var fleximetricsStream = File.OpenRead(FLEXIMETRICS_PATH);
-                await CopyFileToContainer(container, fleximetricsStream, "fleximetrics.py");
-
-                using var scriptStream = _fileStorage.GetAnalyzerScript(analyzer.Assignment!.CourseId, analyzer.AssignmentId, analyzer.Id);
-                await CopyFileToContainer(container, scriptStream, "script.py");
-
-                var deliveryJson =
-                """
-                {
-                    "student": {
-                        "id": "123",
-                        "name": "ola",
-                        "email": "ola@ntnu.no"
-                    },
-                    "team": null,
-                    "fields": {
-                        "test_int": 5,
-                        "test_str": "text"
-                    }
-                }
-                """;
-                var deliveryJsonBytes = Encoding.UTF8.GetBytes(deliveryJson);
-                using var deliveryJsonStream = new MemoryStream(deliveryJsonBytes);
-                await CopyFileToContainer(container, deliveryJsonStream, "delivery.json");
-
-                await _dockerClient.Containers.StartContainerAsync(container, new ContainerStartParameters());
-
-                await PrintLogs(container);
-
-                await _dockerClient.Containers.WaitContainerAsync(container);
-
-                await OnAnalyzerFinished(container);
-            }
-            finally
-            {
-                await _dockerClient.Containers.RemoveContainerAsync(container, new());
-            }
+            await RunDeliveryAnalysis(delivery, request, cancellationToken);
         });
     }
 
-    public async Task PrintLogs(string container)
+    private async Task RunDeliveryAnalysis(Delivery delivery, RunAnalyzerRequest request, CancellationToken cancellationToken)
+    {
+        var container = await CreateContainer($"analyzer-{request.AnalyzerId}-{delivery.Id}", cancellationToken);
+
+        try
+        {
+            using var fleximetricsStream = File.OpenRead(FLEXIMETRICS_PATH);
+            await CopyFileToContainer(container, fleximetricsStream, "fleximetrics.py");
+
+            using var scriptStream = _fileStorage.GetAnalyzerScript(request.CourseId, request.AssignmentId, request.AnalyzerId);
+            await CopyFileToContainer(container, scriptStream, "script.py");
+
+            var deliveryDTO = DeliveryDTO.MapFrom(delivery);
+            var deliveryJsonBytes = JsonSerializer.SerializeToUtf8Bytes(deliveryDTO);
+            using var deliveryJsonStream = new MemoryStream(deliveryJsonBytes);
+            await CopyFileToContainer(container, deliveryJsonStream, "delivery.json");
+
+            await _dockerClient.Containers.StartContainerAsync(container, new ContainerStartParameters(), cancellationToken);
+
+            await PrintLogs(container, cancellationToken);
+
+            await _dockerClient.Containers.WaitContainerAsync(container, cancellationToken);
+
+            await OnDeliveryAnalysisFinished(container);
+        }
+        finally
+        {
+            await _dockerClient.Containers.RemoveContainerAsync(container, new ContainerRemoveParameters(), CancellationToken.None);
+        }
+    }
+
+    private async Task PrintLogs(string container, CancellationToken cancellationToken)
     {
         var logsStream = await _dockerClient.Containers.GetContainerLogsAsync(container, false, new ContainerLogsParameters
         {
             ShowStdout = true,
             ShowStderr = true,
             Follow = true
-        });
+        }, cancellationToken);
 
-        var (stdout, stderr) = await logsStream.ReadOutputToEndAsync(CancellationToken.None);
+        var (stdout, stderr) = await logsStream.ReadOutputToEndAsync(cancellationToken);
 
         if (stdout != string.Empty)
         {
@@ -154,7 +144,7 @@ public class ContainerService : IContainerService
         }
     }
 
-    public async Task OnAnalyzerFinished(string container)
+    private async Task OnDeliveryAnalysisFinished(string container)
     {
         using var analysisStream = await CopyFileFromContainer(container, "analysis.json");
         var obj = await JsonSerializer.DeserializeAsync<object>(analysisStream);
@@ -162,7 +152,7 @@ public class ContainerService : IContainerService
         _logger.LogInformation(JsonSerializer.Serialize(obj));
     }
 
-    private async Task<string> CreateContainer(string name)
+    private async Task<string> CreateContainer(string name, CancellationToken cancellationToken)
     {
         var container = await _dockerClient.Containers.CreateContainerAsync
         (
@@ -176,14 +166,15 @@ public class ContainerService : IContainerService
                 {
                     AutoRemove = false,
                 }
-            }
+            },
+            cancellationToken
         );
         return container.ID;
     }
 
     private async Task CopyFileToContainer(string container, Stream stream, string fileName)
     {
-        using var tarStream = CreateTarArchive(stream, fileName);
+        using var tarStream = TarArchive.Create(stream, fileName);
         await _dockerClient.Containers.ExtractArchiveToContainerAsync
         (
             container,
@@ -206,29 +197,6 @@ public class ContainerService : IContainerService
             },
             false
         );
-        return ExtractTarArchive(response.Stream);
-    }
-
-    private Stream CreateTarArchive(Stream fileStream, string fileName)
-    {
-        var outputStream = new MemoryStream();
-        using (var writer = WriterFactory.Open(outputStream, ArchiveType.Tar, CompressionType.None))
-        {
-            writer.Write(fileName, fileStream, DateTime.Now);
-        }
-        outputStream.Position = 0;
-        return outputStream;
-    }
-
-    private Stream ExtractTarArchive(Stream tarStream)
-    {
-        var outputStream = new MemoryStream();
-        using (var reader = ReaderFactory.Open(tarStream))
-        {
-            reader.MoveToNextEntry();
-            reader.WriteEntryTo(outputStream);
-        }
-        outputStream.Position = 0;
-        return outputStream;
+        return TarArchive.Extract(response.Stream);
     }
 }
