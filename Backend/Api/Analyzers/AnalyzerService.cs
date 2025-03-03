@@ -207,12 +207,30 @@ public class AnalyzerService : IAnalyzerService
                 return Result.NotFound();
             }
 
-            // TODO:
-            // Get latest analysis
-            // If status is running: return error
-            // Create an analysis with status running
+            var latestAnalysis = await _dbContext.Analyses
+                .Where(a => a.AnalyzerId == id)
+                .OrderByDescending(a => a.StartedAt)
+                .FirstOrDefaultAsync();
 
-            await _containerService.StartAnalyzer(analyzer.Assignment!.CourseId, analyzer.AssignmentId, analyzer.Id);
+            if (latestAnalysis is not null && latestAnalysis.AnalysisStatus != AnalysisStatus.Completed)
+            {
+                return new ValidationError("Analyzer already running").MapToResponse();
+            }
+
+            var analysis = new Analysis
+            {
+                Id = Guid.NewGuid(),
+                AnalysisStatus = AnalysisStatus.Started,
+                StartedAt = DateTime.UtcNow,
+                CompletedAt = null,
+                AnalyzerId = id,
+                DeliveryAnalyses = []
+            };
+            _dbContext.Analyses.Add(analysis);
+            await _dbContext.SaveChangesAsync();
+
+            await _containerService.StartAnalyzer(analyzer.Assignment!.CourseId, analyzer.AssignmentId, analyzer.Id, analysis.Id);
+
             return Result.Success();
         }
         else

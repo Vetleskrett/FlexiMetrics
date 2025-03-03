@@ -13,7 +13,7 @@ namespace Container;
 public interface IContainerService
 {
     Task Initialize();
-    Task StartAnalyzer(Guid CourseId, Guid AssignmentId, Guid AnalyzerId);
+    Task StartAnalyzer(Guid CourseId, Guid AssignmentId, Guid AnalyzerId, Guid AnalysisId);
     Task RunAnalyzer(RunAnalyzerRequest request, CancellationToken cancellationToken);
 }
 
@@ -28,6 +28,7 @@ public class ContainerService : IContainerService
     private readonly Channel<RunAnalyzerRequest> _channel;
     private readonly IDockerClient _dockerClient;
     private readonly ILogger<ContainerService> _logger;
+    private readonly SemaphoreSlim _dbLock = new(1);
 
     public ContainerService(AppDbContext dbContext, IFileStorage fileStorage, Channel<RunAnalyzerRequest> channel, IDockerClient dockerClient, ILogger<ContainerService> logger)
     {
@@ -59,24 +60,19 @@ public class ContainerService : IContainerService
                 }
             })
         );
-
-        var containers = await _dockerClient.Containers.ListContainersAsync(new());
-        foreach (var container in containers)
-        {
-            if (container.Names.Any(n => n.StartsWith("analyzer")))
-            {
-                await _dockerClient.Containers.RemoveContainerAsync(container.ID, new());
-            }
-        }
     }
 
-    public async Task StartAnalyzer(Guid CourseId, Guid AssignmentId, Guid AnalyzerId)
+    public async Task StartAnalyzer(Guid CourseId, Guid AssignmentId, Guid AnalyzerId, Guid AnalysisId)
     {
-        await _channel.Writer.WriteAsync(new(CourseId, AssignmentId, AnalyzerId));
+        await _channel.Writer.WriteAsync(new(CourseId, AssignmentId, AnalyzerId, AnalysisId));
     }
 
     public async Task RunAnalyzer(RunAnalyzerRequest request, CancellationToken cancellationToken)
     {
+        await _dbContext.Analyses
+            .Where(a => a.Id == request.AnalysisId)
+            .ExecuteUpdateAsync(setter => setter.SetProperty(a => a.AnalysisStatus, AnalysisStatus.Running));
+
         var deliveries = await _dbContext.Deliveries
             .Include(d => d.Student)
             .Include(d => d.Team)
@@ -90,6 +86,15 @@ public class ContainerService : IContainerService
         {
             await RunDeliveryAnalysis(delivery, request, cancellationToken);
         });
+
+        await _dbContext.SaveChangesAsync();
+
+        await _dbContext.Analyses
+            .Where(a => a.Id == request.AnalysisId)
+            .ExecuteUpdateAsync(setter => setter
+                .SetProperty(a => a.AnalysisStatus, AnalysisStatus.Completed)
+                .SetProperty(a => a.CompletedAt, DateTime.UtcNow)
+            );
     }
 
     private async Task RunDeliveryAnalysis(Delivery delivery, RunAnalyzerRequest request, CancellationToken cancellationToken)
@@ -115,7 +120,7 @@ public class ContainerService : IContainerService
 
             await _dockerClient.Containers.WaitContainerAsync(container, cancellationToken);
 
-            await OnDeliveryAnalysisFinished(container);
+            await OnDeliveryAnalysisFinished(container, delivery, request);
         }
         finally
         {
@@ -144,12 +149,42 @@ public class ContainerService : IContainerService
         }
     }
 
-    private async Task OnDeliveryAnalysisFinished(string container)
+    private async Task OnDeliveryAnalysisFinished(string container, Delivery delivery, RunAnalyzerRequest request)
     {
         using var analysisStream = await CopyFileFromContainer(container, "analysis.json");
-        var obj = await JsonSerializer.DeserializeAsync<object>(analysisStream);
+        var fields = await JsonSerializer.DeserializeAsync<Dictionary<string, object>>(analysisStream);
 
-        _logger.LogInformation(JsonSerializer.Serialize(obj));
+        var deliveryAnalysis = new DeliveryAnalysis
+        {
+            Id = Guid.NewGuid(),
+            AnalysisId = request.AnalysisId,
+            DeliveryId = delivery.Id,
+            Fields = []
+        };
+
+        var deliveryAnalysisFields = fields!.Select(field =>
+            new DeliveryAnalysisField
+            {
+                Id = Guid.NewGuid(),
+                DeliveryAnalysisId = deliveryAnalysis.Id,
+                Name = field.Key,
+                Value = field.Value
+            }
+        ).ToList();
+
+        await _dbLock.WaitAsync();
+        try
+        {
+            _dbContext.DeliveryAnalyses.Add(deliveryAnalysis);
+            _dbContext.DeliveryAnalysisFields.AddRange(deliveryAnalysisFields);
+            await _dbContext.SaveChangesAsync();
+        }
+        finally
+        {
+            _dbLock.Release();
+        }
+
+        _logger.LogInformation(JsonSerializer.Serialize(fields));
     }
 
     private async Task<string> CreateContainer(string name, CancellationToken cancellationToken)

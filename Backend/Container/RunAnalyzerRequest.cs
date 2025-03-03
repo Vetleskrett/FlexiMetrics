@@ -2,4 +2,4 @@
 
 namespace Container;
 
-public record RunAnalyzerRequest(Guid CourseId, Guid AssignmentId, Guid AnalyzerId);
+public record RunAnalyzerRequest(Guid CourseId, Guid AssignmentId, Guid AnalyzerId, Guid AnalysisId);

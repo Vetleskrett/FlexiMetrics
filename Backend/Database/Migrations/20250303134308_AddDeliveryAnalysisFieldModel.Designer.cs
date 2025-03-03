@@ -4,6 +4,7 @@ using System.Text.Json;
 using Database;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -12,9 +13,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Database.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250303134308_AddDeliveryAnalysisFieldModel")]
+    partial class AddDeliveryAnalysisFieldModel
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -237,7 +240,7 @@ namespace Database.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
-                    b.Property<Guid>("AnalysisId")
+                    b.Property<Guid?>("AnalysisId")
                         .HasColumnType("uuid");
 
                     b.Property<Guid>("DeliveryId")
@@ -258,7 +261,7 @@ namespace Database.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
-                    b.Property<Guid>("DeliveryAnalysisId")
+                    b.Property<Guid?>("DeliveryAnalysisId")
                         .HasColumnType("uuid");
 
                     b.Property<JsonDocument>("JsonValue")
@@ -537,11 +540,9 @@ namespace Database.Migrations
 
             modelBuilder.Entity("Database.Models.DeliveryAnalysis", b =>
                 {
-                    b.HasOne("Database.Models.Analysis", "Analysis")
+                    b.HasOne("Database.Models.Analysis", null)
                         .WithMany("DeliveryAnalyses")
-                        .HasForeignKey("AnalysisId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("AnalysisId");
 
                     b.HasOne("Database.Models.Delivery", "Delivery")
                         .WithMany()
@@ -549,20 +550,14 @@ namespace Database.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("Analysis");
-
                     b.Navigation("Delivery");
                 });
 
             modelBuilder.Entity("Database.Models.DeliveryAnalysisField", b =>
                 {
-                    b.HasOne("Database.Models.DeliveryAnalysis", "DeliveryAnalysis")
+                    b.HasOne("Database.Models.DeliveryAnalysis", null)
                         .WithMany("Fields")
-                        .HasForeignKey("DeliveryAnalysisId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("DeliveryAnalysis");
+                        .HasForeignKey("DeliveryAnalysisId");
                 });
 
             modelBuilder.Entity("Database.Models.DeliveryField", b =>
