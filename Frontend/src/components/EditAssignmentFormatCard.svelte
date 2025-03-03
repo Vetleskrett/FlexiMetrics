@@ -6,9 +6,9 @@
 	import Undo_2 from 'lucide-svelte/icons/undo-2';
 	import { superForm } from 'sveltekit-superforms';
 	import AssignmentFieldsForm from './AssignmentFieldsForm.svelte';
-	import { editAssignmentFields } from 'src/api';
 	import { cleanOptional, transformErrors } from 'src/utils';
 	import { goto } from '$app/navigation';
+	import axios from 'axios';
 
 	export let courseId: string;
 	export let assignmentId: string;
@@ -37,7 +37,7 @@
 	const onSubmit = async (formEvent: any) => {
 		formEvent.cancel();
 		console.log(formData);
-		editAssignmentFields(assignmentId, {
+		axios.put(`/api/assignments/fields/${assignmentId}`, {
 			fields: formData.fields.map((fieldFormData) => {
 				return {
 					...fieldFormData,

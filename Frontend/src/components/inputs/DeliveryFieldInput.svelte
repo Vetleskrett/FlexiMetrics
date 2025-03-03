@@ -10,7 +10,7 @@
 	export let type: AssignmentFieldType;
 	export let subType: AssignmentFieldType | undefined = undefined;
 
-	if (type == 'JSON') {
+	if (type == 'JSON' && value) {
 		value = JSON.stringify(JSON.parse(value), null, 4);
 	}
 </script>
