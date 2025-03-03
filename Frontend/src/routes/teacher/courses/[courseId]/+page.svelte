@@ -11,8 +11,8 @@
 	import * as Breadcrumb from '$lib/components/ui/breadcrumb/index.js';
 	import type { Course, Assignment, Teacher, Student, Team } from 'src/types';
 	import { Role } from 'src/types';
-	import { deleteCourse } from 'src/api';
 	import { goto } from '$app/navigation';
+	import axios from 'axios';
 
 	const courseId = $page.params.courseId;
 
@@ -26,7 +26,7 @@
 
 	async function deleteCoursePage() {
 		try {
-			await deleteCourse(courseId);
+			await axios.delete(`/api/course/${courseId}`);
 			goto('/teacher/courses');
 		} catch (error) {
 			console.error(error);

@@ -9,7 +9,7 @@
 	import SimpleAddCard from 'src/components/SimpleAddCard.svelte';
 	import TeamMembersCard from 'src/components/TeamMembersCard.svelte';
 	import TeamAssignmentsCard from 'src/components/TeamAssignmentsCard.svelte';
-	import { postStudentEmailTeam, getTeam } from 'src/api';
+	import axios from 'axios';
 
 	const courseId = $page.params.courseId;
 
@@ -24,7 +24,7 @@
 	async function addStudent(input: string) {
 		if (input && input.trim().length > 0) {
 			try {
-				const result = await postStudentEmailTeam(data.team.id, {
+				const result = await axios.post(`/api/teams/${data.team.id}/student`, {
 					email: input
 				});
 				data.team = result.data;

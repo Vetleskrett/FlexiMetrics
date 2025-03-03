@@ -1,6 +1,5 @@
 <script lang="ts">
 	import type { AssignmentFieldType } from 'src/types';
-	import { getDeliveryFieldFile } from 'src/api';
 	import { ArrowDownToLine } from 'lucide-svelte';
 	import Check from 'lucide-svelte/icons/check';
 	import X from 'lucide-svelte/icons/x';
@@ -35,7 +34,7 @@
 		<p style="white-space: pre-wrap">{JSON.stringify(JSON.parse(value), null, 4)}</p>
 	</div>
 {:else if type == 'File'}
-	<a class="flex items-center text-blue-500" download href={getDeliveryFieldFile(id)}>
+	<a class="flex items-center text-blue-500" download href={`/api/delivery/fields/${id}`}>
 		<ArrowDownToLine size="20" />
 		{value?.FileName}
 	</a>

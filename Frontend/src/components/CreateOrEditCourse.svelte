@@ -6,11 +6,11 @@
 	import Undo_2 from 'lucide-svelte/icons/undo-2';
 	import { Input } from '$lib/components/ui/input';
 	import * as RadioGroup from '$lib/components/ui/radio-group';
-	import { editCourse, postCourse } from 'src/api';
 	import { goto } from '$app/navigation';
 	import { teacherId } from 'src/store';
 	import * as Form from 'src/lib/components/ui/form';
 	import { superForm } from 'sveltekit-superforms';
+	import axios from 'axios';
 
 	export let edit: boolean;
 	export let course: Course = {
@@ -22,22 +22,21 @@
 	};
 
 	const onSubmitEdit = async () => {
-		return editCourse(course.id, {
+		return axios.put(`/api/course/${course.id}`, {
 			name: course.name,
 			code: course.code,
 			year: Number(course.year),
 			semester: course.semester.toString()
-		});
+		})
 	};
 
 	const onSubmitCreate = async () => {
-		return postCourse({
-			name: course.name,
+		return axios.post('/api/course', {name: course.name,
 			code: course.code,
 			year: Number(course.year),
 			semester: course.semester.toString(),
 			teacherId: teacherId
-		});
+		})
 	};
 
 	const onSubmit = async (formEvent: any) => {
@@ -47,6 +46,7 @@
 		promise
 			.then((response) => {
 				var course = response.data;
+				console.log(response)
 				goto(`/teacher/courses/${course.id}`);
 			})
 			.catch((exception) => {

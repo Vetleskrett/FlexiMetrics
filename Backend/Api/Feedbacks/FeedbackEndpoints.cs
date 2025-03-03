@@ -6,7 +6,7 @@ public static class FeedbackEndpoints
 {
     public static void MapFeedbackEndpoints(this WebApplication app)
     {
-        var group = app.MapGroup("").WithTags("Feedbacks");
+        var group = app.MapGroup("").WithTags("Feedbacks").RequireAuthorization();
 
         group.MapGet("feedbacks", async (IFeedbackService feedbackService) =>
         {

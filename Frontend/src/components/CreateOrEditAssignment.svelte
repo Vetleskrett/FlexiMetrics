@@ -14,7 +14,8 @@
 	import { Input } from '$lib/components/ui/input';
 	import { Textarea } from '$lib/components/ui/textarea';
 	import * as RadioGroup from '$lib/components/ui/radio-group';
-	import { editAssignment, postAssignment } from 'src/api';
+	import Trash_2 from 'lucide-svelte/icons/trash-2';
+	import Plus from 'lucide-svelte/icons/plus';
 	import { goto } from '$app/navigation';
 	import * as Form from 'src/lib/components/ui/form';
 	import { superForm } from 'sveltekit-superforms';
@@ -22,6 +23,8 @@
 	import DatePicker from './inputs/DatePicker.svelte';
 	import AssignmentFieldsForm from './AssignmentFieldsForm.svelte';
 	import { cleanOptional, transformErrors } from 'src/utils';
+	import * as Select from '$lib/components/ui/select/index';
+	import axios from 'axios';
 
 	const today = new Date();
 
@@ -74,7 +77,7 @@
 	}
 
 	const onSubmitEdit = async () => {
-		return editAssignment(assignment!.id, {
+		return axios.put(`/api/assignments/${assignment!.id}`, {
 			name: assignmentFormData.name,
 			description: assignmentFormData.description,
 			dueDate: assignmentFormData.dueDate.toDate('utc').toJSON(),
@@ -87,7 +90,7 @@
 	};
 
 	const onSubmitCreate = async () => {
-		return postAssignment({
+		return axios.post(`/api/assignments`, {
 			name: assignmentFormData.name,
 			description: assignmentFormData.description,
 			courseId: course.id,

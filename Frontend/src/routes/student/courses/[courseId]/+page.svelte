@@ -6,7 +6,6 @@
 	import { Role } from 'src/types';
 	import TeamCard from 'src/components/TeamCard.svelte';
 	import StudentAssignmentsCard from 'src/components/StudentAssignmentsCard.svelte';
-	import { teams } from 'src/mockData';
 	import TeamsCard from 'src/components/TeamsCard.svelte';
 
 	const courseId = $page.params.courseId;
