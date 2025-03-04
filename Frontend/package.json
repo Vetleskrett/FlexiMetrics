@@ -40,6 +40,7 @@
 	},
 	"type": "module",
 	"dependencies": {
+		"@auth/sveltekit": "^1.7.4",
 		"axios": "^1.7.9",
 		"clsx": "^2.1.1",
 		"svelte-headless-table": "^0.18.2",

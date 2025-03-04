@@ -3,18 +3,19 @@
 	import AllTeamCard from 'src/components/AllTeamCard.svelte';
 	import { type Team, type Course, type StudentToTeam, Role } from 'src/types';
 	import * as Breadcrumb from '$lib/components/ui/breadcrumb/index.js';
-	import { postStudentTeam } from 'src/api';
 	import { studentId } from 'src/store';
 	import { goto } from '$app/navigation';
+	import axios from 'axios';
 
 	const courseId = $page.params.courseId;
 
 	async function joinTeam(teamNr: string) {
-		try {
-			await postStudentTeam(teamNr, studentId);
-			goto(`/student/courses/${courseId}`);
-		} catch {
-			console.error('Could not join team');
+		try{
+			await axios.post(`/api/teams/${teamNr}/student/${studentId}`)
+			goto(`/student/courses/${courseId}`)
+		}
+		catch{
+			console.error("Could not join team")
 		}
 	}
 

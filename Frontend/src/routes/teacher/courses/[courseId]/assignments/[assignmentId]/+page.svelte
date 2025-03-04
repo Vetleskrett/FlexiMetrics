@@ -21,16 +21,16 @@
 		Analyzer
 	} from 'src/types';
 	import { Role } from 'src/types';
-	import { deleteAssigment, publishAssignment } from 'src/api';
 	import { goto } from '$app/navigation';
+	import axios from 'axios';
 
 	const courseId = $page.params.courseId;
 	const assignmentId = $page.params.assignmentId;
 
 	async function publishAssignmentButton() {
 		try {
-			const response = await publishAssignment(assignmentId);
-			data.assignment = response.data;
+			const response = await axios.put(`/api/assignments/${assignmentId}/publish`);
+			data.assignment = response.data
 		} catch (exception) {
 			console.error('Something Went Wrong!');
 		}
@@ -38,8 +38,8 @@
 
 	async function deleteAssignmentButton() {
 		try {
-			await deleteAssigment(assignmentId);
-			goto(`/teacher/courses/${courseId}`);
+			await axios.delete(`/api/assignments/${assignmentId}`);
+			goto(`/teacher/courses/${courseId}`)
 		} catch (exception) {
 			console.error('Something Went Wrong!');
 		}

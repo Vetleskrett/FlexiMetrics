@@ -13,6 +13,9 @@ using FileStorage;
 using Api.Analyzers;
 using Container;
 using Api.Analyses;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
+using Microsoft.AspNetCore.Authorization;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -61,6 +64,27 @@ builder.Services.ConfigureHttpJsonOptions(options =>
     options.SerializerOptions.Converters.Add(new JsonStringEnumConverter());
 });
 
+builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+.AddJwtBearer(jwtOptions =>
+{
+    jwtOptions.TokenValidationParameters = new TokenValidationParameters
+    {
+        ValidateAudience = true,
+        ValidateIssuer = true,
+        //ValidateIssuerSigningKey = true,
+        //IssuerSigningKey
+        ValidAudience = "client id", // the client id
+    };
+    jwtOptions.Authority = "some site"; // the issuer
+});
+
+builder.Services.AddAuthorization(options =>
+{
+    options.DefaultPolicy = new AuthorizationPolicyBuilder(JwtBearerDefaults.AuthenticationScheme)
+       .RequireAuthenticatedUser()
+       .Build();
+});
+
 var app = builder.Build();
 
 app.MapDefaultEndpoints();
@@ -72,6 +96,9 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseCors("AllowCors");
+
+app.UseAuthentication();
+app.UseAuthorization();
 
 app.MapCourseEndpoints();
 app.MapTeacherEndpoints();

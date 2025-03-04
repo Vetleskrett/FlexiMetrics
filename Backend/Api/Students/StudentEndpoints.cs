@@ -6,7 +6,7 @@ public static class StudentEndpoints
 {
     public static void MapStudentEndpoints(this WebApplication app)
     {
-        var group = app.MapGroup("").WithTags("Students");
+        var group = app.MapGroup("").WithTags("Students").RequireAuthorization();
 
         group.MapGet("students/{studentId:guid}", async (IStudentService studentService, Guid studentId) =>
         {
