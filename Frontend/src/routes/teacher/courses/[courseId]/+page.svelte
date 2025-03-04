@@ -91,7 +91,7 @@
 				<StudentsCard numStudents={data.students.length} {courseId} />
 				<TeamsCard numTeams={data.teams.length} {courseId} />
 			</div>
-			<TeachersCard userRole={Role.Teacher} teachers={data.teachers} />
+			<TeachersCard courseId={courseId} userRole={Role.Teacher} teachers={data.teachers} />
 		</div>
 	</div>
 </div>

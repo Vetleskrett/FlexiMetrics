@@ -181,7 +181,7 @@ export function postTeacherToCourse(courseId: string, teacher: EmailAdd) : Promi
   return instance.post(`/courses/${courseId}/teachers`, teacher)
 }
 
-export function deleteTeacherToCourse(courseId: string, teacherId: string) : Promise<AxiosResponse> {
+export function deleteTeacherFromCourse(courseId: string, teacherId: string) : Promise<AxiosResponse> {
   return instance.delete(`/courses/${courseId}/teachers/${teacherId}`)
 }
 

@@ -1,15 +1,15 @@
 <script lang="ts">
-	import type { Student, Teacher } from 'src/types.js';
+	import type { Teacher } from 'src/types.js';
 	import * as Card from '$lib/components/ui/card/index.js';
 	import * as Table from '$lib/components/ui/table';
 	import CustomButton from './CustomButton.svelte';
 	import Trash_2 from 'lucide-svelte/icons/trash-2';
-	import { deleteStudentCourse } from 'src/api';
+	import axios from 'axios';
 
 	export let teachers: Teacher[], courseId: string;
 	async function removeTeacher(teacher: Teacher) {
 		try {
-			await deleteStudentCourse(courseId, teacher.id);
+			await axios.delete(`/api/course/${courseId}/teachers/${teacher.id}`);
 			deleteTeacherFromList(teacher);
 		} catch {
 			console.error('Could not delete student');
