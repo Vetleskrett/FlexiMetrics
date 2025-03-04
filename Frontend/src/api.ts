@@ -177,8 +177,12 @@ export function getTeachers(courseId: string): Promise<AxiosResponse<Teacher[]>>
   return instance.get(`/courses/${courseId}/teachers`)
 }
 
-export function addTeacherToCourse(courseId: string, teacher: EmailAdd) : Promise<AxiosResponse> {
+export function postTeacherToCourse(courseId: string, teacher: EmailAdd) : Promise<AxiosResponse<Teacher[]>> {
   return instance.post(`/courses/${courseId}/teachers`, teacher)
+}
+
+export function deleteTeacherFromCourse(courseId: string, teacherId: string) : Promise<AxiosResponse> {
+  return instance.delete(`/courses/${courseId}/teachers/${teacherId}`)
 }
 
 export function deleteCourse(courseId: string) : Promise<AxiosResponse> {

@@ -9,6 +9,7 @@
 
 	export let userRole: Role;
 	export let teachers: Teacher[];
+	export let courseId: string = ""
 </script>
 
 <Card.Root class="w-full overflow-hidden p-0">
@@ -29,7 +30,7 @@
 					<EllipsisVertical size="20" />
 				</DropdownMenu.Trigger>
 				<DropdownMenu.Content>
-					<DropdownMenu.Item>
+					<DropdownMenu.Item href={`${courseId}/teachers`}>
 						<Pencil class="h-4" />
 						<p>Edit teachers</p>
 					</DropdownMenu.Item>

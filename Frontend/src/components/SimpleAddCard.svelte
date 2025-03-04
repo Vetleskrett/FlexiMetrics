@@ -2,7 +2,6 @@
 	import * as Card from '$lib/components/ui/card/index.js';
 	import { Separator } from '$lib/components/ui/separator/index.js';
 	import Plus from 'lucide-svelte/icons/plus';
-	import Button from '$lib/components/ui/button/button.svelte';
 	import { Input } from 'src/lib/components/ui/input';
 	import CustomButton from './CustomButton.svelte';
 

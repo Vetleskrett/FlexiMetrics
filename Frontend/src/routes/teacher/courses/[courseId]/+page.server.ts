@@ -1,7 +1,7 @@
 import { getCourse, getAssignments, getTeachers, getStudents, getTeams } from "src/api";
-import type { PageServerLoad } from "../$types";
+import type { PageServerLoad } from "./$types";
 
-export const load: PageServerLoad = async ({ params }) => {
+export const load: PageServerLoad = async ({ params }: {params: {courseId: string}}) => {
     const [
         courseResponse,
         assignmentsResponse,
