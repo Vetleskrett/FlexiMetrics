@@ -12,6 +12,7 @@ using Api.Feedbacks;
 using FileStorage;
 using Api.Analyzers;
 using Container;
+using Api.Analyses;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -33,6 +34,7 @@ builder.Services.AddScoped<IAssignmentFieldService, AssignmentFieldService>();
 builder.Services.AddScoped<IDeliveryService, DeliveryService>();
 builder.Services.AddScoped<IFeedbackService, FeedbackService>();
 builder.Services.AddScoped<IAnalyzerService, AnalyzerService>();
+builder.Services.AddScoped<IAnalysisService, AnalysisService>();
 
 builder.Services.AddValidatorsFromAssemblyContaining<Program>();
 
@@ -80,6 +82,7 @@ app.MapAssignmentFieldEndpoints();
 app.MapDeliveryEndpoints();
 app.MapFeedbackEndpoints();
 app.MapAnalyzerEndpoints();
+app.MapAnalysisEndpoints();
 
 app.Run();
 
