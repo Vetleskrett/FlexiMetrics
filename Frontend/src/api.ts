@@ -83,6 +83,10 @@ export async function addTeacherToCourse(courseId: string, teacher: EmailAdd) : 
   return axios.post(`/api/courses/${courseId}/teachers`, teacher)
 }
 
+export async function removeTeacherFromCourse(courseId: string, teacherId: string) : Promise<AxiosResponse> {
+  return axios.delete(`/api/courses/${courseId}/teachers/${teacherId}`);
+}
+
 export async function deleteCourse(courseId: string) : Promise<AxiosResponse> {
   return axios.delete(`/api/courses/${courseId}`)
 }
