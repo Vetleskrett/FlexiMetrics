@@ -8,6 +8,7 @@
 	import AllStudentsCard from 'src/components/AllStudentsCard.svelte';
 	import AddStudentsCard from 'src/components/AddStudentsCard.svelte';
 	import axios from 'axios';
+	import { postStudentsCourse } from 'src/api';
 
 	const courseId = $page.params.courseId;
 
@@ -23,7 +24,9 @@
 		const studentEmails = handleInput(input);
 		try {
 			if (studentEmails) {
-				var response = await axios.post(`/api/course/${courseId}/students`, { emails: studentEmails });
+				var response = await postStudentsCourse(courseId, {
+					emails: studentEmails
+				});
 				data.students = response.data;
 			}
 		} catch (error) {

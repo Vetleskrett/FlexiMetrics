@@ -9,6 +9,7 @@
 	import AddTeamMembersCard from 'src/components/AddTeamMembersCard.svelte';
 	import SimpleAddCard from 'src/components/SimpleAddCard.svelte';
 	import axios from 'axios';
+	import { postStudentsTeam, postTeams } from 'src/api';
 
 	const courseId = $page.params.courseId;
 
@@ -20,7 +21,7 @@
 	async function addTeams(input: number) {
 		if (input && input > 0) {
 			try {
-				const result = await axios.post(`/api/teams`, {
+				const result = await postTeams({
 					courseId: courseId,
 					numTeams: input
 				});
@@ -47,7 +48,7 @@
 			allTeams.push({ teamNr: Number(info[0].trim()), emails: info.slice(1) });
 		}
 		try {
-			const result = await axios.post(`/api/teams/bulk`, {
+			const result = await postStudentsTeam({
 				courseId: courseId,
 				teams: allTeams
 			});

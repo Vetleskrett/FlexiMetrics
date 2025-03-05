@@ -151,9 +151,16 @@ export type Feedback = {
     points?: number;
 }
 
+export type FileMetadata = {
+    FileName: string;
+    ContentType: string;
+};
+
 export type Analyzer = {
     id: string;
     name: string;
+    fileName: string;
+    assignmentId: string;
 }
 
 export type AnalyzerFieldType = 'String' | 'Integer' | 'Boolean' | 'File' | 'List' | 'Json' | 'Range';
@@ -280,4 +287,15 @@ export type EditFeedback = {
     isApproved?: boolean;
     letterGrade?: LetterGrade;
     points?: number;
+}
+
+export type CreateAnalyzer = {
+    name: string;
+    fileName: string;
+    assignmentId: string;
+}
+
+export type EditAnalyzer = {
+    name: string;
+    fileName: string;
 }

@@ -1,7 +1,7 @@
 import { redirect, type Handle } from '@sveltejs/kit';
 import { handle as authenticationHandle } from './routes/auth/route';
 import { sequence } from '@sveltejs/kit/hooks';
-import { hasToken } from './api';
+import { hasToken } from './api.server';
  
 const authorizationHandle: Handle = async ({ event, resolve }) => {
   if (event.url.pathname.startsWith('/')) {

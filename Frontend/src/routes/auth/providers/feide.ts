@@ -1,5 +1,5 @@
 import type { Provider } from "@auth/sveltekit/providers";
-import { setAuthToken } from "src/api";
+import { setAuthToken } from "src/api.server";
 
 export const FEIDE_PROVIDER: Provider = {
     id: 'feide',
@@ -8,12 +8,14 @@ export const FEIDE_PROVIDER: Provider = {
     options: {
         authorization : {
             params: {
-                redirect_uri: "http://localhost:5173/auth/callback/feide",
+                redirect_uri: import.meta.env.MODE == 'production' ?
+                    "http://localhost:4173/auth/callback/feide" :
+                    "http://localhost:5173/auth/callback/feide",
             }
         },
     },
-    clientId: "CLIENTID",
-    clientSecret: "CLIENTSECRET",
+    clientId: import.meta.env.VITE_FEIDE_CLIENT_ID,
+    clientSecret: import.meta.env.VITE_FEIDE_CLIENT_SECRET,
     token: 'https://auth.dataporten.no/oauth/token',
     authorization: 'https://auth.dataporten.no/oauth/authorization',
     userinfo: 'https://auth.dataporten.no/openid/userinfo',

@@ -14,6 +14,7 @@
 	import Undo_2 from 'lucide-svelte/icons/undo-2';
 	import DeliveryFieldInput from './inputs/DeliveryFieldInput.svelte';
 	import axios from 'axios';
+	import { postDelivery, postDeliveryFieldFile, putDelivery } from 'src/api';
 
 	export let assignment: Assignment;
 	export let assignmentFields: AssignmentField[];
@@ -55,7 +56,7 @@
 				};
 			})
 		};
-		const response = await axios.put(`/api/delivery/${delivery?.id || ''}`, request);
+		const response = await putDelivery(delivery!.id, request);
 		delivery = response.data;
 	};
 
@@ -83,7 +84,7 @@
 				};
 			})
 		};
-		const response = await axios.post(`/api/delivery`, request);
+		const response = await postDelivery(request);
 		delivery = response.data;
 	};
 
@@ -112,8 +113,8 @@
 			);
 			if (deliveryField) {
 				var formData = new FormData();
-				formData.append("file", fileField.file);
-				await axios.post(`/api/delivery/fields/${deliveryField.id}`, formData);
+				formData.append('file', fileField.file);
+				await postDeliveryFieldFile(deliveryField.id, formData);
 			}
 		}
 		goto('./');

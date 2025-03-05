@@ -23,8 +23,8 @@
 	import DatePicker from './inputs/DatePicker.svelte';
 	import AssignmentFieldsForm from './AssignmentFieldsForm.svelte';
 	import { cleanOptional, transformErrors } from 'src/utils';
-	import * as Select from '$lib/components/ui/select/index';
 	import axios from 'axios';
+	import { postAssignment, putAssignment } from 'src/api';
 
 	const today = new Date();
 
@@ -77,7 +77,7 @@
 	}
 
 	const onSubmitEdit = async () => {
-		return axios.put(`/api/assignments/${assignment!.id}`, {
+		return putAssignment(assignment!.id, {
 			name: assignmentFormData.name,
 			description: assignmentFormData.description,
 			dueDate: assignmentFormData.dueDate.toDate('utc').toJSON(),
@@ -90,7 +90,7 @@
 	};
 
 	const onSubmitCreate = async () => {
-		return axios.post(`/api/assignments`, {
+		return postAssignment({
 			name: assignmentFormData.name,
 			description: assignmentFormData.description,
 			courseId: course.id,

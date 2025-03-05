@@ -19,6 +19,10 @@ public class AppDbContext : DbContext
     public DbSet<Delivery> Deliveries { get; set; }
     public DbSet<DeliveryField> DeliveryFields { get; set; }
     public DbSet<Feedback> Feedbacks { get; set; }
+    public DbSet<Analyzer> Analyzers { get; set; }
+    public DbSet<Analysis> Analyses { get; set; }
+    public DbSet<DeliveryAnalysis> DeliveryAnalyses { get; set; }
+    public DbSet<DeliveryAnalysisField> DeliveryAnalysisFields { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -75,5 +79,16 @@ public class AppDbContext : DbContext
         modelBuilder.Entity<ApprovalFeedback>();
         modelBuilder.Entity<LetterFeedback>();
         modelBuilder.Entity<PointsFeedback>();
+
+        var analyzer = modelBuilder.Entity<Analyzer>();
+        analyzer.HasOne(a => a.Assignment).WithMany();
+
+        var analysis = modelBuilder.Entity<Analysis>();
+        analysis.HasOne(a => a.Analyzer).WithMany();
+        analysis.HasMany(a => a.DeliveryAnalyses).WithOne(da => da.Analysis);
+
+        var deliveryAnalysis = modelBuilder.Entity<DeliveryAnalysis>();
+        deliveryAnalysis.HasOne(da => da.Delivery).WithMany();
+        deliveryAnalysis.HasMany(da => da.Fields).WithOne(f => f.DeliveryAnalysis);
     }
 }

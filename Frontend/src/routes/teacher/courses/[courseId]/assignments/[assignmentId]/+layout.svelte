@@ -2,10 +2,15 @@
 	import 'src/app.css';
 	import { page } from '$app/stores';
 	import MenuRow from 'src/components/MenuRow.svelte';
-	import { analyzers } from 'src/mockData';
+	import type { Analyzer } from 'src/types';
+	import { Separator } from 'src/lib/components/ui/separator';
 
 	const courseId = $page.params.courseId;
 	const assignmentId = $page.params.assignmentId;
+
+	export let data: {
+		analyzers: Analyzer[];
+	};
 </script>
 
 <div class="fixed flex h-full w-60 flex-row flex-col items-start bg-white pt-12">
@@ -39,7 +44,7 @@
 		<h2>Feedback</h2>
 	</MenuRow>
 
-	<div class="mt-12 flex items-center gap-2 pl-6">
+	<div class="mt-12 flex items-center gap-2 px-4">
 		<img
 			width="24"
 			height="24"
@@ -49,9 +54,9 @@
 		<h2 class="font-bold">Analyzers</h2>
 	</div>
 
-	{#each analyzers as analyzer}
+	{#each data.analyzers as analyzer}
 		<MenuRow href="/teacher/courses/{courseId}/assignments/{assignmentId}/analyzers/{analyzer.id}">
-			<h2>{analyzer.name}</h2>
+			<h2 class="text-base">{analyzer.name}</h2>
 		</MenuRow>
 	{/each}
 </div>

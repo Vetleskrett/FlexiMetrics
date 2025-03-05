@@ -1,4 +1,4 @@
-import { getCoursesByTeacher } from "src/api";
+import { getCoursesByTeacher } from "src/api.server";
 import { teacherId } from "src/store";
 import type { PageServerLoad } from "./$types";
 

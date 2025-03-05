@@ -8,7 +8,7 @@
 	export let teams: Team[],
 		courseId: string,
 		userRole: Role = Role.Teacher,
-		onJoin: ((teamNr: string) => void) | null = null;
+		onJoin: ((teamId: string) => void) | null = null;
 </script>
 
 <Card.Root class="w-full overflow-hidden p-0">

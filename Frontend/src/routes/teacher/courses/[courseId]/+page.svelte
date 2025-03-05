@@ -13,6 +13,7 @@
 	import { Role } from 'src/types';
 	import { goto } from '$app/navigation';
 	import axios from 'axios';
+	import { deleteCourse } from 'src/api';
 
 	const courseId = $page.params.courseId;
 
@@ -26,7 +27,7 @@
 
 	async function deleteCoursePage() {
 		try {
-			await axios.delete(`/api/course/${courseId}`);
+			await deleteCourse(courseId);
 			goto('/teacher/courses');
 		} catch (error) {
 			console.error(error);

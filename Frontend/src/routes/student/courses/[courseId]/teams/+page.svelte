@@ -5,17 +5,16 @@
 	import * as Breadcrumb from '$lib/components/ui/breadcrumb/index.js';
 	import { studentId } from 'src/store';
 	import { goto } from '$app/navigation';
-	import axios from 'axios';
+	import { postStudentTeam } from 'src/api';
 
 	const courseId = $page.params.courseId;
 
-	async function joinTeam(teamNr: string) {
-		try{
-			await axios.post(`/api/teams/${teamNr}/student/${studentId}`)
-			goto(`/student/courses/${courseId}`)
-		}
-		catch{
-			console.error("Could not join team")
+	async function joinTeam(teamId: string) {
+		try {
+			await postStudentTeam(teamId, studentId);
+			goto(`/student/courses/${courseId}`);
+		} catch {
+			console.error('Could not join team');
 		}
 	}
 

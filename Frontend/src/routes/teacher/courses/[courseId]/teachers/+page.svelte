@@ -2,9 +2,9 @@
 	import { page } from '$app/stores';
 	import type { Course, Student } from 'src/types';
 	import * as Breadcrumb from '$lib/components/ui/breadcrumb/index.js';
-	import axios from 'axios';
 	import SimpleAddCard from 'src/components/SimpleAddCard.svelte';
 	import AllTeachersCard from 'src/components/AllTeachersCard.svelte';
+	import { addTeacherToCourse } from 'src/api';
 
 	const courseId = $page.params.courseId;
 
@@ -17,14 +17,15 @@
 		const teacherEmail = checkTeacher(input);
 		try {
 			if (teacherEmail) {
-				var response = await axios.post(`/api/course/${courseId}/teachers`, { email: input.trim() });
+				var response = await addTeacherToCourse(courseId, {
+					email: input.trim()
+				});
 				data.teachers = response.data;
 			}
 		} catch (error) {
 			console.error('Something went wrong!');
 		}
 	}
-
 
 	function checkTeacher(email: string): boolean {
 		// Add additional checks if needed
@@ -71,12 +72,13 @@
 			<AllTeachersCard teachers={data.teachers} {courseId} />
 		</div>
 		<div class="flex w-[400px] flex-col gap-8">
-			<SimpleAddCard 
-			headline="Add Teacher"
-			actionString="Add"
-			inputString="Email"
-			inputType="String"
-			addFunction={addTeacher}/>
+			<SimpleAddCard
+				headline="Add Teacher"
+				actionString="Add"
+				inputString="Email"
+				inputType="String"
+				addFunction={addTeacher}
+			/>
 		</div>
 	</div>
 </div>

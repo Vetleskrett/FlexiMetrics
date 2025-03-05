@@ -1,16 +1,13 @@
 <script lang="ts">
 	import { Upload } from 'lucide-svelte';
 	import CustomButton from '../CustomButton.svelte';
+	import type { FileMetadata } from 'src/types';
 
 	let fileInput: HTMLInputElement;
 	let isDragOver = false;
 
-	type FileMetadata = {
-		FileName: string;
-		ContentType: string;
-	};
-
-	export let file: File | FileMetadata | null = null;
+	export let file: File | FileMetadata | undefined = undefined;
+	export let accept: string;
 
 	function triggerFileSelect() {
 		fileInput.click();
@@ -18,7 +15,7 @@
 
 	function onFileChange(event: Event) {
 		const target = event.target as HTMLInputElement;
-		file = target.files ? target.files[0] : null;
+		file = target.files ? target.files[0] : undefined;
 	}
 
 	function onDragOver(event: DragEvent) {
@@ -60,10 +57,12 @@
 
 		<input
 			type="file"
+			{accept}
 			multiple={false}
 			bind:this={fileInput}
 			class="hidden"
 			on:change={onFileChange}
+			on:change
 		/>
 	</div>
 

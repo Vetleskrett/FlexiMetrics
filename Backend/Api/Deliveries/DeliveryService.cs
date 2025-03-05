@@ -5,6 +5,7 @@ using Database.Models;
 using Database;
 using Api.Deliveries.Contracts;
 using FileStorage;
+using Api.Common;
 
 namespace Api.Deliveries;
 
@@ -253,7 +254,7 @@ public class DeliveryService : IDeliveryService
             return new ValidationError("Cannot deliver after assignment due date").MapToResponse();
         }
 
-        foreach(var fieldRequest in request.Fields)
+        foreach (var fieldRequest in request.Fields)
         {
             var assignmentField = delivery.Assignment!.Fields!.FirstOrDefault(f => f.Id == fieldRequest.AssignmentFieldId);
             if (assignmentField is null)
@@ -295,7 +296,7 @@ public class DeliveryService : IDeliveryService
         if (deliveryField is null)
         {
             return Result.NotFound();
-        } 
+        }
 
         if (deliveryField.AssignmentField!.Type != AssignmentDataType.File)
         {
@@ -338,7 +339,7 @@ public class DeliveryService : IDeliveryService
         {
             var metadata = deliveryField.GetValue<FileMetadata>();
 
-            var stream = _fileStorage.ReadDeliveryField
+            var stream = _fileStorage.GetDeliveryField
             (
                 deliveryField.Delivery!.Assignment!.CourseId,
                 deliveryField.Delivery!.AssignmentId,

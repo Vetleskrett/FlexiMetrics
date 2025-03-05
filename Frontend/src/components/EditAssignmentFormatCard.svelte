@@ -8,7 +8,7 @@
 	import AssignmentFieldsForm from './AssignmentFieldsForm.svelte';
 	import { cleanOptional, transformErrors } from 'src/utils';
 	import { goto } from '$app/navigation';
-	import axios from 'axios';
+	import { putAssignmentFields } from 'src/api';
 
 	export let courseId: string;
 	export let assignmentId: string;
@@ -37,7 +37,7 @@
 	const onSubmit = async (formEvent: any) => {
 		formEvent.cancel();
 		console.log(formData);
-		axios.put(`/api/assignments/fields/${assignmentId}`, {
+		putAssignmentFields(assignmentId, {
 			fields: formData.fields.map((fieldFormData) => {
 				return {
 					...fieldFormData,

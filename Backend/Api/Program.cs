@@ -10,15 +10,20 @@ using Api.AssignmentFields;
 using Api.Deliveries;
 using Api.Feedbacks;
 using FileStorage;
+using Api.Analyzers;
+using Container;
+using Api.Analyses;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.IdentityModel.Tokens;
 using Microsoft.AspNetCore.Authorization;
 
 var builder = WebApplication.CreateBuilder(args);
 
+builder.Services.AddLogging();
+
 builder.AddServiceDefaults();
 
 builder.Services.AddSingleton<IFileStorage, LocalFileStorage>();
+builder.Services.AddContainer();
 
 builder.AddNpgsqlDbContext<AppDbContext>("postgresdb");
 
@@ -30,6 +35,8 @@ builder.Services.AddScoped<IAssignmentService, AssignmentService>();
 builder.Services.AddScoped<IAssignmentFieldService, AssignmentFieldService>();
 builder.Services.AddScoped<IDeliveryService, DeliveryService>();
 builder.Services.AddScoped<IFeedbackService, FeedbackService>();
+builder.Services.AddScoped<IAnalyzerService, AnalyzerService>();
+builder.Services.AddScoped<IAnalysisService, AnalysisService>();
 
 builder.Services.AddValidatorsFromAssemblyContaining<Program>();
 
@@ -59,25 +66,22 @@ builder.Services.ConfigureHttpJsonOptions(options =>
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
 .AddJwtBearer(jwtOptions =>
 {
-    jwtOptions.TokenValidationParameters = new TokenValidationParameters
+    if (builder.Environment.IsDevelopment())
     {
-        ValidateAudience = true,
-        ValidateIssuer = true,
-        //ValidateIssuerSigningKey = true,
-        //IssuerSigningKey
-        ValidAudience = "client id", // the client id
-    };
-    jwtOptions.Authority = "some site"; // the issuer
+        jwtOptions.RequireHttpsMetadata = false;
+    }
+
+    jwtOptions.Authority = builder.Configuration["Feide:Issuer"];
+    jwtOptions.Audience = builder.Configuration["Feide:ClientId"];
 });
 
-builder.Services.AddAuthorization(options =>
-{
-    options.DefaultPolicy = new AuthorizationPolicyBuilder(JwtBearerDefaults.AuthenticationScheme)
-       .RequireAuthenticatedUser()
-       .Build();
-
-});
-
+builder.Services.AddAuthorizationBuilder()
+    .SetDefaultPolicy
+    (
+        new AuthorizationPolicyBuilder(JwtBearerDefaults.AuthenticationScheme)
+            .RequireAuthenticatedUser()
+            .Build()
+    );
 
 var app = builder.Build();
 
@@ -91,6 +95,9 @@ if (app.Environment.IsDevelopment())
 
 app.UseCors("AllowCors");
 
+app.UseAuthentication();
+app.UseAuthorization();
+
 app.MapCourseEndpoints();
 app.MapTeacherEndpoints();
 app.MapStudentEndpoints();
@@ -99,8 +106,8 @@ app.MapAssignmentEndpoints();
 app.MapAssignmentFieldEndpoints();
 app.MapDeliveryEndpoints();
 app.MapFeedbackEndpoints();
-app.UseAuthentication();
-app.UseAuthorization();
+app.MapAnalyzerEndpoints();
+app.MapAnalysisEndpoints();
 
 app.Run();
 

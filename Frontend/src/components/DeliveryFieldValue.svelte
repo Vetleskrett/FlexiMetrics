@@ -30,11 +30,13 @@
 {:else if type == 'URL'}
 	<a class="text-blue-500" target="_blank" href={value}>{value}</a>
 {:else if type == 'JSON'}
-	<div class="min-w-48 rounded bg-gray-100 p-2">
-		<p style="white-space: pre-wrap">{JSON.stringify(JSON.parse(value), null, 4)}</p>
+	<div class="min-w-48 rounded bg-gray-100 p-2 font-mono">
+		<p style="white-space: pre-wrap">
+			{JSON.stringify(JSON.parse(value), null, 2)}
+		</p>
 	</div>
 {:else if type == 'File'}
-	<a class="flex items-center text-blue-500" download href={`/api/delivery/fields/${id}`}>
+	<a class="flex items-center text-blue-500" download href={`/api/delivery-fields/${id}`}>
 		<ArrowDownToLine size="20" />
 		{value?.FileName}
 	</a>

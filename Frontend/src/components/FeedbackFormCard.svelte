@@ -15,6 +15,7 @@
 	import X from 'lucide-svelte/icons/x';
 	import Check from 'lucide-svelte/icons/check';
 	import axios from 'axios';
+	import { postFeedback, putFeedback } from 'src/api';
 
 	export let assignment: Assignment;
 	export let feedback: Feedback | null;
@@ -63,7 +64,7 @@
 	let feedbackFormData: FeedbackFormData = toFormData();
 
 	const onSubmitEdit = async () => {
-		return axios.put(`/api/feedback/${feedback!.id}`, {
+		return putFeedback(feedback!.id, {
 			comment: feedbackFormData.comment,
 			isApproved:
 				feedbackFormData.isApproved == undefined
@@ -75,7 +76,7 @@
 	};
 
 	const onSubmitCreate = async () => {
-		return axios.post(`/api/feedback`, {
+		return postFeedback({
 			comment: feedbackFormData.comment,
 			assignmentId: assignment.id,
 			studentId: studentId,

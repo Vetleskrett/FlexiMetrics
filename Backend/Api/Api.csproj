@@ -20,6 +20,7 @@
 	</ItemGroup>
 
 	<ItemGroup>
+		<ProjectReference Include="..\Container\Container.csproj" />
 		<ProjectReference Include="..\FileStorage\FileStorage.csproj" />
 		<ProjectReference Include="..\ServiceDefaults\ServiceDefaults.csproj" />
 		<ProjectReference Include="..\Database\Database.csproj" />

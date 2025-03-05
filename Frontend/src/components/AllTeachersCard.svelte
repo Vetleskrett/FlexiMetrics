@@ -4,12 +4,12 @@
 	import * as Table from '$lib/components/ui/table';
 	import CustomButton from './CustomButton.svelte';
 	import Trash_2 from 'lucide-svelte/icons/trash-2';
-	import axios from 'axios';
+	import { removeTeacherFromCourse } from 'src/api';
 
 	export let teachers: Teacher[], courseId: string;
 	async function removeTeacher(teacher: Teacher) {
 		try {
-			await axios.delete(`/api/course/${courseId}/teachers/${teacher.id}`);
+			await removeTeacherFromCourse(courseId, teacher.id);
 			deleteTeacherFromList(teacher);
 		} catch {
 			console.error('Could not delete student');
