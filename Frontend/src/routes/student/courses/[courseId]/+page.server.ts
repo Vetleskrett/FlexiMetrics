@@ -1,4 +1,4 @@
-import { getCourse, getStudentAssignments, getStudentTeam, getTeachers, getTeams } from "src/api";
+import { getCourse, getStudentAssignments, getStudentTeam, getTeachers, getTeams } from "src/api.server";
 import { studentId } from "src/store";
 import type { PageServerLoad } from "./$types";
 

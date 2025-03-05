@@ -1,4 +1,4 @@
-import { getAssignment, getAssignmentFields, getCourse } from "src/api";
+import { getAssignment, getCourse } from "src/api.server";
 import type { PageServerLoad } from "../$types";
 
 export const load: PageServerLoad = async ({ params }: {params: { courseId: string, assignmentId: string }}) => {

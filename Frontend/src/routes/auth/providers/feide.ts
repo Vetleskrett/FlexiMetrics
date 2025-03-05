@@ -1,5 +1,5 @@
 import type { Provider } from "@auth/sveltekit/providers";
-import { setAuthToken } from "src/api";
+import { setAuthToken } from "src/api.server";
 
 export const FEIDE_PROVIDER: Provider = {
     id: 'feide',

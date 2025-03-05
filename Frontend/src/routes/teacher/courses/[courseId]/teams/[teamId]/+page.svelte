@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { page } from '$app/stores';
-	import type { Team, Student, AssignmentTeam, Course, StudentAssignment } from 'src/types';
+	import type { Team, Course, StudentAssignment } from 'src/types';
 	import EllipsisVertical from 'lucide-svelte/icons/ellipsis-vertical';
 	import Trash2 from 'lucide-svelte/icons/trash-2';
 	import * as DropdownMenu from '$lib/components/ui/dropdown-menu';
@@ -9,7 +9,7 @@
 	import SimpleAddCard from 'src/components/SimpleAddCard.svelte';
 	import TeamMembersCard from 'src/components/TeamMembersCard.svelte';
 	import TeamAssignmentsCard from 'src/components/TeamAssignmentsCard.svelte';
-	import axios from 'axios';
+	import { postStudentEmailTeam } from 'src/api';
 
 	const courseId = $page.params.courseId;
 
@@ -24,7 +24,7 @@
 	async function addStudent(input: string) {
 		if (input && input.trim().length > 0) {
 			try {
-				const result = await axios.post(`/api/teams/${data.team.id}/student`, {
+				const result = await postStudentEmailTeam(data.team.id, {
 					email: input
 				});
 				data.team = result.data;

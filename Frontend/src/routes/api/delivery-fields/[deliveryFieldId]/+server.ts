@@ -1,16 +1,16 @@
-import { getDeliveryFieldFile, postDeliveryFieldFile } from 'src/api';
 import { json, type RequestHandler } from '@sveltejs/kit';
 import { Readable } from 'stream';
+import { api } from 'src/api.server';
 
 export const POST: RequestHandler = async ({ params, request }) => {
-  const payload = await request.formData()
-  const response = await postDeliveryFieldFile(params.deliveryFieldId as string, payload)
-  return json(response.data)
+  const payload = await request.formData();
+  const response = await api.post(`delivery-fields/${params.deliveryFieldId}`, payload);
+  return json(response.data);
 }
 
 export const GET: RequestHandler = async ({ params }) => {
   try {
-    const fileResponse = await getDeliveryFieldFile(params.deliveryFieldId as string);
+    const fileResponse = await api.get(`delivery-fields/${params.deliveryFieldId}`, { responseType: 'stream' });
 
     const headers = new Headers();
     headers.set('Content-Disposition', fileResponse.headers['content-disposition'] || 'attachment');

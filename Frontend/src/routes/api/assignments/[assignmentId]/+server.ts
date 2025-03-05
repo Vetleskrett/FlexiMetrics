@@ -1,14 +1,14 @@
-import { deleteAssigment, editAssignment, putFeedback } from 'src/api';
 import { json, type RequestHandler } from '@sveltejs/kit';
-import type { EditAssignment, EditFeedback } from 'src/types';
+import type { EditAssignment } from 'src/types';
+import { api } from 'src/api.server';
 
 export const PUT: RequestHandler = async ({ params, request }) => {
   const payload: EditAssignment = await request.json()
-  const response = await editAssignment(params.assignmentId as string, payload)
+  const response = await api.put(`assignments/${params.assignmentId}`, payload);
   return json(response.data)
 }
 
 export const DELETE: RequestHandler = async ({ params }) => {
-  const response = await deleteAssigment(params.assignmentId as string)
+  const response = await api.delete(`assignments/${params.assignmentId}`);
   return json(response.data)
 }

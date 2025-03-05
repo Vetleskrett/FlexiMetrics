@@ -1,4 +1,3 @@
-import { browser } from '$app/environment'; 
 import axios, { type AxiosResponse } from 'axios';
 import type {
   Course,
@@ -28,214 +27,102 @@ import type {
   EditAnalyzer,
 } from "./types";
 
-const instance = axios.create({
-  baseURL: browser ? 'https://localhost:7255' : 'http://localhost:5041'
-})
-
-export function setAuthToken(token: string){
-  instance.defaults.headers.common["Authorization"] = `Bearer ${token}`
+export async function postFeedback(feedback: CreateFeedback) : Promise<AxiosResponse<Feedback>> {
+  return axios.post(`/api/feedbacks`, feedback)
 }
 
-export function hasToken(){
-  return instance.defaults.headers.common["Authorization"]
+export async function putFeedback(feedbackId: string, feedback: EditFeedback) : Promise<AxiosResponse<Feedback>> {
+  return axios.put(`/api/feedbacks/${feedbackId}`, feedback)
 }
 
-export function getCourses() : Promise<AxiosResponse<Course[]>> {
-  return instance.get("/courses")
+export async function postDelivery(delivery: CreateDelivery) : Promise<AxiosResponse<Delivery>> {
+  return axios.post(`/api/deliveries`, delivery)
 }
 
-export function getCoursesByTeacher(teacherId: string) : Promise<AxiosResponse<Course[]>> {
-  return instance.get(`/teachers/${teacherId}/courses`)
+export async function putDelivery(deliveryId:string, delivery: UpdateDelivery) : Promise<AxiosResponse<Delivery>> {
+  return axios.put(`/api/deliveries/${deliveryId}`, delivery)
 }
 
-export function getCoursesByStudent(studentId: string) : Promise<AxiosResponse<Course[]>> {
-  return instance.get(`/students/${studentId}/courses`)
+export async function postDeliveryFieldFile(deliveryFieldId: string, file: FormData) : Promise<AxiosResponse> {
+  return axios.postForm(`/api/delivery-fields/${deliveryFieldId}`, file)
 }
 
-export function getCourse(courseId: string) : Promise<AxiosResponse<Course>> {
-  return instance.get(`/courses/${courseId}`)
+export async function postTeams(payload: CreateTeams) : Promise<AxiosResponse> {
+  return axios.post(`/api/teams`, payload)
 }
 
-export function getAssignments(courseId: string) : Promise<AxiosResponse<Assignment[]>> {
-  return instance.get(`/course/${courseId}/assignments`)
+export async function postStudentsCourse(courseId: string, emails: AddStudentsToCourse) : Promise<AxiosResponse<Student[]>> {
+  return axios.post(`/api/courses/${courseId}/students`, emails)
 }
 
-export function getStudentAssignments(studentId: string, courseId: string) : Promise<AxiosResponse<StudentAssignment[]>> {
-  return instance.get(`/students/${studentId}/course/${courseId}/assignments`)
+export async function deleteStudentCourse(courseId: string, studentId: string) : Promise<AxiosResponse> {
+  return axios.delete(`/api/courses/${courseId}/students/${studentId}`)
 }
 
-export function getTeamAssignments(courseId: string, teamId: string) : Promise<AxiosResponse<StudentAssignment[]>> {
-  return instance.get(`/courses/${courseId}/teams/${teamId}/assignments`)
+export async function postStudentsTeam(teams: AddStudentsToTeams) : Promise<AxiosResponse> {
+  return axios.post(`/api/teams/bulk`, teams)
 }
 
-export function getAssignment(assignmentId: string): Promise<AxiosResponse<Assignment>> {
-  return instance.get(`/assignments/${assignmentId}`)
+export async function postStudentTeam(teamId: string, studentId: string) : Promise<AxiosResponse<Team>>{
+  return axios.post(`/api/teams/${teamId}/students/${studentId}`)
 }
 
-export function getAssignmentFields(assignmentId: string): Promise<AxiosResponse<AssignmentField[]>> {
-  return instance.get(`/assignments/${assignmentId}/fields`)
+export async function postStudentEmailTeam(teamId: string, email: EmailAdd) : Promise<AxiosResponse<Team>>{
+  return axios.post(`/api/teams/${teamId}/students`, email)
 }
 
-export function getStudentDelivery(studentId: string, assignmentId: string): Promise<AxiosResponse<Delivery>> {
-  return instance.get(`/students/${studentId}/assignments/${assignmentId}/deliveries`)
+export async function deleteStudentTeam(teamId: string, studentId: string) : Promise<AxiosResponse> {
+  return axios.delete(`/api/teams/${teamId}/students/${studentId}`)
 }
 
-export function getTeamDelivery(teamId: string, assignmentId: string): Promise<AxiosResponse<Delivery>> {
-  return instance.get(`/teams/${teamId}/assignments/${assignmentId}/deliveries`)
+export async function postCourse(course: CreateCourse) : Promise<AxiosResponse<Course>> {
+  return axios.post(`/api/courses`, course)
 }
 
-export function getDeliveries(assignmentId: string) : Promise<AxiosResponse<Delivery[]>> {
-  return instance.get(`/assignments/${assignmentId}/deliveries`)
+export async function addTeacherToCourse(courseId: string, teacher: EmailAdd) : Promise<AxiosResponse> {
+  return axios.post(`/api/courses/${courseId}/teachers`, teacher)
 }
 
-export function getDeliveryFieldFile(deliveryFieldId: string): Promise<AxiosResponse> {
-  return instance.get(`/delivery-fields/${deliveryFieldId}`, { responseType: 'stream' });
+export async function deleteCourse(courseId: string) : Promise<AxiosResponse> {
+  return axios.delete(`/api/courses/${courseId}`)
 }
 
-export function getFeedbacks(assignmentId: string) : Promise<AxiosResponse<Feedback[]>> {
-  return instance.get(`/assignments/${assignmentId}/feedbacks`)
-}
-
-export function postFeedback(feedback: CreateFeedback) : Promise<AxiosResponse<Feedback>> {
-  return instance.post(`/feedbacks`, feedback)
-}
-
-export function putFeedback(feedbackId: string, feedback: EditFeedback) : Promise<AxiosResponse<Feedback>> {
-  return instance.put(`/feedbacks/${feedbackId}`, feedback)
-}
-
-export function postDelivery(delivery: CreateDelivery) : Promise<AxiosResponse<Delivery>> {
-  return instance.post(`/deliveries`, delivery)
-}
-
-export function putDelivery(deliveryId:string, delivery: UpdateDelivery) : Promise<AxiosResponse<Delivery>> {
-  return instance.put(`/deliveries/${deliveryId}`, delivery)
-}
-
-export function postDeliveryFieldFile(deliveryFieldId: string, file: FormData) : Promise<AxiosResponse> {
-  return instance.postForm(`/delivery-fields/${deliveryFieldId}`, file)
-}
-
-export function getStudentFeedback(studentId: string, assignmentId: string): Promise<AxiosResponse<Feedback>> {
-  return instance.get(`/students/${studentId}/assignments/${assignmentId}/feedbacks`)
-}
-
-export function getTeamFeedback(teamId: string, assignmentId: string): Promise<AxiosResponse<Feedback>> {
-  return instance.get(`/teams/${teamId}/assignments/${assignmentId}/feedbacks`)
-}
-
-export function getTeam(teamId: string): Promise<AxiosResponse<Team>> {
-  return instance.get(`/teams/${teamId}`)
-}
-
-export function getTeams(courseId: string): Promise<AxiosResponse<Team[]>> {
-  return instance.get(`/courses/${courseId}/teams`)
-}
-
-export function getStudentTeam(courseId: string, studentId: string) : Promise<AxiosResponse<Team>>{
-  return instance.get(`students/${studentId}/courses/${courseId}/teams`)
-}
-
-export function postTeams(payload: CreateTeams) : Promise<AxiosResponse> {
-  return instance.post("/teams", payload)
-}
-
-export function getStudent(studentId: string): Promise<AxiosResponse<Student>> {
-  return instance.get(`students/${studentId}`)
-}
-
-export function getStudents(courseId: string): Promise<AxiosResponse<Student[]>> {
-  return instance.get(`/courses/${courseId}/students`)
-}
-
-export function postStudentsCourse(courseId: string, emails: AddStudentsToCourse) : Promise<AxiosResponse<Student[]>> {
-  return instance.post(`/courses/${courseId}/students`, emails)
-}
-
-export function deleteStudentCourse(courseId: string, studentId: string) : Promise<AxiosResponse> {
-  return instance.delete(`/courses/${courseId}/students/${studentId}`)
-}
-
-export function postStudentsTeam(teams: AddStudentsToTeams) : Promise<AxiosResponse> {
-  return instance.post(`/teams/bulk`, teams)
-}
-
-export function postStudentTeam(teamId: string, studentId: string) : Promise<AxiosResponse<Team>>{
-  return instance.post(`/teams/${teamId}/students/${studentId}`)
-}
-
-export function postStudentEmailTeam(teamId: string, email: EmailAdd) : Promise<AxiosResponse<Team>>{
-  return instance.post(`/teams/${teamId}/students/`, email)
-}
-
-export function deleteStudentTeam(teamId: string, studentId: string) : Promise<AxiosResponse> {
-  return instance.delete(`/teams/${teamId}/students/${studentId}`)
-}
-
-export function postCourse(course: CreateCourse) : Promise<AxiosResponse<Course>> {
-  return instance.post(`/courses`, course)
-}
-
-export function getTeachers(courseId: string): Promise<AxiosResponse<Teacher[]>> {
-  return instance.get(`/courses/${courseId}/teachers`)
-}
-
-export function addTeacherToCourse(courseId: string, teacher: EmailAdd) : Promise<AxiosResponse> {
-  return instance.post(`/courses/${courseId}/teachers`, teacher)
-}
-
-export function deleteCourse(courseId: string) : Promise<AxiosResponse> {
-  return instance.delete(`/courses/${courseId}`)
-}
-
-export function editCourse(courseId: string, course: EditCourse) : Promise<AxiosResponse<Course>> {
-  return instance.put(`/courses/${courseId}`, course)
+export async function putCourse(courseId: string, course: EditCourse) : Promise<AxiosResponse<Course>> {
+  return axios.put(`/api/courses/${courseId}`, course)
 }
 
 export async function postAssignment(assingment: CreateAssignment) : Promise<AxiosResponse<Assignment>>{
-  return instance.post(`/assignments`, assingment)
+  return axios.post(`/api/assignments`, assingment)
 }
 
-export async function editAssignment(assignmentId: string, assignment: EditAssignment) : Promise<AxiosResponse<Assignment>>{
-  return instance.put(`/assignments/${assignmentId}`, assignment)
+export async function putAssignment(assignmentId: string, assignment: EditAssignment) : Promise<AxiosResponse<Assignment>>{
+  return axios.put(`/api/assignments/${assignmentId}`, assignment)
 }
 
 export async function publishAssignment(assignmentId: string) : Promise<AxiosResponse<Assignment>>{
-  return instance.put(`/assignments/${assignmentId}/publish`,)
+  return axios.put(`/api/assignments/${assignmentId}/publish`,)
 }
 
 export async function deleteAssigment(assignmentId: string) : Promise<AxiosResponse>{
-  return instance.delete(`/assignments/${assignmentId}`)
+  return axios.delete(`/api/assignments/${assignmentId}`)
 }
 
-export async function editAssignmentFields(assignmentId: string, request: UpdateAssignmentFields):Promise<AxiosResponse<AssignmentField[]>> {
-  return instance.put(`/assignments/${assignmentId}/fields`, request)
+export async function putAssignmentFields(assignmentId: string, request: UpdateAssignmentFields) : Promise<AxiosResponse<AssignmentField[]>> {
+  return axios.put(`/api/assignments/${assignmentId}/fields`, request)
 }
 
 export async function deleteAssigmentField(assignmentFieldId: string) : Promise<AxiosResponse>{
-  return instance.delete(`/assignment-fields/${assignmentFieldId}`)
-}
-
-export async function getAnalyzer(analyzerId: string) : Promise<AxiosResponse<Analyzer>>{
-  return instance.get(`/analyzers/${analyzerId}`)
-}
-
-export async function getAnalyzers(assignmentId: string) : Promise<AxiosResponse<Analyzer[]>>{
-  return instance.get(`/assignments/${assignmentId}/analyzers`)
+  return axios.delete(`/api/assignment-fields/${assignmentFieldId}`)
 }
 
 export async function postAnalyzer(request: CreateAnalyzer) : Promise<AxiosResponse<Analyzer>>{
-  return instance.post(`/analyzers`,request)
+  return axios.post(`/api/analyzers`,request)
 }
 
 export async function putAnalyzer(analyzerId: string, request: EditAnalyzer) : Promise<AxiosResponse<Analyzer>>{
-  return instance.put(`/analyzers/${analyzerId}`, request)
+  return axios.put(`/api/analyzers/${analyzerId}`, request)
 }
 
-export async function getAnalyzerScript(analyzerId: string, stream: boolean = true) : Promise<AxiosResponse>{
-  return instance.get(`/analyzers/${analyzerId}/script`, { responseType: stream ? 'stream' : undefined })
-}
-
-export function postAnalyzerScript(analyzerId: string, script: FormData) : Promise<AxiosResponse> {
-  return instance.postForm(`/analyzers/${analyzerId}/script`, script)
+export async function postAnalyzerScript(analyzerId: string, script: FormData) : Promise<AxiosResponse> {
+  return axios.postForm(`/api/analyzers/${analyzerId}/script`, script)
 }

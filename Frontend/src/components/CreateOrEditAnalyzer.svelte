@@ -12,6 +12,7 @@
 	import { transformErrors } from 'src/utils';
 	import { ArrowDownToLine } from 'lucide-svelte';
 	import axios from 'axios';
+	import { postAnalyzer, postAnalyzerScript, putAnalyzer } from 'src/api';
 
 	export let courseId: string;
 	export let assignmentId: string;
@@ -37,14 +38,14 @@
 	}
 
 	const onSubmitEdit = async () => {
-		return await axios.put(`/api/analyzers/${analyzer!.id}`, {
+		return putAnalyzer(analyzer!.id, {
 			name: analyzerFormData.name,
 			fileName: analyzerFormData.script?.name ?? ''
 		});
 	};
 
 	const onSubmitCreate = async () => {
-		return await axios.post('/api/analyzers', {
+		return postAnalyzer({
 			name: analyzerFormData.name,
 			fileName: analyzerFormData.script?.name ?? '',
 			assignmentId: assignmentId
@@ -61,7 +62,7 @@
 
 				var formData = new FormData();
 				formData.append('script', analyzerFormData.script!);
-				await axios.post(`/api/analyzers/${analyzer.id}/script`, formData);
+				await postAnalyzerScript(analyzer.id, formData);
 
 				goto(`/teacher/courses/${courseId}/assignments/${assignmentId}/analyzers/${analyzer.id}`, {
 					invalidateAll: true

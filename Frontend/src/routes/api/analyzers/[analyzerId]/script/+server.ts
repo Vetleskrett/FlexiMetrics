@@ -1,16 +1,16 @@
-import { getAnalyzerScript, postAnalyzerScript } from 'src/api';
+import { api } from 'src/api.server';
 import { json, type RequestHandler } from '@sveltejs/kit';
 import { Readable } from 'stream';
 
 export const POST: RequestHandler = async ({ params, request }) => {
   const payload = await request.formData()
-  const response = await postAnalyzerScript(params.analyzerId as string, payload)
+  const response = await api.postForm(`/analyzers/${params.analyzerId}/script`, payload)
   return json(response.data)
 }
 
 export const GET: RequestHandler = async ({ params }) => {
   try {
-    const fileResponse = await getAnalyzerScript(params.analyzerId as string);
+    const fileResponse = await api.get(`/analyzers/${params.analyzerId}/script`, { responseType: 'stream' })
 
     const headers = new Headers();
     headers.set('Content-Disposition', fileResponse.headers['content-disposition'] || 'attachment');

@@ -6,6 +6,7 @@
 	import * as DropdownMenu from '$lib/components/ui/dropdown-menu';
 	import Trash2 from 'lucide-svelte/icons/trash-2';
 	import axios from 'axios';
+	import { deleteStudentTeam } from 'src/api';
 
 	export let students: Student[], teamId: string;
 
@@ -19,12 +20,11 @@
 	}
 
 	async function removeTeamMember(student: Student) {
-		try{
-			await axios.delete(`/api/teams/${teamId}/student/${student.id}`)
-			deleteStudentFromList(student)
-		}
-		catch{
-			console.error("Could not remove team member")
+		try {
+			await deleteStudentTeam(teamId, student.id);
+			deleteStudentFromList(student);
+		} catch {
+			console.error('Could not remove team member');
 		}
 	}
 </script>

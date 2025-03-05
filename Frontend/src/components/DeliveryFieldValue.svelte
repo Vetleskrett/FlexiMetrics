@@ -36,7 +36,7 @@
 		</p>
 	</div>
 {:else if type == 'File'}
-	<a class="flex items-center text-blue-500" download href={`/api/delivery/fields/${id}`}>
+	<a class="flex items-center text-blue-500" download href={`/api/delivery-fields/${id}`}>
 		<ArrowDownToLine size="20" />
 		{value?.FileName}
 	</a>

@@ -1,4 +1,4 @@
-import { getCourse, getAssignment } from "src/api";
+import { getCourse, getAssignment } from "src/api.server";
 
 export const load = async ({ params }: { params: { courseId: string; assignmentId: string; } }) => {
     const [
