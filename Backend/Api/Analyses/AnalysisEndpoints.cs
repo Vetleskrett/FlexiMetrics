@@ -6,7 +6,7 @@ public static class AnalysisEndpoints
 {
     public static void MapAnalysisEndpoints(this WebApplication app)
     {
-        var group = app.MapGroup("").WithTags("Analyses");
+        var group = app.MapGroup("").WithTags("Analyses").RequireAuthorization();
 
         group.MapGet("analyses", async (IAnalysisService analysisService) =>
         {

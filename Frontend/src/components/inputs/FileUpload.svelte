@@ -7,6 +7,7 @@
 	let isDragOver = false;
 
 	export let file: File | FileMetadata | undefined = undefined;
+	export let accept: string;
 
 	function triggerFileSelect() {
 		fileInput.click();
@@ -56,6 +57,7 @@
 
 		<input
 			type="file"
+			{accept}
 			multiple={false}
 			bind:this={fileInput}
 			class="hidden"

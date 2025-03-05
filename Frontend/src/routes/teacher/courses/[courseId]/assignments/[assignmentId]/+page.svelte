@@ -30,7 +30,7 @@
 	async function publishAssignmentButton() {
 		try {
 			const response = await axios.put(`/api/assignments/${assignmentId}/publish`);
-			data.assignment = response.data
+			data.assignment = response.data;
 		} catch (exception) {
 			console.error('Something Went Wrong!');
 		}
@@ -39,7 +39,7 @@
 	async function deleteAssignmentButton() {
 		try {
 			await axios.delete(`/api/assignments/${assignmentId}`);
-			goto(`/teacher/courses/${courseId}`)
+			goto(`/teacher/courses/${courseId}`);
 		} catch (exception) {
 			console.error('Something Went Wrong!');
 		}

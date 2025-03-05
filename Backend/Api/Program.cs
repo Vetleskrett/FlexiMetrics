@@ -14,7 +14,6 @@ using Api.Analyzers;
 using Container;
 using Api.Analyses;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.IdentityModel.Tokens;
 using Microsoft.AspNetCore.Authorization;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -67,23 +66,22 @@ builder.Services.ConfigureHttpJsonOptions(options =>
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
 .AddJwtBearer(jwtOptions =>
 {
-    jwtOptions.TokenValidationParameters = new TokenValidationParameters
+    if (builder.Environment.IsDevelopment())
     {
-        ValidateAudience = true,
-        ValidateIssuer = true,
-        //ValidateIssuerSigningKey = true,
-        //IssuerSigningKey
-        ValidAudience = "client id", // the client id
-    };
-    jwtOptions.Authority = "some site"; // the issuer
+        jwtOptions.RequireHttpsMetadata = false;
+    }
+
+    jwtOptions.Authority = builder.Configuration["Feide:Issuer"];
+    jwtOptions.Audience = builder.Configuration["Feide:ClientId"];
 });
 
-builder.Services.AddAuthorization(options =>
-{
-    options.DefaultPolicy = new AuthorizationPolicyBuilder(JwtBearerDefaults.AuthenticationScheme)
-       .RequireAuthenticatedUser()
-       .Build();
-});
+builder.Services.AddAuthorizationBuilder()
+    .SetDefaultPolicy
+    (
+        new AuthorizationPolicyBuilder(JwtBearerDefaults.AuthenticationScheme)
+            .RequireAuthenticatedUser()
+            .Build()
+    );
 
 var app = builder.Build();
 

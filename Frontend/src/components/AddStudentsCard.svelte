@@ -38,9 +38,9 @@
 
 				<div>
 					<p>Copy and Paste, Drag and Drop file, or</p>
-					<a on:click={openFileExplorer} href="#" class="text-blue-500 hover:text-blue-700">
+					<button on:click={openFileExplorer} class="text-blue-500 hover:text-blue-700">
 						Browse Files
-					</a>
+					</button>
 					<input
 						bind:this={fileInput}
 						type="file"

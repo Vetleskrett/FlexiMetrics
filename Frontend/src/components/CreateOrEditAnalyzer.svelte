@@ -5,13 +5,13 @@
 	import Save from 'lucide-svelte/icons/save';
 	import Undo_2 from 'lucide-svelte/icons/undo-2';
 	import { Input } from '$lib/components/ui/input';
-	import { editAnalyzer, postAnalyzer, postAnalyzerScript } from 'src/api';
 	import { goto } from '$app/navigation';
 	import * as Form from 'src/lib/components/ui/form';
 	import { superForm } from 'sveltekit-superforms';
 	import FileUpload from './inputs/FileUpload.svelte';
 	import { transformErrors } from 'src/utils';
 	import { ArrowDownToLine } from 'lucide-svelte';
+	import axios from 'axios';
 
 	export let courseId: string;
 	export let assignmentId: string;
@@ -37,14 +37,14 @@
 	}
 
 	const onSubmitEdit = async () => {
-		return editAnalyzer(analyzer!.id, {
+		return await axios.put(`/api/analyzers/${analyzer!.id}`, {
 			name: analyzerFormData.name,
 			fileName: analyzerFormData.script?.name ?? ''
 		});
 	};
 
 	const onSubmitCreate = async () => {
-		return postAnalyzer({
+		return await axios.post('/api/analyzers', {
 			name: analyzerFormData.name,
 			fileName: analyzerFormData.script?.name ?? '',
 			assignmentId: assignmentId
@@ -58,7 +58,11 @@
 		promise
 			.then(async (response) => {
 				var analyzer = response.data;
-				await postAnalyzerScript(analyzer.id, analyzerFormData.script!);
+
+				var formData = new FormData();
+				formData.append('script', analyzerFormData.script!);
+				await axios.post(`/api/analyzers/${analyzer.id}/script`, formData);
+
 				goto(`/teacher/courses/${courseId}/assignments/${assignmentId}/analyzers/${analyzer.id}`, {
 					invalidateAll: true
 				});
@@ -109,6 +113,7 @@
 						<FileUpload
 							{...attrs}
 							bind:file={analyzerFormData.script}
+							accept=".py"
 							on:change={() => {
 								if (analyzerFormData.script) {
 									analyzerFormData.script?.text().then((text) => (script = text));

@@ -89,7 +89,7 @@ export function getDeliveries(assignmentId: string) : Promise<AxiosResponse<Deli
 }
 
 export function getDeliveryFieldFile(deliveryFieldId: string): Promise<AxiosResponse> {
-  return instance.get(`/delivery-fields/${deliveryFieldId}`);
+  return instance.get(`/delivery-fields/${deliveryFieldId}`, { responseType: 'stream' });
 }
 
 export function getFeedbacks(assignmentId: string) : Promise<AxiosResponse<Feedback[]>> {
@@ -228,20 +228,14 @@ export async function postAnalyzer(request: CreateAnalyzer) : Promise<AxiosRespo
   return instance.post(`/analyzers`,request)
 }
 
-export async function editAnalyzer(analyzerId: string, request: EditAnalyzer) : Promise<AxiosResponse<Analyzer>>{
+export async function putAnalyzer(analyzerId: string, request: EditAnalyzer) : Promise<AxiosResponse<Analyzer>>{
   return instance.put(`/analyzers/${analyzerId}`, request)
 }
 
-export async function getAnalyzerScript(analyzerId: string) : Promise<AxiosResponse<File>>{
-  return instance.get(`/analyzers/${analyzerId}/script`)
+export async function getAnalyzerScript(analyzerId: string, stream: boolean = true) : Promise<AxiosResponse>{
+  return instance.get(`/analyzers/${analyzerId}/script`, { responseType: stream ? 'stream' : undefined })
 }
 
-export function getAnalyzerScriptUrl(analyzerId: string) : string {
-  return instance.defaults.baseURL + `/analyzers/${analyzerId}/script`;
-}
-
-export function postAnalyzerScript(analyzerId: string, script: File) : Promise<AxiosResponse> {
-  var formData = new FormData();
-  formData.append("script", script);
-  return instance.postForm(`/analyzers/${analyzerId}/script`, formData)
+export function postAnalyzerScript(analyzerId: string, script: FormData) : Promise<AxiosResponse> {
+  return instance.postForm(`/analyzers/${analyzerId}/script`, script)
 }

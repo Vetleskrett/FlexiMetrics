@@ -13,7 +13,6 @@
 	import AnalyzerRunningCard from 'src/components/AnalyzerRunningCard.svelte';
 	import type { Analyzer, Assignment, Course, Student, Team } from 'src/types';
 	import { ArrowDownToLine } from 'lucide-svelte';
-	import { getAnalyzerScriptUrl } from 'src/api';
 
 	const courseId = $page.params.courseId;
 	const assignmentId = $page.params.assignmentId;
@@ -82,7 +81,7 @@
 					<EllipsisVertical size={32} />
 				</DropdownMenu.Trigger>
 				<DropdownMenu.Content>
-					<DropdownMenu.Item download href={getAnalyzerScriptUrl(analyzerId)}>
+					<DropdownMenu.Item download href={`/api/analyzers/${analyzerId}/script`}>
 						<ArrowDownToLine class="h-4" />
 						<p>Download script</p>
 					</DropdownMenu.Item>

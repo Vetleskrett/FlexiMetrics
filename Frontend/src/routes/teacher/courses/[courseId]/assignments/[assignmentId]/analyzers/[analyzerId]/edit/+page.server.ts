@@ -1,6 +1,7 @@
 import { getCourse, getAssignment, getAnalyzer, getAnalyzerScript } from "src/api";
+import type { PageServerLoad } from "./$types";
 
-export const load = async ({ params }: { params: { courseId: string; assignmentId: string; analyzerId: string; } }) => {
+export const load: PageServerLoad = async ({ params }: { params: { courseId: string; assignmentId: string; analyzerId: string; } }) => {
     const [
         courseResponse,
         assignmentResponse,
@@ -10,7 +11,7 @@ export const load = async ({ params }: { params: { courseId: string; assignmentI
         getCourse(params.courseId),
         getAssignment(params.assignmentId),
         getAnalyzer(params.analyzerId),
-        getAnalyzerScript(params.analyzerId)
+        getAnalyzerScript(params.analyzerId, false)
     ])
 
     return { 

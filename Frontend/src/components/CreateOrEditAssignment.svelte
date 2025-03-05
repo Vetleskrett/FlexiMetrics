@@ -23,7 +23,6 @@
 	import DatePicker from './inputs/DatePicker.svelte';
 	import AssignmentFieldsForm from './AssignmentFieldsForm.svelte';
 	import { cleanOptional, transformErrors } from 'src/utils';
-	import * as Select from '$lib/components/ui/select/index';
 	import axios from 'axios';
 
 	const today = new Date();
