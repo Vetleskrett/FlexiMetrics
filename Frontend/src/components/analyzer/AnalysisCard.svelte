@@ -16,11 +16,13 @@
 	import CustomButton from '../CustomButton.svelte';
 	import { getFilter } from './filters/filters';
 	import { getCell } from './cells/cells';
+	import { EllipsisVertical, Trash2 } from 'lucide-svelte';
 
 	export let analyses: SlimAnalysis[];
 	export let analysis: Analysis;
 	export let isIndividual: boolean;
 	export let onSetAnalysis: (analysisId: string) => Promise<void>;
+	export let onDeleteAnalysis: () => Promise<void>;
 
 	type Header = {
 		name: string;
@@ -126,7 +128,7 @@
 					{/each}
 				</DropdownMenu.Content>
 			</DropdownMenu.Root>
-			<div class="flex items-start gap-4">
+			<div class="flex items-center gap-4">
 				<DropdownMenu.Root>
 					<DropdownMenu.Trigger asChild let:builder>
 						<CustomButton outline={true} color="blue" builders={[builder]}>
@@ -169,6 +171,17 @@
 								</DropdownMenu.CheckboxItem>
 							{/if}
 						{/each}
+					</DropdownMenu.Content>
+				</DropdownMenu.Root>
+				<DropdownMenu.Root>
+					<DropdownMenu.Trigger>
+						<EllipsisVertical size={24} />
+					</DropdownMenu.Trigger>
+					<DropdownMenu.Content>
+						<DropdownMenu.Item on:click={onDeleteAnalysis}>
+							<Trash2 class="h-4" />
+							<p>Delete analysis</p>
+						</DropdownMenu.Item>
 					</DropdownMenu.Content>
 				</DropdownMenu.Root>
 			</div>

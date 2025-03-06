@@ -12,7 +12,13 @@
 	import AnalyzerRunningCard from 'src/components/analyzer/AnalyzerRunningCard.svelte';
 	import type { Analyzer, AnalyzerAnalyses, Assignment, Course, Student, Team } from 'src/types/';
 	import { ArrowDownToLine } from 'lucide-svelte';
-	import { cancelAnalyzer, getAnalysis, runAnalyzer } from 'src/api';
+	import {
+		cancelAnalyzer,
+		deleteAnalysis,
+		getAnalysis,
+		getAnalyzerAnalyses,
+		runAnalyzer
+	} from 'src/api';
 	import * as Card from '$lib/components/ui/card/index.js';
 
 	const courseId = $page.params.courseId;
@@ -26,21 +32,33 @@
 	};
 
 	$: analysis = data.analyses.latest;
-	let isRunning = analysis?.status == 'Started' || analysis?.status == 'Running';
+
+	const update = async () => {
+		const response = await getAnalyzerAnalyses($page.params.analyzerId);
+		data.analyses = response.data;
+		analysis = data.analyses.latest;
+	};
 
 	const onCancel = async () => {
-		isRunning = false;
 		await cancelAnalyzer($page.params.analyzerId);
+		await update();
 	};
 
 	const onRun = async () => {
-		isRunning = true;
 		await runAnalyzer($page.params.analyzerId);
+		await update();
 	};
 
 	const onSetAnalysis = async (analysisId: string) => {
 		const analysisResponse = await getAnalysis(analysisId);
 		analysis = analysisResponse.data;
+	};
+
+	const onDeleteAnalysis = async () => {
+		if (analysis) {
+			await deleteAnalysis(analysis.id);
+			await update();
+		}
 	};
 </script>
 
@@ -77,7 +95,7 @@
 			<h1 class="ml-4 text-4xl font-semibold">{data.analyzer.name}</h1>
 		</div>
 		<div class="flex items-center gap-2">
-			{#if isRunning}
+			{#if analysis?.status == 'Started' || analysis?.status == 'Running'}
 				<CustomButton color="red" on:click={onCancel}>
 					<X size="20" />
 					<p>Cancel</p>
@@ -113,7 +131,7 @@
 		</div>
 	</div>
 
-	{#if isRunning}
+	{#if analysis?.status == 'Started' || analysis?.status == 'Running'}
 		<AnalyzerRunningCard />
 	{/if}
 
@@ -124,6 +142,7 @@
 				analyses={data.analyses.analyses}
 				isIndividual={data.assignment.collaborationType == 'Individual'}
 				{onSetAnalysis}
+				{onDeleteAnalysis}
 			/>
 		{:else}
 			<Card.Root class="w-[1080px]">

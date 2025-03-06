@@ -2,7 +2,6 @@ import axios, { type AxiosResponse } from 'axios';
 import type {
   Course,
   Assignment,
-  StudentAssignment,
   AssignmentField,
   Team,
   CreateTeams,
@@ -25,7 +24,8 @@ import type {
   CreateAnalyzer,
   EditAnalyzer,
   Analysis,
-} from "./types/common";
+  AnalyzerAnalyses,
+} from "./types/";
 
 export async function postFeedback(feedback: CreateFeedback) : Promise<AxiosResponse<Feedback>> {
   return axios.post(`/api/feedbacks`, feedback)
@@ -143,6 +143,14 @@ export async function cancelAnalyzer(analyzerId: string) : Promise<AxiosResponse
   });
 }
 
+export async function getAnalyzerAnalyses(analyzerId: string) : Promise<AxiosResponse<AnalyzerAnalyses>> {
+  return axios.get(`/api/analyzers/${analyzerId}/analyses`)
+}
+
 export async function getAnalysis(analysisId: string) : Promise<AxiosResponse<Analysis>> {
   return axios.get(`/api/analyses/${analysisId}`)
+}
+
+export async function deleteAnalysis(analysisId: string) : Promise<AxiosResponse> {
+  return axios.delete(`/api/analyses/${analysisId}`)
 }
