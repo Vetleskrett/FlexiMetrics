@@ -7,6 +7,7 @@ using Docker.DotNet.Models;
 using Microsoft.Extensions.Logging;
 using System.Threading.Channels;
 using Database.Models;
+using System.Text.Json.Serialization;
 
 namespace Container;
 
@@ -71,7 +72,7 @@ public class ContainerService : IContainerService
     {
         await _dbContext.Analyses
             .Where(a => a.Id == request.AnalysisId)
-            .ExecuteUpdateAsync(setter => setter.SetProperty(a => a.AnalysisStatus, AnalysisStatus.Running));
+            .ExecuteUpdateAsync(setter => setter.SetProperty(a => a.Status, AnalysisStatus.Running));
 
         var deliveries = await _dbContext.Deliveries
             .Include(d => d.Student)
@@ -92,7 +93,7 @@ public class ContainerService : IContainerService
         await _dbContext.Analyses
             .Where(a => a.Id == request.AnalysisId)
             .ExecuteUpdateAsync(setter => setter
-                .SetProperty(a => a.AnalysisStatus, AnalysisStatus.Completed)
+                .SetProperty(a => a.Status, AnalysisStatus.Completed)
                 .SetProperty(a => a.CompletedAt, DateTime.UtcNow)
             );
     }
@@ -124,7 +125,15 @@ public class ContainerService : IContainerService
         }
         finally
         {
-            await _dockerClient.Containers.RemoveContainerAsync(container, new ContainerRemoveParameters(), CancellationToken.None);
+            await _dockerClient.Containers.RemoveContainerAsync
+            (
+                container,
+                new ContainerRemoveParameters
+                {
+                    Force = true
+                },
+                CancellationToken.None
+            );
         }
     }
 
@@ -149,10 +158,22 @@ public class ContainerService : IContainerService
         }
     }
 
+    private class AnalysisField
+    {
+        public required AnalysisFieldType Type { get; init; }
+        public required object Value { get; init; }
+    }
+
+    private readonly JsonSerializerOptions _jsonOptions = new()
+    {
+        PropertyNameCaseInsensitive = true,
+        Converters = { new JsonStringEnumConverter() }
+    };
+
     private async Task OnDeliveryAnalysisFinished(string container, Delivery delivery, RunAnalyzerRequest request)
     {
         using var analysisStream = await CopyFileFromContainer(container, "analysis.json");
-        var fields = await JsonSerializer.DeserializeAsync<Dictionary<string, object>>(analysisStream);
+        var fields = await JsonSerializer.DeserializeAsync<Dictionary<string, AnalysisField>>(analysisStream, _jsonOptions);
 
         var deliveryAnalysis = new DeliveryAnalysis
         {
@@ -162,13 +183,14 @@ public class ContainerService : IContainerService
             Fields = []
         };
 
-        var deliveryAnalysisFields = fields!.Select(field =>
+        var deliveryAnalysisFields = fields!.Select(pair =>
             new DeliveryAnalysisField
             {
                 Id = Guid.NewGuid(),
                 DeliveryAnalysisId = deliveryAnalysis.Id,
-                Name = field.Key,
-                Value = field.Value
+                Name = pair.Key,
+                Type = pair.Value.Type,
+                Value = pair.Value.Value,
             }
         ).ToList();
 

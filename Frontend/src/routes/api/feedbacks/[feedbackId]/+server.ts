@@ -1,5 +1,5 @@
 import { json, type RequestHandler } from '@sveltejs/kit';
-import type { EditFeedback } from 'src/types';
+import type { EditFeedback } from 'src/types/';
 import { api } from 'src/api.server';
 
 export const PUT: RequestHandler = async ({ params, request }) => {

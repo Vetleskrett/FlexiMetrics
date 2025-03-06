@@ -8,7 +8,7 @@ namespace Api.Analyses;
 
 public interface IAnalysisService
 {
-    Task<Result<IEnumerable<AnalysisResponse>>> GetAll();
+    Task<Result<IEnumerable<SlimAnalysisResponse>>> GetAll();
     Task<Result<AnalysisResponse>> GetById(Guid id);
     Task<Result<AnalyzerAnalysesResponse>> GetAllByAnalyzer(Guid analyzerId);
     Task<Result> DeleteById(Guid id);
@@ -23,17 +23,15 @@ public class AnalysisService : IAnalysisService
         _dbContext = dbContext;
     }
 
-    public async Task<Result<IEnumerable<AnalysisResponse>>> GetAll()
+    public async Task<Result<IEnumerable<SlimAnalysisResponse>>> GetAll()
     {
         var analyses = await _dbContext.Analyses
             .AsNoTracking()
-            .Include(a => a.DeliveryAnalyses!)
-            .ThenInclude(da => da.Fields)
             .OrderBy(a => a.AnalyzerId)
             .ThenByDescending(a => a.StartedAt)
             .ToListAsync();
 
-        return analyses.MapToResponse();
+        return analyses.MapToSlimResponse();
     }
 
     public async Task<Result<AnalysisResponse>> GetById(Guid id)
@@ -41,6 +39,11 @@ public class AnalysisService : IAnalysisService
         var analysis = await _dbContext.Analyses
             .Include(a => a.DeliveryAnalyses!)
             .ThenInclude(da => da.Fields)
+            .Include(a => a.DeliveryAnalyses!)
+            .ThenInclude(da => da.Delivery!.Team!)
+            .ThenInclude(t => t.Students)
+            .Include(a => a.DeliveryAnalyses!)
+            .ThenInclude(da => da.Delivery!.Student)
             .FirstOrDefaultAsync(a => a.Id == id);
 
         if (analysis is null)
@@ -66,6 +69,11 @@ public class AnalysisService : IAnalysisService
             .AsNoTracking()
             .Include(a => a.DeliveryAnalyses!)
             .ThenInclude(da => da.Fields)
+            .Include(a => a.DeliveryAnalyses!)
+            .ThenInclude(da => da.Delivery!.Team!)
+            .ThenInclude(t => t.Students)
+            .Include(a => a.DeliveryAnalyses!)
+            .ThenInclude(da => da.Delivery!.Student)
             .FirstOrDefaultAsync(a => a.Id == latestId);
 
         return new AnalyzerAnalysesResponse

@@ -4,7 +4,7 @@
 	import { Textarea } from 'src/lib/components/ui/textarea';
 	import FileUpload from './FileUpload.svelte';
 	import ListInput from './ListInput.svelte';
-	import type { AssignmentFieldType } from 'src/types';
+	import type { AssignmentFieldType } from 'src/types/';
 
 	export let value: any;
 	export let type: AssignmentFieldType;

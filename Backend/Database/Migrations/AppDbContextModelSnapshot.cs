@@ -29,9 +29,6 @@ namespace Database.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
-                    b.Property<int>("AnalysisStatus")
-                        .HasColumnType("integer");
-
                     b.Property<Guid>("AnalyzerId")
                         .HasColumnType("uuid");
 
@@ -40,6 +37,9 @@ namespace Database.Migrations
 
                     b.Property<DateTime>("StartedAt")
                         .HasColumnType("timestamp with time zone");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("integer");
 
                     b.HasKey("Id");
 
@@ -267,6 +267,9 @@ namespace Database.Migrations
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasColumnType("text");
+
+                    b.Property<int>("Type")
+                        .HasColumnType("integer");
 
                     b.HasKey("Id");
 

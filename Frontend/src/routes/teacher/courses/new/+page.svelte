@@ -1,6 +1,6 @@
 <script lang="ts">
 	import * as Breadcrumb from '$lib/components/ui/breadcrumb/index.js';
-	import CreateOrEditCourse from 'src/components/CreateOrEditCourse.svelte';
+	import CreateOrEditCourse from 'src/components/course/CreateOrEditCourse.svelte';
 </script>
 
 <div class="mx-auto mt-4 flex w-max flex-col gap-10">

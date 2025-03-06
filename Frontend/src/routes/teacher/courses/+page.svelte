@@ -1,6 +1,6 @@
 <script lang="ts">
-	import { Role, type Course } from 'src/types';
-	import CoursesCard from 'src/components/CoursesCard.svelte';
+	import { Role, type Course } from 'src/types/';
+	import CoursesCard from 'src/components/course/CoursesCard.svelte';
 
 	export let data: {
 		courses: Course[];

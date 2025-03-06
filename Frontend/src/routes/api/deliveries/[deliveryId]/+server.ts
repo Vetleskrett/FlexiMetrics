@@ -1,5 +1,5 @@
 import { json, type RequestHandler } from '@sveltejs/kit';
-import type { UpdateDelivery } from 'src/types';
+import type { UpdateDelivery } from 'src/types/';
 import { api } from 'src/api.server';
 
 export const PUT: RequestHandler = async ({ params, request }) => {

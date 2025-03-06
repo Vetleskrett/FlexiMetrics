@@ -7,9 +7,9 @@
 	import * as DropdownMenu from '$lib/components/ui/dropdown-menu';
 	import * as Breadcrumb from '$lib/components/ui/breadcrumb/index.js';
 	import CompletedTotalCard from 'src/components/CompletedTotalCard.svelte';
-	import AssignmentInformationCard from 'src/components/AssignmentInformationCard.svelte';
-	import AssignmentFormatCard from 'src/components/AssignmentFormatCard.svelte';
-	import AnalyzersCard from 'src/components/AnalyzersCard.svelte';
+	import AssignmentInformationCard from 'src/components/assignment/AssignmentInformationCard.svelte';
+	import AssignmentFormatCard from 'src/components/assignment/AssignmentFormatCard.svelte';
+	import AnalyzersCard from 'src/components/analyzer/AnalyzersCard.svelte';
 	import CustomButton from 'src/components/CustomButton.svelte';
 	import type {
 		Assignment,
@@ -19,10 +19,9 @@
 		Student,
 		Team,
 		Analyzer
-	} from 'src/types';
-	import { Role } from 'src/types';
+	} from 'src/types/';
+	import { Role } from 'src/types/';
 	import { goto } from '$app/navigation';
-	import axios from 'axios';
 	import { deleteAssigment, publishAssignment } from 'src/api';
 
 	const courseId = $page.params.courseId;

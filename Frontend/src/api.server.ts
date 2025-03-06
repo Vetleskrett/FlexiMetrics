@@ -10,7 +10,8 @@ import type {
   Feedback,
   Teacher,
   Analyzer,
-} from "./types";
+  AnalyzerAnalyses,
+} from "./types/";
 
 export const api = axios.create({
   baseURL: 'http://localhost:5041'
@@ -122,4 +123,8 @@ export async function getAnalyzers(assignmentId: string) : Promise<AxiosResponse
 
 export async function getAnalyzerScript(analyzerId: string, stream: boolean = true) : Promise<AxiosResponse>{
   return api.get(`analyzers/${analyzerId}/script`, { responseType: stream ? 'stream' : undefined })
+}
+
+export async function getAnalyzerAnalyses(analyzerId: string) : Promise<AxiosResponse<AnalyzerAnalyses>>{
+  return api.get(`analyzers/${analyzerId}/analyses`)
 }

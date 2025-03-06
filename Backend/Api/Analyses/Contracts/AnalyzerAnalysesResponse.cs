@@ -13,6 +13,6 @@ public class SlimAnalysisResponse
     public required Guid Id { get; init; }
     public required DateTime StartedAt { get; init; }
     public required DateTime? CompletedAt { get; init; }
-    public required AnalysisStatus AnalysisStatus { get; init; }
+    public required AnalysisStatus Status { get; init; }
     public required Guid AnalyzerId { get; init; }
 }

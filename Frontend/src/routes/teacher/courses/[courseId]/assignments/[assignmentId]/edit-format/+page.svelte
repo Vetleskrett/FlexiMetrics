@@ -1,7 +1,7 @@
 <script lang="ts">
 	import * as Breadcrumb from '$lib/components/ui/breadcrumb/index.js';
-	import type { Assignment, AssignmentField, Course } from 'src/types';
-	import EditAssignmentFormatCard from 'src/components/EditAssignmentFormatCard.svelte';
+	import type { Assignment, AssignmentField, Course } from 'src/types/';
+	import EditAssignmentFormatCard from 'src/components/assignment/EditAssignmentFormatCard.svelte';
 	import { page } from '$app/stores';
 
 	const courseId = $page.params.courseId;

@@ -1,4 +1,4 @@
-import { getCourse, getAssignment, getStudents, getTeams, getAnalyzer } from "src/api.server";
+import { getCourse, getAssignment, getAnalyzer, getAnalyzerAnalyses } from "src/api.server";
 import type { PageServerLoad } from "./$types";
 
 export const load: PageServerLoad = async ({ params }: { params: { courseId: string; assignmentId: string; analyzerId: string; } }) => {
@@ -6,21 +6,18 @@ export const load: PageServerLoad = async ({ params }: { params: { courseId: str
         courseResponse,
         assignmentResponse,
         analyzerResponse,
-        studentsResponse,
-        teamsResponse,
+        analysesResponse,
     ] = await Promise.all([
         getCourse(params.courseId),
         getAssignment(params.assignmentId),
         getAnalyzer(params.analyzerId),
-        getStudents(params.courseId),
-        getTeams(params.courseId)
+        getAnalyzerAnalyses(params.analyzerId)
     ])
 
     return { 
         course: courseResponse.data,
         assignment: assignmentResponse.data,
         analyzer: analyzerResponse.data,
-        students: studentsResponse.data,
-        teams: teamsResponse.data
+        analyses: analysesResponse.data
     }
 };

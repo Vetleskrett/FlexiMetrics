@@ -2,34 +2,64 @@
 	import { page } from '$app/stores';
 	import * as Breadcrumb from '$lib/components/ui/breadcrumb/index.js';
 	import * as DropdownMenu from '$lib/components/ui/dropdown-menu';
-	import { analyzerOutput } from 'src/mockData';
-	import AnalyzerOutputCard from 'src/components/AnalyzerOutputCard.svelte';
+	import AnalysisCard from 'src/components/analyzer/AnalysisCard.svelte';
 	import EllipsisVertical from 'lucide-svelte/icons/ellipsis-vertical';
 	import Pencil from 'lucide-svelte/icons/pencil';
 	import Trash2 from 'lucide-svelte/icons/trash-2';
 	import Play from 'lucide-svelte/icons/play';
 	import X from 'lucide-svelte/icons/x';
 	import CustomButton from 'src/components/CustomButton.svelte';
-	import AnalyzerRunningCard from 'src/components/AnalyzerRunningCard.svelte';
-	import type { Analyzer, Assignment, Course, Student, Team } from 'src/types';
+	import AnalyzerRunningCard from 'src/components/analyzer/AnalyzerRunningCard.svelte';
+	import type { Analyzer, AnalyzerAnalyses, Assignment, Course, Student, Team } from 'src/types/';
 	import { ArrowDownToLine } from 'lucide-svelte';
+	import {
+		cancelAnalyzer,
+		deleteAnalysis,
+		getAnalysis,
+		getAnalyzerAnalyses,
+		runAnalyzer
+	} from 'src/api';
+	import * as Card from '$lib/components/ui/card/index.js';
 
 	const courseId = $page.params.courseId;
 	const assignmentId = $page.params.assignmentId;
-	const analyzerId = $page.params.analyzerId;
 
 	export let data: {
 		course: Course;
 		assignment: Assignment;
 		analyzer: Analyzer;
-		students: Student[];
-		teams: Team[];
+		analyses: AnalyzerAnalyses;
 	};
 
-	let isRunning = false;
+	$: analysis = data.analyses.latest;
 
-	const onCancel = () => (isRunning = false);
-	const onRun = () => (isRunning = true);
+	const update = async () => {
+		const response = await getAnalyzerAnalyses($page.params.analyzerId);
+		data.analyses = response.data;
+		analysis = data.analyses.latest;
+	};
+
+	const onCancel = async () => {
+		await cancelAnalyzer($page.params.analyzerId);
+		await update();
+	};
+
+	const onRun = async () => {
+		await runAnalyzer($page.params.analyzerId);
+		await update();
+	};
+
+	const onSetAnalysis = async (analysisId: string) => {
+		const analysisResponse = await getAnalysis(analysisId);
+		analysis = analysisResponse.data;
+	};
+
+	const onDeleteAnalysis = async () => {
+		if (analysis) {
+			await deleteAnalysis(analysis.id);
+			await update();
+		}
+	};
 </script>
 
 <div class="m-auto mt-4 flex w-max flex-col items-center justify-center gap-10">
@@ -65,7 +95,7 @@
 			<h1 class="ml-4 text-4xl font-semibold">{data.analyzer.name}</h1>
 		</div>
 		<div class="flex items-center gap-2">
-			{#if isRunning}
+			{#if analysis?.status == 'Started' || analysis?.status == 'Running'}
 				<CustomButton color="red" on:click={onCancel}>
 					<X size="20" />
 					<p>Cancel</p>
@@ -81,12 +111,13 @@
 					<EllipsisVertical size={32} />
 				</DropdownMenu.Trigger>
 				<DropdownMenu.Content>
-					<DropdownMenu.Item download href={`/api/analyzers/${analyzerId}/script`}>
+					<DropdownMenu.Item download href={`/api/analyzers/${$page.params.analyzerId}/script`}>
 						<ArrowDownToLine class="h-4" />
 						<p>Download script</p>
 					</DropdownMenu.Item>
 					<DropdownMenu.Item
-						href="/teacher/courses/{courseId}/assignments/{assignmentId}/analyzers/{analyzerId}/edit"
+						href="/teacher/courses/{courseId}/assignments/{assignmentId}/analyzers/{$page.params
+							.analyzerId}/edit"
 					>
 						<Pencil class="h-4" />
 						<p>Edit analyzer</p>
@@ -100,9 +131,25 @@
 		</div>
 	</div>
 
-	{#if isRunning}
+	{#if analysis?.status == 'Started' || analysis?.status == 'Running'}
 		<AnalyzerRunningCard />
 	{/if}
 
-	<AnalyzerOutputCard {analyzerOutput} />
+	{#key analysis}
+		{#if analysis}
+			<AnalysisCard
+				{analysis}
+				analyses={data.analyses.analyses}
+				isIndividual={data.assignment.collaborationType == 'Individual'}
+				{onSetAnalysis}
+				{onDeleteAnalysis}
+			/>
+		{:else}
+			<Card.Root class="w-[1080px]">
+				<Card.Content class="text-center">
+					<p>No analyses</p>
+				</Card.Content>
+			</Card.Root>
+		{/if}
+	{/key}
 </div>
