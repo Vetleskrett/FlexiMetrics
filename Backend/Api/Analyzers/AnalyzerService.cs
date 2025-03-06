@@ -212,7 +212,7 @@ public class AnalyzerService : IAnalyzerService
                 .OrderByDescending(a => a.StartedAt)
                 .FirstOrDefaultAsync();
 
-            if (latestAnalysis is not null && latestAnalysis.AnalysisStatus != AnalysisStatus.Completed)
+            if (latestAnalysis is not null && latestAnalysis.Status != AnalysisStatus.Completed)
             {
                 return new ValidationError("Analyzer already running").MapToResponse();
             }
@@ -220,7 +220,7 @@ public class AnalyzerService : IAnalyzerService
             var analysis = new Analysis
             {
                 Id = Guid.NewGuid(),
-                AnalysisStatus = AnalysisStatus.Started,
+                Status = AnalysisStatus.Started,
                 StartedAt = DateTime.UtcNow,
                 CompletedAt = null,
                 AnalyzerId = id,

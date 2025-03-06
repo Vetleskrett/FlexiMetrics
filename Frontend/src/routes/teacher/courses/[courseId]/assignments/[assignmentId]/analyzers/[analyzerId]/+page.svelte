@@ -2,8 +2,7 @@
 	import { page } from '$app/stores';
 	import * as Breadcrumb from '$lib/components/ui/breadcrumb/index.js';
 	import * as DropdownMenu from '$lib/components/ui/dropdown-menu';
-	import { analyzerOutput } from 'src/mockData';
-	import AnalyzerOutputCard from 'src/components/AnalyzerOutputCard.svelte';
+	import AnalysisCard from 'src/components/AnalysisCard.svelte';
 	import EllipsisVertical from 'lucide-svelte/icons/ellipsis-vertical';
 	import Pencil from 'lucide-svelte/icons/pencil';
 	import Trash2 from 'lucide-svelte/icons/trash-2';
@@ -11,25 +10,38 @@
 	import X from 'lucide-svelte/icons/x';
 	import CustomButton from 'src/components/CustomButton.svelte';
 	import AnalyzerRunningCard from 'src/components/AnalyzerRunningCard.svelte';
-	import type { Analyzer, Assignment, Course, Student, Team } from 'src/types';
+	import type { Analyzer, AnalyzerAnalyses, Assignment, Course, Student, Team } from 'src/types';
 	import { ArrowDownToLine } from 'lucide-svelte';
+	import { cancelAnalyzer, getAnalysis, runAnalyzer } from 'src/api';
+	import * as Card from '$lib/components/ui/card/index.js';
 
 	const courseId = $page.params.courseId;
 	const assignmentId = $page.params.assignmentId;
-	const analyzerId = $page.params.analyzerId;
 
 	export let data: {
 		course: Course;
 		assignment: Assignment;
 		analyzer: Analyzer;
-		students: Student[];
-		teams: Team[];
+		analyses: AnalyzerAnalyses;
 	};
 
-	let isRunning = false;
+	$: analysis = data.analyses.latest;
+	let isRunning = analysis?.status == 'Started' || analysis?.status == 'Running';
 
-	const onCancel = () => (isRunning = false);
-	const onRun = () => (isRunning = true);
+	const onCancel = async () => {
+		isRunning = false;
+		await cancelAnalyzer($page.params.analyzerId);
+	};
+
+	const onRun = async () => {
+		isRunning = true;
+		await runAnalyzer($page.params.analyzerId);
+	};
+
+	const onSetAnalysis = async (analysisId: string) => {
+		const analysisResponse = await getAnalysis(analysisId);
+		analysis = analysisResponse.data;
+	};
 </script>
 
 <div class="m-auto mt-4 flex w-max flex-col items-center justify-center gap-10">
@@ -81,12 +93,13 @@
 					<EllipsisVertical size={32} />
 				</DropdownMenu.Trigger>
 				<DropdownMenu.Content>
-					<DropdownMenu.Item download href={`/api/analyzers/${analyzerId}/script`}>
+					<DropdownMenu.Item download href={`/api/analyzers/${$page.params.analyzerId}/script`}>
 						<ArrowDownToLine class="h-4" />
 						<p>Download script</p>
 					</DropdownMenu.Item>
 					<DropdownMenu.Item
-						href="/teacher/courses/{courseId}/assignments/{assignmentId}/analyzers/{analyzerId}/edit"
+						href="/teacher/courses/{courseId}/assignments/{assignmentId}/analyzers/{$page.params
+							.analyzerId}/edit"
 					>
 						<Pencil class="h-4" />
 						<p>Edit analyzer</p>
@@ -104,5 +117,20 @@
 		<AnalyzerRunningCard />
 	{/if}
 
-	<AnalyzerOutputCard {analyzerOutput} />
+	{#key analysis}
+		{#if analysis}
+			<AnalysisCard
+				{analysis}
+				analyses={data.analyses.analyses}
+				isIndividual={data.assignment.collaborationType == 'Individual'}
+				{onSetAnalysis}
+			/>
+		{:else}
+			<Card.Root class="w-[1080px]">
+				<Card.Content class="text-center">
+					<p>No analyses</p>
+				</Card.Content>
+			</Card.Root>
+		{/if}
+	{/key}
 </div>

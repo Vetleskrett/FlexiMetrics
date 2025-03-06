@@ -9,7 +9,7 @@
 	import List from 'lucide-svelte/icons/list';
 	import { Button } from 'src/lib/components/ui/button';
 	import { Label } from 'src/lib/components/ui/label';
-	import type { AnalyzerOutput, AnalyzerOutputVersion } from 'src/types';
+	import type { Analysis, AnalysisFieldType, SlimAnalysis } from 'src/types';
 	import { createTable, Render, Subscribe } from 'svelte-headless-table';
 	import { addColumnFilters, addSortBy, addHiddenColumns } from 'svelte-headless-table/plugins';
 	import { readable } from 'svelte/store';
@@ -17,30 +17,60 @@
 	import { getFilter } from './filters/filters';
 	import { getCell } from './cells/cells';
 
-	export let analyzerOutput: AnalyzerOutput;
+	export let analyses: SlimAnalysis[];
+	export let analysis: Analysis;
+	export let isIndividual: boolean;
+	export let onSetAnalysis: (analysisId: string) => Promise<void>;
 
-	const table = createTable(readable(analyzerOutput.teamOutputs), {
+	type Header = {
+		name: string;
+		type: AnalysisFieldType;
+	};
+
+	const headers: Header[] = [];
+
+	for (let field of analysis.deliveryAnalyses.flatMap((d) => d.fields)) {
+		if (!headers.some((h) => h.name == field.name && h.type == field.type)) {
+			headers.push({
+				name: field.name,
+				type: field.type
+			});
+		}
+	}
+
+	const table = createTable(readable(analysis.deliveryAnalyses), {
 		sort: addSortBy(),
 		hide: addHiddenColumns(),
 		filter: addColumnFilters()
 	});
 
 	const columns = table.createColumns([
-		table.column({
-			id: 'Team',
-			accessor: (teamOutput) => teamOutput.teamId,
-			header: 'Team',
-			cell: getCell({ id: 'Team', name: 'Team', type: 'String' })
-		}),
-		...analyzerOutput.fields.map((field, i) =>
+		isIndividual
+			? table.column({
+					id: 'Student',
+					accessor: (deliveryAnalysis) => deliveryAnalysis.student?.name,
+					header: 'Student',
+					cell: getCell('String')
+				})
+			: table.column({
+					id: 'Team',
+					accessor: (deliveryAnalysis) => deliveryAnalysis.team?.teamNr,
+					header: 'Team',
+					cell: getCell('String')
+				}),
+		...headers.map((header, i) =>
 			table.column({
 				id: i.toString(),
-				accessor: (teamOutput) => teamOutput.values.get(field.id),
-				header: field.name,
+				accessor: (deliveryAnalysis) =>
+					deliveryAnalysis.fields.find(
+						(deliveryField) =>
+							deliveryField.name == header.name && deliveryField.type == header.type
+					)?.value,
+				header: header.name,
 				plugins: {
-					filter: getFilter(field.type)
+					filter: getFilter(header.type)
 				},
-				cell: getCell(field)
+				cell: getCell(header.type)
 			})
 		)
 	]);
@@ -60,10 +90,12 @@
 	let sortColumn: { id: string; order: 'asc' | 'desc' | undefined } | undefined = undefined;
 	sortKeys.subscribe((value) => (sortColumn = value.length > 0 ? value[0] : undefined));
 
-	let currentVersion = analyzerOutput.currentVersion;
-	const onVersionChange = (version: AnalyzerOutputVersion) => {
-		currentVersion = version;
-	};
+	sortKeys.set([
+		{
+			id: isIndividual ? 'Student' : 'Team',
+			order: 'asc'
+		}
+	]);
 </script>
 
 <Card.Root class="w-[1080px]">
@@ -75,23 +107,20 @@
 						<p class="mb-[1px] ml-2 text-xs">Version</p>
 						<CustomButton outline={true} color="blue" builders={[builder]}>
 							<p class="text-start font-normal text-black">
-								{currentVersion.datetime.toLocaleString(undefined, {
-									dateStyle: 'long',
-									timeStyle: 'short'
-								})}
+								{new Date(analysis.startedAt).toDateString()}
+
+								{new Date(analysis.startedAt).toLocaleTimeString()}
 							</p>
 							<ChevronDown class="h-4 w-4 text-black" />
 						</CustomButton>
 					</Label>
 				</DropdownMenu.Trigger>
 				<DropdownMenu.Content>
-					{#each analyzerOutput.versions as version, id}
-						<DropdownMenu.Item on:click={() => onVersionChange(version)}>
+					{#each analyses as otherAnalysis}
+						<DropdownMenu.Item on:click={() => onSetAnalysis(otherAnalysis.id)}>
 							<p>
-								{version.datetime.toLocaleString(undefined, {
-									dateStyle: 'long',
-									timeStyle: 'short'
-								})}
+								{new Date(otherAnalysis.startedAt).toDateString()}
+								{new Date(otherAnalysis.startedAt).toLocaleTimeString()}
 							</p>
 						</DropdownMenu.Item>
 					{/each}
@@ -106,7 +135,7 @@
 						</CustomButton>
 					</DropdownMenu.Trigger>
 					<DropdownMenu.Content>
-						{#each analyzerOutput.fields as field, id}
+						{#each headers as header, id}
 							<DropdownMenu.CheckboxItem
 								bind:checked={showColumnForId[id]}
 								on:click={(e) => {
@@ -114,7 +143,7 @@
 									showColumnForId[id] = !showColumnForId[id];
 								}}
 							>
-								{field.name}
+								{header.name}
 							</DropdownMenu.CheckboxItem>
 						{/each}
 					</DropdownMenu.Content>
@@ -127,7 +156,7 @@
 						</CustomButton>
 					</DropdownMenu.Trigger>
 					<DropdownMenu.Content>
-						{#each analyzerOutput.fields as field, id}
+						{#each headers as header, id}
 							{#if showColumnForId[id]}
 								<DropdownMenu.CheckboxItem
 									bind:checked={showFilterForId[id]}
@@ -136,7 +165,7 @@
 										showFilterForId[id] = !showFilterForId[id];
 									}}
 								>
-									{field.name}
+									{header.name}
 								</DropdownMenu.CheckboxItem>
 							{/if}
 						{/each}

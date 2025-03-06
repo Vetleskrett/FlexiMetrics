@@ -13,7 +13,7 @@ public static class AnalysisEndpoints
             var result = await analysisService.GetAll();
             return result.MapToResponse(analyses => Results.Ok(analyses));
         })
-        .Produces<IEnumerable<AnalysisResponse>>()
+        .Produces<IEnumerable<SlimAnalysisResponse>>()
         .WithName("GetAllAnalyses")
         .WithSummary("Get all analyses");
 

@@ -163,37 +163,46 @@ export type Analyzer = {
     assignmentId: string;
 }
 
-export type AnalyzerFieldType = 'String' | 'Integer' | 'Boolean' | 'File' | 'List' | 'Json' | 'Range';
+export type AnalysisStatus = 'Started' | 'Running' | 'Completed';
 
-export type AnalyzerField = {
+export type AnalyzerAnalyses = {
+    analyses: SlimAnalysis[];
+    latest?: Analysis;
+}
+
+export type SlimAnalysis = {
+    id: string;
+    startedAt: Date;
+    completedAt?: Date;
+    status: AnalysisStatus;
+    analyzerId: string;
+}
+
+export type Analysis = {
+    id: string;
+    startedAt: Date;
+    completedAt?: Date;
+    status: AnalysisStatus;
+    analyzerId: string;
+    deliveryAnalyses: DeliveryAnalysis[];
+}
+
+export type DeliveryAnalysis = {
+    id: string;
+    analysisId: string;
+    deliveryId: string;
+    team?: Team;
+    student?: Student;
+    fields: DeliveryAnalysisField[];
+}
+
+export type AnalysisFieldType = 'String' | 'Int';
+
+export type DeliveryAnalysisField = {
     id: string;
     name: string;
-} &
-(
-    {
-        type: 'String' | 'Integer' | 'Boolean' | 'File' | 'List' | 'Json';
-    } |
-    {
-        type: 'Range';
-        max: number;
-    }
-)
-
-export type AnalyzerTeamOutput = {
-    teamId: string;
-    values: Map<string, any>;
-}
-
-export type AnalyzerOutputVersion = {
-    id: string;
-    datetime: Date;
-}
-
-export type AnalyzerOutput = {
-    versions: AnalyzerOutputVersion[];
-    currentVersion: AnalyzerOutputVersion;
-    fields: AnalyzerField[];
-    teamOutputs: AnalyzerTeamOutput[];
+    type: AnalysisFieldType;
+    value: any;
 }
 
 export type CreateTeams = {

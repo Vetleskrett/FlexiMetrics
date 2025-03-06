@@ -14,7 +14,6 @@ import type {
   CreateCourse,
   EditCourse,
   CreateDelivery,
-  Teacher,
   CreateAssignment,
   EditAssignment,
   UpdateAssignmentFields,
@@ -25,6 +24,7 @@ import type {
   Analyzer,
   CreateAnalyzer,
   EditAnalyzer,
+  Analysis,
 } from "./types";
 
 export async function postFeedback(feedback: CreateFeedback) : Promise<AxiosResponse<Feedback>> {
@@ -129,4 +129,20 @@ export async function putAnalyzer(analyzerId: string, request: EditAnalyzer) : P
 
 export async function postAnalyzerScript(analyzerId: string, script: FormData) : Promise<AxiosResponse> {
   return axios.postForm(`/api/analyzers/${analyzerId}/script`, script)
+}
+
+export async function runAnalyzer(analyzerId: string) : Promise<AxiosResponse> {
+  return axios.post(`/api/analyzers/${analyzerId}/action`, {
+    action: 'Run'
+  });
+}
+
+export async function cancelAnalyzer(analyzerId: string) : Promise<AxiosResponse> {
+  return axios.post(`/api/analyzers/${analyzerId}/action`, {
+    action: 'Cancel'
+  });
+}
+
+export async function getAnalysis(analysisId: string) : Promise<AxiosResponse<Analysis>> {
+  return axios.get(`/api/analyses/${analysisId}`)
 }

@@ -1,4 +1,4 @@
-import type { AnalyzerFieldType } from 'src/types';
+import type { AnalysisFieldType } from 'src/types';
 import StringFilter from './StringFilter.svelte';
 import NumberFilter from './NumberFilter.svelte';
 import { createRender } from 'svelte-headless-table';
@@ -15,10 +15,9 @@ const numberFilterFn = ({
     value: any;
 }) => Number(value) >= filterValue.min && Number(value) <= filterValue.max;
 
-export const getFilter = (type: AnalyzerFieldType) => {
+export const getFilter = (type: AnalysisFieldType) => {
     switch (type) {
-        case 'Integer':
-        case 'Range':
+        case 'Int':
             return {
                 initialFilterValue: { min: -Infinity, max: Infinity },
                 fn: numberFilterFn,

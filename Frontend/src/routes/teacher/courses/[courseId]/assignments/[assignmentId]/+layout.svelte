@@ -3,7 +3,6 @@
 	import { page } from '$app/stores';
 	import MenuRow from 'src/components/MenuRow.svelte';
 	import type { Analyzer } from 'src/types';
-	import { Separator } from 'src/lib/components/ui/separator';
 
 	const courseId = $page.params.courseId;
 	const assignmentId = $page.params.assignmentId;

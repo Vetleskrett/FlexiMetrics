@@ -1,4 +1,6 @@
 ﻿using Api.Analyses.Contracts;
+using Api.Teams;
+using Api.Students;
 using Database.Models;
 
 namespace Api.Analyses;
@@ -12,7 +14,7 @@ public static class AnalysisMapping
             Id = analysis.Id,
             StartedAt = analysis.StartedAt,
             CompletedAt = analysis.CompletedAt,
-            AnalysisStatus = analysis.AnalysisStatus,
+            Status = analysis.Status,
             AnalyzerId = analysis.AnalyzerId,
         };
     }
@@ -29,7 +31,7 @@ public static class AnalysisMapping
             Id = analysis.Id,
             StartedAt = analysis.StartedAt,
             CompletedAt = analysis.CompletedAt,
-            AnalysisStatus = analysis.AnalysisStatus,
+            Status = analysis.Status,
             AnalyzerId = analysis.AnalyzerId,
             DeliveryAnalyses = analysis.DeliveryAnalyses!.MapToResponse()
         };
@@ -47,6 +49,8 @@ public static class AnalysisMapping
             Id = deliveryAnalysis.Id,
             AnalysisId = deliveryAnalysis.AnalysisId,
             DeliveryId = deliveryAnalysis.DeliveryId,
+            Team = deliveryAnalysis.Delivery?.Team?.MapToResponse(),
+            Student = deliveryAnalysis.Delivery?.Student?.MapToStudentResponse(),
             Fields = deliveryAnalysis.Fields!.MapToResponse()
         };
     }
@@ -62,6 +66,7 @@ public static class AnalysisMapping
         {
             Id = deliveryAnalysisField.Id,
             Name = deliveryAnalysisField.Name,
+            Type = deliveryAnalysisField.Type,
             Value = deliveryAnalysisField.Value
         };
     }

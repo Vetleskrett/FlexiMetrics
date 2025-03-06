@@ -11,6 +11,7 @@ public class DeliveryAnalysisField
     public required Guid DeliveryAnalysisId { get; set; }
     public DeliveryAnalysis? DeliveryAnalysis { get; set; }
     public required string Name { get; set; }
+    public required AnalysisFieldType Type { get; set; }
     public JsonDocument? JsonValue { get; set; }
 
     [NotMapped]
