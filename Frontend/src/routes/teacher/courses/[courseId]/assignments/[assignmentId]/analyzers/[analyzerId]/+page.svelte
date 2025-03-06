@@ -2,15 +2,15 @@
 	import { page } from '$app/stores';
 	import * as Breadcrumb from '$lib/components/ui/breadcrumb/index.js';
 	import * as DropdownMenu from '$lib/components/ui/dropdown-menu';
-	import AnalysisCard from 'src/components/AnalysisCard.svelte';
+	import AnalysisCard from 'src/components/analyzer/AnalysisCard.svelte';
 	import EllipsisVertical from 'lucide-svelte/icons/ellipsis-vertical';
 	import Pencil from 'lucide-svelte/icons/pencil';
 	import Trash2 from 'lucide-svelte/icons/trash-2';
 	import Play from 'lucide-svelte/icons/play';
 	import X from 'lucide-svelte/icons/x';
 	import CustomButton from 'src/components/CustomButton.svelte';
-	import AnalyzerRunningCard from 'src/components/AnalyzerRunningCard.svelte';
-	import type { Analyzer, AnalyzerAnalyses, Assignment, Course, Student, Team } from 'src/types';
+	import AnalyzerRunningCard from 'src/components/analyzer/AnalyzerRunningCard.svelte';
+	import type { Analyzer, AnalyzerAnalyses, Assignment, Course, Student, Team } from 'src/types/';
 	import { ArrowDownToLine } from 'lucide-svelte';
 	import { cancelAnalyzer, getAnalysis, runAnalyzer } from 'src/api';
 	import * as Card from '$lib/components/ui/card/index.js';

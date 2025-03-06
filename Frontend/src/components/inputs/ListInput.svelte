@@ -1,5 +1,5 @@
 <script lang="ts">
-	import type { AssignmentFieldType } from 'src/types';
+	import type { AssignmentFieldType } from 'src/types/';
 	import CustomButton from '../CustomButton.svelte';
 	import { Plus } from 'lucide-svelte';
 	import Trash_2 from 'lucide-svelte/icons/trash-2';

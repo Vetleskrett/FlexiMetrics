@@ -1,7 +1,7 @@
 <script lang="ts">
-	import CreateOrEditCourse from 'src/components/CreateOrEditCourse.svelte';
+	import CreateOrEditCourse from 'src/components/course/CreateOrEditCourse.svelte';
 	import * as Breadcrumb from '$lib/components/ui/breadcrumb/index.js';
-	import type { Course } from 'src/types';
+	import type { Course } from 'src/types/';
 
 	export let data: {
 		course: Course;

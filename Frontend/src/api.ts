@@ -25,7 +25,7 @@ import type {
   CreateAnalyzer,
   EditAnalyzer,
   Analysis,
-} from "./types";
+} from "./types/common";
 
 export async function postFeedback(feedback: CreateFeedback) : Promise<AxiosResponse<Feedback>> {
   return axios.post(`/api/feedbacks`, feedback)

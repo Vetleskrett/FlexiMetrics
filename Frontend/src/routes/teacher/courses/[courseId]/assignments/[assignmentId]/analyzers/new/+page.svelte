@@ -1,8 +1,8 @@
 <script lang="ts">
 	import { page } from '$app/stores';
 	import * as Breadcrumb from '$lib/components/ui/breadcrumb/index.js';
-	import CreateOrEditAnalyzer from 'src/components/CreateOrEditAnalyzer.svelte';
-	import type { Assignment, Course } from 'src/types';
+	import CreateOrEditAnalyzer from 'src/components/analyzer/CreateOrEditAnalyzer.svelte';
+	import type { Assignment, Course } from 'src/types/';
 
 	const courseId = $page.params.courseId;
 	const assignmentId = $page.params.assignmentId;

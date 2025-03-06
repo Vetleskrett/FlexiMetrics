@@ -1,9 +1,16 @@
 <script lang="ts">
 	import { page } from '$app/stores';
 	import * as Breadcrumb from '$lib/components/ui/breadcrumb/index.js';
-	import DeliveryCard from 'src/components/DeliveryCard.svelte';
-	import FeedbackFormCard from 'src/components/FeedbackFormCard.svelte';
-	import type { Assignment, Student, Course, Delivery, Feedback, AssignmentField } from 'src/types';
+	import DeliveryCard from 'src/components/delivery/DeliveryCard.svelte';
+	import FeedbackFormCard from 'src/components/feedback/FeedbackFormCard.svelte';
+	import type {
+		Assignment,
+		Student,
+		Course,
+		Delivery,
+		Feedback,
+		AssignmentField
+	} from 'src/types/';
 
 	const courseId = $page.params.courseId;
 	const assignmentId = $page.params.assignmentId;

@@ -11,7 +11,7 @@ import type {
   Teacher,
   Analyzer,
   AnalyzerAnalyses,
-} from "./types";
+} from "./types/common";
 
 export const api = axios.create({
   baseURL: 'http://localhost:5041'

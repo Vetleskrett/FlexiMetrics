@@ -1,12 +1,12 @@
 <script lang="ts">
 	import { page } from '$app/stores';
-	import TeachersCard from 'src/components/TeachersCard.svelte';
+	import TeachersCard from 'src/components/teacher/TeachersCard.svelte';
 	import * as Breadcrumb from '$lib/components/ui/breadcrumb/index.js';
-	import type { StudentAssignment, Course, Team, Teacher } from 'src/types';
-	import { Role } from 'src/types';
-	import TeamCard from 'src/components/TeamCard.svelte';
-	import StudentAssignmentsCard from 'src/components/StudentAssignmentsCard.svelte';
-	import TeamsCard from 'src/components/TeamsCard.svelte';
+	import type { StudentAssignment, Course, Team, Teacher } from 'src/types/';
+	import { Role } from 'src/types/';
+	import TeamCard from 'src/components/team/TeamCard.svelte';
+	import StudentAssignmentsCard from 'src/components/assignment/StudentAssignmentsCard.svelte';
+	import TeamsCard from 'src/components/team/TeamsCard.svelte';
 
 	const courseId = $page.params.courseId;
 

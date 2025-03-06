@@ -2,7 +2,7 @@
 	import 'src/app.css';
 	import { page } from '$app/stores';
 	import MenuRow from 'src/components/MenuRow.svelte';
-	import type { Analyzer } from 'src/types';
+	import type { Analyzer } from 'src/types/';
 
 	const courseId = $page.params.courseId;
 	const assignmentId = $page.params.assignmentId;

@@ -1,14 +1,13 @@
 <script lang="ts">
 	import { page } from '$app/stores';
-	import AllTeamCard from 'src/components/AllTeamCard.svelte';
-	import type { Team, Course, StudentToTeam } from 'src/types';
+	import AllTeamCard from 'src/components/team/AllTeamCard.svelte';
+	import type { Team, Course, StudentToTeam } from 'src/types/';
 	import EllipsisVertical from 'lucide-svelte/icons/ellipsis-vertical';
 	import Trash2 from 'lucide-svelte/icons/trash-2';
 	import * as DropdownMenu from '$lib/components/ui/dropdown-menu';
 	import * as Breadcrumb from '$lib/components/ui/breadcrumb/index.js';
-	import AddTeamMembersCard from 'src/components/AddTeamMembersCard.svelte';
+	import AddTeamMembersCard from 'src/components/team/AddTeamMembersCard.svelte';
 	import SimpleAddCard from 'src/components/SimpleAddCard.svelte';
-	import axios from 'axios';
 	import { postStudentsTeam, postTeams } from 'src/api';
 
 	const courseId = $page.params.courseId;

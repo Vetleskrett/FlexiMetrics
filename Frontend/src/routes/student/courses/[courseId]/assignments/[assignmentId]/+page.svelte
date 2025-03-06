@@ -2,7 +2,7 @@
 	import { page } from '$app/stores';
 	import * as Breadcrumb from '$lib/components/ui/breadcrumb/index.js';
 	import MoveRight from 'lucide-svelte/icons/move-right';
-	import AssignmentInformationCard from 'src/components/AssignmentInformationCard.svelte';
+	import AssignmentInformationCard from 'src/components/assignment/AssignmentInformationCard.svelte';
 	import {
 		Role,
 		type Assignment,
@@ -10,10 +10,10 @@
 		type Course,
 		type Delivery,
 		type Feedback
-	} from 'src/types';
-	import AssignmentDescriptionCard from 'src/components/AssignmentDescriptionCard.svelte';
-	import DeliveryCard from 'src/components/DeliveryCard.svelte';
-	import FeedbackCard from 'src/components/FeedbackCard.svelte';
+	} from 'src/types/';
+	import AssignmentDescriptionCard from 'src/components/assignment/AssignmentDescriptionCard.svelte';
+	import DeliveryCard from 'src/components/delivery/DeliveryCard.svelte';
+	import FeedbackCard from 'src/components/feedback/FeedbackCard.svelte';
 	import CustomButton from 'src/components/CustomButton.svelte';
 
 	const courseId = $page.params.courseId;

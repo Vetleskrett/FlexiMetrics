@@ -1,9 +1,9 @@
 <script lang="ts">
 	import { page } from '$app/stores';
-	import type { Course, Student } from 'src/types';
+	import type { Course, Student } from 'src/types/';
 	import * as Breadcrumb from '$lib/components/ui/breadcrumb/index.js';
 	import SimpleAddCard from 'src/components/SimpleAddCard.svelte';
-	import AllTeachersCard from 'src/components/AllTeachersCard.svelte';
+	import AllTeachersCard from 'src/components/teacher/AllTeachersCard.svelte';
 	import { addTeacherToCourse } from 'src/api';
 
 	const courseId = $page.params.courseId;

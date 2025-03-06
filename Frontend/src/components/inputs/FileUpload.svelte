@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { Upload } from 'lucide-svelte';
 	import CustomButton from '../CustomButton.svelte';
-	import type { FileMetadata } from 'src/types';
+	import type { FileMetadata } from 'src/types/';
 
 	let fileInput: HTMLInputElement;
 	let isDragOver = false;

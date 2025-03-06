@@ -1,8 +1,8 @@
 <script lang="ts">
 	import { page } from '$app/stores';
 	import * as Breadcrumb from '$lib/components/ui/breadcrumb/index.js';
-	import DeliveriesCard from 'src/components/DeliveriesCard.svelte';
-	import type { Assignment, AssignmentField, Delivery, Student, Course, Team } from 'src/types';
+	import DeliveriesCard from 'src/components/delivery/DeliveriesCard.svelte';
+	import type { Assignment, AssignmentField, Delivery, Student, Course, Team } from 'src/types/';
 
 	const courseId = $page.params.courseId;
 	const assignmentId = $page.params.assignmentId;

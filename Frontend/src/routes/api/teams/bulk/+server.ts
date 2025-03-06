@@ -1,5 +1,5 @@
 import { json, type RequestHandler } from '@sveltejs/kit';
-import type { AddStudentsToTeams } from 'src/types';
+import type { AddStudentsToTeams } from 'src/types/';
 import { api } from 'src/api.server';
 
 export const POST: RequestHandler = async ({ request }) => {

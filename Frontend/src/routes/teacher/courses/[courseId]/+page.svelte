@@ -1,18 +1,17 @@
 <script lang="ts">
 	import { page } from '$app/stores';
-	import TeacherAssignmentsCard from 'src/components/TeacherAssignmentsCard.svelte';
-	import StudentsCard from 'src/components/StudentsCard.svelte';
+	import TeacherAssignmentsCard from 'src/components/assignment/TeacherAssignmentsCard.svelte';
+	import StudentsCard from 'src/components/student/StudentsCard.svelte';
 	import EllipsisVertical from 'lucide-svelte/icons/ellipsis-vertical';
 	import Pencil from 'lucide-svelte/icons/pencil';
 	import Trash2 from 'lucide-svelte/icons/trash-2';
 	import * as DropdownMenu from '$lib/components/ui/dropdown-menu';
-	import TeamsCard from 'src/components/TeamsCard.svelte';
-	import TeachersCard from 'src/components/TeachersCard.svelte';
+	import TeamsCard from 'src/components/team/TeamsCard.svelte';
+	import TeachersCard from 'src/components/teacher/TeachersCard.svelte';
 	import * as Breadcrumb from '$lib/components/ui/breadcrumb/index.js';
-	import type { Course, Assignment, Teacher, Student, Team } from 'src/types';
-	import { Role } from 'src/types';
+	import type { Course, Assignment, Teacher, Student, Team } from 'src/types/';
+	import { Role } from 'src/types/';
 	import { goto } from '$app/navigation';
-	import axios from 'axios';
 	import { deleteCourse } from 'src/api';
 
 	const courseId = $page.params.courseId;
@@ -92,7 +91,7 @@
 				<StudentsCard numStudents={data.students.length} {courseId} />
 				<TeamsCard numTeams={data.teams.length} {courseId} />
 			</div>
-			<TeachersCard courseId={courseId} userRole={Role.Teacher} teachers={data.teachers} />
+			<TeachersCard {courseId} userRole={Role.Teacher} teachers={data.teachers} />
 		</div>
 	</div>
 </div>
