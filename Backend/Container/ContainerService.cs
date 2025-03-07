@@ -8,13 +8,15 @@ using Microsoft.Extensions.Logging;
 using System.Threading.Channels;
 using Database.Models;
 using System.Text.Json.Serialization;
+using System.Runtime.CompilerServices;
 
 namespace Container;
 
 public interface IContainerService
 {
     Task Initialize();
-    Task StartAnalyzer(Guid CourseId, Guid AssignmentId, Guid AnalyzerId, Guid AnalysisId);
+    Task StartAnalyzer(Guid courseId, Guid assignmentId, Guid analyzerId, Guid analysisId);
+    IAsyncEnumerable<AnalysisStatusUpdate> GetStatusUpdates(Guid analysisId, CancellationToken cancellationToken);
     Task RunAnalyzer(RunAnalyzerRequest request, CancellationToken cancellationToken);
 }
 
@@ -26,16 +28,18 @@ public class ContainerService : IContainerService
 
     private readonly AppDbContext _dbContext;
     private readonly IFileStorage _fileStorage;
-    private readonly Channel<RunAnalyzerRequest> _channel;
+    private readonly Channel<RunAnalyzerRequest> _runAnalyzerChannel;
+    private readonly Channel<AnalysisStatusUpdate> _analysisStatusChannel;
     private readonly IDockerClient _dockerClient;
     private readonly ILogger<ContainerService> _logger;
     private readonly SemaphoreSlim _dbLock = new(1);
 
-    public ContainerService(AppDbContext dbContext, IFileStorage fileStorage, Channel<RunAnalyzerRequest> channel, IDockerClient dockerClient, ILogger<ContainerService> logger)
+    public ContainerService(AppDbContext dbContext, IFileStorage fileStorage, Channel<RunAnalyzerRequest> runAnalyzerChannel, Channel<AnalysisStatusUpdate> analysisStatusChannel, IDockerClient dockerClient, ILogger<ContainerService> logger)
     {
         _dbContext = dbContext;
         _fileStorage = fileStorage;
-        _channel = channel;
+        _runAnalyzerChannel = runAnalyzerChannel;
+        _analysisStatusChannel = analysisStatusChannel;
         _dockerClient = dockerClient;
         _logger = logger;
     }
@@ -63,9 +67,23 @@ public class ContainerService : IContainerService
         );
     }
 
-    public async Task StartAnalyzer(Guid CourseId, Guid AssignmentId, Guid AnalyzerId, Guid AnalysisId)
+    public async Task StartAnalyzer(Guid courseId, Guid assignmentId, Guid analyzerId, Guid analysisId)
     {
-        await _channel.Writer.WriteAsync(new(CourseId, AssignmentId, AnalyzerId, AnalysisId));
+        await _runAnalyzerChannel.Writer.WriteAsync(new(courseId, assignmentId, analyzerId, analysisId));
+    }
+
+    public async IAsyncEnumerable<AnalysisStatusUpdate> GetStatusUpdates(Guid analysisId, [EnumeratorCancellation] CancellationToken cancellationToken)
+    {
+        while (!cancellationToken.IsCancellationRequested)
+        {
+            var statusUpdate = await _analysisStatusChannel.Reader.ReadAsync(cancellationToken);
+
+            if (statusUpdate.AnalysisId == analysisId)
+            {
+                yield return statusUpdate;
+
+            }
+        }
     }
 
     public async Task RunAnalyzer(RunAnalyzerRequest request, CancellationToken cancellationToken)
@@ -117,11 +135,13 @@ public class ContainerService : IContainerService
 
             await _dockerClient.Containers.StartContainerAsync(container, new ContainerStartParameters(), cancellationToken);
 
-            await PrintLogs(container, cancellationToken);
+            var logs = await GetLogs(container, cancellationToken);
 
             await _dockerClient.Containers.WaitContainerAsync(container, cancellationToken);
 
-            await OnDeliveryAnalysisFinished(container, delivery, request);
+            var deliveryAnalysis = await OnDeliveryAnalysisFinished(container, delivery, request);
+
+            await _analysisStatusChannel.Writer.WriteAsync(new(request.AnalysisId, deliveryAnalysis.Id, logs), cancellationToken);
         }
         finally
         {
@@ -137,7 +157,7 @@ public class ContainerService : IContainerService
         }
     }
 
-    private async Task PrintLogs(string container, CancellationToken cancellationToken)
+    private async Task<string> GetLogs(string container, CancellationToken cancellationToken)
     {
         var logsStream = await _dockerClient.Containers.GetContainerLogsAsync(container, false, new ContainerLogsParameters
         {
@@ -148,14 +168,7 @@ public class ContainerService : IContainerService
 
         var (stdout, stderr) = await logsStream.ReadOutputToEndAsync(cancellationToken);
 
-        if (stdout != string.Empty)
-        {
-            _logger.LogInformation(stdout);
-        }
-        if (stderr != string.Empty)
-        {
-            _logger.LogError(stderr);
-        }
+        return stdout + stderr;
     }
 
     private class AnalysisField
@@ -170,7 +183,7 @@ public class ContainerService : IContainerService
         Converters = { new JsonStringEnumConverter() }
     };
 
-    private async Task OnDeliveryAnalysisFinished(string container, Delivery delivery, RunAnalyzerRequest request)
+    private async Task<DeliveryAnalysis> OnDeliveryAnalysisFinished(string container, Delivery delivery, RunAnalyzerRequest request)
     {
         using var analysisStream = await CopyFileFromContainer(container, "analysis.json");
         var fields = await JsonSerializer.DeserializeAsync<Dictionary<string, AnalysisField>>(analysisStream, _jsonOptions);
@@ -206,7 +219,7 @@ public class ContainerService : IContainerService
             _dbLock.Release();
         }
 
-        _logger.LogInformation(JsonSerializer.Serialize(fields));
+        return deliveryAnalysis;
     }
 
     private async Task<string> CreateContainer(string name, CancellationToken cancellationToken)

@@ -10,16 +10,24 @@
 	import X from 'lucide-svelte/icons/x';
 	import CustomButton from 'src/components/CustomButton.svelte';
 	import AnalyzerRunningCard from 'src/components/analyzer/AnalyzerRunningCard.svelte';
-	import type { Analyzer, AnalyzerAnalyses, Assignment, Course, Student, Team } from 'src/types/';
+	import type {
+		Analyzer,
+		AnalyzerAnalyses,
+		Assignment,
+		Course,
+		DeliveryAnalysis
+	} from 'src/types/';
 	import { ArrowDownToLine } from 'lucide-svelte';
 	import {
 		cancelAnalyzer,
 		deleteAnalysis,
 		getAnalysis,
+		getAnalysisStatusEventSource,
 		getAnalyzerAnalyses,
 		runAnalyzer
 	} from 'src/api';
 	import * as Card from '$lib/components/ui/card/index.js';
+	import { onMount } from 'svelte';
 
 	const courseId = $page.params.courseId;
 	const assignmentId = $page.params.assignmentId;
@@ -33,11 +41,57 @@
 
 	$: analysis = data.analyses.latest;
 
+	let status = {
+		total: 30,
+		completed: analysis?.deliveryAnalyses?.length || 0,
+		logs: ''
+	};
+
 	const update = async () => {
 		const response = await getAnalyzerAnalyses($page.params.analyzerId);
 		data.analyses = response.data;
 		analysis = data.analyses.latest;
 	};
+
+	type StatusUpdate = {
+		deliveryAnalysis?: DeliveryAnalysis;
+		logs: string;
+	};
+
+	const subscribeToStatus = () => {
+		const eventSource = getAnalysisStatusEventSource(analysis!.id);
+
+		eventSource.onmessage = async (event) => {
+			const statusUpdate = JSON.parse(event.data) as StatusUpdate;
+			console.log('Received event:', statusUpdate);
+
+			if (statusUpdate?.deliveryAnalysis) {
+				analysis!.deliveryAnalyses = [...analysis!.deliveryAnalyses, statusUpdate.deliveryAnalysis];
+			}
+
+			if (statusUpdate?.deliveryAnalysis?.student) {
+				status.logs += `[${statusUpdate.deliveryAnalysis.student.name}]: `;
+			}
+
+			if (statusUpdate?.deliveryAnalysis?.team) {
+				status.logs += `[Team ${statusUpdate.deliveryAnalysis.team.teamNr}]: `;
+			}
+
+			status.completed = analysis?.deliveryAnalyses.length || 0;
+			status.logs += statusUpdate.logs + '\n';
+		};
+
+		eventSource.onerror = async (err) => {
+			console.error('EventSource failed:', err);
+			eventSource.close();
+		};
+	};
+
+	onMount(() => {
+		if (analysis?.status == 'Started' || analysis?.status == 'Running') {
+			subscribeToStatus();
+		}
+	});
 
 	const onCancel = async () => {
 		await cancelAnalyzer($page.params.analyzerId);
@@ -47,6 +101,7 @@
 	const onRun = async () => {
 		await runAnalyzer($page.params.analyzerId);
 		await update();
+		subscribeToStatus();
 	};
 
 	const onSetAnalysis = async (analysisId: string) => {
@@ -131,12 +186,10 @@
 		</div>
 	</div>
 
-	{#if analysis?.status == 'Started' || analysis?.status == 'Running'}
-		<AnalyzerRunningCard />
-	{/if}
-
 	{#key analysis}
 		{#if analysis}
+			<AnalyzerRunningCard {analysis} {status} />
+
 			<AnalysisCard
 				{analysis}
 				analyses={data.analyses.analyses}

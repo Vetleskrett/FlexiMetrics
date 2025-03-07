@@ -154,3 +154,7 @@ export async function getAnalysis(analysisId: string) : Promise<AxiosResponse<An
 export async function deleteAnalysis(analysisId: string) : Promise<AxiosResponse> {
   return axios.delete(`/api/analyses/${analysisId}`)
 }
+
+export function getAnalysisStatusEventSource(analysisId: string) : EventSource {
+  return new EventSource(`/api/analyses/${analysisId}/status`);
+}
