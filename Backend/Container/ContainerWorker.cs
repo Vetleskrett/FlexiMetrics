@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.DependencyInjection;
+﻿using Container.Models;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using System.Threading.Channels;
@@ -26,29 +27,19 @@ class ContainerWorker : BackgroundService
             await containerService.Initialize();
         }
 
-        List<Task> tasks = [];
         while (await _channel.Reader.WaitToReadAsync(cancellationToken))
         {
-            foreach (var task in tasks.Where(t => t.IsCompleted).ToList())
-            {
-                await task;
-                tasks.Remove(task);
-            }
-
             var request = await _channel.Reader.ReadAsync(cancellationToken);
-            tasks.Add(Task.Run(async () =>
+            using var scope = _serviceScopeFactory.CreateScope();
+            var analyzerExecutor = scope.ServiceProvider.GetRequiredService<IAnalyzerExecutor>();
+            try
             {
-                using var scope = _serviceScopeFactory.CreateScope();
-                var containerService = scope.ServiceProvider.GetRequiredService<IContainerService>();
-                try
-                {
-                    await containerService.RunAnalyzer(request, cancellationToken);
-                }
-                catch (Exception e)
-                {
-                    _logger.LogError("Error running analyzer: {ERROR}", e);
-                }
-            }, cancellationToken));
+                await analyzerExecutor.RunAnalyzer(request, cancellationToken);
+            }
+            catch (Exception e)
+            {
+                _logger.LogError("Error running analyzer: {ERROR}", e);
+            }
         }
     }
 }

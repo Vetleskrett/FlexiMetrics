@@ -1,6 +1,6 @@
 ﻿using Database.Models;
 
-namespace Container;
+namespace Container.Models;
 
 #pragma warning disable IDE1006 // Naming Styles
 

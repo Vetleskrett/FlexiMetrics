@@ -29,14 +29,14 @@ public class AnalyzerService : IAnalyzerService
     private readonly AppDbContext _dbContext;
     private readonly IValidator<Analyzer> _validator;
     private readonly IFileStorage _fileStorage;
-    private readonly IContainerService _containerService;
+    private readonly IAnalyzerExecutor _analyzerExecutor;
 
-    public AnalyzerService(AppDbContext dbContext, IValidator<Analyzer> validator, IFileStorage fileStorage, IContainerService containerService)
+    public AnalyzerService(AppDbContext dbContext, IValidator<Analyzer> validator, IFileStorage fileStorage, IAnalyzerExecutor analyzerExecutor)
     {
         _dbContext = dbContext;
         _validator = validator;
         _fileStorage = fileStorage;
-        _containerService = containerService;
+        _analyzerExecutor = analyzerExecutor;
     }
 
     public async Task<Result<IEnumerable<AnalyzerResponse>>> GetAll()
@@ -229,7 +229,7 @@ public class AnalyzerService : IAnalyzerService
             _dbContext.Analyses.Add(analysis);
             await _dbContext.SaveChangesAsync();
 
-            await _containerService.StartAnalyzer(analyzer.Assignment!.CourseId, analyzer.AssignmentId, analyzer.Id, analysis.Id);
+            await _analyzerExecutor.StartAnalyzer(analyzer.Assignment!.CourseId, analyzer.AssignmentId, analyzer.Id, analysis.Id);
 
             return Result.Success();
         }

@@ -20,12 +20,12 @@ public interface IAnalysisService
 public class AnalysisService : IAnalysisService
 {
     private readonly AppDbContext _dbContext;
-    private readonly IContainerService _containerService;
+    private readonly IAnalyzerExecutor _analyzerExecutor;
 
-    public AnalysisService(AppDbContext dbContext, IContainerService containerService)
+    public AnalysisService(AppDbContext dbContext, IAnalyzerExecutor analyzerExecutor)
     {
         _dbContext = dbContext;
-        _containerService = containerService;
+        _analyzerExecutor = analyzerExecutor;
     }
 
     public async Task<Result<IEnumerable<SlimAnalysisResponse>>> GetAll()
@@ -88,6 +88,17 @@ public class AnalysisService : IAnalysisService
         };
     }
 
+    /*
+     * TODO:
+     * - Split ContainerService into ContainerService and "AnalyzerRunnerService"
+     * - Move GetStatusEventsById to analyzer folder (get status by analyzer id)
+     * - Change DeliveryAnalysis to depend on student/team (also maybe change class name)
+     * - Clean up state management in frontend page
+     * - Fix sse bugs: When multiple readers, each reader does not recieve all events (maybe not use channels?)
+     * - Consider making the Container project separate process in Aspire, with rabbitMq (or something) for communication
+     * - Add .RequireAuthorization() on analysis endpoint group
+    */
+
     public async IAsyncEnumerable<AnalysisStatusUpdateResponse> GetStatusEventsById(Guid id, [EnumeratorCancellation] CancellationToken cancellationToken)
     {
         if (await IsInactive(id))
@@ -95,7 +106,7 @@ public class AnalysisService : IAnalysisService
             yield break;
         }
 
-        await foreach (var statusUpdate in _containerService.GetStatusUpdates(id, cancellationToken))
+        await foreach (var statusUpdate in _analyzerExecutor.GetStatusUpdates(id, cancellationToken))
         {
             var deliveryAnalysis = await _dbContext.DeliveryAnalyses
                 .Include(da => da.Fields)
