@@ -8,6 +8,8 @@ using FileStorage;
 using Api.Common;
 using System.Net.Mime;
 using Container;
+using Api.Analyses;
+using System.Runtime.CompilerServices;
 
 namespace Api.Analyzers;
 
@@ -21,6 +23,7 @@ public interface IAnalyzerService
     Task<Result> UploadScript(IFormFile script, Guid analyzerFieldId);
     Task<Result<FileResponse>> DownloadScript(Guid analyzerFieldId);
     Task<Result> StartAction(AnalyzerActionRequest request, Guid id);
+    IAsyncEnumerable<AnalyzerStatusUpdateResponse> GetStatusEventsById(Guid id, CancellationToken cancellationToken);
     Task<Result> DeleteById(Guid id);
 }
 
@@ -224,7 +227,7 @@ public class AnalyzerService : IAnalyzerService
                 StartedAt = DateTime.UtcNow,
                 CompletedAt = null,
                 AnalyzerId = id,
-                DeliveryAnalyses = []
+                AnalysisEntries = []
             };
             _dbContext.Analyses.Add(analysis);
             await _dbContext.SaveChangesAsync();
@@ -236,6 +239,50 @@ public class AnalyzerService : IAnalyzerService
         else
         {
             throw new NotImplementedException();
+        }
+    }
+
+    /*
+     * TODO:
+     * - Clean up state management in frontend page
+     * - Fix sse bugs: When multiple readers, each reader does not recieve all events (maybe not use channels?)
+     * - Consider making the Container project separate process in Aspire, with rabbitMq (or something) for communication
+    */
+
+    public async IAsyncEnumerable<AnalyzerStatusUpdateResponse> GetStatusEventsById(Guid id, [EnumeratorCancellation] CancellationToken cancellationToken)
+    {
+        var analysis = await _dbContext.Analyses
+            .Include(a => a.AnalysisEntries!)
+            .ThenInclude(ae => ae.Fields)
+            .Where(a => a.AnalyzerId == id)
+            .OrderByDescending(a => a.StartedAt)
+            .FirstOrDefaultAsync();
+
+        if (analysis is null || analysis.Status == AnalysisStatus.Completed)
+        {
+            yield break;
+        }
+
+        yield return new AnalyzerStatusUpdateResponse
+        {
+            Analysis = analysis.MapToResponse(),
+            Logs = ""
+        };
+
+        await foreach (var statusUpdate in _analyzerExecutor.GetStatusUpdates(analysis.Id, cancellationToken))
+        {
+            await _dbContext.Entry(analysis).ReloadAsync(cancellationToken);
+
+            yield return new AnalyzerStatusUpdateResponse
+            {
+                Analysis = analysis.MapToResponse(),
+                Logs = statusUpdate.Logs
+            };
+
+            if (analysis.Status == AnalysisStatus.Completed)
+            {
+                yield break;
+            }
         }
     }
 

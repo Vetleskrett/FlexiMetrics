@@ -85,7 +85,7 @@ public class AppDbContext : DbContext
 
         var analysis = modelBuilder.Entity<Analysis>();
         analysis.HasOne(a => a.Analyzer).WithMany();
-        analysis.HasMany(a => a.DeliveryAnalyses).WithOne(ae => ae.Analysis);
+        analysis.HasMany(a => a.AnalysisEntries).WithOne(ae => ae.Analysis);
 
         var analysisEntry = modelBuilder.Entity<AnalysisEntry>();
         analysisEntry.HasOne(d => d.Student).WithMany().IsRequired(false).OnDelete(DeleteBehavior.Cascade);

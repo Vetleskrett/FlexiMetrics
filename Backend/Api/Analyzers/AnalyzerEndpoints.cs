@@ -1,5 +1,7 @@
-﻿using Api.Analyzers.Contracts;
+﻿using Api.Analyses;
+using Api.Analyzers.Contracts;
 using Microsoft.AspNetCore.Http.HttpResults;
+using System.Text.Json;
 
 namespace Api.Analyzers;
 
@@ -83,6 +85,20 @@ public static class AnalyzerEndpoints
         .DisableAntiforgery()
         .WithName("UploadAnalyzerScript")
         .WithSummary("Upload analyzer script");
+
+        group.MapGet("analyzers/{id:guid}/status", async (HttpContext context, IAnalyzerService analyzerService, Guid id) =>
+        {
+            context.Response.Headers.Append("Content-Type", "text/event-stream");
+            await foreach (var statusUpdate in analyzerService.GetStatusEventsById(id, context.RequestAborted))
+            {
+                var json = JsonSerializer.Serialize(statusUpdate, JsonSerializerOptions.Web);
+                await context.Response.WriteAsync($"data: {json}\n\n");
+                await context.Response.Body.FlushAsync();
+            }
+        })
+        .Produces(StatusCodes.Status200OK, contentType: "text/event-stream")
+        .WithName("GetAnalyzerStatus")
+        .WithSummary("Get analyzer status by id");
 
         group.MapDelete("analyzers/{id:guid}", async (IAnalyzerService analyzerService, Guid id) =>
         {

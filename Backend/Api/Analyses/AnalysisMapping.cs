@@ -33,7 +33,7 @@ public static class AnalysisMapping
 			CompletedAt = analysis.CompletedAt,
 			Status = analysis.Status,
 			AnalyzerId = analysis.AnalyzerId,
-			DeliveryAnalyses = analysis.DeliveryAnalyses!.MapToResponse()
+			DeliveryAnalyses = analysis.AnalysisEntries!.MapToResponse()
 		};
 	}
 

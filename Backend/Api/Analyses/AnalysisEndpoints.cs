@@ -7,7 +7,7 @@ public static class AnalysisEndpoints
 {
     public static void MapAnalysisEndpoints(this WebApplication app)
     {
-        var group = app.MapGroup("").WithTags("Analyses");
+        var group = app.MapGroup("").WithTags("Analyses").RequireAuthorization();
 
         group.MapGet("analyses", async (IAnalysisService analysisService) =>
         {
@@ -35,20 +35,6 @@ public static class AnalysisEndpoints
         .Produces<AnalyzerAnalysesResponse>()
         .WithName("GetAllAnalysesByAnalyzer")
         .WithSummary("Get all analyses by analyzer id");
-
-        group.MapGet("analyses/{id:guid}/status", async (HttpContext context, IAnalysisService analysisService, Guid id) =>
-        {
-            context.Response.Headers.Append("Content-Type", "text/event-stream");
-            await foreach (var statusUpdate in analysisService.GetStatusEventsById(id, context.RequestAborted))
-            {
-                var json = JsonSerializer.Serialize(statusUpdate, JsonSerializerOptions.Web);
-                await context.Response.WriteAsync($"data: {json}\n\n");
-                await context.Response.Body.FlushAsync();
-            }
-        })
-        .Produces(StatusCodes.Status200OK, contentType: "text/event-stream")
-        .WithName("GetAnalysisStatus")
-        .WithSummary("Get analysis status by id");
 
         group.MapDelete("analyses/{id:guid}", async (IAnalysisService analysisService, Guid id) =>
         {

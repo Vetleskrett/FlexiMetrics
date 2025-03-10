@@ -18,7 +18,7 @@ public static class ContainerExtensions
             SingleReader = true,
             SingleWriter = false
         }));
-        services.AddHostedService<ContainerWorker>();
+        services.AddHostedService<RunAnalyzerWorker>();
 
         services.AddSingleton(Channel.CreateUnbounded<AnalysisStatusUpdate>(new()
         {

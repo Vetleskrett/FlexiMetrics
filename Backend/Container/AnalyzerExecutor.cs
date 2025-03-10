@@ -143,7 +143,7 @@ public partial class AnalyzerExecutor : IAnalyzerExecutor
 
             var analysisEntry = await OnAnalysisEntryFinished(container, entry, request);
 
-            await _analysisStatusChannel.Writer.WriteAsync(new(request.AnalysisId, analysisEntry.Id, logs), cancellationToken);
+            await _analysisStatusChannel.Writer.WriteAsync(new(request.AnalysisId, logs), cancellationToken);
         }
         finally
         {
@@ -165,8 +165,8 @@ public partial class AnalyzerExecutor : IAnalyzerExecutor
 
     private async Task<AnalysisEntry> OnAnalysisEntryFinished(string container, AssignmentEntry entry, RunAnalyzerRequest request)
     {
-        using var analysisStream = await _containerService.CopyFileFromContainer(container, "analysis.json");
-        var fields = await JsonSerializer.DeserializeAsync<Dictionary<string, OutputField>>(analysisStream, _jsonOptions);
+        using var outputStream = await _containerService.CopyFileFromContainer(container, "output.json");
+        var outputFields = await JsonSerializer.DeserializeAsync<Dictionary<string, OutputField>>(outputStream, _jsonOptions);
 
         var analysisEntry = new AnalysisEntry
         {
@@ -177,7 +177,7 @@ public partial class AnalyzerExecutor : IAnalyzerExecutor
             Fields = []
         };
 
-        var analysisFields = fields!.Select(pair =>
+        var analysisFields = outputFields!.Select(pair =>
             new AnalysisField
             {
                 Id = Guid.NewGuid(),

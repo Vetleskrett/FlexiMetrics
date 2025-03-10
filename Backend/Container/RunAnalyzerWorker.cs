@@ -6,13 +6,13 @@ using System.Threading.Channels;
 
 namespace Container;
 
-class ContainerWorker : BackgroundService
+class RunAnalyzerWorker : BackgroundService
 {
     private readonly Channel<RunAnalyzerRequest> _channel;
     private readonly IServiceScopeFactory _serviceScopeFactory;
-    private readonly ILogger<ContainerWorker> _logger;
+    private readonly ILogger<RunAnalyzerWorker> _logger;
 
-    public ContainerWorker(Channel<RunAnalyzerRequest> channel, IServiceScopeFactory serviceScopeFactory, ILogger<ContainerWorker> logger)
+    public RunAnalyzerWorker(Channel<RunAnalyzerRequest> channel, IServiceScopeFactory serviceScopeFactory, ILogger<RunAnalyzerWorker> logger)
     {
         _channel = channel;
         _serviceScopeFactory = serviceScopeFactory;
