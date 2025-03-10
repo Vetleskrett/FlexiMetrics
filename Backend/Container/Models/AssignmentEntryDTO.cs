@@ -4,18 +4,31 @@ namespace Container.Models;
 
 #pragma warning disable IDE1006 // Naming Styles
 
-public class DeliveryDTO
+public class AssignmentEntryDTO
 {
     public required StudentDTO? student { get; init; }
     public required TeamDTO? team { get; init; }
+    public required DeliveryDTO? delivery { get; init; }
+
+    public static AssignmentEntryDTO MapFrom(AssignmentEntry entry)
+    {
+        return new AssignmentEntryDTO
+        {
+            student = entry.Student is not null ? StudentDTO.MapFrom(entry.Student) : null,
+            team = entry.Team is not null ? TeamDTO.MapFrom(entry.Team) : null,
+            delivery = entry.Delivery is not null ? DeliveryDTO.MapFrom(entry.Delivery) : null,
+        };
+    }
+}
+
+public class DeliveryDTO
+{
     public required Dictionary<string, object> fields { get; init; }
 
     public static DeliveryDTO MapFrom(Delivery delivery)
     {
         return new DeliveryDTO
         {
-            student = delivery.Student is not null ? StudentDTO.MapFrom(delivery.Student) : null,
-            team = delivery.Team is not null ? TeamDTO.MapFrom(delivery.Team) : null,
             fields = delivery.Fields!.ToDictionary
             (
                 d => d.AssignmentField!.Name,

@@ -43,12 +43,12 @@ public class AnalysisService : IAnalysisService
     {
         var analysis = await _dbContext.Analyses
             .Include(a => a.DeliveryAnalyses!)
-            .ThenInclude(da => da.Fields)
+            .ThenInclude(ae => ae.Fields)
             .Include(a => a.DeliveryAnalyses!)
-            .ThenInclude(da => da.Delivery!.Team!)
+            .ThenInclude(ae => ae.Team!)
             .ThenInclude(t => t.Students)
             .Include(a => a.DeliveryAnalyses!)
-            .ThenInclude(da => da.Delivery!.Student)
+            .ThenInclude(ae => ae.Student)
             .FirstOrDefaultAsync(a => a.Id == id);
 
         if (analysis is null)
@@ -73,12 +73,12 @@ public class AnalysisService : IAnalysisService
             await _dbContext.Analyses
             .AsNoTracking()
             .Include(a => a.DeliveryAnalyses!)
-            .ThenInclude(da => da.Fields)
+            .ThenInclude(ae => ae.Fields)
             .Include(a => a.DeliveryAnalyses!)
-            .ThenInclude(da => da.Delivery!.Team!)
+            .ThenInclude(ae => ae.Team!)
             .ThenInclude(t => t.Students)
             .Include(a => a.DeliveryAnalyses!)
-            .ThenInclude(da => da.Delivery!.Student)
+            .ThenInclude(ae => ae.Student)
             .FirstOrDefaultAsync(a => a.Id == latestId);
 
         return new AnalyzerAnalysesResponse
@@ -92,7 +92,7 @@ public class AnalysisService : IAnalysisService
      * TODO:
      * - Split ContainerService into ContainerService and "AnalyzerRunnerService"
      * - Move GetStatusEventsById to analyzer folder (get status by analyzer id)
-     * - Change DeliveryAnalysis to depend on student/team (also maybe change class name)
+     * - Change AnalysisEntry to depend on student/team (also maybe change class name)
      * - Clean up state management in frontend page
      * - Fix sse bugs: When multiple readers, each reader does not recieve all events (maybe not use channels?)
      * - Consider making the Container project separate process in Aspire, with rabbitMq (or something) for communication
@@ -108,16 +108,16 @@ public class AnalysisService : IAnalysisService
 
         await foreach (var statusUpdate in _analyzerExecutor.GetStatusUpdates(id, cancellationToken))
         {
-            var deliveryAnalysis = await _dbContext.DeliveryAnalyses
-                .Include(da => da.Fields)
-                .Include(da => da.Delivery!.Team!)
+            var analysisEntry = await _dbContext.DeliveryAnalyses
+                .Include(ae => ae.Fields)
+                .Include(ae => ae.Team!)
                 .ThenInclude(t => t.Students)
-                .Include(da => da.Delivery!.Student)
-                .FirstOrDefaultAsync(da => da.Id == statusUpdate.DeliveryAnalysisId, cancellationToken);
+                .Include(ae => ae.Student)
+                .FirstOrDefaultAsync(ae => ae.Id == statusUpdate.AnalysisEntryId, cancellationToken);
 
             yield return new AnalysisStatusUpdateResponse
             {
-                DeliveryAnalysis = deliveryAnalysis?.MapToResponse(),
+                AnalysisEntry = analysisEntry?.MapToResponse(),
                 Logs = statusUpdate.Logs
             };
 

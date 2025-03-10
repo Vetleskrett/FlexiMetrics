@@ -19,21 +19,26 @@ class Team:
 
 @dataclass
 class Delivery:
-    student: Student | None
-    team: Team | None
     fields: Dict[str, Any]
-
-    def read_from_file():
-        with open("delivery.json", "r") as file:
-            delivery_json = file.read()
-        print(f"Input: {delivery_json}")
-        return Delivery(**json.loads(delivery_json))
 
     def get_str(self, name: str) -> str:
         return str(self.fields[name])
 
     def get_int(self, name: str) -> int:
         return int(self.fields[name])
+
+
+@dataclass
+class AssignmentEntry:
+    student: Student | None
+    team: Team | None
+    delivery: Delivery | None
+
+    def read_from_file():
+        with open("input.json", "r") as file:
+            input_json = file.read()
+        print(f"Input: {input_json}")
+        return AssignmentEntry(**json.loads(input_json))
 
 
 class Analysis:

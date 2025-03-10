@@ -11,5 +11,5 @@ public class Analysis
     public required AnalysisStatus Status { get; set; }
     public required Guid AnalyzerId { get; set; }
     public Analyzer? Analyzer { get; set; }
-    public required List<DeliveryAnalysis>? DeliveryAnalyses { get; set; }
+    public required List<AnalysisEntry>? DeliveryAnalyses { get; set; }
 }

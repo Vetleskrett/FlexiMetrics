@@ -17,7 +17,7 @@ public interface IAnalyzerExecutor
     Task RunAnalyzer(RunAnalyzerRequest request, CancellationToken cancellationToken);
 }
 
-public class AnalyzerExecutor : IAnalyzerExecutor
+public partial class AnalyzerExecutor : IAnalyzerExecutor
 {
     private const string FLEXIMETRICS_PATH = "../Container/scripts/fleximetrics.py";
 
@@ -37,7 +37,6 @@ public class AnalyzerExecutor : IAnalyzerExecutor
         _analysisStatusChannel = analysisStatusChannel;
     }
 
-
     public async Task StartAnalyzer(Guid courseId, Guid assignmentId, Guid analyzerId, Guid analysisId)
     {
         await _runAnalyzerChannel.Writer.WriteAsync(new(courseId, assignmentId, analyzerId, analysisId));
@@ -56,24 +55,59 @@ public class AnalyzerExecutor : IAnalyzerExecutor
         }
     }
 
+    private async Task<List<AssignmentEntry>> GetEntries(RunAnalyzerRequest request)
+    {
+        var assignment = await _dbContext.Assignments.FindAsync(request.AssignmentId);
+
+        if (assignment!.CollaborationType == CollaborationType.Individual)
+        {
+            return await _dbContext.CourseStudents
+                .Where(cs => cs.CourseId == request.CourseId)
+                .Select(cs => cs.Student!)
+                .Select(student =>
+                    new AssignmentEntry
+                    {
+                        Student = student,
+                        Team = null,
+                        Delivery = _dbContext.Deliveries.FirstOrDefault(d =>
+                            d.StudentId == student.Id &&
+                            d.AssignmentId == request.AssignmentId
+                        )
+                    }
+                )
+                .ToListAsync();
+        }
+        else
+        {
+            return await _dbContext.Teams
+                .Where(t => t.CourseId == request.CourseId)
+                .Include(t => t.Students)
+                .Select(team =>
+                    new AssignmentEntry
+                    {
+                        Student = null,
+                        Team = team,
+                        Delivery = _dbContext.Deliveries.FirstOrDefault(d =>
+                            d.TeamId == team.Id &&
+                            d.AssignmentId == request.AssignmentId
+                        )
+                    }
+                )
+                .ToListAsync();
+        }
+    }
+
     public async Task RunAnalyzer(RunAnalyzerRequest request, CancellationToken cancellationToken)
     {
         await _dbContext.Analyses
             .Where(a => a.Id == request.AnalysisId)
             .ExecuteUpdateAsync(setter => setter.SetProperty(a => a.Status, AnalysisStatus.Running));
 
-        var deliveries = await _dbContext.Deliveries
-            .Include(d => d.Student)
-            .Include(d => d.Team)
-            .ThenInclude(t => t!.Students)
-            .Include(d => d.Fields!)
-            .ThenInclude(f => f.AssignmentField)
-            .Where(d => d.AssignmentId == request.AssignmentId)
-            .ToListAsync();
+        var entries = await GetEntries(request);
 
-        await Parallel.ForEachAsync(deliveries, cancellationToken, async (delivery, cancellationToken) =>
+        await Parallel.ForEachAsync(entries, cancellationToken, async (entry, cancellationToken) =>
         {
-            await RunDeliveryAnalysis(delivery, request, cancellationToken);
+            await RunAnalysisEntry(entry, request, cancellationToken);
         });
 
         await _dbContext.Analyses
@@ -84,9 +118,9 @@ public class AnalyzerExecutor : IAnalyzerExecutor
             );
     }
 
-    private async Task RunDeliveryAnalysis(Delivery delivery, RunAnalyzerRequest request, CancellationToken cancellationToken)
+    private async Task RunAnalysisEntry(AssignmentEntry entry, RunAnalyzerRequest request, CancellationToken cancellationToken)
     {
-        var container = await _containerService.CreateContainer($"analyzer-{request.AnalyzerId}-{delivery.Id}", cancellationToken);
+        var container = await _containerService.CreateContainer($"analyzer-{request.AnalyzerId}-{entry.Id}", cancellationToken);
 
         try
         {
@@ -96,10 +130,10 @@ public class AnalyzerExecutor : IAnalyzerExecutor
             using var scriptStream = _fileStorage.GetAnalyzerScript(request.CourseId, request.AssignmentId, request.AnalyzerId);
             await _containerService.CopyFileToContainer(container, scriptStream, "script.py");
 
-            var deliveryDTO = DeliveryDTO.MapFrom(delivery);
-            var deliveryJsonBytes = JsonSerializer.SerializeToUtf8Bytes(deliveryDTO);
-            using var deliveryJsonStream = new MemoryStream(deliveryJsonBytes);
-            await _containerService.CopyFileToContainer(container, deliveryJsonStream, "delivery.json");
+            var entryDTO = AssignmentEntryDTO.MapFrom(entry);
+            var entryJsonBytes = JsonSerializer.SerializeToUtf8Bytes(entryDTO);
+            using var entryJsonStream = new MemoryStream(entryJsonBytes);
+            await _containerService.CopyFileToContainer(container, entryJsonStream, "input.json");
 
             await _containerService.StartContainer(container, cancellationToken);
 
@@ -107,9 +141,9 @@ public class AnalyzerExecutor : IAnalyzerExecutor
 
             await _containerService.WaitForContainerCompletion(container, cancellationToken);
 
-            var deliveryAnalysis = await OnDeliveryAnalysisFinished(container, delivery, request);
+            var analysisEntry = await OnAnalysisEntryFinished(container, entry, request);
 
-            await _analysisStatusChannel.Writer.WriteAsync(new(request.AnalysisId, deliveryAnalysis.Id, logs), cancellationToken);
+            await _analysisStatusChannel.Writer.WriteAsync(new(request.AnalysisId, analysisEntry.Id, logs), cancellationToken);
         }
         finally
         {
@@ -117,7 +151,7 @@ public class AnalyzerExecutor : IAnalyzerExecutor
         }
     }
 
-    private class AnalysisField
+    private class OutputField
     {
         public required AnalysisFieldType Type { get; init; }
         public required object Value { get; init; }
@@ -129,24 +163,25 @@ public class AnalyzerExecutor : IAnalyzerExecutor
         Converters = { new JsonStringEnumConverter() }
     };
 
-    private async Task<DeliveryAnalysis> OnDeliveryAnalysisFinished(string container, Delivery delivery, RunAnalyzerRequest request)
+    private async Task<AnalysisEntry> OnAnalysisEntryFinished(string container, AssignmentEntry entry, RunAnalyzerRequest request)
     {
         using var analysisStream = await _containerService.CopyFileFromContainer(container, "analysis.json");
-        var fields = await JsonSerializer.DeserializeAsync<Dictionary<string, AnalysisField>>(analysisStream, _jsonOptions);
+        var fields = await JsonSerializer.DeserializeAsync<Dictionary<string, OutputField>>(analysisStream, _jsonOptions);
 
-        var deliveryAnalysis = new DeliveryAnalysis
+        var analysisEntry = new AnalysisEntry
         {
             Id = Guid.NewGuid(),
             AnalysisId = request.AnalysisId,
-            DeliveryId = delivery.Id,
+            StudentId = entry.Student?.Id,
+            TeamId = entry.Team?.Id,
             Fields = []
         };
 
-        var deliveryAnalysisFields = fields!.Select(pair =>
-            new DeliveryAnalysisField
+        var analysisFields = fields!.Select(pair =>
+            new AnalysisField
             {
                 Id = Guid.NewGuid(),
-                DeliveryAnalysisId = deliveryAnalysis.Id,
+                AnalysisEntryId = analysisEntry.Id,
                 Name = pair.Key,
                 Type = pair.Value.Type,
                 Value = pair.Value.Value,
@@ -156,8 +191,8 @@ public class AnalyzerExecutor : IAnalyzerExecutor
         await _dbLock.WaitAsync();
         try
         {
-            _dbContext.DeliveryAnalyses.Add(deliveryAnalysis);
-            _dbContext.DeliveryAnalysisFields.AddRange(deliveryAnalysisFields);
+            _dbContext.DeliveryAnalyses.Add(analysisEntry);
+            _dbContext.AnalysisFields.AddRange(analysisFields);
             await _dbContext.SaveChangesAsync();
         }
         finally
@@ -165,6 +200,6 @@ public class AnalyzerExecutor : IAnalyzerExecutor
             _dbLock.Release();
         }
 
-        return deliveryAnalysis;
+        return analysisEntry;
     }
 }

@@ -2,6 +2,6 @@
 
 public class AnalysisStatusUpdateResponse
 {
-    public required DeliveryAnalysisResponse? DeliveryAnalysis { get; init; }
-    public required string Logs { get; init; }
+	public required AnalysisEntryResponse? AnalysisEntry { get; init; }
+	public required string Logs { get; init; }
 }
