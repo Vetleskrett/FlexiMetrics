@@ -7,11 +7,11 @@ namespace Container;
 
 public interface IContainerService
 {
-    Task<Stream> CopyFileFromContainer(string container, string path);
+    Task Initialize();
+    Task<Stream?> CopyFileFromContainer(string container, string path);
     Task CopyFileToContainer(string container, Stream stream, string fileName);
     Task<string> CreateContainer(string name, CancellationToken cancellationToken);
     Task<string> GetLogs(string container, CancellationToken cancellationToken);
-    Task Initialize();
     Task RemoveContainer(string container);
     Task StartContainer(string container, CancellationToken cancellationToken);
     Task WaitForContainerCompletion(string container, CancellationToken cancellationToken);
@@ -102,18 +102,25 @@ public class ContainerService : IContainerService
         );
     }
 
-    public async Task<Stream> CopyFileFromContainer(string container, string path)
+    public async Task<Stream?> CopyFileFromContainer(string container, string path)
     {
-        var response = await _dockerClient.Containers.GetArchiveFromContainerAsync
-        (
-            container,
-            new GetArchiveFromContainerParameters
-            {
-                Path = $"{WORKING_DIR}/{path}"
-            },
-            false
-        );
-        return TarArchive.Extract(response.Stream);
+        try
+        {
+            var response = await _dockerClient.Containers.GetArchiveFromContainerAsync
+            (
+                container,
+                new GetArchiveFromContainerParameters
+                {
+                    Path = $"{WORKING_DIR}/{path}"
+                },
+                false
+            );
+            return TarArchive.Extract(response.Stream);
+        }
+        catch
+        {
+            return null;
+        }
     }
 
     public async Task StartContainer(string container, CancellationToken cancellationToken)

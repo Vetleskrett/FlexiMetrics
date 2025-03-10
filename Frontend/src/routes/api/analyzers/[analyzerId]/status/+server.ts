@@ -4,7 +4,7 @@ import type { Readable } from 'stream';
 
 export const GET: RequestHandler = async ({ params }) => {
   try {
-    const response = await api.get(`/analyses/${params.analysisId}/status`, { responseType: 'stream' })
+    const response = await api.get(`/analyzers/${params.analyzerId}/status`, { responseType: 'stream' })
 
     const headers = new Headers();
     headers.set('Content-Type', response.headers['content-type'] || 'text/event-stream');

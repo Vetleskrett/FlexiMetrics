@@ -45,7 +45,7 @@ class Analysis:
     def write_to_file(self):
         analysis_json = json.dumps(self.__dict__)
         print(f"Output: {analysis_json}")
-        with open("analysis.json", "w") as file:
+        with open("output.json", "w") as file:
             file.write(analysis_json)
 
     def set_str(self, name: str, value: str):

@@ -2,6 +2,7 @@
 using Api.Analyzers.Contracts;
 using Microsoft.AspNetCore.Http.HttpResults;
 using System.Text.Json;
+using System.Text.Json.Serialization;
 
 namespace Api.Analyzers;
 
@@ -33,7 +34,9 @@ public static class AnalyzerEndpoints
         {
             var result = await analyzerService.StartAction(request, id);
             return result.MapToResponse(() => Results.Ok());
-        });
+        })
+        .WithName("StartAnalyzerAction")
+        .WithSummary("Start analyzer action by id");
 
         group.MapGet("assignments/{assignmentId:guid}/analyzers", async (IAnalyzerService analyzerService, Guid assignmentId) =>
         {
@@ -88,10 +91,16 @@ public static class AnalyzerEndpoints
 
         group.MapGet("analyzers/{id:guid}/status", async (HttpContext context, IAnalyzerService analyzerService, Guid id) =>
         {
+            var jsonOptions = new JsonSerializerOptions
+            {
+                PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+                Converters = { new JsonStringEnumConverter() }
+            };
+
             context.Response.Headers.Append("Content-Type", "text/event-stream");
             await foreach (var statusUpdate in analyzerService.GetStatusEventsById(id, context.RequestAborted))
             {
-                var json = JsonSerializer.Serialize(statusUpdate, JsonSerializerOptions.Web);
+                var json = JsonSerializer.Serialize(statusUpdate, jsonOptions);
                 await context.Response.WriteAsync($"data: {json}\n\n");
                 await context.Response.Body.FlushAsync();
             }

@@ -1,7 +1,6 @@
-﻿using Container.Models;
-using Docker.DotNet;
+﻿using Docker.DotNet;
 using Microsoft.Extensions.DependencyInjection;
-using System.Threading.Channels;
+using Microsoft.Extensions.Hosting;
 
 namespace Container;
 
@@ -12,18 +11,10 @@ public static class ContainerExtensions
         services.AddSingleton<IDockerClient>(new DockerClientConfiguration().CreateClient());
         services.AddSingleton<IContainerService, ContainerService>();
         services.AddScoped<IAnalyzerExecutor, AnalyzerExecutor>();
+    }
 
-        services.AddSingleton(Channel.CreateUnbounded<RunAnalyzerRequest>(new()
-        {
-            SingleReader = true,
-            SingleWriter = false
-        }));
-        services.AddHostedService<RunAnalyzerWorker>();
-
-        services.AddSingleton(Channel.CreateUnbounded<AnalysisStatusUpdate>(new()
-        {
-            SingleReader = false,
-            SingleWriter = false
-        }));
+    public static async Task InitializeContainer(this IHost app)
+    {
+        await app.Services.GetRequiredService<IContainerService>().Initialize();
     }
 }

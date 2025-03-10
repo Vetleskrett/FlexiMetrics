@@ -10,24 +10,18 @@
 	import X from 'lucide-svelte/icons/x';
 	import CustomButton from 'src/components/CustomButton.svelte';
 	import AnalyzerRunningCard from 'src/components/analyzer/AnalyzerRunningCard.svelte';
-	import type {
-		Analyzer,
-		AnalyzerAnalyses,
-		Assignment,
-		Course,
-		DeliveryAnalysis
-	} from 'src/types/';
+	import type { Analysis, Analyzer, AnalyzerAnalyses, Assignment, Course } from 'src/types/';
 	import { ArrowDownToLine } from 'lucide-svelte';
 	import {
 		cancelAnalyzer,
 		deleteAnalysis,
 		getAnalysis,
-		getAnalysisStatusEventSource,
+		getAnalyzerStatusEventSource,
 		getAnalyzerAnalyses,
 		runAnalyzer
 	} from 'src/api';
 	import * as Card from '$lib/components/ui/card/index.js';
-	import { onMount } from 'svelte';
+	import { onDestroy, onMount } from 'svelte';
 
 	const courseId = $page.params.courseId;
 	const assignmentId = $page.params.assignmentId;
@@ -39,58 +33,72 @@
 		analyses: AnalyzerAnalyses;
 	};
 
-	$: analysis = data.analyses.latest;
+	let analysis = data.analyses.latest;
 
 	let status = {
 		total: 30,
-		completed: analysis?.deliveryAnalyses?.length || 0,
+		completed: analysis?.analysisEntries?.length || 0,
 		logs: ''
 	};
 
 	const update = async () => {
+		closeEventSource();
 		const response = await getAnalyzerAnalyses($page.params.analyzerId);
 		data.analyses = response.data;
 		analysis = data.analyses.latest;
+		subscribeToStatusIfRunning();
 	};
 
 	type StatusUpdate = {
-		deliveryAnalysis?: DeliveryAnalysis;
+		analysis: Analysis;
 		logs: string;
 	};
 
+	let eventSource: EventSource | undefined = undefined;
+
+	const closeEventSource = () => {
+		if (eventSource) {
+			console.log('Closing event source');
+			eventSource?.close();
+			eventSource = undefined;
+		}
+	};
+
 	const subscribeToStatus = () => {
-		const eventSource = getAnalysisStatusEventSource(analysis!.id);
+		closeEventSource();
+
+		console.log('Subscribing to event source');
+
+		eventSource = getAnalyzerStatusEventSource($page.params.analyzerId);
 
 		eventSource.onmessage = async (event) => {
 			const statusUpdate = JSON.parse(event.data) as StatusUpdate;
 			console.log('Received event:', statusUpdate);
 
-			if (statusUpdate?.deliveryAnalysis) {
-				analysis!.deliveryAnalyses = [...analysis!.deliveryAnalyses, statusUpdate.deliveryAnalysis];
-			}
+			analysis = statusUpdate.analysis;
 
-			if (statusUpdate?.deliveryAnalysis?.student) {
-				status.logs += `[${statusUpdate.deliveryAnalysis.student.name}]: `;
-			}
-
-			if (statusUpdate?.deliveryAnalysis?.team) {
-				status.logs += `[Team ${statusUpdate.deliveryAnalysis.team.teamNr}]: `;
-			}
-
-			status.completed = analysis?.deliveryAnalyses.length || 0;
+			status.completed = analysis?.analysisEntries.length || 0;
 			status.logs += statusUpdate.logs + '\n';
 		};
 
 		eventSource.onerror = async (err) => {
 			console.error('EventSource failed:', err);
-			eventSource.close();
+			closeEventSource();
 		};
 	};
 
-	onMount(() => {
+	const subscribeToStatusIfRunning = () => {
 		if (analysis?.status == 'Started' || analysis?.status == 'Running') {
 			subscribeToStatus();
 		}
+	};
+
+	onMount(() => {
+		subscribeToStatusIfRunning();
+	});
+
+	onDestroy(() => {
+		closeEventSource();
 	});
 
 	const onCancel = async () => {
@@ -101,12 +109,13 @@
 	const onRun = async () => {
 		await runAnalyzer($page.params.analyzerId);
 		await update();
-		subscribeToStatus();
 	};
 
 	const onSetAnalysis = async (analysisId: string) => {
+		closeEventSource();
 		const analysisResponse = await getAnalysis(analysisId);
 		analysis = analysisResponse.data;
+		subscribeToStatusIfRunning();
 	};
 
 	const onDeleteAnalysis = async () => {
@@ -186,23 +195,23 @@
 		</div>
 	</div>
 
-	{#key analysis}
-		{#if analysis}
-			<AnalyzerRunningCard {analysis} {status} />
-
-			<AnalysisCard
-				{analysis}
-				analyses={data.analyses.analyses}
-				isIndividual={data.assignment.collaborationType == 'Individual'}
-				{onSetAnalysis}
-				{onDeleteAnalysis}
-			/>
-		{:else}
-			<Card.Root class="w-[1080px]">
-				<Card.Content class="text-center">
-					<p>No analyses</p>
-				</Card.Content>
-			</Card.Root>
+	{#if analysis}
+		{#if analysis?.status == 'Started' || analysis?.status == 'Running'}
+			<AnalyzerRunningCard {status} />
 		{/if}
-	{/key}
+
+		<AnalysisCard
+			{analysis}
+			analyses={data.analyses.analyses}
+			isIndividual={data.assignment.collaborationType == 'Individual'}
+			{onSetAnalysis}
+			{onDeleteAnalysis}
+		/>
+	{:else}
+		<Card.Root class="w-[1080px]">
+			<Card.Content class="text-center">
+				<p>No analyses</p>
+			</Card.Content>
+		</Card.Root>
+	{/if}
 </div>

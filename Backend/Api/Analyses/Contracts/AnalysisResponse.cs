@@ -11,7 +11,7 @@ public class AnalysisResponse
 	public required DateTime? CompletedAt { get; init; }
 	public required AnalysisStatus Status { get; init; }
 	public required Guid AnalyzerId { get; init; }
-	public required List<AnalysisEntryResponse> DeliveryAnalyses { get; init; }
+	public required List<AnalysisEntryResponse> AnalysisEntries { get; init; }
 }
 
 public class AnalysisEntryResponse

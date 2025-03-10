@@ -31,7 +31,7 @@
 
 	const headers: Header[] = [];
 
-	for (let field of analysis.deliveryAnalyses.flatMap((d) => d.fields)) {
+	for (let field of analysis.analysisEntries.flatMap((d) => d.fields)) {
 		if (!headers.some((h) => h.name == field.name && h.type == field.type)) {
 			headers.push({
 				name: field.name,
@@ -40,7 +40,7 @@
 		}
 	}
 
-	const table = createTable(readable(analysis.deliveryAnalyses), {
+	const table = createTable(readable(analysis.analysisEntries), {
 		sort: addSortBy(),
 		hide: addHiddenColumns(),
 		filter: addColumnFilters()
@@ -50,21 +50,21 @@
 		isIndividual
 			? table.column({
 					id: 'Student',
-					accessor: (deliveryAnalysis) => deliveryAnalysis.student?.name,
+					accessor: (analysisEntry) => analysisEntry.student?.name,
 					header: 'Student',
 					cell: getCell('String')
 				})
 			: table.column({
 					id: 'Team',
-					accessor: (deliveryAnalysis) => deliveryAnalysis.team?.teamNr,
+					accessor: (analysisEntry) => analysisEntry.team?.teamNr,
 					header: 'Team',
 					cell: getCell('String')
 				}),
 		...headers.map((header, i) =>
 			table.column({
 				id: i.toString(),
-				accessor: (deliveryAnalysis) =>
-					deliveryAnalysis.fields.find(
+				accessor: (analysisEntry) =>
+					analysisEntry.fields.find(
 						(deliveryField) =>
 							deliveryField.name == header.name && deliveryField.type == header.type
 					)?.value,

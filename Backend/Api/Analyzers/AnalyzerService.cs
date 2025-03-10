@@ -7,9 +7,11 @@ using Api.Analyzers.Contracts;
 using FileStorage;
 using Api.Common;
 using System.Net.Mime;
-using Container;
 using Api.Analyses;
 using System.Runtime.CompilerServices;
+using MassTransit;
+using Container.Models;
+using System.Threading.Channels;
 
 namespace Api.Analyzers;
 
@@ -32,14 +34,18 @@ public class AnalyzerService : IAnalyzerService
     private readonly AppDbContext _dbContext;
     private readonly IValidator<Analyzer> _validator;
     private readonly IFileStorage _fileStorage;
-    private readonly IAnalyzerExecutor _analyzerExecutor;
+    private readonly IAnalyzerStatusUpdateReader _statusUpdateReader;
+    private readonly IBus _bus;
+    private readonly ILogger<AnalyzerService> _logger;
 
-    public AnalyzerService(AppDbContext dbContext, IValidator<Analyzer> validator, IFileStorage fileStorage, IAnalyzerExecutor analyzerExecutor)
+    public AnalyzerService(AppDbContext dbContext, IValidator<Analyzer> validator, IFileStorage fileStorage, IAnalyzerStatusUpdateReader statusUpdateReader, IBus bus, ILogger<AnalyzerService> logger)
     {
         _dbContext = dbContext;
         _validator = validator;
         _fileStorage = fileStorage;
-        _analyzerExecutor = analyzerExecutor;
+        _statusUpdateReader = statusUpdateReader;
+        _bus = bus;
+        _logger = logger;
     }
 
     public async Task<Result<IEnumerable<AnalyzerResponse>>> GetAll()
@@ -232,7 +238,7 @@ public class AnalyzerService : IAnalyzerService
             _dbContext.Analyses.Add(analysis);
             await _dbContext.SaveChangesAsync();
 
-            await _analyzerExecutor.StartAnalyzer(analyzer.Assignment!.CourseId, analyzer.AssignmentId, analyzer.Id, analysis.Id);
+            await _bus.Publish(new RunAnalyzerRequest(analyzer.Assignment!.CourseId, analyzer.AssignmentId, analyzer.Id, analysis.Id));
 
             return Result.Success();
         }
@@ -242,23 +248,11 @@ public class AnalyzerService : IAnalyzerService
         }
     }
 
-    /*
-     * TODO:
-     * - Clean up state management in frontend page
-     * - Fix sse bugs: When multiple readers, each reader does not recieve all events (maybe not use channels?)
-     * - Consider making the Container project separate process in Aspire, with rabbitMq (or something) for communication
-    */
-
     public async IAsyncEnumerable<AnalyzerStatusUpdateResponse> GetStatusEventsById(Guid id, [EnumeratorCancellation] CancellationToken cancellationToken)
     {
-        var analysis = await _dbContext.Analyses
-            .Include(a => a.AnalysisEntries!)
-            .ThenInclude(ae => ae.Fields)
-            .Where(a => a.AnalyzerId == id)
-            .OrderByDescending(a => a.StartedAt)
-            .FirstOrDefaultAsync();
+        var analysis = await GetAnalysisWithNestedEntities(id);
 
-        if (analysis is null || analysis.Status == AnalysisStatus.Completed)
+        if (analysis.Status == AnalysisStatus.Completed)
         {
             yield break;
         }
@@ -269,21 +263,46 @@ public class AnalyzerService : IAnalyzerService
             Logs = ""
         };
 
-        await foreach (var statusUpdate in _analyzerExecutor.GetStatusUpdates(analysis.Id, cancellationToken))
+        var channel = _statusUpdateReader.GetChannel();
+
+        try
         {
-            await _dbContext.Entry(analysis).ReloadAsync(cancellationToken);
-
-            yield return new AnalyzerStatusUpdateResponse
+            await foreach (var statusUpdate in channel.Reader.ReadAllAsync(cancellationToken))
             {
-                Analysis = analysis.MapToResponse(),
-                Logs = statusUpdate.Logs
-            };
+                analysis = await GetAnalysisWithNestedEntities(id);
 
-            if (analysis.Status == AnalysisStatus.Completed)
-            {
-                yield break;
+                yield return new AnalyzerStatusUpdateResponse
+                {
+                    Analysis = analysis.MapToResponse(),
+                    Logs = statusUpdate.Logs
+                };
+
+                if (analysis.Status == AnalysisStatus.Completed)
+                {
+                    yield break;
+                }
             }
         }
+        finally
+        {
+            _statusUpdateReader.RemoveChannel(channel);
+        }
+    }
+
+    private async Task<Analysis> GetAnalysisWithNestedEntities(Guid id)
+    {
+        return await _dbContext.Analyses
+            .AsNoTracking()
+            .Include(a => a.AnalysisEntries!)
+            .ThenInclude(ae => ae.Fields)
+            .Include(a => a.AnalysisEntries!)
+            .ThenInclude(ae => ae.Student)
+            .Include(a => a.AnalysisEntries!)
+            .ThenInclude(ae => ae.Team!)
+            .ThenInclude(t => t.Students)
+            .Where(a => a.AnalyzerId == id)
+            .OrderByDescending(a => a.StartedAt)
+            .FirstAsync();
     }
 
     public async Task<Result> DeleteById(Guid id)
