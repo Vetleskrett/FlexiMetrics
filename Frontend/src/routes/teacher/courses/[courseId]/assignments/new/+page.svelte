@@ -1,5 +1,5 @@
 <script lang="ts">
-	import * as Breadcrumb from '$lib/components/ui/breadcrumb/index.js';
+	import * as Breadcrumb from '$lib/components/ui/breadcrumb';
 	import CreateOrEditAssignment from 'src/components/assignment/CreateOrEditAssignment.svelte';
 	import type { Course } from 'src/types/';
 

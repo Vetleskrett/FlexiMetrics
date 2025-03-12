@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { page } from '$app/stores';
-	import * as Breadcrumb from '$lib/components/ui/breadcrumb/index.js';
+	import * as Breadcrumb from '$lib/components/ui/breadcrumb';
 	import * as DropdownMenu from '$lib/components/ui/dropdown-menu';
 	import AnalysisCard from 'src/components/analyzer/AnalysisCard.svelte';
 	import EllipsisVertical from 'lucide-svelte/icons/ellipsis-vertical';
@@ -10,16 +10,18 @@
 	import X from 'lucide-svelte/icons/x';
 	import CustomButton from 'src/components/CustomButton.svelte';
 	import AnalyzerRunningCard from 'src/components/analyzer/AnalyzerRunningCard.svelte';
-	import type { Analyzer, AnalyzerAnalyses, Assignment, Course, Student, Team } from 'src/types/';
+	import type { Analysis, Analyzer, AnalyzerAnalyses, Assignment, Course } from 'src/types/';
 	import { ArrowDownToLine } from 'lucide-svelte';
 	import {
 		cancelAnalyzer,
 		deleteAnalysis,
 		getAnalysis,
+		getAnalyzerStatusEventSource,
 		getAnalyzerAnalyses,
 		runAnalyzer
 	} from 'src/api';
-	import * as Card from '$lib/components/ui/card/index.js';
+	import * as Card from '$lib/components/ui/card';
+	import { onDestroy, afterUpdate } from 'svelte';
 
 	const courseId = $page.params.courseId;
 	const assignmentId = $page.params.assignmentId;
@@ -33,11 +35,69 @@
 
 	$: analysis = data.analyses.latest;
 
+	type RunningAnalyzerInfo = {
+		eventSource: EventSource;
+		analyzerId: string;
+		analysis: Analysis;
+	};
+
+	let runningAnalyzerInfo: RunningAnalyzerInfo | undefined = undefined;
+
+	const subscribeToEventSource = () => {
+		if (!analysis || analysis.status == 'Completed') {
+			return;
+		}
+		if (runningAnalyzerInfo) {
+			return;
+		}
+
+		console.log('Subscribing to event source');
+
+		runningAnalyzerInfo = {
+			eventSource: getAnalyzerStatusEventSource($page.params.analyzerId),
+			analyzerId: $page.params.analyzerId,
+			analysis: analysis
+		};
+
+		runningAnalyzerInfo.eventSource.onmessage = async (event) => {
+			runningAnalyzerInfo!.analysis = JSON.parse(event.data) as Analysis;
+			if (runningAnalyzerInfo!.analysis.id == analysis?.id) {
+				analysis = runningAnalyzerInfo!.analysis;
+			}
+		};
+
+		runningAnalyzerInfo.eventSource.onerror = async () => {
+			closeEventSource();
+		};
+	};
+
+	const closeEventSource = () => {
+		if (runningAnalyzerInfo) {
+			console.log('Closing event source');
+			runningAnalyzerInfo.eventSource.close();
+			runningAnalyzerInfo = undefined;
+		}
+	};
+
 	const update = async () => {
+		closeEventSource();
 		const response = await getAnalyzerAnalyses($page.params.analyzerId);
 		data.analyses = response.data;
 		analysis = data.analyses.latest;
+		subscribeToEventSource();
 	};
+
+	onDestroy(() => {
+		closeEventSource();
+	});
+
+	afterUpdate(() => {
+		if (runningAnalyzerInfo?.analyzerId != $page.params.analyzerId) {
+			closeEventSource();
+		}
+
+		subscribeToEventSource();
+	});
 
 	const onCancel = async () => {
 		await cancelAnalyzer($page.params.analyzerId);
@@ -50,15 +110,17 @@
 	};
 
 	const onSetAnalysis = async (analysisId: string) => {
-		const analysisResponse = await getAnalysis(analysisId);
-		analysis = analysisResponse.data;
+		if (analysisId == runningAnalyzerInfo?.analysis.id) {
+			analysis = runningAnalyzerInfo.analysis;
+		} else {
+			const analysisResponse = await getAnalysis(analysisId);
+			analysis = analysisResponse.data;
+		}
 	};
 
 	const onDeleteAnalysis = async () => {
-		if (analysis) {
-			await deleteAnalysis(analysis.id);
-			await update();
-		}
+		await deleteAnalysis(analysis!.id);
+		await update();
 	};
 </script>
 
@@ -95,7 +157,7 @@
 			<h1 class="ml-4 text-4xl font-semibold">{data.analyzer.name}</h1>
 		</div>
 		<div class="flex items-center gap-2">
-			{#if analysis?.status == 'Started' || analysis?.status == 'Running'}
+			{#if runningAnalyzerInfo}
 				<CustomButton color="red" on:click={onCancel}>
 					<X size="20" />
 					<p>Cancel</p>
@@ -131,11 +193,11 @@
 		</div>
 	</div>
 
-	{#if analysis?.status == 'Started' || analysis?.status == 'Running'}
-		<AnalyzerRunningCard />
-	{/if}
-
 	{#key analysis}
+		{#if analysis && runningAnalyzerInfo?.analysis.id == analysis.id}
+			<AnalyzerRunningCard {analysis} />
+		{/if}
+
 		{#if analysis}
 			<AnalysisCard
 				{analysis}

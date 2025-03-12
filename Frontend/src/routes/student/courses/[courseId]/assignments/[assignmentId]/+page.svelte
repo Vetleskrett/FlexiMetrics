@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { page } from '$app/stores';
-	import * as Breadcrumb from '$lib/components/ui/breadcrumb/index.js';
+	import * as Breadcrumb from '$lib/components/ui/breadcrumb';
 	import MoveRight from 'lucide-svelte/icons/move-right';
 	import AssignmentInformationCard from 'src/components/assignment/AssignmentInformationCard.svelte';
 	import {

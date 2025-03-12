@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { type Assignment } from 'src/types/';
-	import * as Card from '$lib/components/ui/card/index.js';
+	import * as Card from '$lib/components/ui/card';
 
 	export let assignment: Assignment;
 </script>

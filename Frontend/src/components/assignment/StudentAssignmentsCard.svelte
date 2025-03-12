@@ -1,6 +1,6 @@
 <script lang="ts">
 	import type { StudentAssignment } from 'src/types/';
-	import * as Card from '$lib/components/ui/card/index.js';
+	import * as Card from '$lib/components/ui/card';
 	import * as Table from '$lib/components/ui/table';
 	import Check from 'lucide-svelte/icons/check';
 	import X from 'lucide-svelte/icons/x';

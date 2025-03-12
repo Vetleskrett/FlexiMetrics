@@ -1,7 +1,7 @@
 <script lang="ts">
 	import type { Assignment } from 'src/types/';
-	import * as Card from '$lib/components/ui/card/index.js';
-	import { Separator } from '$lib/components/ui/separator/index.js';
+	import * as Card from '$lib/components/ui/card';
+	import { Separator } from '$lib/components/ui/separator';
 	import Plus from 'lucide-svelte/icons/plus';
 	import CustomButton from '../CustomButton.svelte';
 

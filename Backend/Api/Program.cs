@@ -15,6 +15,7 @@ using Container;
 using Api.Analyses;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
+using MassTransit;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -26,6 +27,17 @@ builder.Services.AddSingleton<IFileStorage, LocalFileStorage>();
 builder.Services.AddContainer();
 
 builder.AddNpgsqlDbContext<AppDbContext>("postgresdb");
+
+builder.Services.AddMassTransit(options =>
+{
+    options.AddConsumer<RunAnalyzerConsumer>();
+    options.AddConsumer<AnalyzerStatusUpdateConsumer>();
+    options.UsingInMemory((context, config) =>
+    {
+        config.ConfigureEndpoints(context);
+    });
+});
+builder.Services.AddSingleton<IAnalyzerStatusUpdateReader, AnalyzerStatusUpdateReader>();
 
 builder.Services.AddScoped<ICourseService, CourseService>();
 builder.Services.AddScoped<ITeacherService, TeacherService>();
@@ -85,13 +97,12 @@ builder.Services.AddAuthorizationBuilder()
 
 var app = builder.Build();
 
+await app.InitializeContainer();
+
 app.MapDefaultEndpoints();
 
-if (app.Environment.IsDevelopment())
-{
-    app.UseSwagger();
-    app.UseSwaggerUI();
-}
+app.UseSwagger();
+app.UseSwaggerUI();
 
 app.UseCors("AllowCors");
 

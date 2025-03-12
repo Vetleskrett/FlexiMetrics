@@ -4,7 +4,7 @@
 	import EllipsisVertical from 'lucide-svelte/icons/ellipsis-vertical';
 	import Trash2 from 'lucide-svelte/icons/trash-2';
 	import * as DropdownMenu from '$lib/components/ui/dropdown-menu';
-	import * as Breadcrumb from '$lib/components/ui/breadcrumb/index.js';
+	import * as Breadcrumb from '$lib/components/ui/breadcrumb';
 	import AllStudentsCard from 'src/components/student/AllStudentsCard.svelte';
 	import AddStudentsCard from 'src/components/student/AddStudentsCard.svelte';
 	import { postStudentsCourse } from 'src/api';

@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { page } from '$app/stores';
 	import TeachersCard from 'src/components/teacher/TeachersCard.svelte';
-	import * as Breadcrumb from '$lib/components/ui/breadcrumb/index.js';
+	import * as Breadcrumb from '$lib/components/ui/breadcrumb';
 	import type { StudentAssignment, Course, Team, Teacher } from 'src/types/';
 	import { Role } from 'src/types/';
 	import TeamCard from 'src/components/team/TeamCard.svelte';

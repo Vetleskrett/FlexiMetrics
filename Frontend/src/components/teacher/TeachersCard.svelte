@@ -1,6 +1,6 @@
 <script lang="ts">
 	import type { Teacher } from 'src/types/';
-	import * as Card from '$lib/components/ui/card/index.js';
+	import * as Card from '$lib/components/ui/card';
 	import * as Table from '$lib/components/ui/table';
 	import EllipsisVertical from 'lucide-svelte/icons/ellipsis-vertical';
 	import Pencil from 'lucide-svelte/icons/pencil';

@@ -21,8 +21,8 @@ public class AppDbContext : DbContext
     public DbSet<Feedback> Feedbacks { get; set; }
     public DbSet<Analyzer> Analyzers { get; set; }
     public DbSet<Analysis> Analyses { get; set; }
-    public DbSet<DeliveryAnalysis> DeliveryAnalyses { get; set; }
-    public DbSet<DeliveryAnalysisField> DeliveryAnalysisFields { get; set; }
+    public DbSet<AnalysisEntry> DeliveryAnalyses { get; set; }
+    public DbSet<AnalysisField> AnalysisFields { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -85,10 +85,11 @@ public class AppDbContext : DbContext
 
         var analysis = modelBuilder.Entity<Analysis>();
         analysis.HasOne(a => a.Analyzer).WithMany();
-        analysis.HasMany(a => a.DeliveryAnalyses).WithOne(da => da.Analysis);
+        analysis.HasMany(a => a.AnalysisEntries).WithOne(ae => ae.Analysis);
 
-        var deliveryAnalysis = modelBuilder.Entity<DeliveryAnalysis>();
-        deliveryAnalysis.HasOne(da => da.Delivery).WithMany();
-        deliveryAnalysis.HasMany(da => da.Fields).WithOne(f => f.DeliveryAnalysis);
+        var analysisEntry = modelBuilder.Entity<AnalysisEntry>();
+        analysisEntry.HasOne(d => d.Student).WithMany().IsRequired(false).OnDelete(DeleteBehavior.Cascade);
+        analysisEntry.HasOne(d => d.Team).WithMany().IsRequired(false).OnDelete(DeleteBehavior.Cascade);
+        analysisEntry.HasMany(ae => ae.Fields).WithOne(f => f.AnalysisEntry);
     }
 }

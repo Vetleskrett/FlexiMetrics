@@ -1,4 +1,5 @@
 ﻿using Api.Analyses.Contracts;
+using System.Text.Json;
 
 namespace Api.Analyses;
 

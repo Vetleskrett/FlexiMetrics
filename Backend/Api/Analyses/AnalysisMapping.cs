@@ -33,7 +33,8 @@ public static class AnalysisMapping
             CompletedAt = analysis.CompletedAt,
             Status = analysis.Status,
             AnalyzerId = analysis.AnalyzerId,
-            DeliveryAnalyses = analysis.DeliveryAnalyses!.MapToResponse()
+            AnalysisEntries = analysis.AnalysisEntries!.MapToResponse(),
+            TotalNumEntries = analysis.TotalNumEntries
         };
     }
 
@@ -42,37 +43,39 @@ public static class AnalysisMapping
         return analyses.Select(analysis => analysis.MapToResponse()).ToList();
     }
 
-    public static DeliveryAnalysisResponse MapToResponse(this DeliveryAnalysis deliveryAnalysis)
+    public static AnalysisEntryResponse MapToResponse(this AnalysisEntry analysisEntry)
     {
-        return new DeliveryAnalysisResponse
+        return new AnalysisEntryResponse
         {
-            Id = deliveryAnalysis.Id,
-            AnalysisId = deliveryAnalysis.AnalysisId,
-            DeliveryId = deliveryAnalysis.DeliveryId,
-            Team = deliveryAnalysis.Delivery?.Team?.MapToResponse(),
-            Student = deliveryAnalysis.Delivery?.Student?.MapToStudentResponse(),
-            Fields = deliveryAnalysis.Fields!.MapToResponse()
+            Id = analysisEntry.Id,
+            AnalysisId = analysisEntry.AnalysisId,
+            Team = analysisEntry.Team?.MapToResponse(),
+            Student = analysisEntry.Student?.MapToStudentResponse(),
+            Fields = analysisEntry.Fields!.MapToResponse(),
+            LogInformation = analysisEntry.LogInformation,
+            LogError = analysisEntry.LogError,
+            CompletedAt = analysisEntry.CompletedAt,
         };
     }
 
-    public static List<DeliveryAnalysisResponse> MapToResponse(this IEnumerable<DeliveryAnalysis> deliveryAnalyses)
+    public static List<AnalysisEntryResponse> MapToResponse(this IEnumerable<AnalysisEntry> deliveryAnalyses)
     {
-        return deliveryAnalyses.Select(deliveryAnalysis => deliveryAnalysis.MapToResponse()).ToList();
+        return deliveryAnalyses.Select(analysisEntry => analysisEntry.MapToResponse()).ToList();
     }
 
-    public static DeliveryAnalysisFieldResponse MapToResponse(this DeliveryAnalysisField deliveryAnalysisField)
+    public static AnalysisFieldResponse MapToResponse(this AnalysisField analysisField)
     {
-        return new DeliveryAnalysisFieldResponse
+        return new AnalysisFieldResponse
         {
-            Id = deliveryAnalysisField.Id,
-            Name = deliveryAnalysisField.Name,
-            Type = deliveryAnalysisField.Type,
-            Value = deliveryAnalysisField.Value
+            Id = analysisField.Id,
+            Name = analysisField.Name,
+            Type = analysisField.Type,
+            Value = analysisField.Value
         };
     }
 
-    public static List<DeliveryAnalysisFieldResponse> MapToResponse(this IEnumerable<DeliveryAnalysisField> deliveryAnalysisFields)
+    public static List<AnalysisFieldResponse> MapToResponse(this IEnumerable<AnalysisField> analysisFields)
     {
-        return deliveryAnalysisFields.Select(deliveryAnalysisField => deliveryAnalysisField.MapToResponse()).ToList();
+        return analysisFields.Select(analysisField => analysisField.MapToResponse()).ToList();
     }
 }

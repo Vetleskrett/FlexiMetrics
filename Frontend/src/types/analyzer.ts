@@ -29,21 +29,24 @@ export type Analysis = {
     completedAt?: Date;
     status: AnalysisStatus;
     analyzerId: string;
-    deliveryAnalyses: DeliveryAnalysis[];
+    analysisEntries: AnalysisEntry[];
+    totalNumEntries: number;
 }
 
-export type DeliveryAnalysis = {
+export type AnalysisEntry = {
     id: string;
     analysisId: string;
     deliveryId: string;
     team?: Team;
     student?: Student;
-    fields: DeliveryAnalysisField[];
+    fields: AnalysisField[];
+    logInformation: string;
+    logError: string;
 }
 
 export type AnalysisFieldType = 'String' | 'Int';
 
-export type DeliveryAnalysisField = {
+export type AnalysisField = {
     id: string;
     name: string;
     type: AnalysisFieldType;

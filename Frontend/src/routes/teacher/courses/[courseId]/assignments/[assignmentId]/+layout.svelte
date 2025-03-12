@@ -6,6 +6,7 @@
 
 	const courseId = $page.params.courseId;
 	const assignmentId = $page.params.assignmentId;
+	$: currentPath = $page.url.pathname;
 
 	export let data: {
 		analyzers: Analyzer[];
@@ -13,7 +14,10 @@
 </script>
 
 <div class="fixed flex h-full w-60 flex-row flex-col items-start bg-white pt-12">
-	<MenuRow href="/teacher/courses/{courseId}/assignments/{assignmentId}">
+	<MenuRow
+		href="/teacher/courses/{courseId}/assignments/{assignmentId}"
+		isActive={currentPath.endsWith(assignmentId)}
+	>
 		<img
 			width="24"
 			height="24"
@@ -23,7 +27,10 @@
 		<h2>Overview</h2>
 	</MenuRow>
 
-	<MenuRow href="/teacher/courses/{courseId}/assignments/{assignmentId}/deliveries">
+	<MenuRow
+		href="/teacher/courses/{courseId}/assignments/{assignmentId}/deliveries"
+		isActive={currentPath.endsWith('deliveries')}
+	>
 		<img
 			width="24"
 			height="24"
@@ -33,7 +40,10 @@
 		<h2>Deliveries</h2>
 	</MenuRow>
 
-	<MenuRow href="/teacher/courses/{courseId}/assignments/{assignmentId}/feedback">
+	<MenuRow
+		href="/teacher/courses/{courseId}/assignments/{assignmentId}/feedback"
+		isActive={currentPath.endsWith('feedback')}
+	>
 		<img
 			width="24"
 			height="24"
@@ -54,7 +64,10 @@
 	</div>
 
 	{#each data.analyzers as analyzer}
-		<MenuRow href="/teacher/courses/{courseId}/assignments/{assignmentId}/analyzers/{analyzer.id}">
+		<MenuRow
+			href="/teacher/courses/{courseId}/assignments/{assignmentId}/analyzers/{analyzer.id}"
+			isActive={currentPath.endsWith(analyzer.id)}
+		>
 			<h2 class="text-base">{analyzer.name}</h2>
 		</MenuRow>
 	{/each}

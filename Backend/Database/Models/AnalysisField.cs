@@ -4,12 +4,12 @@ using System.Text.Json;
 
 namespace Database.Models;
 
-public class DeliveryAnalysisField
+public class AnalysisField
 {
     [Key]
     public required Guid Id { get; set; }
-    public required Guid DeliveryAnalysisId { get; set; }
-    public DeliveryAnalysis? DeliveryAnalysis { get; set; }
+    public required Guid AnalysisEntryId { get; set; }
+    public AnalysisEntry? AnalysisEntry { get; set; }
     public required string Name { get; set; }
     public required AnalysisFieldType Type { get; set; }
     public JsonDocument? JsonValue { get; set; }

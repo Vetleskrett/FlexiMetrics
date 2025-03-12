@@ -2,7 +2,7 @@
 	import { page } from '$app/stores';
 	import AllTeamCard from 'src/components/team/AllTeamCard.svelte';
 	import { type Team, type Course, type StudentToTeam, Role } from 'src/types/';
-	import * as Breadcrumb from '$lib/components/ui/breadcrumb/index.js';
+	import * as Breadcrumb from '$lib/components/ui/breadcrumb';
 	import { studentId } from 'src/store';
 	import { goto } from '$app/navigation';
 	import { postStudentTeam } from 'src/api';

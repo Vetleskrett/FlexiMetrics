@@ -1,5 +1,5 @@
 <script lang="ts">
-	import * as Card from '$lib/components/ui/card/index.js';
+	import * as Card from '$lib/components/ui/card';
 	import type { Analyzer } from 'src/types/';
 	import CustomButton from '../CustomButton.svelte';
 	import Save from 'lucide-svelte/icons/save';

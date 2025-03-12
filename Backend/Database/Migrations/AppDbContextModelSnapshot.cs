@@ -41,11 +41,77 @@ namespace Database.Migrations
                     b.Property<int>("Status")
                         .HasColumnType("integer");
 
+                    b.Property<int>("TotalNumEntries")
+                        .HasColumnType("integer");
+
                     b.HasKey("Id");
 
                     b.HasIndex("AnalyzerId");
 
                     b.ToTable("Analyses");
+                });
+
+            modelBuilder.Entity("Database.Models.AnalysisEntry", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("AnalysisId")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("CompletedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("LogError")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("LogInformation")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<Guid?>("StudentId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid?>("TeamId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("AnalysisId");
+
+                    b.HasIndex("StudentId");
+
+                    b.HasIndex("TeamId");
+
+                    b.ToTable("DeliveryAnalyses");
+                });
+
+            modelBuilder.Entity("Database.Models.AnalysisField", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("AnalysisEntryId")
+                        .HasColumnType("uuid");
+
+                    b.Property<JsonDocument>("JsonValue")
+                        .HasColumnType("jsonb");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<int>("Type")
+                        .HasColumnType("integer");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("AnalysisEntryId");
+
+                    b.ToTable("AnalysisFields");
                 });
 
             modelBuilder.Entity("Database.Models.Analyzer", b =>
@@ -231,53 +297,6 @@ namespace Database.Migrations
                     b.ToTable("Deliveries");
                 });
 
-            modelBuilder.Entity("Database.Models.DeliveryAnalysis", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
-
-                    b.Property<Guid>("AnalysisId")
-                        .HasColumnType("uuid");
-
-                    b.Property<Guid>("DeliveryId")
-                        .HasColumnType("uuid");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("AnalysisId");
-
-                    b.HasIndex("DeliveryId");
-
-                    b.ToTable("DeliveryAnalyses");
-                });
-
-            modelBuilder.Entity("Database.Models.DeliveryAnalysisField", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
-
-                    b.Property<Guid>("DeliveryAnalysisId")
-                        .HasColumnType("uuid");
-
-                    b.Property<JsonDocument>("JsonValue")
-                        .HasColumnType("jsonb");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<int>("Type")
-                        .HasColumnType("integer");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("DeliveryAnalysisId");
-
-                    b.ToTable("DeliveryAnalysisFields");
-                });
-
             modelBuilder.Entity("Database.Models.DeliveryField", b =>
                 {
                     b.Property<Guid>("Id")
@@ -442,6 +461,42 @@ namespace Database.Migrations
                     b.Navigation("Analyzer");
                 });
 
+            modelBuilder.Entity("Database.Models.AnalysisEntry", b =>
+                {
+                    b.HasOne("Database.Models.Analysis", "Analysis")
+                        .WithMany("AnalysisEntries")
+                        .HasForeignKey("AnalysisId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Database.Models.User", "Student")
+                        .WithMany()
+                        .HasForeignKey("StudentId")
+                        .OnDelete(DeleteBehavior.Cascade);
+
+                    b.HasOne("Database.Models.Team", "Team")
+                        .WithMany()
+                        .HasForeignKey("TeamId")
+                        .OnDelete(DeleteBehavior.Cascade);
+
+                    b.Navigation("Analysis");
+
+                    b.Navigation("Student");
+
+                    b.Navigation("Team");
+                });
+
+            modelBuilder.Entity("Database.Models.AnalysisField", b =>
+                {
+                    b.HasOne("Database.Models.AnalysisEntry", "AnalysisEntry")
+                        .WithMany("Fields")
+                        .HasForeignKey("AnalysisEntryId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("AnalysisEntry");
+                });
+
             modelBuilder.Entity("Database.Models.Analyzer", b =>
                 {
                     b.HasOne("Database.Models.Assignment", "Assignment")
@@ -538,36 +593,6 @@ namespace Database.Migrations
                     b.Navigation("Team");
                 });
 
-            modelBuilder.Entity("Database.Models.DeliveryAnalysis", b =>
-                {
-                    b.HasOne("Database.Models.Analysis", "Analysis")
-                        .WithMany("DeliveryAnalyses")
-                        .HasForeignKey("AnalysisId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("Database.Models.Delivery", "Delivery")
-                        .WithMany()
-                        .HasForeignKey("DeliveryId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Analysis");
-
-                    b.Navigation("Delivery");
-                });
-
-            modelBuilder.Entity("Database.Models.DeliveryAnalysisField", b =>
-                {
-                    b.HasOne("Database.Models.DeliveryAnalysis", "DeliveryAnalysis")
-                        .WithMany("Fields")
-                        .HasForeignKey("DeliveryAnalysisId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("DeliveryAnalysis");
-                });
-
             modelBuilder.Entity("Database.Models.DeliveryField", b =>
                 {
                     b.HasOne("Database.Models.AssignmentField", "AssignmentField")
@@ -640,7 +665,12 @@ namespace Database.Migrations
 
             modelBuilder.Entity("Database.Models.Analysis", b =>
                 {
-                    b.Navigation("DeliveryAnalyses");
+                    b.Navigation("AnalysisEntries");
+                });
+
+            modelBuilder.Entity("Database.Models.AnalysisEntry", b =>
+                {
+                    b.Navigation("Fields");
                 });
 
             modelBuilder.Entity("Database.Models.Assignment", b =>
@@ -658,11 +688,6 @@ namespace Database.Migrations
                 });
 
             modelBuilder.Entity("Database.Models.Delivery", b =>
-                {
-                    b.Navigation("Fields");
-                });
-
-            modelBuilder.Entity("Database.Models.DeliveryAnalysis", b =>
                 {
                     b.Navigation("Fields");
                 });

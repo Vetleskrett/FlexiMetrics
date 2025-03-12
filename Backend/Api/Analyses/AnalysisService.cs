@@ -3,6 +3,8 @@ using FluentValidation;
 using Microsoft.EntityFrameworkCore;
 using Database;
 using Api.Analyses.Contracts;
+using Container;
+using System.Runtime.CompilerServices;
 
 namespace Api.Analyses;
 
@@ -17,10 +19,12 @@ public interface IAnalysisService
 public class AnalysisService : IAnalysisService
 {
     private readonly AppDbContext _dbContext;
+    private readonly IAnalyzerExecutor _analyzerExecutor;
 
-    public AnalysisService(AppDbContext dbContext)
+    public AnalysisService(AppDbContext dbContext, IAnalyzerExecutor analyzerExecutor)
     {
         _dbContext = dbContext;
+        _analyzerExecutor = analyzerExecutor;
     }
 
     public async Task<Result<IEnumerable<SlimAnalysisResponse>>> GetAll()
@@ -37,13 +41,13 @@ public class AnalysisService : IAnalysisService
     public async Task<Result<AnalysisResponse>> GetById(Guid id)
     {
         var analysis = await _dbContext.Analyses
-            .Include(a => a.DeliveryAnalyses!)
-            .ThenInclude(da => da.Fields)
-            .Include(a => a.DeliveryAnalyses!)
-            .ThenInclude(da => da.Delivery!.Team!)
+            .Include(a => a.AnalysisEntries!)
+            .ThenInclude(ae => ae.Fields)
+            .Include(a => a.AnalysisEntries!)
+            .ThenInclude(ae => ae.Team!)
             .ThenInclude(t => t.Students)
-            .Include(a => a.DeliveryAnalyses!)
-            .ThenInclude(da => da.Delivery!.Student)
+            .Include(a => a.AnalysisEntries!)
+            .ThenInclude(ae => ae.Student)
             .FirstOrDefaultAsync(a => a.Id == id);
 
         if (analysis is null)
@@ -67,13 +71,13 @@ public class AnalysisService : IAnalysisService
         var latest = latestId is null ? null :
             await _dbContext.Analyses
             .AsNoTracking()
-            .Include(a => a.DeliveryAnalyses!)
-            .ThenInclude(da => da.Fields)
-            .Include(a => a.DeliveryAnalyses!)
-            .ThenInclude(da => da.Delivery!.Team!)
+            .Include(a => a.AnalysisEntries!)
+            .ThenInclude(ae => ae.Fields)
+            .Include(a => a.AnalysisEntries!)
+            .ThenInclude(ae => ae.Team!)
             .ThenInclude(t => t.Students)
-            .Include(a => a.DeliveryAnalyses!)
-            .ThenInclude(da => da.Delivery!.Student)
+            .Include(a => a.AnalysisEntries!)
+            .ThenInclude(ae => ae.Student)
             .FirstOrDefaultAsync(a => a.Id == latestId);
 
         return new AnalyzerAnalysesResponse

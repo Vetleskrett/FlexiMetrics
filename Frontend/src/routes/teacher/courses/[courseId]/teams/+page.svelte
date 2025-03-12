@@ -5,7 +5,7 @@
 	import EllipsisVertical from 'lucide-svelte/icons/ellipsis-vertical';
 	import Trash2 from 'lucide-svelte/icons/trash-2';
 	import * as DropdownMenu from '$lib/components/ui/dropdown-menu';
-	import * as Breadcrumb from '$lib/components/ui/breadcrumb/index.js';
+	import * as Breadcrumb from '$lib/components/ui/breadcrumb';
 	import AddTeamMembersCard from 'src/components/team/AddTeamMembersCard.svelte';
 	import SimpleAddCard from 'src/components/SimpleAddCard.svelte';
 	import { postStudentsTeam, postTeams } from 'src/api';

@@ -7,7 +7,11 @@ using Api.Analyzers.Contracts;
 using FileStorage;
 using Api.Common;
 using System.Net.Mime;
-using Container;
+using Api.Analyses;
+using System.Runtime.CompilerServices;
+using MassTransit;
+using Container.Models;
+using Api.Analyses.Contracts;
 
 namespace Api.Analyzers;
 
@@ -21,6 +25,7 @@ public interface IAnalyzerService
     Task<Result> UploadScript(IFormFile script, Guid analyzerFieldId);
     Task<Result<FileResponse>> DownloadScript(Guid analyzerFieldId);
     Task<Result> StartAction(AnalyzerActionRequest request, Guid id);
+    IAsyncEnumerable<AnalysisResponse> GetStatusEventsById(Guid id, CancellationToken cancellationToken);
     Task<Result> DeleteById(Guid id);
 }
 
@@ -29,14 +34,18 @@ public class AnalyzerService : IAnalyzerService
     private readonly AppDbContext _dbContext;
     private readonly IValidator<Analyzer> _validator;
     private readonly IFileStorage _fileStorage;
-    private readonly IContainerService _containerService;
+    private readonly IAnalyzerStatusUpdateReader _statusUpdateReader;
+    private readonly IBus _bus;
+    private readonly ILogger<AnalyzerService> _logger;
 
-    public AnalyzerService(AppDbContext dbContext, IValidator<Analyzer> validator, IFileStorage fileStorage, IContainerService containerService)
+    public AnalyzerService(AppDbContext dbContext, IValidator<Analyzer> validator, IFileStorage fileStorage, IAnalyzerStatusUpdateReader statusUpdateReader, IBus bus, ILogger<AnalyzerService> logger)
     {
         _dbContext = dbContext;
         _validator = validator;
         _fileStorage = fileStorage;
-        _containerService = containerService;
+        _statusUpdateReader = statusUpdateReader;
+        _bus = bus;
+        _logger = logger;
     }
 
     public async Task<Result<IEnumerable<AnalyzerResponse>>> GetAll()
@@ -217,6 +226,10 @@ public class AnalyzerService : IAnalyzerService
                 return new ValidationError("Analyzer already running").MapToResponse();
             }
 
+            var totalNumEntries = analyzer.Assignment!.CollaborationType == CollaborationType.Individual ?
+                await _dbContext.CourseStudents.Where(cs => cs.CourseId == analyzer.Assignment.CourseId).CountAsync() :
+                await _dbContext.Teams.Where(t => t.CourseId == analyzer.Assignment.CourseId).CountAsync();
+
             var analysis = new Analysis
             {
                 Id = Guid.NewGuid(),
@@ -224,12 +237,13 @@ public class AnalyzerService : IAnalyzerService
                 StartedAt = DateTime.UtcNow,
                 CompletedAt = null,
                 AnalyzerId = id,
-                DeliveryAnalyses = []
+                AnalysisEntries = [],
+                TotalNumEntries = totalNumEntries
             };
             _dbContext.Analyses.Add(analysis);
             await _dbContext.SaveChangesAsync();
 
-            await _containerService.StartAnalyzer(analyzer.Assignment!.CourseId, analyzer.AssignmentId, analyzer.Id, analysis.Id);
+            await _bus.Publish(new RunAnalyzerRequest(analyzer.Assignment!.CourseId, analyzer.AssignmentId, analyzer.Id, analysis.Id));
 
             return Result.Success();
         }
@@ -237,6 +251,55 @@ public class AnalyzerService : IAnalyzerService
         {
             throw new NotImplementedException();
         }
+    }
+
+    public async IAsyncEnumerable<AnalysisResponse> GetStatusEventsById(Guid id, [EnumeratorCancellation] CancellationToken cancellationToken)
+    {
+        var analysis = await GetAnalysisWithNestedEntities(id);
+
+        if (analysis.Status == AnalysisStatus.Completed)
+        {
+            yield break;
+        }
+
+        yield return analysis.MapToResponse();
+
+        var channel = _statusUpdateReader.GetChannel();
+
+        try
+        {
+            await foreach (var statusUpdate in channel.Reader.ReadAllAsync(cancellationToken))
+            {
+                analysis = await GetAnalysisWithNestedEntities(id);
+
+                yield return analysis.MapToResponse();
+
+                if (analysis.Status == AnalysisStatus.Completed)
+                {
+                    yield break;
+                }
+            }
+        }
+        finally
+        {
+            _statusUpdateReader.RemoveChannel(channel);
+        }
+    }
+
+    private async Task<Analysis> GetAnalysisWithNestedEntities(Guid id)
+    {
+        return await _dbContext.Analyses
+            .AsNoTracking()
+            .Include(a => a.AnalysisEntries!.OrderBy(ae => ae.CompletedAt))
+            .ThenInclude(ae => ae.Fields)
+            .Include(a => a.AnalysisEntries!)
+            .ThenInclude(ae => ae.Student)
+            .Include(a => a.AnalysisEntries!)
+            .ThenInclude(ae => ae.Team!)
+            .ThenInclude(t => t.Students)
+            .Where(a => a.AnalyzerId == id)
+            .OrderByDescending(a => a.StartedAt)
+            .FirstAsync();
     }
 
     public async Task<Result> DeleteById(Guid id)

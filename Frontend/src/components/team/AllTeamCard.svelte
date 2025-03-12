@@ -1,8 +1,8 @@
 <script lang="ts">
 	import { Role, type Team } from 'src/types/';
-	import * as Card from '$lib/components/ui/card/index.js';
+	import * as Card from '$lib/components/ui/card';
 	import * as Table from '$lib/components/ui/table';
-	import { Progress } from '$lib/components/ui/progress/index.js';
+	import { Progress } from '$lib/components/ui/progress';
 	import CustomButton from '../CustomButton.svelte';
 
 	export let teams: Team[],
