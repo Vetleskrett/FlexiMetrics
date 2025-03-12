@@ -5,7 +5,7 @@
 	import Trash2 from 'lucide-svelte/icons/trash-2';
 	import ArrowUpFromLine from 'lucide-svelte/icons/arrow-up-from-line';
 	import * as DropdownMenu from '$lib/components/ui/dropdown-menu';
-	import * as Breadcrumb from '$lib/components/ui/breadcrumb/index.js';
+	import * as Breadcrumb from '$lib/components/ui/breadcrumb';
 	import CompletedTotalCard from 'src/components/CompletedTotalCard.svelte';
 	import AssignmentInformationCard from 'src/components/assignment/AssignmentInformationCard.svelte';
 	import AssignmentFormatCard from 'src/components/assignment/AssignmentFormatCard.svelte';

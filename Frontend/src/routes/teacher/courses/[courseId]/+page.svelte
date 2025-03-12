@@ -8,7 +8,7 @@
 	import * as DropdownMenu from '$lib/components/ui/dropdown-menu';
 	import TeamsCard from 'src/components/team/TeamsCard.svelte';
 	import TeachersCard from 'src/components/teacher/TeachersCard.svelte';
-	import * as Breadcrumb from '$lib/components/ui/breadcrumb/index.js';
+	import * as Breadcrumb from '$lib/components/ui/breadcrumb';
 	import type { Course, Assignment, Teacher, Student, Team } from 'src/types/';
 	import { Role } from 'src/types/';
 	import { goto } from '$app/navigation';

@@ -51,7 +51,10 @@ public static class AnalysisMapping
             AnalysisId = analysisEntry.AnalysisId,
             Team = analysisEntry.Team?.MapToResponse(),
             Student = analysisEntry.Student?.MapToStudentResponse(),
-            Fields = analysisEntry.Fields!.MapToResponse()
+            Fields = analysisEntry.Fields!.MapToResponse(),
+            LogInformation = analysisEntry.LogInformation,
+            LogError = analysisEntry.LogError,
+            CompletedAt = analysisEntry.CompletedAt,
         };
     }
 

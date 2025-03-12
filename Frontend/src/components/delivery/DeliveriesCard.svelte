@@ -1,5 +1,5 @@
 <script lang="ts">
-	import * as Card from '$lib/components/ui/card/index.js';
+	import * as Card from '$lib/components/ui/card';
 	import * as Table from '$lib/components/ui/table';
 	import type { Delivery, AssignmentField, Assignment, Student, Team } from 'src/types/';
 	import Separator from 'src/lib/components/ui/separator/separator.svelte';

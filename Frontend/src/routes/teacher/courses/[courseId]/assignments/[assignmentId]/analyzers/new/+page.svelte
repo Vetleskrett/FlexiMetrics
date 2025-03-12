@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { page } from '$app/stores';
-	import * as Breadcrumb from '$lib/components/ui/breadcrumb/index.js';
+	import * as Breadcrumb from '$lib/components/ui/breadcrumb';
 	import CreateOrEditAnalyzer from 'src/components/analyzer/CreateOrEditAnalyzer.svelte';
 	import type { Assignment, Course } from 'src/types/';
 

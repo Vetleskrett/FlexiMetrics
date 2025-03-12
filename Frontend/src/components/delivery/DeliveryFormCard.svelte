@@ -6,7 +6,7 @@
 		UpdateDelivery,
 		Delivery
 	} from 'src/types/';
-	import * as Card from '$lib/components/ui/card/index.js';
+	import * as Card from '$lib/components/ui/card';
 	import Save from 'lucide-svelte/icons/save';
 	import CustomButton from '../CustomButton.svelte';
 	import { studentId } from 'src/store';

@@ -1,11 +1,25 @@
 <script lang="ts">
-	import * as Card from '$lib/components/ui/card/index.js';
+	import * as Card from '$lib/components/ui/card';
 	import { Progress } from '$lib/components/ui/progress';
-	import { ScrollArea } from '$lib/components/ui/scroll-area/index.js';
+	import { ScrollArea } from '$lib/components/ui/scroll-area';
+	import type { Analysis } from 'src/types';
+	import { onMount } from 'svelte';
 
-	export let total: number;
-	export let completed: number;
-	export let logs: string[];
+	export let analysis: Analysis;
+
+	const total = analysis.totalNumEntries;
+	const completed = analysis.analysisEntries.length;
+
+	const scrollToBottom = () => {
+		const scrollArea = document.querySelector('[data-scroll-area-viewport]');
+		if (scrollArea) {
+			scrollArea.scrollTop = scrollArea.scrollHeight;
+		}
+	};
+
+	onMount(() => {
+		setTimeout(scrollToBottom, 10);
+	});
 </script>
 
 <Card.Root class="w-[1080px]">
@@ -16,12 +30,21 @@
 			<Progress value={completed} max={total} class="mt-2 h-4" />
 		</div>
 		<ScrollArea class="h-64 w-full rounded-lg bg-background text-xs">
-			<div class="px-4 py-2">
-				{#each logs as log, i}
-					<p style="white-space: pre-wrap">
-						<span class="font-bold">[{i + 1}]</span>
-						{log}
-					</p>
+			<div class="flex flex-col gap-2 px-4 py-2">
+				{#each analysis.analysisEntries as entry}
+					<div>
+						{#if entry.student}
+							<p class="m-0 p-0 font-bold">[{entry.student.name}]</p>
+						{:else}
+							<p class="m-0 p-0 font-bold">[Team {entry.team?.teamNr}]</p>
+						{/if}
+						{#if entry.logInformation}
+							<p style="white-space: pre-wrap" class="m-0 p-0">{entry.logInformation}</p>
+						{/if}
+						{#if entry.logError}
+							<p style="white-space: pre-wrap" class="m-0 p-0 text-red-500">{entry.logError}</p>
+						{/if}
+					</div>
 				{/each}
 			</div>
 		</ScrollArea>

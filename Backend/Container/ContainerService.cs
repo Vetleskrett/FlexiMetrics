@@ -11,7 +11,7 @@ public interface IContainerService
     Task<Stream?> CopyFileFromContainer(string container, string path);
     Task CopyFileToContainer(string container, Stream stream, string fileName);
     Task<string> CreateContainer(string name, CancellationToken cancellationToken);
-    Task<string> GetLogs(string container, CancellationToken cancellationToken);
+    Task<(string LogInformation, string LogError)> GetLogs(string container, CancellationToken cancellationToken);
     Task RemoveContainer(string container);
     Task StartContainer(string container, CancellationToken cancellationToken);
     Task WaitForContainerCompletion(string container, CancellationToken cancellationToken);
@@ -54,7 +54,7 @@ public class ContainerService : IContainerService
         );
     }
 
-    public async Task<string> GetLogs(string container, CancellationToken cancellationToken)
+    public async Task<(string LogInformation, string LogError)> GetLogs(string container, CancellationToken cancellationToken)
     {
         var logsStream = await _dockerClient.Containers.GetContainerLogsAsync(container, false, new ContainerLogsParameters
         {
@@ -63,9 +63,7 @@ public class ContainerService : IContainerService
             Follow = true
         }, cancellationToken);
 
-        var (stdout, stderr) = await logsStream.ReadOutputToEndAsync(cancellationToken);
-
-        return stdout + stderr;
+        return await logsStream.ReadOutputToEndAsync(cancellationToken);
     }
 
     public async Task<string> CreateContainer(string name, CancellationToken cancellationToken)

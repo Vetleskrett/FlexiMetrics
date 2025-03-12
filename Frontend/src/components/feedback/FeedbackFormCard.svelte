@@ -1,6 +1,6 @@
 <script lang="ts">
 	import type { Assignment, Feedback, LetterGrade } from 'src/types/';
-	import * as Card from '$lib/components/ui/card/index.js';
+	import * as Card from '$lib/components/ui/card';
 	import { Input } from 'src/lib/components/ui/input';
 	import Textarea from 'src/lib/components/ui/textarea/textarea.svelte';
 	import Save from 'lucide-svelte/icons/save';

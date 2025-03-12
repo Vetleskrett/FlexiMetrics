@@ -40,6 +40,8 @@ export type AnalysisEntry = {
     team?: Team;
     student?: Student;
     fields: AnalysisField[];
+    logInformation: string;
+    logError: string;
 }
 
 export type AnalysisFieldType = 'String' | 'Int';

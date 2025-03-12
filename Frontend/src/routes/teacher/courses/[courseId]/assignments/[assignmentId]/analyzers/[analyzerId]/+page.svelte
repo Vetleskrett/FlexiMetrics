@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { page } from '$app/stores';
-	import * as Breadcrumb from '$lib/components/ui/breadcrumb/index.js';
+	import * as Breadcrumb from '$lib/components/ui/breadcrumb';
 	import * as DropdownMenu from '$lib/components/ui/dropdown-menu';
 	import AnalysisCard from 'src/components/analyzer/AnalysisCard.svelte';
 	import EllipsisVertical from 'lucide-svelte/icons/ellipsis-vertical';
@@ -20,7 +20,7 @@
 		getAnalyzerAnalyses,
 		runAnalyzer
 	} from 'src/api';
-	import * as Card from '$lib/components/ui/card/index.js';
+	import * as Card from '$lib/components/ui/card';
 	import { onDestroy, afterUpdate } from 'svelte';
 
 	const courseId = $page.params.courseId;
@@ -38,7 +38,7 @@
 	type RunningAnalyzerInfo = {
 		eventSource: EventSource;
 		analyzerId: string;
-		logs: string[];
+		analysis: Analysis;
 	};
 
 	let runningAnalyzerInfo: RunningAnalyzerInfo | undefined = undefined;
@@ -56,17 +56,13 @@
 		runningAnalyzerInfo = {
 			eventSource: getAnalyzerStatusEventSource($page.params.analyzerId),
 			analyzerId: $page.params.analyzerId,
-			logs: []
+			analysis: analysis
 		};
 
 		runningAnalyzerInfo.eventSource.onmessage = async (event) => {
-			const statusUpdate = JSON.parse(event.data) as {
-				analysis: Analysis;
-				logs: string;
-			};
-			analysis = statusUpdate.analysis;
-			if (statusUpdate.logs) {
-				runningAnalyzerInfo!.logs = [...runningAnalyzerInfo!.logs, statusUpdate.logs];
+			runningAnalyzerInfo!.analysis = JSON.parse(event.data) as Analysis;
+			if (runningAnalyzerInfo!.analysis.id == analysis?.id) {
+				analysis = runningAnalyzerInfo!.analysis;
 			}
 		};
 
@@ -114,10 +110,12 @@
 	};
 
 	const onSetAnalysis = async (analysisId: string) => {
-		closeEventSource();
-		const analysisResponse = await getAnalysis(analysisId);
-		analysis = analysisResponse.data;
-		subscribeToEventSource();
+		if (analysisId == runningAnalyzerInfo?.analysis.id) {
+			analysis = runningAnalyzerInfo.analysis;
+		} else {
+			const analysisResponse = await getAnalysis(analysisId);
+			analysis = analysisResponse.data;
+		}
 	};
 
 	const onDeleteAnalysis = async () => {
@@ -159,7 +157,7 @@
 			<h1 class="ml-4 text-4xl font-semibold">{data.analyzer.name}</h1>
 		</div>
 		<div class="flex items-center gap-2">
-			{#if analysis?.status == 'Started' || analysis?.status == 'Running'}
+			{#if runningAnalyzerInfo}
 				<CustomButton color="red" on:click={onCancel}>
 					<X size="20" />
 					<p>Cancel</p>
@@ -195,16 +193,12 @@
 		</div>
 	</div>
 
-	{#if analysis}
-		{#if analysis?.status == 'Started' || analysis?.status == 'Running'}
-			<AnalyzerRunningCard
-				total={analysis.totalNumEntries}
-				completed={analysis.analysisEntries.length}
-				logs={runningAnalyzerInfo?.logs || []}
-			/>
+	{#key analysis}
+		{#if analysis && runningAnalyzerInfo?.analysis.id == analysis.id}
+			<AnalyzerRunningCard {analysis} />
 		{/if}
 
-		{#key analysis}
+		{#if analysis}
 			<AnalysisCard
 				{analysis}
 				analyses={data.analyses.analyses}
@@ -212,12 +206,12 @@
 				{onSetAnalysis}
 				{onDeleteAnalysis}
 			/>
-		{/key}
-	{:else}
-		<Card.Root class="w-[1080px]">
-			<Card.Content class="text-center">
-				<p>No analyses</p>
-			</Card.Content>
-		</Card.Root>
-	{/if}
+		{:else}
+			<Card.Root class="w-[1080px]">
+				<Card.Content class="text-center">
+					<p>No analyses</p>
+				</Card.Content>
+			</Card.Root>
+		{/if}
+	{/key}
 </div>

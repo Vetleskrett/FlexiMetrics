@@ -101,7 +101,7 @@ public partial class AnalyzerExecutor : IAnalyzerExecutor
                 .SetProperty(a => a.CompletedAt, DateTime.UtcNow)
             );
 
-        var statusUpdate = new AnalyzerStatusUpdate(request.AnalyzerId, "");
+        var statusUpdate = new AnalyzerStatusUpdate(request.AnalyzerId);
         await _bus.Publish(statusUpdate, cancellationToken);
     }
 
@@ -124,13 +124,11 @@ public partial class AnalyzerExecutor : IAnalyzerExecutor
 
             await _containerService.StartContainer(container, cancellationToken);
 
-            var logs = await _containerService.GetLogs(container, cancellationToken);
-
             await _containerService.WaitForContainerCompletion(container, cancellationToken);
 
-            await OnAnalysisEntryFinished(container, entry, request);
+            await OnAnalysisEntryFinished(container, entry, request, cancellationToken);
 
-            var statusUpdate = new AnalyzerStatusUpdate(request.AnalyzerId, logs);
+            var statusUpdate = new AnalyzerStatusUpdate(request.AnalyzerId);
             await _bus.Publish(statusUpdate, cancellationToken);
         }
         finally
@@ -151,15 +149,17 @@ public partial class AnalyzerExecutor : IAnalyzerExecutor
         Converters = { new JsonStringEnumConverter() }
     };
 
-    private async Task OnAnalysisEntryFinished(string container, AssignmentEntry entry, RunAnalyzerRequest request)
+    private async Task OnAnalysisEntryFinished(string container, AssignmentEntry entry, RunAnalyzerRequest request, CancellationToken cancellationToken)
     {
+        var (logInformation, logError) = await _containerService.GetLogs(container, cancellationToken);
+
         using var outputStream = await _containerService.CopyFileFromContainer(container, "output.json");
         if (outputStream is null)
         {
             return;
         }
 
-        var outputFields = await JsonSerializer.DeserializeAsync<Dictionary<string, OutputField>>(outputStream, _jsonOptions);
+        var outputFields = await JsonSerializer.DeserializeAsync<Dictionary<string, OutputField>>(outputStream, _jsonOptions, cancellationToken);
 
         var analysisEntry = new AnalysisEntry
         {
@@ -167,7 +167,10 @@ public partial class AnalyzerExecutor : IAnalyzerExecutor
             AnalysisId = request.AnalysisId,
             StudentId = entry.Student?.Id,
             TeamId = entry.Team?.Id,
-            Fields = []
+            Fields = [],
+            LogInformation = logInformation,
+            LogError = logError,
+            CompletedAt = DateTime.UtcNow
         };
 
         var analysisFields = outputFields!.Select(pair =>
@@ -181,12 +184,12 @@ public partial class AnalyzerExecutor : IAnalyzerExecutor
             }
         ).ToList();
 
-        await _dbLock.WaitAsync();
+        await _dbLock.WaitAsync(cancellationToken);
         try
         {
             _dbContext.DeliveryAnalyses.Add(analysisEntry);
             _dbContext.AnalysisFields.AddRange(analysisFields);
-            await _dbContext.SaveChangesAsync();
+            await _dbContext.SaveChangesAsync(cancellationToken);
         }
         finally
         {

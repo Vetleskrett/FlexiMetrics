@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { page } from '$app/stores';
-	import * as Breadcrumb from '$lib/components/ui/breadcrumb/index.js';
+	import * as Breadcrumb from '$lib/components/ui/breadcrumb';
 	import DeliveriesCard from 'src/components/delivery/DeliveriesCard.svelte';
 	import type { Assignment, AssignmentField, Delivery, Student, Course, Team } from 'src/types/';
 

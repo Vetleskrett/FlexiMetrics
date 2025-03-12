@@ -1,3 +1,3 @@
 ﻿namespace Container.Models;
 
-public record AnalyzerStatusUpdate(Guid AnalyzerId, string Logs);
+public record AnalyzerStatusUpdate(Guid AnalyzerId);

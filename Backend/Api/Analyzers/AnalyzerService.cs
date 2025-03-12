@@ -11,6 +11,7 @@ using Api.Analyses;
 using System.Runtime.CompilerServices;
 using MassTransit;
 using Container.Models;
+using Api.Analyses.Contracts;
 
 namespace Api.Analyzers;
 
@@ -24,7 +25,7 @@ public interface IAnalyzerService
     Task<Result> UploadScript(IFormFile script, Guid analyzerFieldId);
     Task<Result<FileResponse>> DownloadScript(Guid analyzerFieldId);
     Task<Result> StartAction(AnalyzerActionRequest request, Guid id);
-    IAsyncEnumerable<AnalyzerStatusUpdateResponse> GetStatusEventsById(Guid id, CancellationToken cancellationToken);
+    IAsyncEnumerable<AnalysisResponse> GetStatusEventsById(Guid id, CancellationToken cancellationToken);
     Task<Result> DeleteById(Guid id);
 }
 
@@ -252,7 +253,7 @@ public class AnalyzerService : IAnalyzerService
         }
     }
 
-    public async IAsyncEnumerable<AnalyzerStatusUpdateResponse> GetStatusEventsById(Guid id, [EnumeratorCancellation] CancellationToken cancellationToken)
+    public async IAsyncEnumerable<AnalysisResponse> GetStatusEventsById(Guid id, [EnumeratorCancellation] CancellationToken cancellationToken)
     {
         var analysis = await GetAnalysisWithNestedEntities(id);
 
@@ -261,11 +262,7 @@ public class AnalyzerService : IAnalyzerService
             yield break;
         }
 
-        yield return new AnalyzerStatusUpdateResponse
-        {
-            Analysis = analysis.MapToResponse(),
-            Logs = ""
-        };
+        yield return analysis.MapToResponse();
 
         var channel = _statusUpdateReader.GetChannel();
 
@@ -275,11 +272,7 @@ public class AnalyzerService : IAnalyzerService
             {
                 analysis = await GetAnalysisWithNestedEntities(id);
 
-                yield return new AnalyzerStatusUpdateResponse
-                {
-                    Analysis = analysis.MapToResponse(),
-                    Logs = statusUpdate.Logs
-                };
+                yield return analysis.MapToResponse();
 
                 if (analysis.Status == AnalysisStatus.Completed)
                 {
@@ -297,7 +290,7 @@ public class AnalyzerService : IAnalyzerService
     {
         return await _dbContext.Analyses
             .AsNoTracking()
-            .Include(a => a.AnalysisEntries!)
+            .Include(a => a.AnalysisEntries!.OrderBy(ae => ae.CompletedAt))
             .ThenInclude(ae => ae.Fields)
             .Include(a => a.AnalysisEntries!)
             .ThenInclude(ae => ae.Student)

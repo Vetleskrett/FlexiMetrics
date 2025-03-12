@@ -1,6 +1,6 @@
 <script lang="ts">
 	import type { Teacher } from 'src/types/';
-	import * as Card from '$lib/components/ui/card/index.js';
+	import * as Card from '$lib/components/ui/card';
 	import * as Table from '$lib/components/ui/table';
 	import CustomButton from '../CustomButton.svelte';
 	import Trash_2 from 'lucide-svelte/icons/trash-2';

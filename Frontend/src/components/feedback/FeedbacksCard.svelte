@@ -1,5 +1,5 @@
 <script lang="ts">
-	import * as Card from '$lib/components/ui/card/index.js';
+	import * as Card from '$lib/components/ui/card';
 	import * as Table from '$lib/components/ui/table';
 	import type { Assignment, Student, Team, Feedback } from 'src/types/';
 	import Check from 'lucide-svelte/icons/check';
