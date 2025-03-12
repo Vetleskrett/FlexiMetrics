@@ -11,7 +11,6 @@ using Api.Analyses;
 using System.Runtime.CompilerServices;
 using MassTransit;
 using Container.Models;
-using System.Threading.Channels;
 
 namespace Api.Analyzers;
 
@@ -226,6 +225,10 @@ public class AnalyzerService : IAnalyzerService
                 return new ValidationError("Analyzer already running").MapToResponse();
             }
 
+            var totalNumEntries = analyzer.Assignment!.CollaborationType == CollaborationType.Individual ?
+                await _dbContext.CourseStudents.Where(cs => cs.CourseId == analyzer.Assignment.CourseId).CountAsync() :
+                await _dbContext.Teams.Where(t => t.CourseId == analyzer.Assignment.CourseId).CountAsync();
+
             var analysis = new Analysis
             {
                 Id = Guid.NewGuid(),
@@ -233,7 +236,8 @@ public class AnalyzerService : IAnalyzerService
                 StartedAt = DateTime.UtcNow,
                 CompletedAt = null,
                 AnalyzerId = id,
-                AnalysisEntries = []
+                AnalysisEntries = [],
+                TotalNumEntries = totalNumEntries
             };
             _dbContext.Analyses.Add(analysis);
             await _dbContext.SaveChangesAsync();

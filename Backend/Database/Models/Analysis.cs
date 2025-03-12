@@ -12,4 +12,5 @@ public class Analysis
     public required Guid AnalyzerId { get; set; }
     public Analyzer? Analyzer { get; set; }
     public required List<AnalysisEntry>? AnalysisEntries { get; set; }
+    public required int TotalNumEntries { get; set; }
 }

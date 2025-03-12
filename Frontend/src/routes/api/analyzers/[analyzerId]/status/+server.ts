@@ -15,9 +15,27 @@ export const GET: RequestHandler = async ({ params }) => {
 
     const webStream = new ReadableStream({
       start(controller) {
-        nodeStream.on('data', (chunk) => controller.enqueue(chunk));
-        nodeStream.on('end', () => controller.close());
-        nodeStream.on('error', (err) => controller.error(err));
+        nodeStream.on('data', (chunk) => {
+          try {
+            controller.enqueue(chunk);
+          } catch(error: any) {
+            console.error(error);
+          }
+        });
+        nodeStream.on('end', () => {
+          try {
+            controller.close();
+          } catch(error: any) {
+            console.error(error);
+          }
+        });
+        nodeStream.on('error', (err) => {
+          try {
+            controller.error(err);
+          } catch(error: any) {
+            console.error(error);
+          }
+        });
       }
     });
 

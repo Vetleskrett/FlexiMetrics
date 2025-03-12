@@ -30,6 +30,7 @@ export type Analysis = {
     status: AnalysisStatus;
     analyzerId: string;
     analysisEntries: AnalysisEntry[];
+    totalNumEntries: number;
 }
 
 export type AnalysisEntry = {

@@ -21,7 +21,7 @@
 		runAnalyzer
 	} from 'src/api';
 	import * as Card from '$lib/components/ui/card/index.js';
-	import { onDestroy, onMount } from 'svelte';
+	import { onDestroy, afterUpdate } from 'svelte';
 
 	const courseId = $page.params.courseId;
 	const assignmentId = $page.params.assignmentId;
@@ -33,12 +33,54 @@
 		analyses: AnalyzerAnalyses;
 	};
 
-	let analysis = data.analyses.latest;
+	$: analysis = data.analyses.latest;
 
-	let status = {
-		total: 30,
-		completed: analysis?.analysisEntries?.length || 0,
-		logs: ''
+	type RunningAnalyzerInfo = {
+		eventSource: EventSource;
+		analyzerId: string;
+		logs: string[];
+	};
+
+	let runningAnalyzerInfo: RunningAnalyzerInfo | undefined = undefined;
+
+	const subscribeToEventSource = () => {
+		if (!analysis || analysis.status == 'Completed') {
+			return;
+		}
+		if (runningAnalyzerInfo) {
+			return;
+		}
+
+		console.log('Subscribing to event source');
+
+		runningAnalyzerInfo = {
+			eventSource: getAnalyzerStatusEventSource($page.params.analyzerId),
+			analyzerId: $page.params.analyzerId,
+			logs: []
+		};
+
+		runningAnalyzerInfo.eventSource.onmessage = async (event) => {
+			const statusUpdate = JSON.parse(event.data) as {
+				analysis: Analysis;
+				logs: string;
+			};
+			analysis = statusUpdate.analysis;
+			if (statusUpdate.logs) {
+				runningAnalyzerInfo!.logs = [...runningAnalyzerInfo!.logs, statusUpdate.logs];
+			}
+		};
+
+		runningAnalyzerInfo.eventSource.onerror = async () => {
+			closeEventSource();
+		};
+	};
+
+	const closeEventSource = () => {
+		if (runningAnalyzerInfo) {
+			console.log('Closing event source');
+			runningAnalyzerInfo.eventSource.close();
+			runningAnalyzerInfo = undefined;
+		}
 	};
 
 	const update = async () => {
@@ -46,59 +88,19 @@
 		const response = await getAnalyzerAnalyses($page.params.analyzerId);
 		data.analyses = response.data;
 		analysis = data.analyses.latest;
-		subscribeToStatusIfRunning();
+		subscribeToEventSource();
 	};
-
-	type StatusUpdate = {
-		analysis: Analysis;
-		logs: string;
-	};
-
-	let eventSource: EventSource | undefined = undefined;
-
-	const closeEventSource = () => {
-		if (eventSource) {
-			console.log('Closing event source');
-			eventSource?.close();
-			eventSource = undefined;
-		}
-	};
-
-	const subscribeToStatus = () => {
-		closeEventSource();
-
-		console.log('Subscribing to event source');
-
-		eventSource = getAnalyzerStatusEventSource($page.params.analyzerId);
-
-		eventSource.onmessage = async (event) => {
-			const statusUpdate = JSON.parse(event.data) as StatusUpdate;
-			console.log('Received event:', statusUpdate);
-
-			analysis = statusUpdate.analysis;
-
-			status.completed = analysis?.analysisEntries.length || 0;
-			status.logs += statusUpdate.logs + '\n';
-		};
-
-		eventSource.onerror = async (err) => {
-			console.error('EventSource failed:', err);
-			closeEventSource();
-		};
-	};
-
-	const subscribeToStatusIfRunning = () => {
-		if (analysis?.status == 'Started' || analysis?.status == 'Running') {
-			subscribeToStatus();
-		}
-	};
-
-	onMount(() => {
-		subscribeToStatusIfRunning();
-	});
 
 	onDestroy(() => {
 		closeEventSource();
+	});
+
+	afterUpdate(() => {
+		if (runningAnalyzerInfo?.analyzerId != $page.params.analyzerId) {
+			closeEventSource();
+		}
+
+		subscribeToEventSource();
 	});
 
 	const onCancel = async () => {
@@ -115,14 +117,12 @@
 		closeEventSource();
 		const analysisResponse = await getAnalysis(analysisId);
 		analysis = analysisResponse.data;
-		subscribeToStatusIfRunning();
+		subscribeToEventSource();
 	};
 
 	const onDeleteAnalysis = async () => {
-		if (analysis) {
-			await deleteAnalysis(analysis.id);
-			await update();
-		}
+		await deleteAnalysis(analysis!.id);
+		await update();
 	};
 </script>
 
@@ -197,16 +197,22 @@
 
 	{#if analysis}
 		{#if analysis?.status == 'Started' || analysis?.status == 'Running'}
-			<AnalyzerRunningCard {status} />
+			<AnalyzerRunningCard
+				total={analysis.totalNumEntries}
+				completed={analysis.analysisEntries.length}
+				logs={runningAnalyzerInfo?.logs || []}
+			/>
 		{/if}
 
-		<AnalysisCard
-			{analysis}
-			analyses={data.analyses.analyses}
-			isIndividual={data.assignment.collaborationType == 'Individual'}
-			{onSetAnalysis}
-			{onDeleteAnalysis}
-		/>
+		{#key analysis}
+			<AnalysisCard
+				{analysis}
+				analyses={data.analyses.analyses}
+				isIndividual={data.assignment.collaborationType == 'Individual'}
+				{onSetAnalysis}
+				{onDeleteAnalysis}
+			/>
+		{/key}
 	{:else}
 		<Card.Root class="w-[1080px]">
 			<Card.Content class="text-center">
