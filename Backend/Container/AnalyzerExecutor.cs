@@ -16,7 +16,7 @@ public interface IAnalyzerExecutor
 
 public partial class AnalyzerExecutor : IAnalyzerExecutor
 {
-    private const string FLEXIMETRICS_PATH = "../Container/scripts/fleximetrics.py";
+    private const string FLEXIMETRICS_PATH = "../Container/Scripts/fleximetrics.py";
 
     private readonly AppDbContext _dbContext;
     private readonly IContainerService _containerService;

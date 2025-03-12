@@ -2,4 +2,4 @@
 	export let value: any;
 </script>
 
-<p>{value}</p>
+<p style="white-space: pre-wrap">{value}</p>

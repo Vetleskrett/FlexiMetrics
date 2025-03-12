@@ -74,7 +74,15 @@
 				},
 				cell: getCell(header.type)
 			})
-		)
+		),
+		table.column({
+			id: 'Logs',
+			accessor: (analysisEntry) =>
+				analysisEntry.logInformation +
+				(analysisEntry.logError ? '\n' + analysisEntry.logError : ''),
+			header: 'Logs',
+			cell: getCell('String')
+		})
 	]);
 
 	const { headerRows, pageRows, tableAttrs, tableBodyAttrs, pluginStates, flatColumns } =
@@ -82,6 +90,9 @@
 
 	const { hiddenColumnIds } = pluginStates.hide;
 	let showColumnForId = Object.fromEntries(flatColumns.map((col) => [col.id, true]));
+
+	showColumnForId['Logs'] = false;
+
 	$: $hiddenColumnIds = Object.entries(showColumnForId)
 		.filter(([, show]) => !show)
 		.map(([id]) => id);
@@ -128,63 +139,74 @@
 					{/each}
 				</DropdownMenu.Content>
 			</DropdownMenu.Root>
-			<div class="flex items-center gap-4">
-				<DropdownMenu.Root>
-					<DropdownMenu.Trigger asChild let:builder>
-						<CustomButton outline={true} color="blue" builders={[builder]}>
-							<List class="h-4 w-4" />
-							<p>Show/hide columns</p>
-						</CustomButton>
-					</DropdownMenu.Trigger>
-					<DropdownMenu.Content>
-						{#each headers as header, id}
-							<DropdownMenu.CheckboxItem
-								bind:checked={showColumnForId[id]}
-								on:click={(e) => {
-									e.preventDefault();
-									showColumnForId[id] = !showColumnForId[id];
-								}}
-							>
-								{header.name}
-							</DropdownMenu.CheckboxItem>
-						{/each}
-					</DropdownMenu.Content>
-				</DropdownMenu.Root>
-				<DropdownMenu.Root>
-					<DropdownMenu.Trigger asChild let:builder>
-						<CustomButton outline={true} color="blue" builders={[builder]}>
-							<Filter class="h-4 w-4" />
-							<p>Filter</p>
-						</CustomButton>
-					</DropdownMenu.Trigger>
-					<DropdownMenu.Content>
-						{#each headers as header, id}
-							{#if showColumnForId[id]}
+			{#if analysis.status == 'Completed'}
+				<div class="flex items-center gap-4">
+					<DropdownMenu.Root>
+						<DropdownMenu.Trigger asChild let:builder>
+							<CustomButton outline={true} color="blue" builders={[builder]}>
+								<List class="h-4 w-4" />
+								<p>Show/hide columns</p>
+							</CustomButton>
+						</DropdownMenu.Trigger>
+						<DropdownMenu.Content>
+							{#each headers as header, id}
 								<DropdownMenu.CheckboxItem
-									bind:checked={showFilterForId[id]}
+									bind:checked={showColumnForId[id]}
 									on:click={(e) => {
 										e.preventDefault();
-										showFilterForId[id] = !showFilterForId[id];
+										showColumnForId[id] = !showColumnForId[id];
 									}}
 								>
 									{header.name}
 								</DropdownMenu.CheckboxItem>
-							{/if}
-						{/each}
-					</DropdownMenu.Content>
-				</DropdownMenu.Root>
-				<DropdownMenu.Root>
-					<DropdownMenu.Trigger>
-						<EllipsisVertical size={24} />
-					</DropdownMenu.Trigger>
-					<DropdownMenu.Content>
-						<DropdownMenu.Item on:click={onDeleteAnalysis}>
-							<Trash2 class="h-4" />
-							<p>Delete analysis</p>
-						</DropdownMenu.Item>
-					</DropdownMenu.Content>
-				</DropdownMenu.Root>
-			</div>
+							{/each}
+							<DropdownMenu.CheckboxItem
+								bind:checked={showColumnForId['Logs']}
+								on:click={(e) => {
+									e.preventDefault();
+									showColumnForId['Logs'] = !showColumnForId['Logs'];
+								}}
+							>
+								Logs
+							</DropdownMenu.CheckboxItem>
+						</DropdownMenu.Content>
+					</DropdownMenu.Root>
+					<DropdownMenu.Root>
+						<DropdownMenu.Trigger asChild let:builder>
+							<CustomButton outline={true} color="blue" builders={[builder]}>
+								<Filter class="h-4 w-4" />
+								<p>Filter</p>
+							</CustomButton>
+						</DropdownMenu.Trigger>
+						<DropdownMenu.Content>
+							{#each headers as header, id}
+								{#if showColumnForId[id]}
+									<DropdownMenu.CheckboxItem
+										bind:checked={showFilterForId[id]}
+										on:click={(e) => {
+											e.preventDefault();
+											showFilterForId[id] = !showFilterForId[id];
+										}}
+									>
+										{header.name}
+									</DropdownMenu.CheckboxItem>
+								{/if}
+							{/each}
+						</DropdownMenu.Content>
+					</DropdownMenu.Root>
+					<DropdownMenu.Root>
+						<DropdownMenu.Trigger>
+							<EllipsisVertical size={24} />
+						</DropdownMenu.Trigger>
+						<DropdownMenu.Content>
+							<DropdownMenu.Item on:click={onDeleteAnalysis}>
+								<Trash2 class="h-4" />
+								<p>Delete analysis</p>
+							</DropdownMenu.Item>
+						</DropdownMenu.Content>
+					</DropdownMenu.Root>
+				</div>
+			{/if}
 		</div>
 	</Card.Header>
 	<Card.Content class="p-0 ">
