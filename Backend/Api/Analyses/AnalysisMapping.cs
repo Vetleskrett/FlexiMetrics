@@ -58,9 +58,25 @@ public static class AnalysisMapping
         };
     }
 
-    public static List<AnalysisEntryResponse> MapToResponse(this IEnumerable<AnalysisEntry> deliveryAnalyses)
+    public static List<AnalysisEntryResponse> MapToResponse(this IEnumerable<AnalysisEntry> analysisEntries)
     {
-        return deliveryAnalyses.Select(analysisEntry => analysisEntry.MapToResponse()).ToList();
+        return analysisEntries.Select(analysisEntry => analysisEntry.MapToResponse()).ToList();
+    }
+
+    public static StudentAnalysisResponse MapToStudentResponse(this AnalysisEntry analysisEntry)
+    {
+        return new StudentAnalysisResponse
+        {
+            Id = analysisEntry.Id,
+            AnalyzerName = analysisEntry.Analysis!.Analyzer!.Name,
+            Fields = analysisEntry.Fields!.MapToResponse(),
+            CompletedAt = analysisEntry.CompletedAt,
+        };
+    }
+
+    public static List<StudentAnalysisResponse> MapToStudentResponse(this IEnumerable<AnalysisEntry> analysisEntries)
+    {
+        return analysisEntries.Select(analysisEntry => analysisEntry.MapToStudentResponse()).ToList();
     }
 
     public static AnalysisFieldResponse MapToResponse(this AnalysisField analysisField)

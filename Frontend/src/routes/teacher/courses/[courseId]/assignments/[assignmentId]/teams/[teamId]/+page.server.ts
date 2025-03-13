@@ -1,4 +1,4 @@
-import { getCourse, getAssignment, getAssignmentFields, getTeamDelivery, getTeamFeedback, getTeam } from "src/api.server";
+import { getCourse, getAssignment, getAssignmentFields, getTeamDelivery, getTeamFeedback, getTeam, getTeamAnalyses } from "src/api.server";
 import type { PageServerLoad } from "./$types";
 
 export const load: PageServerLoad = async ({ params }: { params: { courseId: string; assignmentId: string; teamId: string; } }) => {
@@ -9,6 +9,7 @@ export const load: PageServerLoad = async ({ params }: { params: { courseId: str
         deliveryResponse,
         feedbackResponse,
         teamResponse,
+        studentAnalysesResponse
     ] = await Promise.all([
         getCourse(params.courseId),
         getAssignment(params.assignmentId),
@@ -16,6 +17,7 @@ export const load: PageServerLoad = async ({ params }: { params: { courseId: str
         getTeamDelivery(params.teamId, params.assignmentId),
         getTeamFeedback(params.teamId, params.assignmentId),
         getTeam(params.teamId),
+        getTeamAnalyses(params.teamId, params.assignmentId)
     ])
 
     return { 
@@ -25,5 +27,6 @@ export const load: PageServerLoad = async ({ params }: { params: { courseId: str
         delivery: deliveryResponse.status == 204 ? null : deliveryResponse?.data,
         feedback: feedbackResponse.status == 204 ? null : feedbackResponse?.data,
         team: teamResponse.data,
+        studentAnalyses: studentAnalysesResponse.data
     }
 };

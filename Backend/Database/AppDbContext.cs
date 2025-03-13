@@ -21,7 +21,7 @@ public class AppDbContext : DbContext
     public DbSet<Feedback> Feedbacks { get; set; }
     public DbSet<Analyzer> Analyzers { get; set; }
     public DbSet<Analysis> Analyses { get; set; }
-    public DbSet<AnalysisEntry> DeliveryAnalyses { get; set; }
+    public DbSet<AnalysisEntry> AnalysisEntries { get; set; }
     public DbSet<AnalysisField> AnalysisFields { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)

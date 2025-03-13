@@ -1,4 +1,4 @@
-import { getCourse, getAssignment, getAssignmentFields, getStudentDelivery, getStudentFeedback } from "src/api.server";
+import { getCourse, getAssignment, getAssignmentFields, getStudentDelivery, getStudentFeedback, getStudentAnalyses } from "src/api.server";
 import { studentId } from "src/store";
 import type { PageServerLoad } from "./$types";
 
@@ -8,13 +8,15 @@ export const load: PageServerLoad = async ({ params }: {params: { courseId: stri
         assignmentResponse,
         assignmentFieldsResponse,
         deliveryResponse,
-        feedbackResponse
+        feedbackResponse,
+        studentAnalysesResponse
     ] = await Promise.all([
         getCourse(params.courseId),
         getAssignment(params.assignmentId),
         getAssignmentFields(params.assignmentId),
         getStudentDelivery(studentId, params.assignmentId),
-        getStudentFeedback(studentId, params.assignmentId)
+        getStudentFeedback(studentId, params.assignmentId),
+        getStudentAnalyses(studentId, params.assignmentId)
     ])
 
     return { 
@@ -23,5 +25,6 @@ export const load: PageServerLoad = async ({ params }: {params: { courseId: stri
         assignmentFields: assignmentFieldsResponse.data,
         delivery: deliveryResponse.status == 204 ? null : deliveryResponse?.data,
         feedback: feedbackResponse.status == 204 ? null : feedbackResponse?.data,
+        studentAnalyses: studentAnalysesResponse.data
     }
 };

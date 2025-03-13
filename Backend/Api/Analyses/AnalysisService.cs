@@ -3,8 +3,7 @@ using FluentValidation;
 using Microsoft.EntityFrameworkCore;
 using Database;
 using Api.Analyses.Contracts;
-using Container;
-using System.Runtime.CompilerServices;
+using Database.Models;
 
 namespace Api.Analyses;
 
@@ -13,18 +12,18 @@ public interface IAnalysisService
     Task<Result<IEnumerable<SlimAnalysisResponse>>> GetAll();
     Task<Result<AnalysisResponse>> GetById(Guid id);
     Task<Result<AnalyzerAnalysesResponse>> GetAllByAnalyzer(Guid analyzerId);
+    Task<Result<IEnumerable<StudentAnalysisResponse>>> GetStudentAssignmentAnalyses(Guid studentId, Guid assignmentId);
+    Task<Result<IEnumerable<StudentAnalysisResponse>>> GetTeamAssignmentAnalyses(Guid teamId, Guid assignmentId);
     Task<Result> DeleteById(Guid id);
 }
 
 public class AnalysisService : IAnalysisService
 {
     private readonly AppDbContext _dbContext;
-    private readonly IAnalyzerExecutor _analyzerExecutor;
 
-    public AnalysisService(AppDbContext dbContext, IAnalyzerExecutor analyzerExecutor)
+    public AnalysisService(AppDbContext dbContext)
     {
         _dbContext = dbContext;
-        _analyzerExecutor = analyzerExecutor;
     }
 
     public async Task<Result<IEnumerable<SlimAnalysisResponse>>> GetAll()
@@ -85,6 +84,89 @@ public class AnalysisService : IAnalysisService
             Analyses = analyses.MapToSlimResponse(),
             Latest = latest?.MapToResponse()
         };
+    }
+
+    public async Task<Result<IEnumerable<StudentAnalysisResponse>>> GetStudentAssignmentAnalyses(Guid studentId, Guid assignmentId)
+    {
+        var assignment = await _dbContext.Assignments.FindAsync(assignmentId);
+        if (assignment is null)
+        {
+            return Result<IEnumerable<StudentAnalysisResponse>>.NotFound();
+        }
+
+        var student = await _dbContext.Users.FindAsync(studentId);
+        if (student is null)
+        {
+            return Result<IEnumerable<StudentAnalysisResponse>>.NotFound();
+        }
+
+        var courseStudent = await _dbContext.CourseStudents
+            .FirstOrDefaultAsync(cs => cs.CourseId == assignment.CourseId && cs.StudentId == studentId);
+        if (courseStudent is null)
+        {
+            return new ValidationError("Student is not enrolled in the course").MapToResponse();
+        }
+
+        if (assignment.CollaborationType == CollaborationType.Individual)
+        {
+            var analyses = await _dbContext.AnalysisEntries
+                .Include(ae => ae.Fields)
+                .Include(ae => ae.Analysis!)
+                .ThenInclude(a => a.Analyzer)
+                .Where(ae => ae.Analysis!.Analyzer!.AssignmentId == assignmentId)
+                .Where(ae => ae.StudentId == studentId)
+                .GroupBy(ae => ae.Analysis!.AnalyzerId)
+                .Select(group => group.OrderByDescending(ae => ae.CompletedAt).First())
+                .ToListAsync();
+
+            return analyses.MapToStudentResponse();
+        }
+        else
+        {
+            var analyses = await _dbContext.AnalysisEntries
+                .Include(ae => ae.Fields)
+                .Include(ae => ae.Analysis!)
+                .ThenInclude(a => a.Analyzer)
+                .Where(ae => ae.Analysis!.Analyzer!.AssignmentId == assignmentId)
+                .Where(ae => ae.Team!.Students.Any(s => s.Id == studentId))
+                .GroupBy(ae => ae.Analysis!.AnalyzerId)
+                .Select(group => group.OrderByDescending(ae => ae.CompletedAt).First())
+                .ToListAsync();
+
+            return analyses.MapToStudentResponse();
+        }
+    }
+
+    public async Task<Result<IEnumerable<StudentAnalysisResponse>>> GetTeamAssignmentAnalyses(Guid teamId, Guid assignmentId)
+    {
+        var assignment = await _dbContext.Assignments.FindAsync(assignmentId);
+        if (assignment is null)
+        {
+            return Result<IEnumerable<StudentAnalysisResponse>>.NotFound();
+        }
+
+        var team = await _dbContext.Teams.FindAsync(teamId);
+        if (team is null)
+        {
+            return Result<IEnumerable<StudentAnalysisResponse>>.NotFound();
+        }
+
+        if (team.CourseId != assignment.CourseId)
+        {
+            return new ValidationError("Team is not in the course").MapToResponse();
+        }
+
+        var analyses = await _dbContext.AnalysisEntries
+            .Include(ae => ae.Fields)
+            .Include(ae => ae.Analysis!)
+            .ThenInclude(a => a.Analyzer)
+            .Where(ae => ae.Analysis!.Analyzer!.AssignmentId == assignmentId)
+            .Where(ae => ae.TeamId == teamId)
+            .GroupBy(ae => ae.Analysis!.AnalyzerId)
+            .Select(group => group.OrderByDescending(ae => ae.CompletedAt).First())
+            .ToListAsync();
+
+        return analyses.MapToStudentResponse();
     }
 
     public async Task<Result> DeleteById(Guid id)

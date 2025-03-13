@@ -36,12 +36,19 @@ export type Analysis = {
 export type AnalysisEntry = {
     id: string;
     analysisId: string;
-    deliveryId: string;
     team?: Team;
     student?: Student;
     fields: AnalysisField[];
     logInformation: string;
     logError: string;
+    completedAt: Date;
+}
+
+export type StudentAnalysis = {
+    id: string;
+    analyzerName: string;
+    completedAt: Date;
+    fields: AnalysisField[];
 }
 
 export type AnalysisFieldType = 'String' | 'Int';
@@ -52,7 +59,6 @@ export type AnalysisField = {
     type: AnalysisFieldType;
     value: any;
 }
-
 
 export type CreateAnalyzer = {
     name: string;
