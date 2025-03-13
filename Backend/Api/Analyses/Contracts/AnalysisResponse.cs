@@ -26,11 +26,3 @@ public class AnalysisEntryResponse
     public required string LogError { get; init; }
     public required DateTime CompletedAt { get; init; }
 }
-
-public class AnalysisFieldResponse
-{
-    public required Guid Id { get; init; }
-    public required string Name { get; init; }
-    public required AnalysisFieldType Type { get; init; }
-    public required object Value { get; init; }
-}

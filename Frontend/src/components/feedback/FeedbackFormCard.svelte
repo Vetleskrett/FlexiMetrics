@@ -226,7 +226,7 @@
 					</Form.Control>
 					<Form.FieldErrors />
 				</Form.Field>
-				<div class="flex justify-end gap-4">
+				<div class="flex justify-center gap-4">
 					{#if feedback != null}
 						<CustomButton color="red" on:click={onCancel}>
 							<X size="20" />

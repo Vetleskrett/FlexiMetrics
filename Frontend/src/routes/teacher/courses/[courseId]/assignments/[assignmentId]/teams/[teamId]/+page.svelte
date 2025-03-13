@@ -1,9 +1,18 @@
 <script lang="ts">
 	import { page } from '$app/stores';
 	import * as Breadcrumb from '$lib/components/ui/breadcrumb';
+	import StudentAnalysisCollection from 'src/components/analyzer/StudentAnalysisCollection.svelte';
 	import DeliveryCard from 'src/components/delivery/DeliveryCard.svelte';
 	import FeedbackFormCard from 'src/components/feedback/FeedbackFormCard.svelte';
-	import type { Assignment, Course, Delivery, Feedback, AssignmentField, Team } from 'src/types/';
+	import type {
+		Assignment,
+		Course,
+		Delivery,
+		Feedback,
+		AssignmentField,
+		Team,
+		StudentAnalysis
+	} from 'src/types/';
 
 	const courseId = $page.params.courseId;
 	const assignmentId = $page.params.assignmentId;
@@ -16,10 +25,11 @@
 		delivery: Delivery | null;
 		feedback: Feedback | null;
 		team: Team;
+		studentAnalyses: StudentAnalysis[];
 	};
 </script>
 
-<div class="m-auto mt-4 flex w-max flex-col items-center justify-center gap-10">
+<div class="m-auto mt-4 flex w-[1080px] flex-col items-center justify-center gap-10">
 	<Breadcrumb.Root class="self-start">
 		<Breadcrumb.List>
 			<Breadcrumb.Item>
@@ -52,13 +62,16 @@
 			<h1 class="ml-4 text-4xl font-semibold">Team {data.team.teamNr}</h1>
 		</div>
 	</div>
-	<div class="flex w-[1080px] flex-row gap-8">
-		<div class="flex w-3/5 flex-col gap-8">
+	<div class="flex w-full flex-row gap-8">
+		<div class="w-3/5">
 			<FeedbackFormCard assignment={data.assignment} feedback={data.feedback} {teamId} />
 		</div>
 
-		<div class="flex w-2/5 flex-col gap-8">
+		<div class="w-2/5">
 			<DeliveryCard assignmentFields={data.assignmentFields} delivery={data.delivery} />
 		</div>
 	</div>
+	{#if data.studentAnalyses.length > 0}
+		<StudentAnalysisCollection studentAnalyses={data.studentAnalyses} />
+	{/if}
 </div>

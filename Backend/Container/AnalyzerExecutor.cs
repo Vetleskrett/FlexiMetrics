@@ -187,7 +187,7 @@ public partial class AnalyzerExecutor : IAnalyzerExecutor
         await _dbLock.WaitAsync(cancellationToken);
         try
         {
-            _dbContext.DeliveryAnalyses.Add(analysisEntry);
+            _dbContext.AnalysisEntries.Add(analysisEntry);
             _dbContext.AnalysisFields.AddRange(analysisFields);
             await _dbContext.SaveChangesAsync(cancellationToken);
         }

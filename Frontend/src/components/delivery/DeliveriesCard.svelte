@@ -40,7 +40,7 @@
 					</Table.Head>
 
 					{#each assignmentFields as field}
-						<Table.Head class="h-8">
+						<Table.Head class="h-8 px-2">
 							<p class="font-bold text-black">{field.name}</p>
 						</Table.Head>
 					{/each}

@@ -9,12 +9,14 @@
 		type AssignmentField,
 		type Course,
 		type Delivery,
-		type Feedback
+		type Feedback,
+		type StudentAnalysis
 	} from 'src/types/';
 	import AssignmentDescriptionCard from 'src/components/assignment/AssignmentDescriptionCard.svelte';
 	import DeliveryCard from 'src/components/delivery/DeliveryCard.svelte';
 	import FeedbackCard from 'src/components/feedback/FeedbackCard.svelte';
 	import CustomButton from 'src/components/CustomButton.svelte';
+	import StudentAnalysisCollection from 'src/components/analyzer/StudentAnalysisCollection.svelte';
 
 	const courseId = $page.params.courseId;
 	const assignmentId = $page.params.assignmentId;
@@ -25,10 +27,11 @@
 		assignmentFields: AssignmentField[];
 		delivery: Delivery | null;
 		feedback: Feedback | null;
+		studentAnalyses: StudentAnalysis[];
 	};
 </script>
 
-<div class="m-auto mt-4 flex w-max flex-col items-center justify-center gap-10">
+<div class="m-auto mt-4 flex w-[1080px] flex-col items-center justify-center gap-10">
 	<Breadcrumb.Root class="self-start">
 		<Breadcrumb.List>
 			<Breadcrumb.Item>
@@ -68,7 +71,7 @@
 			<p class="font-semibold text-gray-500">Due date expired</p>
 		{/if}
 	</div>
-	<div class="flex w-[1080px] flex-row gap-8">
+	<div class="flex w-full flex-row gap-8">
 		<div class="flex w-3/5 flex-col gap-8">
 			<AssignmentDescriptionCard assignment={data.assignment} />
 			<DeliveryCard assignmentFields={data.assignmentFields} delivery={data.delivery} />
@@ -78,4 +81,7 @@
 			<FeedbackCard feedback={data.feedback} assignment={data.assignment} />
 		</div>
 	</div>
+	{#if data.studentAnalyses.length > 0}
+		<StudentAnalysisCollection studentAnalyses={data.studentAnalyses} />
+	{/if}
 </div>

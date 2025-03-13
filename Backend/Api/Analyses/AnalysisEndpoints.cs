@@ -1,5 +1,4 @@
 ﻿using Api.Analyses.Contracts;
-using System.Text.Json;
 
 namespace Api.Analyses;
 
@@ -35,6 +34,24 @@ public static class AnalysisEndpoints
         .Produces<AnalyzerAnalysesResponse>()
         .WithName("GetAllAnalysesByAnalyzer")
         .WithSummary("Get all analyses by analyzer id");
+
+        group.MapGet("students/{studentId:guid}/assignments/{assignmentId:guid}/analyses", async (IAnalysisService analysisService, Guid studentId, Guid assignmentId) =>
+        {
+            var result = await analysisService.GetStudentAssignmentAnalyses(studentId, assignmentId);
+            return result.MapToResponse(analysis => Results.Ok(analysis));
+        })
+        .Produces<IEnumerable<StudentAnalysisResponse>>()
+        .WithName("GetAnalysesByStudentAssignment")
+        .WithSummary("Get analyses by student id and assignment id");
+
+        group.MapGet("teams/{teamId:guid}/assignments/{assignmentId:guid}/analyses", async (IAnalysisService analysisService, Guid teamId, Guid assignmentId) =>
+        {
+            var result = await analysisService.GetTeamAssignmentAnalyses(teamId, assignmentId);
+            return result.MapToResponse(analysis => Results.Ok(analysis));
+        })
+        .Produces<IEnumerable<StudentAnalysisResponse>>()
+        .WithName("GetAnalysesByTeamAssignment")
+        .WithSummary("Get analyses by team id and assignment id");
 
         group.MapDelete("analyses/{id:guid}", async (IAnalysisService analysisService, Guid id) =>
         {
