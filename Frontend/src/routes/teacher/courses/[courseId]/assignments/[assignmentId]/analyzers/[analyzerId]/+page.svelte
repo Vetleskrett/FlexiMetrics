@@ -91,8 +91,6 @@
 	};
 
 	const update = async () => {
-		console.log('update');
-
 		closeEventSource();
 		const response = await getAnalyzerAnalyses($page.params.analyzerId);
 		data.analyses = response.data;
@@ -105,8 +103,6 @@
 	});
 
 	afterUpdate(() => {
-		console.log('afterUpdate');
-
 		if (runningAnalyzerInfo?.analyzerId != $page.params.analyzerId) {
 			closeEventSource();
 		}
@@ -115,7 +111,6 @@
 	});
 
 	const onCancel = async () => {
-		console.log('onCancel');
 		await cancelAnalyzer($page.params.analyzerId);
 	};
 

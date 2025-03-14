@@ -3,7 +3,6 @@ using Database;
 using Database.Models;
 using MassTransit;
 using Microsoft.EntityFrameworkCore;
-using System.Threading;
 
 namespace Container;
 

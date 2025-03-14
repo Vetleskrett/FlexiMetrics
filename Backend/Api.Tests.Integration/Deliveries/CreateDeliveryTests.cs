@@ -1,7 +1,6 @@
 ﻿using Api.Deliveries.Contracts;
 using Database.Models;
 using Microsoft.EntityFrameworkCore;
-using System.Net;
 using System.Net.Http.Json;
 using System.Text.Json;
 

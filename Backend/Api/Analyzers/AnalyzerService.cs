@@ -12,7 +12,6 @@ using System.Runtime.CompilerServices;
 using MassTransit;
 using Container.Models;
 using Api.Analyses.Contracts;
-using System.Threading;
 
 namespace Api.Analyzers;
 
