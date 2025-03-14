@@ -4,5 +4,7 @@ public enum AnalysisStatus
 {
     Started,
     Running,
-    Completed
+    Completed,
+    Canceled,
+    Failed
 }
