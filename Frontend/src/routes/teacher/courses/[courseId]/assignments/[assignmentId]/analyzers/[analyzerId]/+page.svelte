@@ -44,7 +44,10 @@
 	let runningAnalyzerInfo: RunningAnalyzerInfo | undefined = undefined;
 
 	const subscribeToEventSource = () => {
-		if (!analysis || analysis.status == 'Completed') {
+		if (!analysis) {
+			return;
+		}
+		if (analysis.status != 'Started' && analysis.status != 'Running') {
 			return;
 		}
 		if (runningAnalyzerInfo) {
@@ -60,7 +63,15 @@
 		};
 
 		runningAnalyzerInfo.eventSource.onmessage = async (event) => {
-			runningAnalyzerInfo!.analysis = JSON.parse(event.data) as Analysis;
+			const upatedAnalysis = JSON.parse(event.data) as Analysis | null;
+
+			if (upatedAnalysis == null) {
+				update();
+				return;
+			}
+
+			runningAnalyzerInfo!.analysis = upatedAnalysis;
+
 			if (runningAnalyzerInfo!.analysis.id == analysis?.id) {
 				analysis = runningAnalyzerInfo!.analysis;
 			}
@@ -101,7 +112,6 @@
 
 	const onCancel = async () => {
 		await cancelAnalyzer($page.params.analyzerId);
-		await update();
 	};
 
 	const onRun = async () => {
@@ -158,10 +168,14 @@
 		</div>
 		<div class="flex items-center gap-2">
 			{#if runningAnalyzerInfo}
-				<CustomButton color="red" on:click={onCancel}>
-					<X size="20" />
-					<p>Cancel</p>
-				</CustomButton>
+				{#if runningAnalyzerInfo.analysis.status == 'Canceled'}
+					<p>Cancelling...</p>
+				{:else}
+					<CustomButton color="red" on:click={onCancel}>
+						<X size="20" />
+						<p>Cancel</p>
+					</CustomButton>
+				{/if}
 			{:else}
 				<CustomButton color="blue" on:click={onRun}>
 					<Play size="20" />

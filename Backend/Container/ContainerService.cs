@@ -133,14 +133,18 @@ public class ContainerService : IContainerService
 
     public async Task RemoveContainer(string container)
     {
-        await _dockerClient.Containers.RemoveContainerAsync
-        (
-            container,
-            new ContainerRemoveParameters
-            {
-                Force = true
-            },
-            CancellationToken.None
-        );
+        try
+        {
+            await _dockerClient.Containers.RemoveContainerAsync
+            (
+                container,
+                new ContainerRemoveParameters
+                {
+                    Force = true
+                },
+                CancellationToken.None
+            );
+        }
+        catch (Exception) { }
     }
 }

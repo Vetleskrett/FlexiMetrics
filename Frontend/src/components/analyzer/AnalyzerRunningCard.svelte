@@ -3,23 +3,11 @@
 	import { Progress } from '$lib/components/ui/progress';
 	import { ScrollArea } from '$lib/components/ui/scroll-area';
 	import type { Analysis } from 'src/types';
-	import { onMount } from 'svelte';
 
 	export let analysis: Analysis;
 
 	const total = analysis.totalNumEntries;
 	const completed = analysis.analysisEntries.length;
-
-	const scrollToBottom = () => {
-		const scrollArea = document.querySelector('[data-scroll-area-viewport]');
-		if (scrollArea) {
-			scrollArea.scrollTop = scrollArea.scrollHeight;
-		}
-	};
-
-	onMount(() => {
-		setTimeout(scrollToBottom, 10);
-	});
 </script>
 
 <Card.Root class="w-[1080px]">
@@ -31,7 +19,7 @@
 		</div>
 		<ScrollArea class="h-64 w-full rounded-lg bg-background text-xs">
 			<div class="flex flex-col gap-2 px-4 py-2">
-				{#each analysis.analysisEntries as entry}
+				{#each analysis.analysisEntries.reverse() as entry}
 					<div>
 						{#if entry.student}
 							<p class="m-0 p-0 font-bold">[{entry.student.name}]</p>

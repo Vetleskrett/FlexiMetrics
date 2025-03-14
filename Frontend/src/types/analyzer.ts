@@ -8,7 +8,7 @@ export type Analyzer = {
     assignmentId: string;
 }
 
-export type AnalysisStatus = 'Started' | 'Running' | 'Completed';
+export type AnalysisStatus = 'Started' | 'Running' | 'Completed' | 'Canceled' | 'Failed';
 
 export type AnalyzerAnalyses = {
     analyses: SlimAnalysis[];

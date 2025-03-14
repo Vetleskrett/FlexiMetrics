@@ -25,7 +25,7 @@ public interface IAnalyzerService
     Task<Result> UploadScript(IFormFile script, Guid analyzerFieldId);
     Task<Result<FileResponse>> DownloadScript(Guid analyzerFieldId);
     Task<Result> StartAction(AnalyzerActionRequest request, Guid id);
-    IAsyncEnumerable<AnalysisResponse> GetStatusEventsById(Guid id, CancellationToken cancellationToken);
+    IAsyncEnumerable<AnalysisResponse?> GetStatusEventsById(Guid id, CancellationToken cancellationToken);
     Task<Result> DeleteById(Guid id);
 }
 
@@ -205,23 +205,23 @@ public class AnalyzerService : IAnalyzerService
 
     public async Task<Result> StartAction(AnalyzerActionRequest request, Guid id)
     {
+        var analyzer = await _dbContext.Analyzers
+            .Include(a => a.Assignment)
+            .FirstOrDefaultAsync(a => a.Id == id);
+
+        if (analyzer is null)
+        {
+            return Result.NotFound();
+        }
+
+        var runningAnalysis = await _dbContext.Analyses
+            .Where(a => a.AnalyzerId == id)
+            .Where(a => a.Status == AnalysisStatus.Started || a.Status == AnalysisStatus.Running)
+            .FirstOrDefaultAsync();
+
         if (request.Action == AnalyzerAction.Run)
         {
-            var analyzer = await _dbContext.Analyzers
-                .Include(a => a.Assignment)
-                .FirstOrDefaultAsync(a => a.Id == id);
-
-            if (analyzer is null)
-            {
-                return Result.NotFound();
-            }
-
-            var latestAnalysis = await _dbContext.Analyses
-                .Where(a => a.AnalyzerId == id)
-                .OrderByDescending(a => a.StartedAt)
-                .FirstOrDefaultAsync();
-
-            if (latestAnalysis is not null && latestAnalysis.Status != AnalysisStatus.Completed)
+            if (runningAnalysis is not null)
             {
                 return new ValidationError("Analyzer already running").MapToResponse();
             }
@@ -244,51 +244,27 @@ public class AnalyzerService : IAnalyzerService
             await _dbContext.SaveChangesAsync();
 
             await _bus.Publish(new RunAnalyzerRequest(analyzer.Assignment!.CourseId, analyzer.AssignmentId, analyzer.Id, analysis.Id));
-
             return Result.Success();
         }
         else
         {
-            throw new NotImplementedException();
-        }
-    }
-
-    public async IAsyncEnumerable<AnalysisResponse> GetStatusEventsById(Guid id, [EnumeratorCancellation] CancellationToken cancellationToken)
-    {
-        var analysis = await GetAnalysisWithNestedEntities(id);
-
-        if (analysis.Status == AnalysisStatus.Completed)
-        {
-            yield break;
-        }
-
-        yield return analysis.MapToResponse();
-
-        var channel = _statusUpdateReader.GetChannel();
-
-        try
-        {
-            await foreach (var statusUpdate in channel.Reader.ReadAllAsync(cancellationToken))
+            if (runningAnalysis is null)
             {
-                analysis = await GetAnalysisWithNestedEntities(id);
-
-                yield return analysis.MapToResponse();
-
-                if (analysis.Status == AnalysisStatus.Completed)
-                {
-                    yield break;
-                }
+                return new ValidationError("Analyzer not running").MapToResponse();
             }
-        }
-        finally
-        {
-            _statusUpdateReader.RemoveChannel(channel);
+
+            runningAnalysis.Status = AnalysisStatus.Canceled;
+            await _dbContext.SaveChangesAsync();
+            await _bus.Publish(new AnalyzerStatusUpdate(id));
+
+            await _bus.Publish(new CancelAnalyzerRequest(id));
+            return Result.Success();
         }
     }
 
-    private async Task<Analysis> GetAnalysisWithNestedEntities(Guid id)
+    public async IAsyncEnumerable<AnalysisResponse?> GetStatusEventsById(Guid id, [EnumeratorCancellation] CancellationToken cancellationToken)
     {
-        return await _dbContext.Analyses
+        var analysis = await _dbContext.Analyses
             .AsNoTracking()
             .Include(a => a.AnalysisEntries!.OrderBy(ae => ae.CompletedAt))
             .ThenInclude(ae => ae.Fields)
@@ -300,6 +276,34 @@ public class AnalyzerService : IAnalyzerService
             .Where(a => a.AnalyzerId == id)
             .OrderByDescending(a => a.StartedAt)
             .FirstAsync();
+
+        yield return analysis.MapToResponse();
+
+        if (analysis.Status is AnalysisStatus.Completed or AnalysisStatus.Failed)
+        {
+            yield break;
+        }
+
+        await foreach (var statusUpdate in _statusUpdateReader.ReadAllAsync(id, cancellationToken))
+        {
+            analysis = await _dbContext.Analyses
+                .AsNoTracking()
+                .Include(a => a.AnalysisEntries!.OrderBy(ae => ae.CompletedAt))
+                .ThenInclude(ae => ae.Fields)
+                .Include(a => a.AnalysisEntries!)
+                .ThenInclude(ae => ae.Student)
+                .Include(a => a.AnalysisEntries!)
+                .ThenInclude(ae => ae.Team!)
+                .ThenInclude(t => t.Students)
+                .FirstOrDefaultAsync(a => a.Id == analysis.Id);
+
+            yield return analysis?.MapToResponse();
+
+            if (analysis is null || analysis.Status is AnalysisStatus.Completed or AnalysisStatus.Failed)
+            {
+                yield break;
+            }
+        }
     }
 
     public async Task<Result> DeleteById(Guid id)

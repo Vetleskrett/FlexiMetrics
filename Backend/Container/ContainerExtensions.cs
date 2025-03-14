@@ -10,6 +10,7 @@ public static class ContainerExtensions
     {
         services.AddSingleton<IDockerClient>(new DockerClientConfiguration().CreateClient());
         services.AddSingleton<IContainerService, ContainerService>();
+        services.AddSingleton<IAnalyzerCancellationStore, AnalyzerCancellationStore>();
         services.AddScoped<IAnalyzerExecutor, AnalyzerExecutor>();
     }
 

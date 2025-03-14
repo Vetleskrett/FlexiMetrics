@@ -83,40 +83,67 @@ public partial class AnalyzerExecutor : IAnalyzerExecutor
 
     public async Task RunAnalyzer(RunAnalyzerRequest request, CancellationToken cancellationToken)
     {
-        await _dbContext.Analyses
-            .Where(a => a.Id == request.AnalysisId)
-            .ExecuteUpdateAsync(setter => setter.SetProperty(a => a.Status, AnalysisStatus.Running));
-
-        var entries = await GetEntries(request);
-
-        await Parallel.ForEachAsync(entries, cancellationToken, async (entry, cancellationToken) =>
+        try
         {
-            await RunAnalysisEntry(entry, request, cancellationToken);
-        });
+            await _dbContext.Analyses
+                .Where(a => a.Id == request.AnalysisId)
+                .ExecuteUpdateAsync(setter => setter.SetProperty(a => a.Status, AnalysisStatus.Running), cancellationToken);
 
-        await _dbContext.Analyses
-            .Where(a => a.Id == request.AnalysisId)
-            .ExecuteUpdateAsync(setter => setter
-                .SetProperty(a => a.Status, AnalysisStatus.Completed)
-                .SetProperty(a => a.CompletedAt, DateTime.UtcNow)
-            );
+            await _bus.Publish(new AnalyzerStatusUpdate(request.AnalyzerId), cancellationToken);
 
-        var statusUpdate = new AnalyzerStatusUpdate(request.AnalyzerId);
-        await _bus.Publish(statusUpdate, cancellationToken);
+            var entries = await GetEntries(request);
+
+            await Parallel.ForEachAsync(entries, cancellationToken, async (entry, cancellationToken) =>
+            {
+                await RunAnalysisEntry(entry, request, cancellationToken);
+            });
+
+            await _dbContext.Analyses
+                .Where(a => a.Id == request.AnalysisId)
+                .ExecuteUpdateAsync(setter => setter
+                    .SetProperty(a => a.Status, AnalysisStatus.Completed)
+                    .SetProperty(a => a.CompletedAt, DateTime.UtcNow)
+                , cancellationToken);
+
+            await _bus.Publish(new AnalyzerStatusUpdate(request.AnalyzerId), cancellationToken);
+        }
+        catch (OperationCanceledException)
+        {
+            return;
+        }
+        catch
+        {
+            await _dbContext.Analyses
+                .Where(a => a.Id == request.AnalysisId)
+                .ExecuteUpdateAsync(setter => setter.SetProperty(a => a.Status, AnalysisStatus.Failed), cancellationToken);
+
+            await _bus.Publish(new AnalyzerStatusUpdate(request.AnalyzerId), cancellationToken);
+
+            throw;
+        }
     }
 
     private async Task RunAnalysisEntry(AssignmentEntry entry, RunAnalyzerRequest request, CancellationToken cancellationToken)
     {
-        var container = await _containerService.CreateContainer($"analyzer-{request.AnalyzerId}-{entry.Id}", cancellationToken);
+        cancellationToken.ThrowIfCancellationRequested();
+        var container = await _containerService.CreateContainer($"analyzer-{request.AnalyzerId}-{entry.Id}", CancellationToken.None);
+
+        cancellationToken.Register(async () =>
+        {
+            await _containerService.RemoveContainer(container);
+        });
 
         try
         {
+            cancellationToken.ThrowIfCancellationRequested();
             using var fleximetricsStream = File.OpenRead(FLEXIMETRICS_PATH);
             await _containerService.CopyFileToContainer(container, fleximetricsStream, "fleximetrics.py");
 
+            cancellationToken.ThrowIfCancellationRequested();
             using var scriptStream = _fileStorage.GetAnalyzerScript(request.CourseId, request.AssignmentId, request.AnalyzerId);
             await _containerService.CopyFileToContainer(container, scriptStream, "script.py");
 
+            cancellationToken.ThrowIfCancellationRequested();
             var entryDTO = AssignmentEntryDTO.MapFrom(entry);
             var entryJsonBytes = JsonSerializer.SerializeToUtf8Bytes(entryDTO);
             using var entryJsonStream = new MemoryStream(entryJsonBytes);
@@ -128,12 +155,14 @@ public partial class AnalyzerExecutor : IAnalyzerExecutor
 
             await OnAnalysisEntryFinished(container, entry, request, cancellationToken);
 
-            var statusUpdate = new AnalyzerStatusUpdate(request.AnalyzerId);
-            await _bus.Publish(statusUpdate, cancellationToken);
+            await _bus.Publish(new AnalyzerStatusUpdate(request.AnalyzerId), cancellationToken);
         }
         finally
         {
-            await _containerService.RemoveContainer(container);
+            if (!cancellationToken.IsCancellationRequested)
+            {
+                await _containerService.RemoveContainer(container);
+            }
         }
     }
 
