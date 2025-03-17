@@ -6,7 +6,7 @@ public interface IFileStorage
     Stream GetDeliveryField(Guid courseId, Guid assignmentId, Guid deliveryId, Guid deliveryFieldId);
 
     Task WriteAnalyzerScript(Guid courseId, Guid assignmentId, Guid analyzerId, Stream data);
-    Stream GetAnalyzerScript(Guid courseId, Guid assignmentId, Guid analyzerId);
+    Task<string> GetAnalyzerScript(Guid courseId, Guid assignmentId, Guid analyzerId);
 
     bool DeleteAll();
     bool DeleteCourse(Guid courseId);

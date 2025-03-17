@@ -43,7 +43,7 @@ class AssignmentEntry:
 
 class Analysis:
     def write_to_file(self):
-        analysis_json = json.dumps(self.__dict__)
+        analysis_json = json.dumps(self.__dict__, sort_keys=True, indent=2)
         print(f"Output: {analysis_json}")
         with open("output.json", "w") as file:
             file.write(analysis_json)

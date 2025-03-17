@@ -5,6 +5,7 @@
 	import Save from 'lucide-svelte/icons/save';
 	import Undo_2 from 'lucide-svelte/icons/undo-2';
 	import { Input } from '$lib/components/ui/input';
+	import { Textarea } from 'src/lib/components/ui/textarea';
 	import { goto } from '$app/navigation';
 	import * as Form from 'src/lib/components/ui/form';
 	import { superForm } from 'sveltekit-superforms';
@@ -21,17 +22,20 @@
 
 	type AnalyzerFormData = {
 		name: string;
+		requirements: string;
 		script?: File;
 	};
 
 	let analyzerFormData: AnalyzerFormData = {
 		name: '',
+		requirements: '',
 		script: undefined
 	};
 
 	if (edit) {
 		analyzerFormData = {
 			name: analyzer!.name,
+			requirements: analyzer!.requirements,
 			script: new File([new Blob([script!], { type: 'plain/text' })], analyzer!.fileName)
 		};
 	}
@@ -39,6 +43,7 @@
 	const onSubmitEdit = async () => {
 		return putAnalyzer(analyzer!.id, {
 			name: analyzerFormData.name,
+			requirements: analyzerFormData.requirements,
 			fileName: analyzerFormData.script?.name ?? ''
 		});
 	};
@@ -46,6 +51,7 @@
 	const onSubmitCreate = async () => {
 		return postAnalyzer({
 			name: analyzerFormData.name,
+			requirements: analyzerFormData.requirements,
 			fileName: analyzerFormData.script?.name ?? '',
 			assignmentId: assignmentId
 		});
@@ -104,6 +110,13 @@
 					<Form.Control let:attrs>
 						<Form.Label for="name">Name</Form.Label>
 						<Input {...attrs} id="name" bind:value={analyzerFormData.name} />
+					</Form.Control>
+					<Form.FieldErrors />
+				</Form.Field>
+				<Form.Field {form} name="requirements">
+					<Form.Control let:attrs>
+						<Form.Label for="requirements">requirements.txt</Form.Label>
+						<Textarea {...attrs} id="requirements" bind:value={analyzerFormData.requirements} />
 					</Form.Control>
 					<Form.FieldErrors />
 				</Form.Field>

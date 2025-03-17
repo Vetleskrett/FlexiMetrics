@@ -12,6 +12,7 @@ using System.Runtime.CompilerServices;
 using MassTransit;
 using Container.Models;
 using Api.Analyses.Contracts;
+using System.Text;
 
 namespace Api.Analyzers;
 
@@ -120,6 +121,7 @@ public class AnalyzerService : IAnalyzerService
         }
 
         analyzer.Name = request.Name;
+        analyzer.Requirements = request.Requirements;
         analyzer.FileName = request.FileName;
 
         var validationResult = await _validator.ValidateAsync(analyzer);
@@ -180,7 +182,7 @@ public class AnalyzerService : IAnalyzerService
 
         try
         {
-            var stream = _fileStorage.GetAnalyzerScript
+            var script = await _fileStorage.GetAnalyzerScript
             (
                 analyzer!.Assignment!.CourseId,
                 analyzer!.AssignmentId,
@@ -189,7 +191,7 @@ public class AnalyzerService : IAnalyzerService
 
             return new FileResponse
             {
-                Stream = stream,
+                Stream = new MemoryStream(Encoding.UTF8.GetBytes(script)),
                 Metadata = new FileMetadata
                 {
                     FileName = analyzer.FileName,
@@ -318,6 +320,7 @@ public class AnalyzerService : IAnalyzerService
         }
 
         _fileStorage.DeleteAnalyzer(analyzer.Assignment!.CourseId, analyzer.AssignmentId, analyzer.Id);
+        await _bus.Publish(new DeleteAnalyzerRequest(id));
 
         await _dbContext.Analyzers.Where(x => x.Id == id).ExecuteDeleteAsync();
         return Result.Success();

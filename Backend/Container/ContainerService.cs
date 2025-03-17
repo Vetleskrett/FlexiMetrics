@@ -1,4 +1,4 @@
-﻿using System.Text.Json;
+﻿using System.Text;
 using Docker.DotNet;
 using Docker.DotNet.Models;
 using Microsoft.Extensions.Logging;
@@ -7,20 +7,38 @@ namespace Container;
 
 public interface IContainerService
 {
-    Task Initialize();
-    Task<Stream?> CopyFileFromContainer(string container, string path);
-    Task CopyFileToContainer(string container, Stream stream, string fileName);
-    Task<string> CreateContainer(string name, CancellationToken cancellationToken);
+    Task CreateImage(Guid analyzerId, string script, string requirements, CancellationToken cancellationToken);
+    Task DeleteImage(Guid analyzerId);
+    Task<string> CreateContainer(Guid analyzerId, Guid entryId, CancellationToken cancellationToken);
     Task<(string LogInformation, string LogError)> GetLogs(string container, CancellationToken cancellationToken);
     Task RemoveContainer(string container);
     Task StartContainer(string container, CancellationToken cancellationToken);
     Task WaitForContainerCompletion(string container, CancellationToken cancellationToken);
+    Task CopyFileToContainer(string container, Stream stream, string fileName);
+    Task CopyFileToContainer(string container, string contents, string fileName);
+    Task<Stream?> CopyFileFromContainer(string container, string path);
 }
 
 public class ContainerService : IContainerService
 {
-    private const string IMAGE = "python:3.13-slim";
+    private const string FLEXIMETRICS_PATH = "../Container/Scripts/fleximetrics.py";
     private const string WORKING_DIR = "/app";
+    private const string DOCKERFILE =
+        $"""
+        FROM python:3.13-slim
+
+        WORKDIR {WORKING_DIR}
+
+        COPY fleximetrics.py ./
+
+        COPY script.py ./
+
+        COPY requirements.txt ./
+
+        RUN pip install --disable-pip-version-check --root-user-action=ignore --no-cache-dir -r requirements.txt
+
+        CMD ["python", "script.py"]
+        """;
 
     private readonly IDockerClient _dockerClient;
     private readonly ILogger<ContainerService> _logger;
@@ -31,27 +49,74 @@ public class ContainerService : IContainerService
         _logger = logger;
     }
 
-    public async Task Initialize()
+    public async Task CreateImage(Guid analyzerId, string script, string requirements, CancellationToken cancellationToken)
     {
-        await _dockerClient.Images.CreateImageAsync
+        var fleximetrics = await File.ReadAllTextAsync(FLEXIMETRICS_PATH, cancellationToken);
+
+        var tarStream = TarArchive.CreateAll
         (
-        new ImagesCreateParameters
-        {
-            FromImage = IMAGE
-        },
+            new TextFile("Dockerfile", DOCKERFILE),
+            new TextFile("fleximetrics.py", fleximetrics),
+            new TextFile("script.py", script),
+            new TextFile("requirements.txt", requirements)
+        );
+
+        await _dockerClient.Images.BuildImageFromDockerfileAsync
+        (
+            new ImageBuildParameters
+            {
+                Tags = [$"analyzer-{analyzerId}"],
+                Remove = true,
+                ForceRemove = true,
+            },
+            tarStream,
+            null,
             null,
             new Progress<JSONMessage>(message =>
             {
                 if (message.Error is not null)
                 {
-                    _logger.LogError("Container.Initialize: {PROGRESS}", JsonSerializer.Serialize(message));
+                    _logger.LogError("CreateImage analyzer-{ID}:\n{MSG}", analyzerId, message.ErrorMessage.Trim());
                 }
-                else
+                else if (!string.IsNullOrWhiteSpace(message.Stream))
                 {
-                    _logger.LogInformation("Container.Initialize: {PROGRESS}", JsonSerializer.Serialize(message));
+                    _logger.LogInformation("CreateImage analyzer-{ID}:\n{MSG}", analyzerId, message.Stream.Trim());
                 }
-            })
+            }),
+            cancellationToken
         );
+    }
+
+    public async Task DeleteImage(Guid analyzerId)
+    {
+        try
+        {
+            await _dockerClient.Images.DeleteImageAsync($"analyzer-{analyzerId}", new ImageDeleteParameters
+            {
+                Force = true
+            });
+        }
+        catch (DockerImageNotFoundException) { }
+    }
+
+    public async Task<string> CreateContainer(Guid analyzerId, Guid entryId, CancellationToken cancellationToken)
+    {
+        var container = await _dockerClient.Containers.CreateContainerAsync
+        (
+            new CreateContainerParameters
+            {
+                Image = $"analyzer-{analyzerId}",
+                Name = $"analyzer-{analyzerId}-{entryId}",
+                WorkingDir = WORKING_DIR,
+                HostConfig = new HostConfig
+                {
+                    AutoRemove = false,
+                }
+            },
+            cancellationToken
+        );
+
+        return container.ID;
     }
 
     public async Task<(string LogInformation, string LogError)> GetLogs(string container, CancellationToken cancellationToken)
@@ -66,24 +131,38 @@ public class ContainerService : IContainerService
         return await logsStream.ReadOutputToEndAsync(cancellationToken);
     }
 
-    public async Task<string> CreateContainer(string name, CancellationToken cancellationToken)
+    public async Task StartContainer(string container, CancellationToken cancellationToken)
     {
-        var container = await _dockerClient.Containers.CreateContainerAsync
-        (
-            new CreateContainerParameters
-            {
-                Image = IMAGE,
-                Name = name,
-                WorkingDir = WORKING_DIR,
-                Cmd = ["python", "script.py"],
-                HostConfig = new HostConfig
+        await _dockerClient.Containers.StartContainerAsync(container, new ContainerStartParameters(), cancellationToken);
+    }
+
+    public async Task WaitForContainerCompletion(string container, CancellationToken cancellationToken)
+    {
+        await _dockerClient.Containers.WaitContainerAsync(container, cancellationToken);
+    }
+
+    public async Task RemoveContainer(string container)
+    {
+        try
+        {
+            await _dockerClient.Containers.RemoveContainerAsync
+            (
+                container,
+                new ContainerRemoveParameters
                 {
-                    AutoRemove = false,
-                }
-            },
-            cancellationToken
-        );
-        return container.ID;
+                    Force = true
+                },
+                CancellationToken.None
+            );
+        }
+        catch (Exception) { }
+    }
+
+    public async Task CopyFileToContainer(string container, string contents, string fileName)
+    {
+        var bytes = Encoding.UTF8.GetBytes(contents);
+        using var stream = new MemoryStream(bytes);
+        await CopyFileToContainer(container, stream, fileName);
     }
 
     public async Task CopyFileToContainer(string container, Stream stream, string fileName)
@@ -119,32 +198,5 @@ public class ContainerService : IContainerService
         {
             return null;
         }
-    }
-
-    public async Task StartContainer(string container, CancellationToken cancellationToken)
-    {
-        await _dockerClient.Containers.StartContainerAsync(container, new ContainerStartParameters(), cancellationToken);
-    }
-
-    public async Task WaitForContainerCompletion(string container, CancellationToken cancellationToken)
-    {
-        await _dockerClient.Containers.WaitContainerAsync(container, cancellationToken);
-    }
-
-    public async Task RemoveContainer(string container)
-    {
-        try
-        {
-            await _dockerClient.Containers.RemoveContainerAsync
-            (
-                container,
-                new ContainerRemoveParameters
-                {
-                    Force = true
-                },
-                CancellationToken.None
-            );
-        }
-        catch (Exception) { }
     }
 }

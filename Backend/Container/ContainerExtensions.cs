@@ -1,6 +1,5 @@
 ﻿using Docker.DotNet;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
 
 namespace Container;
 
@@ -12,10 +11,5 @@ public static class ContainerExtensions
         services.AddSingleton<IContainerService, ContainerService>();
         services.AddSingleton<IAnalyzerCancellationStore, AnalyzerCancellationStore>();
         services.AddScoped<IAnalyzerExecutor, AnalyzerExecutor>();
-    }
-
-    public static async Task InitializeContainer(this IHost app)
-    {
-        await app.Services.GetRequiredService<IContainerService>().Initialize();
     }
 }

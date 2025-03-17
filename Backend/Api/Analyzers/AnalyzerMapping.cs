@@ -13,6 +13,7 @@ public static class AnalyzerMapping
             Id = id,
             AssignmentId = request.AssignmentId,
             Name = request.Name,
+            Requirements = request.Requirements,
             FileName = request.FileName
         };
     }
@@ -24,6 +25,7 @@ public static class AnalyzerMapping
             Id = analyzer.Id,
             AssignmentId = analyzer.AssignmentId,
             Name = analyzer.Name,
+            Requirements = analyzer.Requirements,
             FileName = analyzer.FileName
         };
     }
