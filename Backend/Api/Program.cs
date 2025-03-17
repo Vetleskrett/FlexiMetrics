@@ -32,6 +32,7 @@ builder.Services.AddMassTransit(options =>
 {
     options.AddConsumer<RunAnalyzerConsumer>();
     options.AddConsumer<CancelAnalyzerConsumer>();
+    options.AddConsumer<DeleteAnalyzerConsumer>();
     options.AddConsumer<AnalyzerStatusUpdateConsumer>();
     options.UsingInMemory((context, config) =>
     {
@@ -97,8 +98,6 @@ builder.Services.AddAuthorizationBuilder()
     );
 
 var app = builder.Build();
-
-await app.InitializeContainer();
 
 app.MapDefaultEndpoints();
 

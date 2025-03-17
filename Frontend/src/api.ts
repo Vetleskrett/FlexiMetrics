@@ -127,6 +127,10 @@ export async function putAnalyzer(analyzerId: string, request: EditAnalyzer) : P
   return axios.put(`/api/analyzers/${analyzerId}`, request)
 }
 
+export async function deleteAnalyzer(analyzerId: string) : Promise<AxiosResponse>{
+  return axios.delete(`/api/analyzers/${analyzerId}`)
+}
+
 export async function postAnalyzerScript(analyzerId: string, script: FormData) : Promise<AxiosResponse> {
   return axios.postForm(`/api/analyzers/${analyzerId}/script`, script)
 }

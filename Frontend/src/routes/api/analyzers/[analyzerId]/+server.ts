@@ -7,3 +7,8 @@ export const PUT: RequestHandler = async ({ params, request }) => {
   const response = await api.put(`/analyzers/${params.analyzerId}`, payload)
   return json(response.data)
 }
+
+export const DELETE: RequestHandler = async ({ params }) => {
+  const response = await api.delete(`/analyzers/${params.analyzerId}`)
+  return json(response.data)
+}

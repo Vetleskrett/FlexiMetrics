@@ -35,11 +35,11 @@ public class LocalFileStorage : IFileStorage
         await data.CopyToAsync(fileStream);
     }
 
-    public Stream GetAnalyzerScript(Guid courseId, Guid assignmentId, Guid analyzerId)
+    public async Task<string> GetAnalyzerScript(Guid courseId, Guid assignmentId, Guid analyzerId)
     {
         var dirPath = GetAnalyzerDirectoryPath(courseId, assignmentId);
         var filePath = Path.Combine(dirPath, analyzerId.ToString());
-        return File.OpenRead(filePath);
+        return await File.ReadAllTextAsync(filePath);
     }
 
     public bool DeleteAll()

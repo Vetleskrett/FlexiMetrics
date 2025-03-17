@@ -390,6 +390,14 @@ public static class Seed
                 var name = string.Join(" ", f.Lorem.Words());
                 return string.Concat(name.ToUpper().AsSpan(0, 1), name.AsSpan(1));
             })
+            .RuleFor(x => x.Requirements, f =>
+            {
+                return
+                """
+                requests==2.26.0
+                numpy==2.2.3
+                """;
+            })
             .RuleFor(x => x.FileName, "analyzer.py");
 
         var analyzers = assignments.Select(assignment =>

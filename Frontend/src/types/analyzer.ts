@@ -4,6 +4,7 @@ import type { Student } from "./user";
 export type Analyzer = {
     id: string;
     name: string;
+    requirements: string;
     fileName: string;
     assignmentId: string;
 }
@@ -62,11 +63,13 @@ export type AnalysisField = {
 
 export type CreateAnalyzer = {
     name: string;
+    requirements: string;
     fileName: string;
     assignmentId: string;
 }
 
 export type EditAnalyzer = {
     name: string;
+    requirements: string;
     fileName: string;
 }

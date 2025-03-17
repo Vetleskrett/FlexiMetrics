@@ -13,6 +13,7 @@
 	import type { Analysis, Analyzer, AnalyzerAnalyses, Assignment, Course } from 'src/types/';
 	import { ArrowDownToLine } from 'lucide-svelte';
 	import {
+		deleteAnalyzer,
 		cancelAnalyzer,
 		deleteAnalysis,
 		getAnalysis,
@@ -22,6 +23,7 @@
 	} from 'src/api';
 	import * as Card from '$lib/components/ui/card';
 	import { onDestroy, afterUpdate } from 'svelte';
+	import { goto, invalidateAll } from '$app/navigation';
 
 	const courseId = $page.params.courseId;
 	const assignmentId = $page.params.assignmentId;
@@ -132,6 +134,17 @@
 		await deleteAnalysis(analysis!.id);
 		await update();
 	};
+
+	async function onDeleteAnalyzer() {
+		try {
+			await deleteAnalyzer($page.params.analyzerId);
+			goto(`/teacher/courses/${courseId}/assignments/${assignmentId}`, {
+				invalidateAll: true
+			});
+		} catch (exception) {
+			console.error('Something Went Wrong!');
+		}
+	}
 </script>
 
 <div class="m-auto mt-4 flex w-max flex-col items-center justify-center gap-10">
@@ -198,7 +211,7 @@
 						<Pencil class="h-4" />
 						<p>Edit analyzer</p>
 					</DropdownMenu.Item>
-					<DropdownMenu.Item>
+					<DropdownMenu.Item on:click={onDeleteAnalyzer}>
 						<Trash2 class="h-4" />
 						<p>Delete analyzer</p>
 					</DropdownMenu.Item>
