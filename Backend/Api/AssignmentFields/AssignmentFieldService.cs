@@ -1,11 +1,11 @@
 ﻿using Api.AssignmentFields.Contracts;
+using Api.Assignments;
 using Api.Validation;
-using Database.Models;
 using Database;
+using Database.Models;
+using FileStorage;
 using FluentValidation;
 using Microsoft.EntityFrameworkCore;
-using Api.Assignments;
-using FileStorage;
 
 namespace Api.AssignmentFields;
 
@@ -21,7 +21,7 @@ public class AssignmentFieldService : IAssignmentFieldService
 {
     private readonly AppDbContext _dbContext;
     private readonly IValidator<Assignment> _validator;
-    private IFileStorage _fileStorage;
+    private readonly IFileStorage _fileStorage;
 
     public AssignmentFieldService(AppDbContext dbContext, IValidator<Assignment> validator, IFileStorage fileStorage)
     {

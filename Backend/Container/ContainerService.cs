@@ -1,7 +1,7 @@
-﻿using System.Text;
-using Docker.DotNet;
+﻿using Docker.DotNet;
 using Docker.DotNet.Models;
 using Microsoft.Extensions.Logging;
+using System.Text;
 
 namespace Container;
 
@@ -21,24 +21,9 @@ public interface IContainerService
 
 public class ContainerService : IContainerService
 {
+    private const string DOCKERFILE_PATH = "../Container/Scripts/Dockerfile";
     private const string FLEXIMETRICS_PATH = "../Container/Scripts/fleximetrics.py";
     private const string WORKING_DIR = "/app";
-    private const string DOCKERFILE =
-        $"""
-        FROM python:3.13-slim
-
-        WORKDIR {WORKING_DIR}
-
-        COPY fleximetrics.py ./
-
-        COPY script.py ./
-
-        COPY requirements.txt ./
-
-        RUN pip install --disable-pip-version-check --root-user-action=ignore --no-cache-dir -r requirements.txt
-
-        CMD ["python", "script.py"]
-        """;
 
     private readonly IDockerClient _dockerClient;
     private readonly ILogger<ContainerService> _logger;
@@ -51,11 +36,12 @@ public class ContainerService : IContainerService
 
     public async Task CreateImage(Guid analyzerId, string script, string requirements, CancellationToken cancellationToken)
     {
+        var dockerfile = await File.ReadAllTextAsync(DOCKERFILE_PATH, cancellationToken);
         var fleximetrics = await File.ReadAllTextAsync(FLEXIMETRICS_PATH, cancellationToken);
 
         var tarStream = TarArchive.CreateAll
         (
-            new TextFile("Dockerfile", DOCKERFILE),
+            new TextFile("Dockerfile", dockerfile),
             new TextFile("fleximetrics.py", fleximetrics),
             new TextFile("script.py", script),
             new TextFile("requirements.txt", requirements)

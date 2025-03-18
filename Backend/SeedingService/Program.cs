@@ -1,6 +1,7 @@
 using Database;
 using FileStorage;
 using SeedingService;
+using ServiceDefaults;
 
 var builder = Host.CreateApplicationBuilder(args);
 

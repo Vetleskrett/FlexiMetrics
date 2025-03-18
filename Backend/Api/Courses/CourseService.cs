@@ -1,11 +1,11 @@
-﻿using Api.Validation;
+﻿using Api.Courses.Contracts;
+using Api.Teams;
+using Api.Validation;
+using Database;
+using Database.Models;
+using FileStorage;
 using FluentValidation;
 using Microsoft.EntityFrameworkCore;
-using Database.Models;
-using Database;
-using Api.Courses.Contracts;
-using Api.Teams;
-using FileStorage;
 
 namespace Api.Courses;
 

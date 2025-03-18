@@ -7,7 +7,7 @@
 	let isDragOver = false;
 
 	export let file: File | FileMetadata | undefined = undefined;
-	export let accept: string;
+	export let accept: string | undefined = undefined;
 
 	function triggerFileSelect() {
 		fileInput.click();

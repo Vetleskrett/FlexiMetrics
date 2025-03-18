@@ -18,7 +18,7 @@ public class UpdateAssignmentFieldsTests(ApiFactory factory) : BaseIntegrationTe
 
         var request = new UpdateAssignmentFieldsRequest
         {
-            Fields = 
+            Fields =
             [
                 new AssignmentFieldRequest
                 {
@@ -35,7 +35,7 @@ public class UpdateAssignmentFieldsTests(ApiFactory factory) : BaseIntegrationTe
 
         };
 
-        var response = await Client.PutAsJsonAsync( $"assignments/{assignment.Id}/fields", request);
+        var response = await Client.PutAsJsonAsync($"assignments/{assignment.Id}/fields", request);
 
         await Verify(response);
         Assert.True(await DbContext.AssignmentFields.AnyAsync(f =>

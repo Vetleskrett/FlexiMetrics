@@ -209,7 +209,7 @@
 			{/if}
 		</div>
 	</Card.Header>
-	<Card.Content class="p-0 ">
+	<Card.Content class="p-0">
 		<Table.Root {...$tableAttrs}>
 			<Table.Header>
 				{#each $headerRows as headerRow}
@@ -217,20 +217,20 @@
 						<Table.Row>
 							{#each headerRow.cells as cell (cell.id)}
 								<Subscribe attrs={cell.attrs()} let:attrs props={cell.props()} let:props>
-									<Table.Head {...attrs} class="px-2 font-bold text-black">
+									<Table.Head {...attrs} class="p-0 font-bold text-black">
 										<div class="flex h-full flex-col items-start justify-end gap-2">
 											{#if props.filter?.render && showFilterForId[cell.id]}
 												<Render of={props.filter.render} />
 											{/if}
-											<Button variant="ghost" on:click={props.sort.toggle}>
+											<Button variant="ghost" on:click={props.sort.toggle} class="px-2">
 												<Render of={cell.render()} />
 
 												{#if sortColumn?.id == cell.id && sortColumn?.order == 'asc'}
-													<ChevronUp class="ml-2 h-4 w-4" />
+													<ChevronUp class="ml-1 h-4 w-4" />
 												{:else if sortColumn?.id == cell.id && sortColumn?.order == 'desc'}
-													<ChevronDown class="ml-2 h-4 w-4" />
+													<ChevronDown class="ml-1 h-4 w-4" />
 												{:else}
-													<ChevronsUpDown class="ml-2 h-4 w-4" />
+													<ChevronsUpDown class="ml-1 h-4 w-4" />
 												{/if}
 											</Button>
 										</div>
@@ -247,10 +247,8 @@
 						<Table.Row {...rowAttrs}>
 							{#each row.cells as cell (cell.id)}
 								<Subscribe attrs={cell.attrs()} let:attrs>
-									<Table.Cell {...attrs} class="px-2">
-										<div class="pl-4">
-											<Render of={cell.render()} />
-										</div>
+									<Table.Cell {...attrs} class="pl-4 pr-2">
+										<Render of={cell.render()} />
 									</Table.Cell>
 								</Subscribe>
 							{/each}

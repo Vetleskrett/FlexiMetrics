@@ -11,7 +11,7 @@ public static class CourseEndpoints
         group.MapGet("courses", async (ICourseService courseService) =>
         {
             var result = await courseService.GetAll();
-            return result.MapToResponse(courses =>Results.Ok(courses));
+            return result.MapToResponse(courses => Results.Ok(courses));
         })
         .Produces<IEnumerable<CourseResponse>>()
         .WithName("GetAllCourses")

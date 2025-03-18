@@ -1,9 +1,9 @@
-﻿using Api.Validation;
+﻿using Api.Analyses.Contracts;
+using Api.Validation;
+using Database;
+using Database.Models;
 using FluentValidation;
 using Microsoft.EntityFrameworkCore;
-using Database;
-using Api.Analyses.Contracts;
-using Database.Models;
 
 namespace Api.Analyses;
 

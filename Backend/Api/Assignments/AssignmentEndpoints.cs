@@ -81,9 +81,9 @@ public static class AssignmentEndpoints
             var result = await assignmentService.Publish(id);
             return result.MapToResponse(assignment => Results.Ok(assignment));
         })
-      .Produces<AssignmentResponse>()
-      .WithName("PublishAssignment")
-      .WithSummary("Publish assignment by id");
+        .Produces<AssignmentResponse>()
+        .WithName("PublishAssignment")
+        .WithSummary("Publish assignment by id");
 
         group.MapDelete("assignments/{id:guid}", async (IAssignmentService assignmentService, Guid id) =>
         {

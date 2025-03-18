@@ -1,21 +1,22 @@
-using Api.Courses;
-using FluentValidation;
-using Database;
-using Api.Teams;
-using Api.Assignments;
-using System.Text.Json.Serialization;
-using Api.Teachers;
-using Api.Students;
+using Api.Analyses;
+using Api.Analyzers;
 using Api.AssignmentFields;
+using Api.Assignments;
+using Api.Courses;
 using Api.Deliveries;
 using Api.Feedbacks;
-using FileStorage;
-using Api.Analyzers;
+using Api.Students;
+using Api.Teachers;
+using Api.Teams;
 using Container;
-using Api.Analyses;
+using Database;
+using FileStorage;
+using FluentValidation;
+using MassTransit;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
-using MassTransit;
+using ServiceDefaults;
+using System.Text.Json.Serialization;
 
 var builder = WebApplication.CreateBuilder(args);
 

@@ -52,7 +52,7 @@ export type StudentAnalysis = {
     fields: AnalysisField[];
 }
 
-export type AnalysisFieldType = 'String' | 'Int';
+export type AnalysisFieldType = 'String' | 'Integer' | 'Float' | 'Boolean' | 'Range' | 'DateTime' | 'URL' | 'Json';
 
 export type AnalysisField = {
     id: string;

@@ -1,6 +1,6 @@
 ﻿using Api.Analyses.Contracts;
-using Api.Teams;
 using Api.Students;
+using Api.Teams;
 using Database.Models;
 
 namespace Api.Analyses;
