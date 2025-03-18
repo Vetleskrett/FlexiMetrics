@@ -53,7 +53,7 @@ public static class CourseEndpoints
             return result.MapToResponse(course => Results.CreatedAtRoute
             (
                 "GetCourse",
-                new { id = course.Id },
+                new { courseId = course.Id },
                 course
             ));
         })

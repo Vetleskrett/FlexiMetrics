@@ -63,7 +63,7 @@ public static class FeedbackEndpoints
             return result.MapToResponse(feedback => Results.CreatedAtRoute
             (
                 "GetFeedback",
-                new { id = feedback.Id },
+                new { feedbackId = feedback.Id },
                 feedback
             ));
         })

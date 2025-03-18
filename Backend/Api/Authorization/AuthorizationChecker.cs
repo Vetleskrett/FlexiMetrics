@@ -60,16 +60,20 @@ namespace Api.Authorization
                     break;
                 case "teacherId":
                     var teacherId = Guid.Parse(httpContext.Request.RouteValues["teacherId"]?.ToString());
+                    _logger.LogInformation("Checking if " + userId + " is " + teacherId);
                     if (!IsClaimedId(teacherId, userId))
                     {
                         context.Fail();
+                        _logger.LogInformation("User is not the same");
                     }
                     break;
                 case "studentId":
                     var studentId = Guid.Parse(httpContext.Request.RouteValues["studentId"]?.ToString());
+                    _logger.LogInformation("Checking if " + userId + " is " + studentId);
                     if (!IsClaimedId(studentId, userId))
                     {
                         context.Fail();
+                        _logger.LogInformation("User is not the same");
                     }
                     break;
                 case "teacherCourse":
@@ -77,6 +81,7 @@ namespace Api.Authorization
                     if (!await IsTeacherInCourse(courseId, userId))
                     {
                         context.Fail();
+                        _logger.LogInformation("User is not the same");
                     }
                     break;
                 case "teacherTeam":
@@ -176,13 +181,13 @@ namespace Api.Authorization
 
         private async Task<bool> IsTeacher(Guid userId)
         {
-            var teacher = await _dbContext.Users.FirstOrDefaultAsync(u => u.Id == userId && u.Role == Role.Teacher);
+            var teacher = await _dbContext.Users.AsNoTracking().FirstOrDefaultAsync(u => u.Id == userId && u.Role == Role.Teacher);
             return teacher != null;
         }
 
         private async Task<bool> InCourse(Guid courseId, Guid userId)
         {
-            var course = await _dbContext.Courses.Include(c => c.CourseTeachers!).Include(c => c.CourseStudents!).FirstOrDefaultAsync(c => c.Id == courseId);
+            var course = await _dbContext.Courses.AsNoTracking().Include(c => c.CourseTeachers!).Include(c => c.CourseStudents!).FirstOrDefaultAsync(c => c.Id == courseId);
 
             if (course == null) 
             {
@@ -201,7 +206,7 @@ namespace Api.Authorization
 
         private async Task<bool> IsTeacherInCourse(Guid courseId, Guid userId)
         {
-            var course = await _dbContext.Courses.Include(c => c.CourseTeachers!).FirstOrDefaultAsync(c => c.Id == courseId);
+            var course = await _dbContext.Courses.AsNoTracking().Include(c => c.CourseTeachers!).FirstOrDefaultAsync(c => c.Id == courseId);
 
             if (course == null || course.CourseTeachers == null || !course.CourseTeachers.Any(t => t.TeacherId == userId))
             {
@@ -212,7 +217,7 @@ namespace Api.Authorization
 
         private async Task<bool> IsTeacherForTeam(Guid teamId, Guid userId)
         {
-            var team = await _dbContext.Teams.Include(t => t.Course!).ThenInclude(c => c.CourseTeachers).FirstOrDefaultAsync(c => c.Id == teamId);
+            var team = await _dbContext.Teams.AsNoTracking().Include(t => t.Course!).ThenInclude(c => c.CourseTeachers).FirstOrDefaultAsync(c => c.Id == teamId);
 
             if (team == null || team.Course == null || team.Course.CourseTeachers == null || !team.Course.CourseTeachers.Any(t => t.TeacherId == userId))
             {
@@ -229,7 +234,7 @@ namespace Api.Authorization
 
         private async Task<bool> IsStudentInCourse(Guid courseId, Guid userId)
         {
-            var course = await _dbContext.Courses.Include(c => c.CourseStudents!).FirstOrDefaultAsync(c => c.Id == courseId);
+            var course = await _dbContext.Courses.AsNoTracking().Include(c => c.CourseStudents!).FirstOrDefaultAsync(c => c.Id == courseId);
 
             if (course == null || course.CourseStudents == null || !course.CourseStudents.Any(t => t.StudentId == userId))
             {
@@ -239,7 +244,7 @@ namespace Api.Authorization
         }
         private async Task<bool> IsStudentInTeam(Guid teamId, Guid userId)
         {
-            var team = await _dbContext.Teams.FirstOrDefaultAsync(t => t.Id == teamId);
+            var team = await _dbContext.Teams.AsNoTracking().FirstOrDefaultAsync(t => t.Id == teamId);
 
             if (team == null  || !team.Students.Any(s => s.Id == userId))
             {
@@ -250,7 +255,7 @@ namespace Api.Authorization
 
         private async Task<bool> IsStudentDelivery(Guid deliveryId, Guid userId)
         {
-            var delivery = await _dbContext.Deliveries.Include(d => d.Team).ThenInclude(t => t!.Students).FirstOrDefaultAsync(t => t.Id == deliveryId);
+            var delivery = await _dbContext.Deliveries.AsNoTracking().Include(d => d.Team).ThenInclude(t => t!.Students).FirstOrDefaultAsync(t => t.Id == deliveryId);
 
             if (delivery == null || delivery.StudentId != userId || delivery.Team == null || !delivery.Team.Students.Any(s => s.Id == userId))
             {
@@ -261,7 +266,7 @@ namespace Api.Authorization
 
         private async Task<bool> IsTeacherForDelivery(Guid deliveryId, Guid userId)
         {
-            var delivery = await _dbContext.Deliveries.Include(d => d.Assignment).ThenInclude(a => a!.Course).ThenInclude(c => c!.CourseTeachers).FirstOrDefaultAsync(t => t.Id == deliveryId);
+            var delivery = await _dbContext.Deliveries.AsNoTracking().Include(d => d.Assignment).ThenInclude(a => a!.Course).ThenInclude(c => c!.CourseTeachers).FirstOrDefaultAsync(t => t.Id == deliveryId);
 
             if (delivery == null 
                 || delivery.Assignment == null
@@ -277,7 +282,7 @@ namespace Api.Authorization
 
         private async Task<bool> InDeliveryField(Guid deliveryId, Guid userId)
         {
-            var deliveryField = await _dbContext.DeliveryFields
+            var deliveryField = await _dbContext.DeliveryFields.AsNoTracking()
                 .Include(d => d.Delivery)
                 .ThenInclude(d => d!.Team)
                 .ThenInclude(t => t!.Students)
@@ -309,7 +314,7 @@ namespace Api.Authorization
 
         private async Task<bool> IsTeacherForAssignment(Guid assignmentId, Guid userId)
         {
-            var assignment = await _dbContext.Assignments
+            var assignment = await _dbContext.Assignments.AsNoTracking()
                 .Include(a => a!.Course)
                 .ThenInclude(c => c!.CourseTeachers)
                 .FirstOrDefaultAsync(f => f.Id == assignmentId);
@@ -326,7 +331,7 @@ namespace Api.Authorization
 
         private async Task<bool> IsTeacherForAssignmentField(Guid assignmentId, Guid userId)
         {
-            var assignmentField = await _dbContext.AssignmentFields
+            var assignmentField = await _dbContext.AssignmentFields.AsNoTracking()
                 .Include(af => af!.Assignment)
                 .ThenInclude(a => a!.Course)
                 .ThenInclude(c => c!.CourseTeachers)
@@ -345,7 +350,7 @@ namespace Api.Authorization
 
         private async Task<bool> IsStudentForAssignment(Guid assignmentId, Guid userId)
         {
-            var assignment = await _dbContext.Assignments
+            var assignment = await _dbContext.Assignments.AsNoTracking()
                 .Include(a => a!.Course)
                 .ThenInclude(c => c!.CourseStudents)
                 .FirstOrDefaultAsync(f => f.Id == assignmentId);
@@ -362,7 +367,7 @@ namespace Api.Authorization
 
         private async Task<bool> FeedbackForStudent(Guid feedbackId, Guid userId)
         {
-            var feedback = await _dbContext.Feedbacks
+            var feedback = await _dbContext.Feedbacks.AsNoTracking()
                 .Include(f => f.Team)
                 .ThenInclude(t => t!.Students)
                 .FirstOrDefaultAsync(f => f.Id == feedbackId);
@@ -384,7 +389,7 @@ namespace Api.Authorization
 
         private async Task<bool> IsTeacherForFeedback(Guid feedbackId, Guid userId)
         {
-            var feedback = await _dbContext.Feedbacks
+            var feedback = await _dbContext.Feedbacks.AsNoTracking()
                 .Include(f => f.Assignment)
                 .ThenInclude(a => a!.Course)
                 .ThenInclude(c => c!.CourseTeachers)

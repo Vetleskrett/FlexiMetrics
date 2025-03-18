@@ -18,9 +18,9 @@ public static class DeliveryEndpoints
         .WithName("GetAllDeliveries")
         .WithSummary("Get all deliveries");
 
-        group.MapGet("deliveries/{id:guid}", async (IDeliveryService deliveryService, Guid id) =>
+        group.MapGet("deliveries/{deliveryId:guid}", async (IDeliveryService deliveryService, Guid deliveryId) =>
         {
-            var result = await deliveryService.GetById(id);
+            var result = await deliveryService.GetById(deliveryId);
             return result.MapToResponse(delivery => Results.Ok(delivery));
         })
         .Produces<DeliveryResponse>()
@@ -66,7 +66,7 @@ public static class DeliveryEndpoints
             return result.MapToResponse(delivery => Results.CreatedAtRoute
             (
                 "GetDelivery",
-                new { id = delivery.Id },
+                new { deliveryId = delivery.Id },
                 delivery
             ));
         })

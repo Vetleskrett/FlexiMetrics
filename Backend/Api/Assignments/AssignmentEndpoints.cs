@@ -64,7 +64,7 @@ public static class AssignmentEndpoints
             return result.MapToResponse(assignment => Results.CreatedAtRoute
             (
                 "GetAssignment",
-                new { id = assignment.Id },
+                new { assignmentId = assignment.Id },
                 assignment
             ));
         })
