@@ -25,6 +25,7 @@ public static class AssignmentFieldEndpoints
         })
         .Produces<IEnumerable<AssignmentFieldResponse>>()
         .WithName("GetAllAssignmentFieldsByAssignment")
+        .RequireAuthorization("Assignment")
         .WithSummary("Get all assignment fields by assignment id");
 
         group.MapPut("assignments/{assignmentId:guid}/fields", async (IAssignmentFieldService assignmentFieldService, Guid assignmentId, UpdateAssignmentFieldsRequest request) =>
@@ -34,14 +35,16 @@ public static class AssignmentFieldEndpoints
         })
         .Produces<AssignmentResponse>()
         .WithName("UpdateAssignmentFields")
+        .RequireAuthorization("TeacherForAssignment")
         .WithSummary("Update assignment fields by assignment id");
 
-        group.MapDelete("assignment-fields/{id:guid}", async (IAssignmentFieldService assignmentFieldService, Guid id) =>
+        group.MapDelete("assignment-fields/{assignmentFieldId:guid}", async (IAssignmentFieldService assignmentFieldService, Guid assignmentFieldId) =>
         {
-            var result = await assignmentFieldService.DeleteById(id);
+            var result = await assignmentFieldService.DeleteById(assignmentFieldId);
             return result.MapToResponse(() => Results.Ok());
         })
         .WithName("DeleteAssignmentField")
+        .RequireAuthorization("TeacherForAssignmentField")
         .WithSummary("Delete assignment field by id");
     }
 }

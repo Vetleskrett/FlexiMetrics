@@ -18,13 +18,14 @@ public static class DeliveryEndpoints
         .WithName("GetAllDeliveries")
         .WithSummary("Get all deliveries");
 
-        group.MapGet("deliveries/{id:guid}", async (IDeliveryService deliveryService, Guid id) =>
+        group.MapGet("deliveries/{deliveryId:guid}", async (IDeliveryService deliveryService, Guid deliveryId) =>
         {
-            var result = await deliveryService.GetById(id);
+            var result = await deliveryService.GetById(deliveryId);
             return result.MapToResponse(delivery => Results.Ok(delivery));
         })
         .Produces<DeliveryResponse>()
         .WithName("GetDelivery")
+        .RequireAuthorization("InDelivery")
         .WithSummary("Get delivery by id");
 
         group.MapGet("students/{studentId:guid}/assignments/{assignmentId:guid}/deliveries",
@@ -35,6 +36,7 @@ public static class DeliveryEndpoints
         })
         .Produces<DeliveryResponse>()
         .WithName("GetDeliveryByStudentAssignment")
+        .RequireAuthorization("TeacherForAssignmentOrStudent")
         .WithSummary("Get delivery by student id and assignment id");
 
         group.MapGet("teams/{teamId:guid}/assignments/{assignmentId:guid}/deliveries",
@@ -45,6 +47,7 @@ public static class DeliveryEndpoints
         })
         .Produces<DeliveryResponse>()
         .WithName("GetDeliveryByTeamAssignment")
+        .RequireAuthorization("TeacherForAssignmentOrTeam")
         .WithSummary("Get delivery by team id and assignment id");
 
         group.MapGet("assignments/{assignmentId:guid}/deliveries", async (IDeliveryService deliveryService, Guid assignmentId) =>
@@ -54,6 +57,7 @@ public static class DeliveryEndpoints
         })
         .Produces<IEnumerable<DeliveryResponse>>()
         .WithName("GetAllDeliveriesByAssignment")
+        .RequireAuthorization("TeacherForAssignment")
         .WithSummary("Get all deliveries by assignment id");
 
         group.MapPost("deliveries", async (IDeliveryService deliveryService, CreateDeliveryRequest request) =>
@@ -62,7 +66,7 @@ public static class DeliveryEndpoints
             return result.MapToResponse(delivery => Results.CreatedAtRoute
             (
                 "GetDelivery",
-                new { id = delivery.Id },
+                new { deliveryId = delivery.Id },
                 delivery
             ));
         })
@@ -70,13 +74,14 @@ public static class DeliveryEndpoints
         .WithName("CreateDelivery")
         .WithSummary("Create new delivery");
 
-        group.MapPut("deliveries/{id}", async (IDeliveryService deliveryService, Guid id, UpdateDeliveryRequest request) =>
+        group.MapPut("deliveries/{deliveryId}", async (IDeliveryService deliveryService, Guid deliveryId, UpdateDeliveryRequest request) =>
         {
-            var result = await deliveryService.Update(request, id);
+            var result = await deliveryService.Update(request, deliveryId);
             return result.MapToResponse(delivery => Results.Ok(delivery));
         })
         .Produces<DeliveryResponse>()
         .WithName("UpdateDelivery")
+        .RequireAuthorization("InDelivery")
         .WithSummary("Update delivery by id");
 
         group.MapGet("delivery-fields/{deliveryFieldId:guid}", async (IDeliveryService deliveryService, Guid deliveryFieldId) =>
@@ -86,6 +91,7 @@ public static class DeliveryEndpoints
         })
         .Produces<FileStreamHttpResult>()
         .WithName("DownloadDeliveryFile")
+        .RequireAuthorization("InDeliveryField")
         .WithSummary("Download delivery file");
 
         group.MapPost("delivery-fields/{deliveryFieldId:guid}", async (IDeliveryService deliveryService, IFormFile file, Guid deliveryFieldId) =>
@@ -96,14 +102,16 @@ public static class DeliveryEndpoints
         .Accepts<IFormFile>("multipart/form-data")
         .DisableAntiforgery()
         .WithName("UploadDeliveryFile")
+        .RequireAuthorization("InDeliveryField")
         .WithSummary("Upload delivery file");
 
-        group.MapDelete("deliveries/{id:guid}", async (IDeliveryService deliveryService, Guid id) =>
+        group.MapDelete("deliveries/{deliveryId:guid}", async (IDeliveryService deliveryService, Guid deliveryId) =>
         {
-            var result = await deliveryService.DeleteById(id);
+            var result = await deliveryService.DeleteById(deliveryId);
             return result.MapToResponse(() => Results.Ok());
         })
         .WithName("DeleteDelivery")
+        .RequireAuthorization("InDelivery")
         .WithSummary("Delete delivery by id");
     }
 }
