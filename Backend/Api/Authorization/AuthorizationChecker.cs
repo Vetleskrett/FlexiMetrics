@@ -171,6 +171,20 @@ namespace Api.Authorization
                         context.Fail();
                     }
                     break;
+                case "analyzer":
+                    var analyzerId = Guid.Parse(httpContext.Request.RouteValues["analyzerId"]?.ToString());
+                    if (!await IsTeacherForAnalyzer(analyzerId, userId))
+                    {
+                        context.Fail();
+                    }
+                    break;
+                case "analysis":
+                    var analysisId = Guid.Parse(httpContext.Request.RouteValues["analysisId"]?.ToString());
+                    if (!await IsTeacherForAnalyzer(analysisId, userId))
+                    {
+                        context.Fail();
+                    }
+                    break;
                 default:
                     context.Fail();
                     break;
@@ -400,6 +414,45 @@ namespace Api.Authorization
                 feedback.Assignment.Course == null ||
                 feedback.Assignment.Course.CourseTeachers == null ||
                 !feedback.Assignment.Course.CourseTeachers.Any(t => t.TeacherId == userId))
+            {
+                return false;
+            }
+            return true;
+        }
+        private async Task<bool> IsTeacherForAnalyzer(Guid analyzerId, Guid userId)
+        {
+            var analyzer = await _dbContext.Analyzers.AsNoTracking()
+                .Include(a => a.Assignment)
+                .ThenInclude(a => a!.Course)
+                .ThenInclude(c => c!.CourseTeachers)
+                .FirstOrDefaultAsync(a => a.Id == analyzerId);
+
+            if (analyzer == null ||
+                analyzer.Assignment == null ||
+                analyzer.Assignment.Course == null ||
+                analyzer.Assignment.Course.CourseTeachers == null ||
+                !analyzer.Assignment.Course.CourseTeachers.Any(t => t.TeacherId == userId))
+            {
+                return false;
+            }
+            return true;
+        }
+
+        private async Task<bool> IsTeacherForAnalysis(Guid analyzerId, Guid userId)
+        {
+            var analysis = await _dbContext.Analyses.AsNoTracking()
+                .Include(a => a.Analyzer)
+                .ThenInclude(a => a!.Assignment)
+                .ThenInclude(a => a!.Course)
+                .ThenInclude(c => c!.CourseTeachers)
+                .FirstOrDefaultAsync(a => a.Id == analyzerId);
+
+            if (analysis == null ||
+                analysis.Analyzer == null ||
+                analysis.Analyzer.Assignment == null ||
+                analysis.Analyzer.Assignment.Course == null ||
+                analysis.Analyzer.Assignment.Course.CourseTeachers == null ||
+                !analysis.Analyzer.Assignment.Course.CourseTeachers.Any(t => t.TeacherId == userId))
             {
                 return false;
             }

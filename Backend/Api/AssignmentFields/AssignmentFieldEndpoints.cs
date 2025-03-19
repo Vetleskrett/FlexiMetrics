@@ -38,9 +38,9 @@ public static class AssignmentFieldEndpoints
         .RequireAuthorization("TeacherForAssignment")
         .WithSummary("Update assignment fields by assignment id");
 
-        group.MapDelete("assignment-fields/{id:guid}", async (IAssignmentFieldService assignmentFieldService, Guid id) =>
+        group.MapDelete("assignment-fields/{assignmentFieldId:guid}", async (IAssignmentFieldService assignmentFieldService, Guid assignmentFieldId) =>
         {
-            var result = await assignmentFieldService.DeleteById(id);
+            var result = await assignmentFieldService.DeleteById(assignmentFieldId);
             return result.MapToResponse(() => Results.Ok());
         })
         .WithName("DeleteAssignmentField")

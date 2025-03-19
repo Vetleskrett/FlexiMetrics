@@ -114,7 +114,9 @@ builder.Services.AddAuthorizationBuilder()
     .AddPolicy("TeacherForAssignmentOrTeam", policy => policy.Requirements.Add(new UserRequirement("assignmentTeacherOrTeam")))
     .AddPolicy("TeacherForAssignment", policy => policy.Requirements.Add(new UserRequirement("assignmentTeacher")))
     .AddPolicy("TeacherForAssignmentField", policy => policy.Requirements.Add(new UserRequirement("assignmentFieldTeacher")))
-    .AddPolicy("Assignment", policy => policy.Requirements.Add(new UserRequirement("assignment")));
+    .AddPolicy("Assignment", policy => policy.Requirements.Add(new UserRequirement("assignment")))
+    .AddPolicy("TeacherForAnalyzer", policy => policy.Requirements.Add(new UserRequirement("analyzer")))
+    .AddPolicy("TeacherForAnalysis", policy => policy.Requirements.Add(new UserRequirement("analysis")));
 
 builder.Services.AddScoped<IAuthorizationHandler, UserAuthorizationHandler>();
 
