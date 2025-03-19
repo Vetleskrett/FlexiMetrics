@@ -408,8 +408,8 @@ public static class Seed
 
             foreach (var analyzer in assignmentAnalyzers)
             {
-                var stream = new MemoryStream(Encoding.UTF8.GetBytes(ANALYZER_SCRIPT));
-                fileStorage.WriteAnalyzerScript(assignment.CourseId, assignment.Id, analyzer.Id, stream);
+                var fileStream = File.OpenRead("../Container/Scripts/template.py");
+                fileStorage.WriteAnalyzerScript(assignment.CourseId, assignment.Id, analyzer.Id, fileStream);
             }
 
             return assignmentAnalyzers;
@@ -421,26 +421,6 @@ public static class Seed
 
         await dbContext.SaveChangesAsync();
     }
-
-    private const string ANALYZER_SCRIPT =
-    """
-    from fleximetrics import *
-
-
-    def main(entry: AssignmentEntry) -> Analysis:
-        analysis = Analysis()
-
-        analysis.set_int("Num files", 5)
-        analysis.set_str("Title", "Weather app")
-
-        return analysis
-
-
-    if __name__ == "__main__":
-        entry = AssignmentEntry.read_from_file()
-        analysis = main(entry)
-        analysis.write_to_file()
-    """;
 
     private static readonly string[] COURSES =
     [

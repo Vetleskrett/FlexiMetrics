@@ -4,4 +4,4 @@
 	};
 </script>
 
-<p style="white-space: pre-wrap">{field?.value}</p>
+<p>{field?.value}</p>

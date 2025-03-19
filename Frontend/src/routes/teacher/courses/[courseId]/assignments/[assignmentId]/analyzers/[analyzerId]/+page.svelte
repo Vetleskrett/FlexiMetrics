@@ -23,7 +23,7 @@
 	} from 'src/api';
 	import * as Card from '$lib/components/ui/card';
 	import { onDestroy, afterUpdate } from 'svelte';
-	import { goto, invalidateAll } from '$app/navigation';
+	import { goto } from '$app/navigation';
 
 	const courseId = $page.params.courseId;
 	const assignmentId = $page.params.assignmentId;
@@ -142,7 +142,7 @@
 				invalidateAll: true
 			});
 		} catch (exception) {
-			console.error('Something Went Wrong!');
+			console.error(exception);
 		}
 	}
 </script>

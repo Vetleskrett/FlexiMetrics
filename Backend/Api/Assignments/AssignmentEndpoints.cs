@@ -1,5 +1,4 @@
 ﻿using Api.Assignments.Contracts;
-using Database.Models;
 
 namespace Api.Assignments;
 
@@ -88,10 +87,10 @@ public static class AssignmentEndpoints
             var result = await assignmentService.Publish(assignmentId);
             return result.MapToResponse(assignment => Results.Ok(assignment));
         })
-      .Produces<AssignmentResponse>()
-      .WithName("PublishAssignment")
-      .RequireAuthorization("TeacherForAssignment")
-      .WithSummary("Publish assignment by id");
+        .Produces<AssignmentResponse>()
+        .WithName("PublishAssignment")
+        .RequireAuthorization("TeacherForAssignment")
+        .WithSummary("Publish assignment by id");
 
         group.MapDelete("assignments/{assignmentId:guid}", async (IAssignmentService assignmentService, Guid assignmentId) =>
         {

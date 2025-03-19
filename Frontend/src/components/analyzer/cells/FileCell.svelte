@@ -1,10 +1,13 @@
 <script lang="ts">
-	import ArrowDownToline from 'lucide-svelte/icons/arrow-down-to-line';
+	import { ArrowDownToLine } from 'lucide-svelte';
 
-	export let value: any;
+	export let field: {
+		value: any;
+		id: string;
+	};
 </script>
 
-<a href="TODO: add url here" download="TODO" class="flex items-center text-blue-500">
-	<ArrowDownToline size="20" />
-	{value}
+<a class="flex items-center text-blue-500" download href={`/api/analysis-fields/${field?.id}`}>
+	<ArrowDownToLine size="20" />
+	{field?.value?.FileName}
 </a>

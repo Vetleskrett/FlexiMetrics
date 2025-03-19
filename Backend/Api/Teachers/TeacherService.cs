@@ -44,8 +44,8 @@ public class TeacherService : ITeacherService
     public async Task<Result<IEnumerable<TeacherResponse>>> AddToCourse(Guid courseId, AddTeacherRequest request)
     {
         var course = await _dbContext.Courses
-            .Include (c => c.CourseTeachers!)
-            .ThenInclude (ct => ct.Teacher)
+            .Include(c => c.CourseTeachers!)
+            .ThenInclude(ct => ct.Teacher)
             .FirstOrDefaultAsync(c => c.Id == courseId);
 
         if (course is null)

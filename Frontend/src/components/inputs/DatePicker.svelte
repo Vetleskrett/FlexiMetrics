@@ -8,6 +8,7 @@
 
 	export let id: string | undefined;
 	export let value: DateValue | undefined = undefined;
+	export let placeholder: string = 'Pick a date';
 </script>
 
 <Popover.Root>
@@ -21,7 +22,7 @@
 			builders={[builder]}
 		>
 			<CalendarIcon class="mr-2 h-4 w-4" />
-			{value ? value.toDate('utc').toDateString() : 'Pick a date'}
+			{value ? value.toDate('utc').toDateString() : placeholder}
 		</Button>
 	</Popover.Trigger>
 	<Popover.Content class="w-auto p-0 ">

@@ -3,5 +3,13 @@
 public enum AnalysisFieldType
 {
     String,
-    Int
+    Integer,
+    Float,
+    Boolean,
+    Range,
+    DateTime,
+    URL,
+    Json,
+    List,
+    File
 }

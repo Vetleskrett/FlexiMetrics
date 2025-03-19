@@ -1,6 +1,6 @@
 ﻿using Api.Analyses.Contracts;
-using Api.Teams;
 using Api.Students;
+using Api.Teams;
 using Database.Models;
 
 namespace Api.Analyses;
@@ -86,6 +86,7 @@ public static class AnalysisMapping
             Id = analysisField.Id,
             Name = analysisField.Name,
             Type = analysisField.Type,
+            SubType = analysisField.SubType,
             Value = analysisField.Value
         };
     }

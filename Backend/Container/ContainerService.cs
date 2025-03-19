@@ -1,7 +1,7 @@
-﻿using System.Text;
-using Docker.DotNet;
+﻿using Docker.DotNet;
 using Docker.DotNet.Models;
 using Microsoft.Extensions.Logging;
+using System.Text;
 
 namespace Container;
 
@@ -14,31 +14,16 @@ public interface IContainerService
     Task RemoveContainer(string container);
     Task StartContainer(string container, CancellationToken cancellationToken);
     Task WaitForContainerCompletion(string container, CancellationToken cancellationToken);
-    Task CopyFileToContainer(string container, Stream stream, string fileName);
-    Task CopyFileToContainer(string container, string contents, string fileName);
+    Task CopyFileToContainer(string container, Stream stream, string fileName, CancellationToken cancellationToken);
+    Task CopyFileToContainer(string container, string contents, string fileName, CancellationToken cancellationToken);
     Task<Stream?> CopyFileFromContainer(string container, string path);
 }
 
 public class ContainerService : IContainerService
 {
+    private const string DOCKERFILE_PATH = "../Container/Scripts/Dockerfile";
     private const string FLEXIMETRICS_PATH = "../Container/Scripts/fleximetrics.py";
     private const string WORKING_DIR = "/app";
-    private const string DOCKERFILE =
-        $"""
-        FROM python:3.13-slim
-
-        WORKDIR {WORKING_DIR}
-
-        COPY fleximetrics.py ./
-
-        COPY script.py ./
-
-        COPY requirements.txt ./
-
-        RUN pip install --disable-pip-version-check --root-user-action=ignore --no-cache-dir -r requirements.txt
-
-        CMD ["python", "script.py"]
-        """;
 
     private readonly IDockerClient _dockerClient;
     private readonly ILogger<ContainerService> _logger;
@@ -51,11 +36,12 @@ public class ContainerService : IContainerService
 
     public async Task CreateImage(Guid analyzerId, string script, string requirements, CancellationToken cancellationToken)
     {
+        var dockerfile = await File.ReadAllTextAsync(DOCKERFILE_PATH, cancellationToken);
         var fleximetrics = await File.ReadAllTextAsync(FLEXIMETRICS_PATH, cancellationToken);
 
         var tarStream = TarArchive.CreateAll
         (
-            new TextFile("Dockerfile", DOCKERFILE),
+            new TextFile("Dockerfile", dockerfile),
             new TextFile("fleximetrics.py", fleximetrics),
             new TextFile("script.py", script),
             new TextFile("requirements.txt", requirements)
@@ -158,14 +144,14 @@ public class ContainerService : IContainerService
         catch (Exception) { }
     }
 
-    public async Task CopyFileToContainer(string container, string contents, string fileName)
+    public async Task CopyFileToContainer(string container, string contents, string fileName, CancellationToken cancellationToken)
     {
         var bytes = Encoding.UTF8.GetBytes(contents);
         using var stream = new MemoryStream(bytes);
-        await CopyFileToContainer(container, stream, fileName);
+        await CopyFileToContainer(container, stream, fileName, cancellationToken);
     }
 
-    public async Task CopyFileToContainer(string container, Stream stream, string fileName)
+    public async Task CopyFileToContainer(string container, Stream stream, string fileName, CancellationToken cancellationToken)
     {
         using var tarStream = TarArchive.Create(stream, fileName);
         await _dockerClient.Containers.ExtractArchiveToContainerAsync
@@ -175,7 +161,8 @@ public class ContainerService : IContainerService
             {
                 Path = WORKING_DIR
             },
-            tarStream
+            tarStream,
+            cancellationToken
         );
     }
 

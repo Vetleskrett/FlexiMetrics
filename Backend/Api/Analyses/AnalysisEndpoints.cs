@@ -1,4 +1,5 @@
 ﻿using Api.Analyses.Contracts;
+using Microsoft.AspNetCore.Http.HttpResults;
 
 namespace Api.Analyses;
 
@@ -55,6 +56,15 @@ public static class AnalysisEndpoints
         .WithName("GetAnalysesByTeamAssignment")
         .RequireAuthorization("TeacherForAssignmentOrTeam")
         .WithSummary("Get analyses by team id and assignment id");
+
+        group.MapGet("analysis-fields/{analysisFieldId:guid}", async (IAnalysisService analysisService, Guid analysisFieldId) =>
+        {
+            var result = await analysisService.DownloadFile(analysisFieldId);
+            return result.MapToResponse(file => Results.File(file.Stream, file.Metadata.ContentType, file.Metadata.FileName));
+        })
+        .Produces<FileStreamHttpResult>()
+        .WithName("DownloadAnalysisFile")
+        .WithSummary("Download analysis file");
 
         group.MapDelete("analyses/{analysisId:guid}", async (IAnalysisService analysisService, Guid analysisId) =>
         {

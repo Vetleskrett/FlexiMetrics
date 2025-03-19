@@ -13,7 +13,7 @@
 	};
 </script>
 
-<div class="fixed flex h-full w-60 flex-row flex-col items-start bg-white pt-12">
+<div class="fixed z-50 flex h-full w-60 flex-row flex-col items-start bg-white pt-12">
 	<MenuRow
 		href="/teacher/courses/{courseId}/assignments/{assignmentId}"
 		isActive={currentPath.endsWith(assignmentId)}

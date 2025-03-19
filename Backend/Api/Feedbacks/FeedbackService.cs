@@ -1,10 +1,10 @@
-﻿using Api.Validation;
+﻿using Api.Feedbacks.Contracts;
+using Api.Teams;
+using Api.Validation;
+using Database;
+using Database.Models;
 using FluentValidation;
 using Microsoft.EntityFrameworkCore;
-using Database.Models;
-using Database;
-using Api.Feedbacks.Contracts;
-using Api.Teams;
 
 namespace Api.Feedbacks;
 

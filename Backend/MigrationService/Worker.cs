@@ -1,8 +1,8 @@
-using System.Diagnostics;
 using Database;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Storage;
+using System.Diagnostics;
 
 namespace MigrationService;
 

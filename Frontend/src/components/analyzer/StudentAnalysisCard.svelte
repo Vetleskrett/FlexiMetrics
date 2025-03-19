@@ -2,7 +2,8 @@
 	import type { StudentAnalysis } from 'src/types/';
 	import * as Card from '$lib/components/ui/card';
 	import { Separator } from '$lib/components/ui/separator';
-	import StringCell from './cells/StringCell.svelte';
+	import { getCell } from './cells/cells';
+	import { Render } from 'svelte-headless-table';
 
 	export let studentAnalysis: StudentAnalysis;
 </script>
@@ -16,12 +17,13 @@
 	<Card.Content class="p-0">
 		<div class="flex flex-col">
 			{#each studentAnalysis.fields as field}
+				{@const renderer = getCell(field.type, field.subType)}
 				<Separator class="w-full" />
 				<div class="px-6 py-4">
 					<h1 class="font-semibold">
 						{field.name}
 					</h1>
-					<StringCell value={field.value} />
+					<Render of={renderer({ value: field })} />
 				</div>
 			{/each}
 		</div>

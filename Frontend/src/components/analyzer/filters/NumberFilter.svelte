@@ -14,7 +14,7 @@
 		type="number"
 		bind:value={$filterValue.min}
 		placeholder="Min"
-		class="border-black font-normal"
+		class="min-w-20 border-black font-normal"
 	/>
 
 	<p class="text-lg">-</p>
@@ -24,6 +24,6 @@
 		type="number"
 		bind:value={$filterValue.max}
 		placeholder="Max"
-		class="border-black font-normal"
+		class="min-w-20 border-black font-normal"
 	/>
 </div>

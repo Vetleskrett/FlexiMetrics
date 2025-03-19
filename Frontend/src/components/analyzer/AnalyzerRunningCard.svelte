@@ -17,7 +17,7 @@
 			<h1 class="text-5xl font-semibold">{completed} / {total}</h1>
 			<Progress value={completed} max={total} class="mt-2 h-4" />
 		</div>
-		<ScrollArea class="h-64 w-full rounded-lg bg-background text-xs">
+		<ScrollArea class="h-64 w-full rounded-lg bg-background font-mono text-xs">
 			<div class="flex flex-col gap-2 px-4 py-2">
 				{#each analysis.analysisEntries.reverse() as entry}
 					<div>
