@@ -24,6 +24,7 @@ public static class CourseEndpoints
         })
         .Produces<IEnumerable<CourseResponse>>()
         .WithName("GetAllCoursesByTeacher")
+        .RequireAuthorization("TeacherId")
         .WithSummary("Get all courses by teacher id");
 
         group.MapGet("students/{studentId:guid}/courses", async (ICourseService courseService, Guid studentId) =>
@@ -33,15 +34,17 @@ public static class CourseEndpoints
         })
         .Produces<IEnumerable<CourseResponse>>()
         .WithName("GetAllCoursesByStudent")
+        .RequireAuthorization("StudentId")
         .WithSummary("Get all courses by student id");
 
-        group.MapGet("/courses/{id:guid}", async (ICourseService courseService, Guid id) =>
+        group.MapGet("/courses/{courseId:guid}", async (ICourseService courseService, Guid courseId) =>
         {
-            var result = await courseService.GetById(id);
+            var result = await courseService.GetById(courseId);
             return result.MapToResponse(course => Results.Ok(course));
         })
         .Produces<CourseResponse>()
         .WithName("GetCourse")
+        .RequireAuthorization("Course")
         .WithSummary("Get course by id");
 
         group.MapPost("courses", async (ICourseService courseService, CreateCourseRequest request) =>
@@ -50,29 +53,32 @@ public static class CourseEndpoints
             return result.MapToResponse(course => Results.CreatedAtRoute
             (
                 "GetCourse",
-                new { id = course.Id },
+                new { courseId = course.Id },
                 course
             ));
         })
         .Produces<CourseResponse>()
         .WithName("CreateCourse")
+        .RequireAuthorization("Teacher")
         .WithSummary("Create new course");
 
-        group.MapPut("courses/{id:guid}", async (ICourseService courseService, Guid id, UpdateCourseRequest request) =>
+        group.MapPut("courses/{courseId:guid}", async (ICourseService courseService, Guid courseId, UpdateCourseRequest request) =>
         {
-            var result = await courseService.Update(request, id);
+            var result = await courseService.Update(request, courseId);
             return result.MapToResponse(course => Results.Ok(course));
         })
         .Produces<CourseResponse>()
         .WithName("UpdateCourse")
+        .RequireAuthorization("TeacherInCourse")
         .WithSummary("Update course by id");
 
-        group.MapDelete("courses/{id:guid}", async (ICourseService courseService, Guid id) =>
+        group.MapDelete("courses/{courseId:guid}", async (ICourseService courseService, Guid courseId) =>
         {
-            var result = await courseService.DeleteById(id);
+            var result = await courseService.DeleteById(courseId);
             return result.MapToResponse(() => Results.Ok());
         })
         .WithName("DeleteCourse")
+        .RequireAuthorization("TeacherInCourse")
         .WithSummary("Delete course by id");
     }
 }

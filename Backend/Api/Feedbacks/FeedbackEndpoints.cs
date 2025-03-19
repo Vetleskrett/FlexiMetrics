@@ -17,13 +17,14 @@ public static class FeedbackEndpoints
         .WithName("GetAllFeedbacks")
         .WithSummary("Get all feedbacks");
 
-        group.MapGet("/feedbacks/{id:guid}", async (IFeedbackService feedbackService, Guid id) =>
+        group.MapGet("/feedbacks/{feedbackId:guid}", async (IFeedbackService feedbackService, Guid feedbackId) =>
         {
-            var result = await feedbackService.GetById(id);
+            var result = await feedbackService.GetById(feedbackId);
             return result.MapToResponse(feedback => Results.Ok(feedback));
         })
         .Produces<FeedbackResponse>()
         .WithName("GetFeedback")
+        .RequireAuthorization("Feedback")
         .WithSummary("Get feedback by id");
 
         group.MapGet("assignments/{assignmentId:guid}/feedbacks", async (IFeedbackService feedbackService, Guid assignmentId) =>
@@ -33,6 +34,7 @@ public static class FeedbackEndpoints
         })
         .Produces<IEnumerable<FeedbackResponse>>()
         .WithName("GetAllFeedbacksByAssignment")
+        .RequireAuthorization("TeacherForAssignment")
         .WithSummary("Get all feedbacks by assignment id");
 
         group.MapGet("students/{studentId:guid}/assignments/{assignmentId:guid}/feedbacks", async (IFeedbackService feedbackService, Guid studentId, Guid assignmentId) =>
@@ -42,6 +44,7 @@ public static class FeedbackEndpoints
         })
         .Produces<FeedbackResponse>()
         .WithName("GetFeedbackByStudentAssignment")
+        .RequireAuthorization("TeacherForAssignmentOrStudent")
         .WithSummary("Get feedback by student id and assignment id");
 
         group.MapGet("teams/{teamId:guid}/assignments/{assignmentId:guid}/feedbacks", async (IFeedbackService feedbackService, Guid teamId, Guid assignmentId) =>
@@ -51,6 +54,7 @@ public static class FeedbackEndpoints
         })
         .Produces<FeedbackResponse>()
         .WithName("GetFeedbackByTeamAssignment")
+        .RequireAuthorization("TeacherForAssignmentOrTeam")
         .WithSummary("Get feedback by team id and assignment id");
 
         group.MapPost("feedbacks", async (IFeedbackService feedbackService, CreateFeedbackRequest request) =>
@@ -59,29 +63,32 @@ public static class FeedbackEndpoints
             return result.MapToResponse(feedback => Results.CreatedAtRoute
             (
                 "GetFeedback",
-                new { id = feedback.Id },
+                new { feedbackId = feedback.Id },
                 feedback
             ));
         })
         .Produces<FeedbackResponse>()
         .WithName("CreateFeedback")
+        .RequireAuthorization("Teacher")
         .WithSummary("Create new feedback");
 
-        group.MapPut("feedbacks/{id:guid}", async (IFeedbackService feedbackService, Guid id, UpdateFeedbackRequest request) =>
+        group.MapPut("feedbacks/{feedbackId:guid}", async (IFeedbackService feedbackService, Guid feedbackId, UpdateFeedbackRequest request) =>
         {
-            var result = await feedbackService.Update(request, id);
+            var result = await feedbackService.Update(request, feedbackId);
             return result.MapToResponse(feedback => Results.Ok(feedback));
         })
         .Produces<FeedbackResponse>()
         .WithName("UpdateFeedback")
+        .RequireAuthorization("TeacherForFeedback")
         .WithSummary("Update feedback by id");
 
-        group.MapDelete("feedbacks/{id:guid}", async (IFeedbackService feedbackService, Guid id) =>
+        group.MapDelete("feedbacks/{feedbackId:guid}", async (IFeedbackService feedbackService, Guid feedbackId) =>
         {
-            var result = await feedbackService.DeleteById(id);
+            var result = await feedbackService.DeleteById(feedbackId);
             return result.MapToResponse(() => Results.Ok());
         })
         .WithName("DeleteFeedback")
+        .RequireAuthorization("TeacherForFeedback")
         .WithSummary("Delete feedback by id");
     }
 }

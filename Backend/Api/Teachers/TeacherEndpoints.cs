@@ -15,6 +15,7 @@ public static class TeacherEndpoints
         })
         .Produces<IEnumerable<TeacherResponse>>()
         .WithName("GetAllTeachersByCourse")
+        .RequireAuthorization("Course")
         .WithSummary("Get all teachers by course id");
 
         group.MapPost("courses/{courseId:guid}/teachers", async (ITeacherService teacherService, Guid courseId, AddTeacherRequest request) =>
@@ -24,6 +25,7 @@ public static class TeacherEndpoints
         })
         .Produces<IEnumerable<TeacherResponse>>()
         .WithName("AddTeacherToCourse")
+        .RequireAuthorization("TeacherInCourse")
         .WithSummary("Add teacher to course");
 
         group.MapDelete("courses/{courseId:guid}/teachers/{teacherId:guid}", async (ITeacherService teacherService, Guid courseId, Guid teacherId) =>
@@ -32,6 +34,7 @@ public static class TeacherEndpoints
             return result.MapToResponse(() => Results.Ok());
         })
         .WithName("RemoveTeacherFromCourse")
+        .RequireAuthorization("TeacherInCourse")
         .WithSummary("Remove teacher from course");
     }
 }

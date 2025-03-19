@@ -1,4 +1,5 @@
 ﻿using Api.Assignments.Contracts;
+using Database.Models;
 
 namespace Api.Assignments;
 
@@ -24,6 +25,7 @@ public static class AssignmentEndpoints
         })
         .Produces<IEnumerable<AssignmentResponse>>()
         .WithName("GetAllAssignmentsByCourse")
+        .RequireAuthorization("Course")
         .WithSummary("Get all assignments by course id");
 
         group.MapGet("students/{studentId:guid}/course/{courseId:guid}/assignments", async (IAssignmentService assignmentService, Guid studentId, Guid courseId) =>
@@ -33,6 +35,7 @@ public static class AssignmentEndpoints
         })
         .Produces<IEnumerable<StudentAssignmentResponse>>()
         .WithName("GetAllAssignmentsByStudentCourse")
+        .RequireAuthorization("Course")
         .WithSummary("Get all assignments by student id and course id");
 
         group.MapGet("courses/{courseId:guid}/teams/{teamId:guid}/assignments", async (IAssignmentService assignmentService, Guid courseId, Guid teamId) =>
@@ -42,15 +45,17 @@ public static class AssignmentEndpoints
         })
         .Produces<IEnumerable<StudentAssignmentResponse>>()
         .WithName("GetAllAssignmentsByTeamCourse")
+        .RequireAuthorization("Course")
         .WithSummary("Get all assignments by team id and course id");
 
-        group.MapGet("assignments/{id:guid}", async (IAssignmentService assignmentService, Guid id) =>
+        group.MapGet("assignments/{assignmentId:guid}", async (IAssignmentService assignmentService, Guid assignmentId) =>
         {
-            var result = await assignmentService.GetById(id);
+            var result = await assignmentService.GetById(assignmentId);
             return result.MapToResponse(assignment => Results.Ok(assignment));
         })
         .Produces<AssignmentResponse>()
         .WithName("GetAssignment")
+        .RequireAuthorization("Assignment")
         .WithSummary("Get assignment by id");
 
         group.MapPost("assignments", async (IAssignmentService assignmentService, CreateAssignmentRequest request) =>
@@ -59,38 +64,42 @@ public static class AssignmentEndpoints
             return result.MapToResponse(assignment => Results.CreatedAtRoute
             (
                 "GetAssignment",
-                new { id = assignment.Id },
+                new { assignmentId = assignment.Id },
                 assignment
             ));
         })
         .Produces<AssignmentResponse>()
         .WithName("CreateAssignment")
+        .RequireAuthorization("Teacher")
         .WithSummary("Create new assignment with fields");
 
-        group.MapPut("assignments/{id:guid}", async (IAssignmentService assignmentService, Guid id, UpdateAssignmentRequest request) =>
+        group.MapPut("assignments/{assignmentId:guid}", async (IAssignmentService assignmentService, Guid assignmentId, UpdateAssignmentRequest request) =>
         {
-            var result = await assignmentService.Update(request, id);
+            var result = await assignmentService.Update(request, assignmentId);
             return result.MapToResponse(assignment => Results.Ok(assignment));
         })
         .Produces<AssignmentResponse>()
         .WithName("UpdateAssignment")
+        .RequireAuthorization("TeacherForAssignment")
         .WithSummary("Update assignment by id");
 
-        group.MapPut("assignments/{id:guid}/publish", async (IAssignmentService assignmentService, Guid id) =>
+        group.MapPut("assignments/{assignmentId:guid}/publish", async (IAssignmentService assignmentService, Guid assignmentId) =>
         {
-            var result = await assignmentService.Publish(id);
+            var result = await assignmentService.Publish(assignmentId);
             return result.MapToResponse(assignment => Results.Ok(assignment));
         })
       .Produces<AssignmentResponse>()
       .WithName("PublishAssignment")
+      .RequireAuthorization("TeacherForAssignment")
       .WithSummary("Publish assignment by id");
 
-        group.MapDelete("assignments/{id:guid}", async (IAssignmentService assignmentService, Guid id) =>
+        group.MapDelete("assignments/{assignmentId:guid}", async (IAssignmentService assignmentService, Guid assignmentId) =>
         {
-            var result = await assignmentService.DeleteById(id);
+            var result = await assignmentService.DeleteById(assignmentId);
             return result.MapToResponse(() => Results.Ok());
         })
         .WithName("DeleteAssignment")
+        .RequireAuthorization("TeacherForAssignment")
         .WithSummary("Delete assignment by id");
     }
 }
