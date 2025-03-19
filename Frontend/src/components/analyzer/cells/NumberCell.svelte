@@ -1,5 +1,7 @@
 <script lang="ts">
-	export let value: any;
+	export let field: {
+		value: any;
+	};
 </script>
 
-<p>{value}</p>
+<p>{field?.value}</p>

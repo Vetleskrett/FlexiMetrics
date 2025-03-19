@@ -1,8 +1,10 @@
 <script lang="ts">
-	export let value: Date;
+	export let field: {
+		value: any | undefined;
+	};
 </script>
 
 <p>
-	<span class="text-nowrap">{new Date(value).toDateString()}</span>
-	<span>{new Date(value).toLocaleTimeString()}</span>
+	<span class="text-nowrap">{new Date(field.value).toDateString()}</span>
+	<span>{new Date(field.value).toLocaleTimeString()}</span>
 </p>

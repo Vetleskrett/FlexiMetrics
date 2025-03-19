@@ -97,11 +97,16 @@ public partial class AnalyzerExecutor : IAnalyzerExecutor
 
         try
         {
-            cancellationToken.ThrowIfCancellationRequested();
-
             var entryDTO = AssignmentEntryDTO.MapFrom(entry);
             var entryJson = JsonSerializer.Serialize(entryDTO, _jsonOptions);
-            await _containerService.CopyFileToContainer(container, entryJson, "input.json");
+            await _containerService.CopyFileToContainer(container, entryJson, "input.json", cancellationToken);
+
+            foreach (var fileField in entry.Delivery!.Fields!.Where(f => f.AssignmentField!.Type == AssignmentDataType.File))
+            {
+                var fileMetadata = fileField.GetValue<FileMetadata>();
+                var fileStream = _fileStorage.GetDeliveryField(request.CourseId, request.AssignmentId, fileField.DeliveryId, fileField.Id);
+                await _containerService.CopyFileToContainer(container, fileStream, fileMetadata.FileName, cancellationToken);
+            }
 
             await _containerService.StartContainer(container, cancellationToken);
 
@@ -152,6 +157,14 @@ public partial class AnalyzerExecutor : IAnalyzerExecutor
                     Value = pair.Value.Value,
                 }
             ).ToList();
+
+            foreach (var fileField in analysisEntry.Fields.Where(f => f.Type == AnalysisFieldType.File))
+            {
+                cancellationToken.ThrowIfCancellationRequested();
+                var fileMetadata = fileField.GetValue<FileMetadata>();
+                using var fileStream = await _containerService.CopyFileFromContainer(container, fileMetadata.FileName);
+                await _fileStorage.WriteAnalysisField(request.CourseId, request.AssignmentId, request.AnalyzerId, request.AnalysisId, analysisEntry.Id, fileField.Id, fileStream);
+            }
         }
 
         await _dbLock.WaitAsync(cancellationToken);

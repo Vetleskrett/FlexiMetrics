@@ -11,23 +11,34 @@ import UrlCell from './UrlCell.svelte';
 import NumberCell from './NumberCell.svelte';
 
 export const getCell = (type: AnalysisFieldType, subType: AnalysisFieldType | undefined = undefined) => {
-    switch (type) {
-        case 'Integer':
-        case 'Float':
-            return ({ value }: { value: any }) => createRender(NumberCell, { value });
-        case 'Boolean':
-            return ({ value }: { value: any }) => createRender(BoolCell, { value });
-        case 'Range':
-            return ({ value }: { value: any }) => createRender(RangeCell, { value });
-        case 'DateTime':
-            return ({ value }: { value: any }) => createRender(DateCell, { value });
-        case 'URL':
-            return ({ value }: { value: any }) => createRender(UrlCell, { value });
-        case 'Json':
-            return ({ value }: { value: any }) => createRender(JsonCell, { value });
-        case 'List':
-            return ({ value }: { value: any }) => createRender(ListCell, { value, subType:subType! });
-        default:
-            return ({ value }: { value: any }) => createRender(StringCell, { value });
+    return ({ value }: any) => {
+
+        if (value == undefined || value?.value == undefined) {
+            return createRender(StringCell, { field: {
+                value: ''
+            } });
+        }
+
+        switch (type) {
+            case 'Integer':
+            case 'Float':
+                return createRender(NumberCell, { field: value });
+            case 'Boolean':
+                return createRender(BoolCell, { field: value });
+            case 'Range':
+                return createRender(RangeCell, { field: value });
+            case 'DateTime':
+                return createRender(DateCell, { field: value });
+            case 'URL':
+                return createRender(UrlCell, { field: value });
+            case 'Json':
+                return createRender(JsonCell, { field: value });
+            case 'File':
+                return createRender(FileCell, { field: value });
+            case 'List':
+                return createRender(ListCell, { field: value, subType:subType! });
+            default:
+                return createRender(StringCell, { field: value });
+        }
     }
 };

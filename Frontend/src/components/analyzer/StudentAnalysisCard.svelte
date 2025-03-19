@@ -2,12 +2,6 @@
 	import type { StudentAnalysis } from 'src/types/';
 	import * as Card from '$lib/components/ui/card';
 	import { Separator } from '$lib/components/ui/separator';
-	import StringCell from './cells/StringCell.svelte';
-	import BoolCell from './cells/BoolCell.svelte';
-	import RangeCell from './cells/RangeCell.svelte';
-	import DateCell from './cells/DateCell.svelte';
-	import UrlCell from './cells/UrlCell.svelte';
-	import JsonCell from './cells/JsonCell.svelte';
 	import { getCell } from './cells/cells';
 	import { Render } from 'svelte-headless-table';
 
@@ -29,7 +23,7 @@
 					<h1 class="font-semibold">
 						{field.name}
 					</h1>
-					<Render of={renderer({ value: field.value })} />
+					<Render of={renderer({ value: field })} />
 				</div>
 			{/each}
 		</div>

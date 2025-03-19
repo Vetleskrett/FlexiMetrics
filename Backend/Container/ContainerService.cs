@@ -14,8 +14,8 @@ public interface IContainerService
     Task RemoveContainer(string container);
     Task StartContainer(string container, CancellationToken cancellationToken);
     Task WaitForContainerCompletion(string container, CancellationToken cancellationToken);
-    Task CopyFileToContainer(string container, Stream stream, string fileName);
-    Task CopyFileToContainer(string container, string contents, string fileName);
+    Task CopyFileToContainer(string container, Stream stream, string fileName, CancellationToken cancellationToken);
+    Task CopyFileToContainer(string container, string contents, string fileName, CancellationToken cancellationToken);
     Task<Stream?> CopyFileFromContainer(string container, string path);
 }
 
@@ -144,14 +144,14 @@ public class ContainerService : IContainerService
         catch (Exception) { }
     }
 
-    public async Task CopyFileToContainer(string container, string contents, string fileName)
+    public async Task CopyFileToContainer(string container, string contents, string fileName, CancellationToken cancellationToken)
     {
         var bytes = Encoding.UTF8.GetBytes(contents);
         using var stream = new MemoryStream(bytes);
-        await CopyFileToContainer(container, stream, fileName);
+        await CopyFileToContainer(container, stream, fileName, cancellationToken);
     }
 
-    public async Task CopyFileToContainer(string container, Stream stream, string fileName)
+    public async Task CopyFileToContainer(string container, Stream stream, string fileName, CancellationToken cancellationToken)
     {
         using var tarStream = TarArchive.Create(stream, fileName);
         await _dockerClient.Containers.ExtractArchiveToContainerAsync
@@ -161,7 +161,8 @@ public class ContainerService : IContainerService
             {
                 Path = WORKING_DIR
             },
-            tarStream
+            tarStream,
+            cancellationToken
         );
     }
 

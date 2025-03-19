@@ -53,6 +53,10 @@ def main(entry: AssignmentEntry) -> Analysis:
         ],
     )
 
+    with open("file.txt", "w") as f:
+        f.write("Tempora quaerat et est ad assumenda ullam quod laudantium.")
+    analysis.set_filename("My file", "file.txt")
+
     return analysis
 
 

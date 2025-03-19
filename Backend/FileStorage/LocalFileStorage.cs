@@ -27,19 +27,36 @@ public class LocalFileStorage : IFileStorage
 
     public async Task WriteAnalyzerScript(Guid courseId, Guid assignmentId, Guid analyzerId, Stream data)
     {
-        var dirPath = GetAnalyzerDirectoryPath(courseId, assignmentId);
+        var dirPath = GetAnalyzerScriptDirectoryPath(courseId, assignmentId, analyzerId);
         Directory.CreateDirectory(dirPath);
 
-        var filePath = Path.Combine(dirPath, analyzerId.ToString());
+        var filePath = Path.Combine(dirPath, "script.py");
         using var fileStream = new FileStream(filePath, FileMode.Create);
         await data.CopyToAsync(fileStream);
     }
 
     public async Task<string> GetAnalyzerScript(Guid courseId, Guid assignmentId, Guid analyzerId)
     {
-        var dirPath = GetAnalyzerDirectoryPath(courseId, assignmentId);
-        var filePath = Path.Combine(dirPath, analyzerId.ToString());
+        var dirPath = GetAnalyzerScriptDirectoryPath(courseId, assignmentId, analyzerId);
+        var filePath = Path.Combine(dirPath, "script.py");
         return await File.ReadAllTextAsync(filePath);
+    }
+
+    public async Task WriteAnalysisField(Guid courseId, Guid assignmentId, Guid analyzerId, Guid analysisId, Guid entryId, Guid analysisFieldId, Stream data)
+    {
+        var dirPath = GetAnalysisFieldDirectoryPath(courseId, assignmentId, analyzerId, analysisId, entryId);
+        Directory.CreateDirectory(dirPath);
+
+        var filePath = Path.Combine(dirPath, analysisFieldId.ToString());
+        using var fileStream = new FileStream(filePath, FileMode.Create);
+        await data.CopyToAsync(fileStream);
+    }
+
+    public Stream GetAnalysisField(Guid courseId, Guid assignmentId, Guid analyzerId, Guid analysisId, Guid entryId, Guid analysisFieldId)
+    {
+        var dirPath = GetAnalysisFieldDirectoryPath(courseId, assignmentId, analyzerId, analysisId, entryId);
+        var filePath = Path.Combine(dirPath, analysisFieldId.ToString());
+        return File.OpenRead(filePath);
     }
 
     public bool DeleteAll()
@@ -109,6 +126,18 @@ public class LocalFileStorage : IFileStorage
         return exists;
     }
 
+    public bool DeleteAnalysis(Guid courseId, Guid assignmentId, Guid analyzerId, Guid analysisId)
+    {
+        var dirPath = GetAnalysisDirectoryPath(courseId, assignmentId, analyzerId);
+        var filePath = Path.Combine(dirPath, analysisId.ToString());
+        var exists = File.Exists(filePath);
+        if (exists)
+        {
+            File.Delete(filePath);
+        }
+        return exists;
+    }
+
     private string GetCourseDirectoryPath(Guid courseId)
     {
         return Path.Combine
@@ -155,6 +184,54 @@ public class LocalFileStorage : IFileStorage
             "assignments",
             assignmentId.ToString(),
             "analyzers"
+        );
+    }
+
+    private string GetAnalyzerScriptDirectoryPath(Guid courseId, Guid assignmentId, Guid analyzerId)
+    {
+        return Path.Combine
+        (
+            AppDataPath,
+            "courses",
+            courseId.ToString(),
+            "assignments",
+            assignmentId.ToString(),
+            "analyzers",
+            analyzerId.ToString()
+        );
+    }
+
+    private string GetAnalysisDirectoryPath(Guid courseId, Guid assignmentId, Guid analyzerId)
+    {
+        return Path.Combine
+        (
+            AppDataPath,
+            "courses",
+            courseId.ToString(),
+            "assignments",
+            assignmentId.ToString(),
+            "analyzers",
+            analyzerId.ToString(),
+            "analyses"
+        );
+    }
+
+    private string GetAnalysisFieldDirectoryPath(Guid courseId, Guid assignmentId, Guid analyzerId, Guid analysisId, Guid entryId)
+    {
+        return Path.Combine
+        (
+            AppDataPath,
+            "courses",
+            courseId.ToString(),
+            "assignments",
+            assignmentId.ToString(),
+            "analyzers",
+            analyzerId.ToString(),
+            "analyses",
+            analysisId.ToString(),
+            "entries",
+            entryId.ToString(),
+            "fields"
         );
     }
 }

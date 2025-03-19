@@ -1,5 +1,7 @@
 <script lang="ts">
-	export let value: any;
+	export let field: {
+		value: any;
+	};
 </script>
 
-<p style="white-space: pre-wrap">{value}</p>
+<p style="white-space: pre-wrap">{field?.value}</p>

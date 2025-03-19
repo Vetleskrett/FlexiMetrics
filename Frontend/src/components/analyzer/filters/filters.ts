@@ -7,37 +7,48 @@ import BoolFilter from './BoolFilter.svelte';
 import DateFilter from './DateFilter.svelte';
 import type { DateValue } from '@internationalized/date';
 
-const stringFilterFn = ({ filterValue, value }: { filterValue: string; value: any }) =>
-    value.toString().toLowerCase().includes(filterValue.toLowerCase());
+const stringFilterFn = ({
+    filterValue,
+    value
+}: {
+    filterValue: string;
+    value: {value: any};
+}) =>
+    !value || value.value.toString().toLowerCase().includes(filterValue.toLowerCase());
 
-const boolFilterFn = ({ filterValue, value }: { filterValue: boolean | undefined; value: boolean }) => {
-    return filterValue == undefined || value == filterValue;
-}
+const boolFilterFn = ({
+    filterValue,
+    value
+}: {
+    filterValue: boolean | undefined;
+    value: {value: any};
+}) => !value || (filterValue == undefined || value.value == filterValue);
 
 const dateFilterFn = ({
     filterValue,
     value
 }: {
     filterValue: { after?: DateValue; before?: DateValue };
-    value: Date;
-}) => (filterValue.after == undefined || new Date (value) >= filterValue.after.toDate('utc')) && 
-    (filterValue.before == undefined || new Date (value) <= filterValue.before.toDate('utc'));
+    value: {value: any};
+}) => !value || 
+    ((filterValue.after == undefined || new Date (value.value) >= filterValue.after.toDate('utc')) && 
+    (filterValue.before == undefined || new Date (value.value) <= filterValue.before.toDate('utc')));
 
 const numberFilterFn = ({
     filterValue,
     value
 }: {
     filterValue: { min: number; max: number };
-    value: any;
-}) => Number(value) >= filterValue.min && Number(value) <= filterValue.max;
+    value: {value: any};
+}) => !value || value.value >= filterValue.min && value.value <= filterValue.max;
 
 const rangeFilterFn = ({
     filterValue,
     value
 }: {
     filterValue: { min: number; max: number };
-    value: any;
-}) => Number(value.Value) >= filterValue.min && Number(value.Value) <= filterValue.max;
+    value: {value: any};
+}) => !value || value.value.Value >= filterValue.min && value.value.Value <= filterValue.max;
 
 export const getFilter = (type: AnalysisFieldType) => {
     switch (type) {

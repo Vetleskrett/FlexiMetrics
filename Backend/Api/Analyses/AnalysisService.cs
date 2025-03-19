@@ -1,7 +1,9 @@
 ﻿using Api.Analyses.Contracts;
+using Api.Common;
 using Api.Validation;
 using Database;
 using Database.Models;
+using FileStorage;
 using FluentValidation;
 using Microsoft.EntityFrameworkCore;
 
@@ -14,16 +16,19 @@ public interface IAnalysisService
     Task<Result<AnalyzerAnalysesResponse>> GetAllByAnalyzer(Guid analyzerId);
     Task<Result<IEnumerable<StudentAnalysisResponse>>> GetStudentAssignmentAnalyses(Guid studentId, Guid assignmentId);
     Task<Result<IEnumerable<StudentAnalysisResponse>>> GetTeamAssignmentAnalyses(Guid teamId, Guid assignmentId);
+    Task<Result<FileResponse>> DownloadFile(Guid analysisFieldId);
     Task<Result> DeleteById(Guid id);
 }
 
 public class AnalysisService : IAnalysisService
 {
     private readonly AppDbContext _dbContext;
+    private readonly IFileStorage _fileStorage;
 
-    public AnalysisService(AppDbContext dbContext)
+    public AnalysisService(AppDbContext dbContext, IFileStorage fileStorage)
     {
         _dbContext = dbContext;
+        _fileStorage = fileStorage;
     }
 
     public async Task<Result<IEnumerable<SlimAnalysisResponse>>> GetAll()
@@ -169,13 +174,59 @@ public class AnalysisService : IAnalysisService
         return analyses.MapToStudentResponse();
     }
 
+    public async Task<Result<FileResponse>> DownloadFile(Guid analysisFieldId)
+    {
+        var analysisField = await _dbContext.AnalysisFields
+            .Include(f => f.AnalysisEntry!)
+            .ThenInclude(f => f.Analysis!)
+            .ThenInclude(f => f.Analyzer!)
+            .ThenInclude(f => f.Assignment)
+            .FirstOrDefaultAsync(f => f.Id == analysisFieldId);
+
+        if (analysisField is null)
+        {
+            return Result<FileResponse>.NotFound();
+        }
+
+        try
+        {
+            var metadata = analysisField.GetValue<FileMetadata>();
+
+            var stream = _fileStorage.GetAnalysisField
+            (
+                analysisField.AnalysisEntry!.Analysis!.Analyzer!.Assignment!.CourseId,
+                analysisField.AnalysisEntry.Analysis.Analyzer.AssignmentId,
+                analysisField.AnalysisEntry.Analysis.AnalyzerId,
+                analysisField.AnalysisEntry.AnalysisId,
+                analysisField.AnalysisEntryId,
+                analysisField.Id
+            );
+
+            return new FileResponse
+            {
+                Stream = stream,
+                Metadata = metadata!
+            };
+        }
+        catch (Exception e)
+        {
+            return new ValidationError($"Could not read file: {e.Message}").MapToResponse();
+        }
+    }
+
     public async Task<Result> DeleteById(Guid id)
     {
-        var analysis = await _dbContext.Analyses.FindAsync(id);
+        var analysis = await _dbContext.Analyses
+            .Include(a => a.Analyzer!)
+            .ThenInclude(a => a.Assignment)
+            .FirstOrDefaultAsync(a => a.Id == id);
         if (analysis is null)
         {
             return Result.NotFound();
         }
+
+        _fileStorage.DeleteAnalysis(analysis.Analyzer!.Assignment!.CourseId, analysis.Analyzer.AssignmentId, analysis.AnalyzerId, id);
+
         await _dbContext.Analyses.Where(x => x.Id == id).ExecuteDeleteAsync();
         return Result.Success();
     }

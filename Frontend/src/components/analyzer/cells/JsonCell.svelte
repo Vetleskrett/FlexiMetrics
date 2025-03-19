@@ -1,10 +1,9 @@
 <script lang="ts">
-	export let value: string;
-
-	//const json = JSON.parse(value);
-	//const text = JSON.stringify(json, null, 2);
+	export let field: {
+		value: any;
+	};
 </script>
 
 <div class="rounded bg-[#F2F2F2] p-2 font-mono">
-	<p style="white-space: pre-wrap">{value}</p>
+	<p style="white-space: pre-wrap">{field?.value}</p>
 </div>

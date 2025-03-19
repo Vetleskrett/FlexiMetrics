@@ -3,6 +3,7 @@ import json
 from dataclasses import dataclass
 from typing import Optional, Any, List, Dict
 from dataclass_wizard import JSONWizard
+import mimetypes
 
 
 @dataclass
@@ -148,4 +149,11 @@ class Analysis:
             "Type": "List",
             "SubType": "Json",
             "Value": [json.dumps(value, sort_keys=True, indent=2) for value in values],
+        }
+
+    def set_filename(self, name: str, value: str):
+        (content_type, _) = mimetypes.guess_type(value)
+        self.__dict__[name] = {
+            "Type": "File",
+            "Value": {"FileName": value, "ContentType": content_type},
         }

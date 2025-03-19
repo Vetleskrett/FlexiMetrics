@@ -10,5 +10,6 @@ public enum AnalysisFieldType
     DateTime,
     URL,
     Json,
-    List
+    List,
+    File
 }

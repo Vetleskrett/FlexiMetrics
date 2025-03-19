@@ -53,14 +53,32 @@
 		isIndividual
 			? table.column({
 					id: 'Student',
-					accessor: (analysisEntry) => analysisEntry.student?.name,
+					accessor: (analysisEntry) => {
+						return {
+							value: analysisEntry.student?.name
+						};
+					},
 					header: 'Student',
+					plugins: {
+						sort: {
+							compareFn: (a: any, b: any) => a.value - b.value
+						}
+					},
 					cell: getCell('String')
 				})
 			: table.column({
 					id: 'Team',
-					accessor: (analysisEntry) => analysisEntry.team?.teamNr,
+					accessor: (analysisEntry) => {
+						return {
+							value: analysisEntry.team?.teamNr
+						};
+					},
 					header: 'Team',
+					plugins: {
+						sort: {
+							compareFn: (a: any, b: any) => a.value - b.value
+						}
+					},
 					cell: getCell('String')
 				}),
 		...headers.map((header, i) =>
@@ -68,22 +86,34 @@
 				id: i.toString(),
 				accessor: (analysisEntry) =>
 					analysisEntry.fields.find(
-						(deliveryField) =>
-							deliveryField.name == header.name && deliveryField.type == header.type
-					)?.value,
+						(analysisField) =>
+							analysisField.name == header.name && analysisField.type == header.type
+					) ?? undefined,
 				header: header.name,
 				plugins: {
-					filter: getFilter(header.type)
+					filter: getFilter(header.type),
+					sort: {
+						compareFn: (a: any, b: any) => a?.value - b?.value
+					}
 				},
 				cell: getCell(header.type, header.subType)
 			})
 		),
 		table.column({
 			id: 'Logs',
-			accessor: (analysisEntry) =>
-				analysisEntry.logInformation +
-				(analysisEntry.logError ? '\n' + analysisEntry.logError : ''),
+			accessor: (analysisEntry) => {
+				return {
+					value:
+						analysisEntry.logInformation +
+						(analysisEntry.logError ? '\n' + analysisEntry.logError : '')
+				};
+			},
 			header: 'Logs',
+			plugins: {
+				sort: {
+					compareFn: (a: any, b: any) => a.value - b.value
+				}
+			},
 			cell: getCell('Json')
 		})
 	]);
@@ -183,7 +213,7 @@
 						</DropdownMenu.Trigger>
 						<DropdownMenu.Content>
 							{#each headers as header, id}
-								{#if showColumnForId[id] && header.type != 'List'}
+								{#if showColumnForId[id] && header.type != 'List' && header.type != 'File'}
 									<DropdownMenu.CheckboxItem
 										bind:checked={showFilterForId[id]}
 										on:click={(e) => {
