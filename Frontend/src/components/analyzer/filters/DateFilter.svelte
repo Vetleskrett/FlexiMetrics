@@ -9,10 +9,8 @@
 	onDestroy(() => filterValue.set({ after: undefined, before: undefined }));
 </script>
 
-<div class="flex flex-row items-center gap-1">
-	<DatePicker id="filter-input" bind:value={$filterValue.after} />
+<div class="flex flex-col items-center gap-1">
+	<DatePicker id="filter-input" placeholder="From" bind:value={$filterValue.after} />
 
-	<p class="text-lg">-</p>
-
-	<DatePicker id="filter-input" bind:value={$filterValue.before} />
+	<DatePicker id="filter-input" placeholder="To" bind:value={$filterValue.before} />
 </div>

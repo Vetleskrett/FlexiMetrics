@@ -8,6 +8,8 @@
 	import DateCell from './cells/DateCell.svelte';
 	import UrlCell from './cells/UrlCell.svelte';
 	import JsonCell from './cells/JsonCell.svelte';
+	import { getCell } from './cells/cells';
+	import { Render } from 'svelte-headless-table';
 
 	export let studentAnalysis: StudentAnalysis;
 </script>
@@ -21,24 +23,13 @@
 	<Card.Content class="p-0">
 		<div class="flex flex-col">
 			{#each studentAnalysis.fields as field}
+				{@const renderer = getCell(field.type, field.subType)}
 				<Separator class="w-full" />
 				<div class="px-6 py-4">
 					<h1 class="font-semibold">
 						{field.name}
 					</h1>
-					{#if field.type == 'Boolean'}
-						<BoolCell value={field.value} />
-					{:else if field.type == 'Range'}
-						<RangeCell value={field.value} />
-					{:else if field.type == 'DateTime'}
-						<DateCell value={field.value} />
-					{:else if field.type == 'URL'}
-						<UrlCell value={field.value} />
-					{:else if field.type == 'Json'}
-						<JsonCell value={field.value} />
-					{:else}
-						<StringCell value={field.value} />
-					{/if}
+					<Render of={renderer({ value: field.value })} />
 				</div>
 			{/each}
 		</div>

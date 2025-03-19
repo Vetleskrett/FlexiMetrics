@@ -70,6 +70,8 @@ export const getFilter = (type: AnalysisFieldType) => {
                 render: ({ filterValue }: { filterValue: Writable<{ after?: DateValue; before?: DateValue }> }) =>
                     createRender(DateFilter, { filterValue })
             };
+        case 'List':
+            return undefined;
         default:
             return {
                 initialFilterValue: '',

@@ -113,3 +113,39 @@ class Analysis:
             "Type": "Json",
             "Value": json.dumps(value, sort_keys=True, indent=2),
         }
+
+    def set_str_list(self, name: str, values: List[str]):
+        self.__dict__[name] = {"Type": "List", "SubType": "String", "Value": values}
+
+    def set_int_list(self, name: str, values: List[int]):
+        self.__dict__[name] = {"Type": "List", "SubType": "Integer", "Value": values}
+
+    def set_float_list(self, name: str, values: List[float]):
+        self.__dict__[name] = {"Type": "List", "SubType": "Float", "Value": values}
+
+    def set_bool_list(self, name: str, values: List[bool]):
+        self.__dict__[name] = {"Type": "List", "SubType": "Boolean", "Value": values}
+
+    def set_range_list(self, name: str, values: List[int], max_value: int):
+        self.__dict__[name] = {
+            "Type": "List",
+            "SubType": "Range",
+            "Value": [{"Value": value, "Max": max_value} for value in values],
+        }
+
+    def set_datetime_list(self, name: str, values: List[datetime]):
+        self.__dict__[name] = {
+            "Type": "List",
+            "SubType": "DateTime",
+            "Value": [value.isoformat() for value in values],
+        }
+
+    def set_url_list(self, name: str, values: List[str]):
+        self.__dict__[name] = {"Type": "List", "SubType": "URL", "Value": values}
+
+    def set_json_list(self, name: str, values: List[Any]):
+        self.__dict__[name] = {
+            "Type": "List",
+            "SubType": "Json",
+            "Value": [json.dumps(value, sort_keys=True, indent=2) for value in values],
+        }

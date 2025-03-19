@@ -2,4 +2,7 @@
 	export let value: Date;
 </script>
 
-<p>{new Date(value).toDateString()} {new Date(value).toLocaleTimeString()}</p>
+<p>
+	<span class="text-nowrap">{new Date(value).toDateString()}</span>
+	<span>{new Date(value).toLocaleTimeString()}</span>
+</p>

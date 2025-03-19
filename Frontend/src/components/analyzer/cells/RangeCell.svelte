@@ -8,6 +8,6 @@
 </script>
 
 <div class="flex items-center justify-center">
-	<Progress class="h-6" value={value.Value} max={value.Max} />
+	<Progress class="h-6 min-w-20" value={value.Value} max={value.Max} />
 	<p class="absolute text-nowrap pb-[1px] font-semibold">{value.Value} / {value.Max}</p>
 </div>

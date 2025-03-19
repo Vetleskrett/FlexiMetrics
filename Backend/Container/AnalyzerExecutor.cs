@@ -148,6 +148,7 @@ public partial class AnalyzerExecutor : IAnalyzerExecutor
                     AnalysisEntryId = analysisEntry.Id,
                     Name = pair.Key,
                     Type = pair.Value.Type,
+                    SubType = pair.Value.SubType,
                     Value = pair.Value.Value,
                 }
             ).ToList();

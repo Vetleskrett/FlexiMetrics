@@ -86,6 +86,7 @@ public static class AnalysisMapping
             Id = analysisField.Id,
             Name = analysisField.Name,
             Type = analysisField.Type,
+            SubType = analysisField.SubType,
             Value = analysisField.Value
         };
     }

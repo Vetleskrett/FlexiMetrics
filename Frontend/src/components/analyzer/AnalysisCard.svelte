@@ -17,6 +17,7 @@
 	import { getFilter } from './filters/filters';
 	import { getCell } from './cells/cells';
 	import { EllipsisVertical, Trash2 } from 'lucide-svelte';
+	import { ScrollArea } from 'src/lib/components/ui/scroll-area';
 
 	export let analyses: SlimAnalysis[];
 	export let analysis: Analysis;
@@ -27,6 +28,7 @@
 	type Header = {
 		name: string;
 		type: AnalysisFieldType;
+		subType?: AnalysisFieldType;
 	};
 
 	const headers: Header[] = [];
@@ -35,7 +37,8 @@
 		if (!headers.some((h) => h.name == field.name && h.type == field.type)) {
 			headers.push({
 				name: field.name,
-				type: field.type
+				type: field.type,
+				subType: field.subType
 			});
 		}
 	}
@@ -72,7 +75,7 @@
 				plugins: {
 					filter: getFilter(header.type)
 				},
-				cell: getCell(header.type)
+				cell: getCell(header.type, header.subType)
 			})
 		),
 		table.column({
@@ -81,7 +84,7 @@
 				analysisEntry.logInformation +
 				(analysisEntry.logError ? '\n' + analysisEntry.logError : ''),
 			header: 'Logs',
-			cell: getCell('String')
+			cell: getCell('Json')
 		})
 	]);
 
@@ -180,7 +183,7 @@
 						</DropdownMenu.Trigger>
 						<DropdownMenu.Content>
 							{#each headers as header, id}
-								{#if showColumnForId[id]}
+								{#if showColumnForId[id] && header.type != 'List'}
 									<DropdownMenu.CheckboxItem
 										bind:checked={showFilterForId[id]}
 										on:click={(e) => {
@@ -210,52 +213,56 @@
 		</div>
 	</Card.Header>
 	<Card.Content class="p-0">
-		<Table.Root {...$tableAttrs}>
-			<Table.Header>
-				{#each $headerRows as headerRow}
-					<Subscribe rowAttrs={headerRow.attrs()}>
-						<Table.Row>
-							{#each headerRow.cells as cell (cell.id)}
-								<Subscribe attrs={cell.attrs()} let:attrs props={cell.props()} let:props>
-									<Table.Head {...attrs} class="p-0 font-bold text-black">
-										<div class="flex h-full flex-col items-start justify-end gap-2">
-											{#if props.filter?.render && showFilterForId[cell.id]}
-												<Render of={props.filter.render} />
-											{/if}
-											<Button variant="ghost" on:click={props.sort.toggle} class="px-2">
-												<Render of={cell.render()} />
-
-												{#if sortColumn?.id == cell.id && sortColumn?.order == 'asc'}
-													<ChevronUp class="ml-1 h-4 w-4" />
-												{:else if sortColumn?.id == cell.id && sortColumn?.order == 'desc'}
-													<ChevronDown class="ml-1 h-4 w-4" />
-												{:else}
-													<ChevronsUpDown class="ml-1 h-4 w-4" />
+		<ScrollArea orientation="horizontal" position="both">
+			<Table.Root {...$tableAttrs} style="border-collapse: collapse; border-style: hidden;">
+				<Table.Header>
+					{#each $headerRows as headerRow}
+						<Subscribe rowAttrs={headerRow.attrs()}>
+							<Table.Row>
+								{#each headerRow.cells as cell (cell.id)}
+									<Subscribe attrs={cell.attrs()} let:attrs props={cell.props()} let:props>
+										<Table.Head {...attrs} class="p-0 font-bold text-black">
+											<div class="flex h-full flex-col items-start justify-end gap-2">
+												{#if props.filter?.render && showFilterForId[cell.id]}
+													<div class="mt-3 px-1">
+														<Render of={props.filter.render} />
+													</div>
 												{/if}
-											</Button>
-										</div>
-									</Table.Head>
-								</Subscribe>
-							{/each}
-						</Table.Row>
-					</Subscribe>
-				{/each}
-			</Table.Header>
-			<Table.Body {...$tableBodyAttrs}>
-				{#each $pageRows as row (row.id)}
-					<Subscribe rowAttrs={row.attrs()} let:rowAttrs>
-						<Table.Row {...rowAttrs}>
-							{#each row.cells as cell (cell.id)}
-								<Subscribe attrs={cell.attrs()} let:attrs>
-									<Table.Cell {...attrs} class="pl-4 pr-2">
-										<Render of={cell.render()} />
-									</Table.Cell>
-								</Subscribe>
-							{/each}
-						</Table.Row>
-					</Subscribe>
-				{/each}
-			</Table.Body>
-		</Table.Root>
+												<Button variant="ghost" on:click={props.sort.toggle} class="px-2">
+													<Render of={cell.render()} />
+
+													{#if sortColumn?.id == cell.id && sortColumn?.order == 'asc'}
+														<ChevronUp class="ml-1 h-4 w-4" />
+													{:else if sortColumn?.id == cell.id && sortColumn?.order == 'desc'}
+														<ChevronDown class="ml-1 h-4 w-4" />
+													{:else}
+														<ChevronsUpDown class="ml-1 h-4 w-4" />
+													{/if}
+												</Button>
+											</div>
+										</Table.Head>
+									</Subscribe>
+								{/each}
+							</Table.Row>
+						</Subscribe>
+					{/each}
+				</Table.Header>
+				<Table.Body {...$tableBodyAttrs}>
+					{#each $pageRows as row (row.id)}
+						<Subscribe rowAttrs={row.attrs()} let:rowAttrs>
+							<Table.Row {...rowAttrs}>
+								{#each row.cells as cell (cell.id)}
+									<Subscribe attrs={cell.attrs()} let:attrs>
+										<Table.Cell {...attrs} class="content-start border pl-4 pr-2">
+											<Render of={cell.render()} />
+										</Table.Cell>
+									</Subscribe>
+								{/each}
+							</Table.Row>
+						</Subscribe>
+					{/each}
+				</Table.Body>
+			</Table.Root>
+		</ScrollArea>
 	</Card.Content>
 </Card.Root>

@@ -5,6 +5,7 @@
 
 	type $$Props = ScrollAreaPrimitive.Props & {
 		orientation?: 'vertical' | 'horizontal' | 'both';
+		position?: 'before' | 'after' | 'both';
 		scrollbarXClasses?: string;
 		scrollbarYClasses?: string;
 	};
@@ -12,6 +13,7 @@
 	let className: $$Props['class'] = undefined;
 	export { className as class };
 	export let orientation = 'vertical';
+	export let position = 'after';
 	export let scrollbarXClasses: string = '';
 	export let scrollbarYClasses: string = '';
 </script>
@@ -22,11 +24,21 @@
 			<slot />
 		</ScrollAreaPrimitive.Content>
 	</ScrollAreaPrimitive.Viewport>
-	{#if orientation === 'vertical' || orientation === 'both'}
-		<Scrollbar orientation="vertical" class={scrollbarYClasses} />
+	{#if position == 'before' || position == 'both'}
+		{#if orientation === 'vertical' || orientation === 'both'}
+			<Scrollbar orientation="vertical" position="before" class={scrollbarYClasses} />
+		{/if}
+		{#if orientation === 'horizontal' || orientation === 'both'}
+			<Scrollbar orientation="horizontal" position="before" class={scrollbarXClasses} />
+		{/if}
 	{/if}
-	{#if orientation === 'horizontal' || orientation === 'both'}
-		<Scrollbar orientation="horizontal" class={scrollbarXClasses} />
+	{#if position == 'after' || position == 'both'}
+		{#if orientation === 'vertical' || orientation === 'both'}
+			<Scrollbar orientation="vertical" position="after" class={scrollbarYClasses} />
+		{/if}
+		{#if orientation === 'horizontal' || orientation === 'both'}
+			<Scrollbar orientation="horizontal" position="after" class={scrollbarXClasses} />
+		{/if}
 	{/if}
 	<ScrollAreaPrimitive.Corner />
 </ScrollAreaPrimitive.Root>

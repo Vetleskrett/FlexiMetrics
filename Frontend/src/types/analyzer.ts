@@ -52,12 +52,13 @@ export type StudentAnalysis = {
     fields: AnalysisField[];
 }
 
-export type AnalysisFieldType = 'String' | 'Integer' | 'Float' | 'Boolean' | 'Range' | 'DateTime' | 'URL' | 'Json';
+export type AnalysisFieldType = 'String' | 'Integer' | 'Float' | 'Boolean' | 'Range' | 'DateTime' | 'URL' | 'Json' | 'List';
 
 export type AnalysisField = {
     id: string;
     name: string;
     type: AnalysisFieldType;
+    subType?: AnalysisFieldType;
     value: any;
 }
 

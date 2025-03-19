@@ -12,6 +12,7 @@ public class AnalysisField
     public AnalysisEntry? AnalysisEntry { get; set; }
     public required string Name { get; set; }
     public required AnalysisFieldType Type { get; set; }
+    public required AnalysisFieldType? SubType { get; set; }
     public JsonDocument? JsonValue { get; set; }
 
     [NotMapped]
