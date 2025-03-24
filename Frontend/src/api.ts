@@ -103,10 +103,6 @@ export async function putAssignment(assignmentId: string, assignment: EditAssign
   return axios.put(`/api/assignments/${assignmentId}`, assignment)
 }
 
-export async function publishAssignment(assignmentId: string) : Promise<AxiosResponse<Assignment>>{
-  return axios.put(`/api/assignments/${assignmentId}/publish`,)
-}
-
 export async function deleteAssigment(assignmentId: string) : Promise<AxiosResponse>{
   return axios.delete(`/api/assignments/${assignmentId}`)
 }

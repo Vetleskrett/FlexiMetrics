@@ -105,7 +105,7 @@ export type EditAssignment = {
     description: string,
     dueDate: string,
     gradingType: GradingType,
-    maxPoints: number | undefined,
+    maxPoints?: number | undefined,
     mandatory: boolean,
     published: boolean,
     collaborationType: CollaborationType,

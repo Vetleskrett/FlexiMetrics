@@ -82,16 +82,6 @@ public static class AssignmentEndpoints
         .RequireAuthorization("TeacherForAssignment")
         .WithSummary("Update assignment by id");
 
-        group.MapPut("assignments/{assignmentId:guid}/publish", async (IAssignmentService assignmentService, Guid assignmentId) =>
-        {
-            var result = await assignmentService.Publish(assignmentId);
-            return result.MapToResponse(assignment => Results.Ok(assignment));
-        })
-        .Produces<AssignmentResponse>()
-        .WithName("PublishAssignment")
-        .RequireAuthorization("TeacherForAssignment")
-        .WithSummary("Publish assignment by id");
-
         group.MapDelete("assignments/{assignmentId:guid}", async (IAssignmentService assignmentService, Guid assignmentId) =>
         {
             var result = await assignmentService.DeleteById(assignmentId);
