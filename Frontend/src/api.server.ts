@@ -12,6 +12,7 @@ import type {
   Analyzer,
   AnalyzerAnalyses,
   StudentAnalysis,
+  CourseStudent,
 } from "./types/";
 
 export const api = axios.create({
@@ -102,7 +103,7 @@ export async function getStudent(studentId: string): Promise<AxiosResponse<Stude
   return api.get(`students/${studentId}`)
 }
 
-export async function getStudents(courseId: string): Promise<AxiosResponse<Student[]>> {
+export async function getStudents(courseId: string): Promise<AxiosResponse<CourseStudent[]>> {
   return api.get(`courses/${courseId}/students`)
 }
 

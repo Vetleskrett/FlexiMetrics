@@ -44,8 +44,8 @@
 							<p>{teacher.email}</p>
 						</Table.Cell>
 						<Table.Cell>
-							<CustomButton color="red" on:click={() => removeTeacher(teacher)}>
-								<Trash_2 />
+							<CustomButton color="red" outline={true} on:click={() => removeTeacher(teacher)}>
+								<Trash_2 size="16" />
 							</CustomButton>
 						</Table.Cell>
 					</Table.Row>

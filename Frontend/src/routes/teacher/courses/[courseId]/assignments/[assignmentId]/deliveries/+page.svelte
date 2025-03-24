@@ -2,7 +2,14 @@
 	import { page } from '$app/stores';
 	import * as Breadcrumb from '$lib/components/ui/breadcrumb';
 	import DeliveriesCard from 'src/components/delivery/DeliveriesCard.svelte';
-	import type { Assignment, AssignmentField, Delivery, Student, Course, Team } from 'src/types/';
+	import type {
+		Assignment,
+		AssignmentField,
+		Delivery,
+		CourseStudent,
+		Course,
+		Team
+	} from 'src/types/';
 
 	const courseId = $page.params.courseId;
 	const assignmentId = $page.params.assignmentId;
@@ -12,7 +19,7 @@
 		assignment: Assignment;
 		assignmentFields: AssignmentField[];
 		deliveries: Delivery[];
-		students: Student[];
+		students: CourseStudent[];
 		teams: Team[];
 	};
 </script>

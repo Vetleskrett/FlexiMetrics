@@ -80,7 +80,7 @@
 	<div class="flex flex-row gap-8">
 		<div class="flex w-[700px] flex-col gap-8">
 			<TeamMembersCard students={data.team.students} teamId={data.team.id} />
-			<TeamAssignmentsCard assignmentsTeam={data.assignments} />
+			<TeamAssignmentsCard teamId={data.team.id} assignmentsTeam={data.assignments} />
 		</div>
 		<div class="flex w-[400px] flex-col gap-8">
 			<SimpleAddCard

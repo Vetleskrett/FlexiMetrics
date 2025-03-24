@@ -37,10 +37,10 @@
 							</Table.Cell>
 							<Table.Cell class="px-6">
 								{#each team.students as student}
-									<p>• {student.email}</p>
+									<p class="whitespace-nowrap">• {student.name}</p>
 								{/each}
 							</Table.Cell>
-							<Table.Cell class="px-6">
+							<Table.Cell class="w-full px-6">
 								<Progress value={team.complete} />
 							</Table.Cell>
 						</a>

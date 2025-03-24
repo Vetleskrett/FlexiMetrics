@@ -1,11 +1,11 @@
 <script lang="ts">
 	import type { Student } from 'src/types/';
 	import * as Card from '$lib/components/ui/card';
-	import { Separator } from '$lib/components/ui/separator';
 	import Ellipsis from 'lucide-svelte/icons/ellipsis';
 	import * as DropdownMenu from '$lib/components/ui/dropdown-menu';
 	import Trash2 from 'lucide-svelte/icons/trash-2';
 	import { deleteStudentTeam } from 'src/api';
+	import * as Table from '$lib/components/ui/table';
 
 	export let students: Student[], teamId: string;
 
@@ -41,32 +41,39 @@
 		</div>
 	</Card.Header>
 	<Card.Content class="p-0">
-		<div class="flex flex-col">
-			<div class="flex items-center px-6 text-sm font-bold">
-				<h1 class="w-2/3">Name</h1>
-				<h1 class="w-2/3">Mail</h1>
-				<div class="w-1/4"></div>
-			</div>
-			{#each students as student}
-				<Separator class="w-full" />
-				<div class="flex items-center px-6 py-4">
-					<h1 class="w-2/3">{student.name}</h1>
-					<h1 class="w-2/3">{student.email}</h1>
-					<div class="w-1/4">
-						<DropdownMenu.Root>
-							<DropdownMenu.Trigger>
-								<Ellipsis />
-							</DropdownMenu.Trigger>
-							<DropdownMenu.Content>
-								<DropdownMenu.Item on:click={() => removeTeamMember(student)}>
-									<Trash2 class="h-4" />
-									<p>Remove member</p>
-								</DropdownMenu.Item>
-							</DropdownMenu.Content>
-						</DropdownMenu.Root>
-					</div>
-				</div>
-			{/each}
-		</div>
+		<Table.Root>
+			<Table.Header>
+				<Table.Row>
+					<Table.Head class="h-0 px-6 font-bold text-black">Name</Table.Head>
+					<Table.Head class="h-0 px-6 font-bold text-black">Email</Table.Head>
+					<Table.Head class="h-0 px-6 font-bold text-black"></Table.Head>
+				</Table.Row>
+			</Table.Header>
+			<Table.Body>
+				{#each students as student}
+					<Table.Row>
+						<Table.Cell class="px-6">
+							{student.name}
+						</Table.Cell>
+						<Table.Cell class="px-6">
+							{student.email}
+						</Table.Cell>
+						<Table.Cell class="px-6">
+							<DropdownMenu.Root>
+								<DropdownMenu.Trigger>
+									<Ellipsis />
+								</DropdownMenu.Trigger>
+								<DropdownMenu.Content>
+									<DropdownMenu.Item on:click={() => removeTeamMember(student)}>
+										<Trash2 class="h-4" />
+										<p>Remove member</p>
+									</DropdownMenu.Item>
+								</DropdownMenu.Content>
+							</DropdownMenu.Root>
+						</Table.Cell>
+					</Table.Row>
+				{/each}
+			</Table.Body>
+		</Table.Root>
 	</Card.Content>
 </Card.Root>

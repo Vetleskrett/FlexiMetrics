@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { page } from '$app/stores';
-	import type { Course, Student } from 'src/types/';
+	import type { Course, CourseStudent } from 'src/types/';
 	import EllipsisVertical from 'lucide-svelte/icons/ellipsis-vertical';
 	import Trash2 from 'lucide-svelte/icons/trash-2';
 	import * as DropdownMenu from '$lib/components/ui/dropdown-menu';
@@ -13,7 +13,7 @@
 
 	export let data: {
 		course: Course;
-		students: Student[];
+		students: CourseStudent[];
 	};
 
 	async function addStudents(input: string, file: File | null) {
@@ -45,7 +45,6 @@
 	}
 
 	function checkStudent(email: string): boolean {
-		// Add additional checks if needed
 		if (email.trim().length < 1) {
 			return false;
 		}

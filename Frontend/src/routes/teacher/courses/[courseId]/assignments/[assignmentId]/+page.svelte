@@ -16,7 +16,7 @@
 		Course,
 		AssignmentField,
 		Delivery,
-		Student,
+		CourseStudent,
 		Team,
 		Analyzer
 	} from 'src/types/';
@@ -32,7 +32,7 @@
 		assignment: Assignment;
 		assignmentFields: AssignmentField[];
 		deliveries: Delivery[];
-		students: Student[];
+		students: CourseStudent[];
 		teams: Team[];
 		analyzers: Analyzer[];
 	};
