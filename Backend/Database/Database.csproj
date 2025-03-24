@@ -7,16 +7,15 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-		<PackageReference Include="Aspire.Npgsql.EntityFrameworkCore.PostgreSQL" Version="9.0.0" />
-		<PackageReference Include="Bogus" Version="35.6.1" />
+		<PackageReference Include="Aspire.Npgsql.EntityFrameworkCore.PostgreSQL" Version="9.1.0" />
 	</ItemGroup>
 
 	<ItemGroup>
-	  <Folder Include="Migrations\" />
+		<Folder Include="Migrations\" />
 	</ItemGroup>
 
 	<ItemGroup>
-	  <ProjectReference Include="..\FileStorage\FileStorage.csproj" />
+		<ProjectReference Include="..\FileStorage\FileStorage.csproj" />
 	</ItemGroup>
 
 </Project>

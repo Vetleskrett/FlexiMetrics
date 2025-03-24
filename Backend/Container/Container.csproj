@@ -7,8 +7,8 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-		<PackageReference Include="Aspire.Npgsql.EntityFrameworkCore.PostgreSQL" Version="9.0.0" />
-		<PackageReference Include="MassTransit" Version="8.3.7" />
+		<PackageReference Include="Aspire.Npgsql.EntityFrameworkCore.PostgreSQL" Version="9.1.0" />
+		<PackageReference Include="MassTransit" Version="8.4.0" />
 		<PackageReference Include="SharpCompress" Version="0.39.0" />
 		<PackageReference Include="Docker.DotNet" Version="3.125.15" />
 	</ItemGroup>
