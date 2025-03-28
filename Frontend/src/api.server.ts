@@ -7,6 +7,7 @@ import type {
   Team,
   Student,
   Delivery,
+  Progress,
   Feedback,
   Teacher,
   Analyzer,
@@ -78,6 +79,14 @@ export async function getDeliveries(assignmentId: string) : Promise<AxiosRespons
 
 export async function getDeliveryFieldFile(deliveryFieldId: string): Promise<AxiosResponse> {
   return api.get(`delivery-fields/${deliveryFieldId}`, { responseType: 'stream' });
+}
+
+export async function getStudentsProgress(courseId: string) : Promise<AxiosResponse<Progress[]>> {
+  return api.get(`courses/${courseId}/progress/students`)
+}
+
+export async function getTeamsProgress(courseId: string) : Promise<AxiosResponse<Progress[]>> {
+  return api.get(`courses/${courseId}/progress/teams`)
 }
 
 export async function getFeedbacks(assignmentId: string) : Promise<AxiosResponse<Feedback[]>> {

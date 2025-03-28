@@ -4,7 +4,7 @@
 	import * as Breadcrumb from '$lib/components/ui/breadcrumb';
 	import type { StudentAssignment, Course, Team, Teacher } from 'src/types/';
 	import { Role } from 'src/types/';
-	import TeamCard from 'src/components/team/TeamCard.svelte';
+	import StudentTeamCard from 'src/components/team/StudentTeamCard.svelte';
 	import StudentAssignmentsCard from 'src/components/assignment/StudentAssignmentsCard.svelte';
 	import TeamsCard from 'src/components/team/TeamsCard.svelte';
 
@@ -57,7 +57,7 @@
 
 		<div class="flex w-2/5 flex-col gap-8">
 			{#if data.team}
-				<TeamCard team={data.team} />
+				<StudentTeamCard team={data.team} />
 			{:else if data.teams}
 				<TeamsCard {courseId} numTeams={data.teams.length} userRole={Role.Student} />
 			{/if}

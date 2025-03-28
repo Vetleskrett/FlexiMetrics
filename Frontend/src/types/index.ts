@@ -3,6 +3,7 @@ export * from './assignment';
 export * from './common';
 export * from './course';
 export * from './delivery';
+export * from './progress';
 export * from './feedback';
 export * from './team';
 export * from './user';

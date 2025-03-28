@@ -1,7 +1,6 @@
 <script lang="ts">
 	import * as Card from '$lib/components/ui/card';
 	import Plus from 'lucide-svelte/icons/plus';
-	import Button from '$lib/components/ui/button/button.svelte';
 	import { Textarea } from 'src/lib/components/ui/textarea';
 	import CustomButton from '../CustomButton.svelte';
 

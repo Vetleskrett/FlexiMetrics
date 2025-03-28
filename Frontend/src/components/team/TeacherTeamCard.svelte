@@ -1,5 +1,5 @@
 <script lang="ts">
-	import type { Student } from 'src/types/';
+	import type { Student, Team } from 'src/types/';
 	import * as Card from '$lib/components/ui/card';
 	import Ellipsis from 'lucide-svelte/icons/ellipsis';
 	import * as DropdownMenu from '$lib/components/ui/dropdown-menu';
@@ -7,9 +7,10 @@
 	import { deleteStudentTeam } from 'src/api';
 	import * as Table from '$lib/components/ui/table';
 
-	export let students: Student[], teamId: string;
+	export let team: Team;
 
-	//TODO: Maybe turn this into a helper function or find a better solution for updating the list
+	let students = team.students;
+
 	function deleteStudentFromList(student: Student) {
 		const index = students.indexOf(student, 0);
 		if (index > -1) {
@@ -20,7 +21,7 @@
 
 	async function removeTeamMember(student: Student) {
 		try {
-			await deleteStudentTeam(teamId, student.id);
+			await deleteStudentTeam(team.id, student.id);
 			deleteStudentFromList(student);
 		} catch {
 			console.error('Could not remove team member');

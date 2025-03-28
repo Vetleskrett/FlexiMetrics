@@ -7,7 +7,7 @@
 	import * as Breadcrumb from '$lib/components/ui/breadcrumb';
 	import CompletedTotalCard from 'src/components/CompletedTotalCard.svelte';
 	import SimpleAddCard from 'src/components/SimpleAddCard.svelte';
-	import TeamMembersCard from 'src/components/team/TeamMembersCard.svelte';
+	import TeacherTeamCard from 'src/components/team/TeacherTeamCard.svelte';
 	import TeamAssignmentsCard from 'src/components/assignment/TeamAssignmentsCard.svelte';
 	import { postStudentEmailTeam } from 'src/api';
 
@@ -79,7 +79,7 @@
 	</div>
 	<div class="flex flex-row gap-8">
 		<div class="flex w-[700px] flex-col gap-8">
-			<TeamMembersCard students={data.team.students} teamId={data.team.id} />
+			<TeacherTeamCard team={data.team} />
 			<TeamAssignmentsCard teamId={data.team.id} assignmentsTeam={data.assignments} />
 		</div>
 		<div class="flex w-[400px] flex-col gap-8">
