@@ -5,12 +5,20 @@ import { api } from 'src/api.server';
 export const POST: RequestHandler = async ({ params, request }) => {
   const payload = await request.formData();
   const response = await api.post(`delivery-fields/${params.deliveryFieldId}`, payload);
-  return json(response.data);
+  return json(response.data, {
+    status: response.status
+  });
 }
 
 export const GET: RequestHandler = async ({ params }) => {
   try {
     const fileResponse = await api.get(`delivery-fields/${params.deliveryFieldId}`, { responseType: 'stream' });
+
+    if (fileResponse.status < 200 || fileResponse.status >= 300) {
+      const status = fileResponse?.status || 500;
+      const message = fileResponse?.statusText || 'Internal Server Error';
+      return new Response(message, { status });
+    }
 
     const headers = new Headers();
     headers.set('Content-Disposition', fileResponse.headers['content-disposition'] || 'attachment');

@@ -6,6 +6,12 @@ export const GET: RequestHandler = async ({ params }) => {
   try {
     const response = await api.get(`/analyzers/${params.analyzerId}/status`, { responseType: 'stream' })
 
+    if (response.status < 200 || response.status >= 300) {
+      const status = response?.status || 500;
+      const message = response?.statusText || 'Internal Server Error';
+      return new Response(message, { status });
+    }
+
     const headers = new Headers();
     headers.set('Content-Type', response.headers['content-type'] || 'text/event-stream');
     headers.set('Cache-Control', 'no-cache');

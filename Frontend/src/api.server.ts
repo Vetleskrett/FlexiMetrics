@@ -16,7 +16,8 @@ import type {
 } from "./types/";
 
 export const api = axios.create({
-  baseURL: 'http://localhost:5041'
+  baseURL: 'http://localhost:5041',
+  validateStatus: () => true
 })
 
 export async function setAuthToken(token: string){

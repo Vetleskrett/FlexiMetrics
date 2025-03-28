@@ -3,5 +3,7 @@ import { api } from 'src/api.server';
 
 export const DELETE: RequestHandler = async ({ params }) => {
   const response = await api.delete(`courses/${params.courseId}/students/${params.studentId}`);
-  return json(response.data);
+  return json(response.data, {
+    status: response.status
+  });
 }
