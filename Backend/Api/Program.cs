@@ -16,6 +16,9 @@ using FluentValidation;
 using MassTransit;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.OpenApi.Any;
+using Microsoft.OpenApi.Interfaces;
+using Microsoft.OpenApi.Models;
 using ServiceDefaults;
 using System.Text.Json.Serialization;
 
@@ -57,7 +60,53 @@ builder.Services.AddScoped<IAnalysisService, AnalysisService>();
 builder.Services.AddValidatorsFromAssemblyContaining<Program>();
 
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+builder.Services.AddSwaggerGen(options =>
+{
+    var oauth2Scheme = new OpenApiSecurityScheme
+    {
+        Name = "oAuth2",
+        Type = SecuritySchemeType.OAuth2,
+        Scheme = "bearer",
+        BearerFormat = "JWT",
+        In = ParameterLocation.Header,
+        Flows = new OpenApiOAuthFlows
+        {
+            AuthorizationCode = new OpenApiOAuthFlow
+            {
+                AuthorizationUrl = new Uri("https://auth.dataporten.no/oauth/authorization"),
+                TokenUrl = new Uri("https://auth.dataporten.no/oauth/token"),
+                Scopes = new Dictionary<string, string>
+                {
+                    { "openid", "OpenID Connect" },
+                    { "profile", "User profile information" },
+                    { "email", "User email address" }
+                }
+            }
+        },
+        Extensions = new Dictionary<string, IOpenApiExtension>
+        {
+            { "x-tokenName", new OpenApiString("id_token") }
+        },
+    };
+
+    options.AddSecurityDefinition("oauth2", oauth2Scheme);
+
+    options.AddSecurityRequirement(new OpenApiSecurityRequirement
+    {
+        {
+            new OpenApiSecurityScheme
+            {
+                Reference = new OpenApiReference
+                {
+                    Type = ReferenceType.SecurityScheme,
+                    Id = "oauth2"
+                }
+            },
+            Array.Empty<string>()
+        }
+    });
+});
+
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowCors",
@@ -125,13 +174,19 @@ var app = builder.Build();
 
 app.MapDefaultEndpoints();
 
-app.UseSwagger();
-app.UseSwaggerUI();
-
-app.UseCors("AllowCors");
-
 app.UseAuthentication();
 app.UseAuthorization();
+
+app.UseSwagger();
+app.UseSwaggerUI(options =>
+{
+    options.OAuthClientId(builder.Configuration["Feide:ClientId"]);
+    options.OAuthScopes("openid", "profile", "email");
+    options.OAuthUsePkce();
+    options.EnablePersistAuthorization();
+});
+
+app.UseCors("AllowCors");
 
 app.MapCourseEndpoints();
 app.MapTeacherEndpoints();
