@@ -27,16 +27,6 @@ export type Assignment = {
 
 export type GradingType = 'NoGrading' | 'ApprovalGrading' | 'LetterGrading' | 'PointsGrading';
 
-export type StudentAssignment = {
-    id: string;
-    name: string;
-    dueDate: string;
-    published: boolean;
-    collaborationType : string;
-    isDelivered: boolean;
-    courseId : string;
-}
-
 export type AssignmentTeam = {
     id: string;
     name: string;

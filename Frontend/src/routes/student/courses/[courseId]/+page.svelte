@@ -2,7 +2,7 @@
 	import { page } from '$app/stores';
 	import TeachersCard from 'src/components/teacher/TeachersCard.svelte';
 	import * as Breadcrumb from '$lib/components/ui/breadcrumb';
-	import type { StudentAssignment, Course, Team, Teacher } from 'src/types/';
+	import type { Assignment, Course, Team, Teacher, AssignmentProgress } from 'src/types/';
 	import { Role } from 'src/types/';
 	import StudentTeamCard from 'src/components/team/StudentTeamCard.svelte';
 	import StudentAssignmentsCard from 'src/components/assignment/StudentAssignmentsCard.svelte';
@@ -12,11 +12,14 @@
 
 	export let data: {
 		course: Course;
-		assignments: StudentAssignment[];
+		assignments: Assignment[];
+		assignmentsProgress: AssignmentProgress[];
 		team: Team | null;
 		teams: Team[] | null;
 		teachers: Teacher[];
 	};
+
+	console.log(data);
 </script>
 
 <div class="m-auto mt-4 flex w-max flex-col items-center justify-center gap-10">
@@ -52,7 +55,11 @@
 	</div>
 	<div class="flex w-[1080px] flex-row gap-8">
 		<div class="flex w-3/5 flex-col gap-8">
-			<StudentAssignmentsCard assignments={data.assignments} {courseId} />
+			<StudentAssignmentsCard
+				assignments={data.assignments}
+				assignmentsProgress={data.assignmentsProgress}
+				{courseId}
+			/>
 		</div>
 
 		<div class="flex w-2/5 flex-col gap-8">

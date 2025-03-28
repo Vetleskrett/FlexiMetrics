@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { page } from '$app/stores';
-	import type { Team, Course, StudentAssignment } from 'src/types/';
+	import type { Team, Course, Assignment, AssignmentProgress } from 'src/types/';
 	import EllipsisVertical from 'lucide-svelte/icons/ellipsis-vertical';
 	import Trash2 from 'lucide-svelte/icons/trash-2';
 	import * as DropdownMenu from '$lib/components/ui/dropdown-menu';
@@ -16,10 +16,13 @@
 	export let data: {
 		course: Course;
 		team: Team;
-		assignments: StudentAssignment[];
+		assignments: Assignment[];
+		assignmentsProgress: AssignmentProgress[];
 	};
 
-	let completed = data.assignments.filter((item) => item.isDelivered).length;
+	data.assignments = data.assignments.filter((a) => a.collaborationType == 'Teams');
+
+	let completed = data.assignmentsProgress.filter((item) => item.isDelivered).length;
 
 	async function addStudent(input: string) {
 		if (input && input.trim().length > 0) {
@@ -80,7 +83,11 @@
 	<div class="flex flex-row gap-8">
 		<div class="flex w-[700px] flex-col gap-8">
 			<TeacherTeamCard team={data.team} />
-			<TeamAssignmentsCard teamId={data.team.id} assignmentsTeam={data.assignments} />
+			<TeamAssignmentsCard
+				teamId={data.team.id}
+				assignments={data.assignments}
+				assignmentsProgress={data.assignmentsProgress}
+			/>
 		</div>
 		<div class="flex w-[400px] flex-col gap-8">
 			<SimpleAddCard
