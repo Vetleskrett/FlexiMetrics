@@ -5,12 +5,20 @@ import { Readable } from 'stream';
 export const POST: RequestHandler = async ({ params, request }) => {
   const payload = await request.formData()
   const response = await api.postForm(`/analyzers/${params.analyzerId}/script`, payload)
-  return json(response.data)
+  return json(response.data, {
+    status: response.status
+  });
 }
 
 export const GET: RequestHandler = async ({ params }) => {
   try {
     const fileResponse = await api.get(`/analyzers/${params.analyzerId}/script`, { responseType: 'stream' })
+
+    if (fileResponse.status < 200 || fileResponse.status >= 300) {
+      const status = fileResponse?.status || 500;
+      const message = fileResponse?.statusText || 'Internal Server Error';
+      return new Response(message, { status });
+    }
 
     const headers = new Headers();
     headers.set('Content-Disposition', fileResponse.headers['content-disposition'] || 'attachment');

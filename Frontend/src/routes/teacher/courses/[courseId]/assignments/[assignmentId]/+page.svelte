@@ -16,20 +16,33 @@
 		Course,
 		AssignmentField,
 		Delivery,
-		Student,
+		CourseStudent,
 		Team,
 		Analyzer
 	} from 'src/types/';
 	import { Role } from 'src/types/';
 	import { goto } from '$app/navigation';
-	import { deleteAssigment, publishAssignment } from 'src/api';
+	import { deleteAssigment, putAssignment } from 'src/api';
 
 	const courseId = $page.params.courseId;
 	const assignmentId = $page.params.assignmentId;
 
+	export let data: {
+		course: Course;
+		assignment: Assignment;
+		assignmentFields: AssignmentField[];
+		deliveries: Delivery[];
+		students: CourseStudent[];
+		teams: Team[];
+		analyzers: Analyzer[];
+	};
+
 	async function publishAssignmentButton() {
 		try {
-			const response = await publishAssignment(assignmentId);
+			const response = await putAssignment(assignmentId, {
+				...data.assignment,
+				published: true
+			});
 			data.assignment = response.data;
 		} catch (exception) {
 			console.error('Something Went Wrong!');
@@ -44,16 +57,6 @@
 			console.error('Something Went Wrong!');
 		}
 	}
-
-	export let data: {
-		course: Course;
-		assignment: Assignment;
-		assignmentFields: AssignmentField[];
-		deliveries: Delivery[];
-		students: Student[];
-		teams: Team[];
-		analyzers: Analyzer[];
-	};
 </script>
 
 <div class="m-auto mt-4 flex w-max flex-col items-center justify-center gap-10">

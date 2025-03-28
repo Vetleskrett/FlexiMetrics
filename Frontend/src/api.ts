@@ -25,6 +25,7 @@ import type {
   EditAnalyzer,
   Analysis,
   AnalyzerAnalyses,
+  CourseStudent,
 } from "./types/";
 
 export async function postFeedback(feedback: CreateFeedback) : Promise<AxiosResponse<Feedback>> {
@@ -51,7 +52,7 @@ export async function postTeams(payload: CreateTeams) : Promise<AxiosResponse> {
   return axios.post(`/api/teams`, payload)
 }
 
-export async function postStudentsCourse(courseId: string, emails: AddStudentsToCourse) : Promise<AxiosResponse<Student[]>> {
+export async function postStudentsCourse(courseId: string, emails: AddStudentsToCourse) : Promise<AxiosResponse<CourseStudent[]>> {
   return axios.post(`/api/courses/${courseId}/students`, emails)
 }
 
@@ -101,10 +102,6 @@ export async function postAssignment(assingment: CreateAssignment) : Promise<Axi
 
 export async function putAssignment(assignmentId: string, assignment: EditAssignment) : Promise<AxiosResponse<Assignment>>{
   return axios.put(`/api/assignments/${assignmentId}`, assignment)
-}
-
-export async function publishAssignment(assignmentId: string) : Promise<AxiosResponse<Assignment>>{
-  return axios.put(`/api/assignments/${assignmentId}/publish`,)
 }
 
 export async function deleteAssigment(assignmentId: string) : Promise<AxiosResponse>{

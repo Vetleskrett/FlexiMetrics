@@ -1,17 +1,20 @@
-import { getCourse, getStudents } from "src/api.server";
+import { getCourse, getStudents, getStudentsProgress } from "src/api.server";
 import type { PageServerLoad } from "../$types";
 
 export const load: PageServerLoad = async ({ params }: {params: {courseId: string}}) => {
     const [
         courseResponse,
-        studentsResponse
+        studentsResponse,
+        studentsProgressResponse
     ] = await Promise.all([
         getCourse(params.courseId),
-        getStudents(params.courseId)
+        getStudents(params.courseId),
+        getStudentsProgress(params.courseId)
     ])
 
     return { 
         course: courseResponse.data,
-        students: studentsResponse.data
+        students: studentsResponse.data,
+        studentsProgress: studentsProgressResponse.data
     }
 };

@@ -18,7 +18,6 @@ public interface IAssignmentService
     Task<Result<AssignmentResponse>> GetById(Guid id);
     Task<Result<AssignmentResponse>> Create(CreateAssignmentRequest request);
     Task<Result<AssignmentResponse>> Update(UpdateAssignmentRequest request, Guid id);
-    Task<Result<AssignmentResponse>> Publish(Guid id);
     Task<Result> DeleteById(Guid id);
 }
 
@@ -198,24 +197,6 @@ public class AssignmentService : IAssignmentService
         {
             return validationResult.Errors.MapToResponse();
         }
-
-        _dbContext.Assignments.Update(assignment);
-        await _dbContext.SaveChangesAsync();
-
-        return assignment.MapToResponse();
-    }
-
-    public async Task<Result<AssignmentResponse>> Publish(Guid id)
-    {
-        var assignment = await _dbContext.Assignments
-           .AsNoTracking()
-           .FirstOrDefaultAsync(x => x.Id == id);
-        if (assignment is null || assignment.Published)
-        {
-            return Result<AssignmentResponse>.NotFound();
-        }
-
-        assignment.Published = true;
 
         _dbContext.Assignments.Update(assignment);
         await _dbContext.SaveChangesAsync();

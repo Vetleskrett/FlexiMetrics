@@ -10,8 +10,8 @@ namespace Api.Students;
 public interface IStudentService
 {
     Task<Result<StudentResponse>> GetById(Guid studentId);
-    Task<Result<IEnumerable<StudentResponse>>> GetAllByCourse(Guid courseId);
-    Task<Result<IEnumerable<StudentResponse>>> AddToCourse(Guid courseId, AddStudentsToCourseRequest request);
+    Task<Result<IEnumerable<CourseStudentResponse>>> GetAllByCourse(Guid courseId);
+    Task<Result<IEnumerable<CourseStudentResponse>>> AddToCourse(Guid courseId, AddStudentsToCourseRequest request);
     Task<Result> RemoveFromCourse(Guid courseId, Guid studentId);
 }
 
@@ -38,35 +38,49 @@ public class StudentService : IStudentService
         return student.MapToStudentResponse();
     }
 
-    public async Task<Result<IEnumerable<StudentResponse>>> GetAllByCourse(Guid courseId)
+    public async Task<Result<IEnumerable<CourseStudentResponse>>> GetAllByCourse(Guid courseId)
     {
         var course = await _dbContext.Courses
+            .Include(c => c.Teams!)
+            .ThenInclude(c => c.Students)
             .Include(c => c.CourseStudents!)
             .ThenInclude(cs => cs.Student)
             .FirstOrDefaultAsync(c => c.Id == courseId);
 
         if (course is null)
         {
-            return Result<IEnumerable<StudentResponse>>.NotFound();
+            return Result<IEnumerable<CourseStudentResponse>>.NotFound();
         }
 
         var students = course.CourseStudents!
-            .Select(ct => ct.Student!)
-            .OrderBy(t => t.Email);
+            .Select(cs => cs.Student!)
+            .OrderBy(s => s.Email)
+            .Select(s =>
+                new CourseStudentResponse
+                {
+                    Id = s.Id,
+                    Email = s.Email,
+                    Name = s.Name,
+                    TeamNr = course.Teams!.FirstOrDefault(t => t.Students.Any(ts => ts.Id == s.Id))?.TeamNr,
+                }
+            )
+            .ToList();
 
-        return students.MapToStudentResponse();
+        return students;
     }
 
-    public async Task<Result<IEnumerable<StudentResponse>>> AddToCourse(Guid courseId, AddStudentsToCourseRequest request)
+    public async Task<Result<IEnumerable<CourseStudentResponse>>> AddToCourse(Guid courseId, AddStudentsToCourseRequest request)
     {
         var course = await _dbContext.Courses
+            .Include(c => c.Teams!)
+            .ThenInclude(c => c.Students)
             .Include(c => c.CourseStudents!)
             .ThenInclude(cs => cs.Student)
             .FirstOrDefaultAsync(c => c.Id == courseId);
 
         if (course is null)
         {
-            return Result<IEnumerable<StudentResponse>>.NotFound();
+            return Result<IEnumerable<CourseStudentResponse>>.NotFound();
         }
 
         var existingUsers = await _dbContext.Users
@@ -106,9 +120,19 @@ public class StudentService : IStudentService
 
         var students = course.CourseStudents!
             .Select(cs => cs.Student!)
-            .OrderBy(t => t.Email);
+            .OrderBy(s => s.Email)
+            .Select(s =>
+                new CourseStudentResponse
+                {
+                    Id = s.Id,
+                    Email = s.Email,
+                    Name = s.Name,
+                    TeamNr = course.Teams!.FirstOrDefault(t => t.Students.Any(ts => ts.Id == s.Id))?.TeamNr,
+                }
+            )
+            .ToList();
 
-        return students.MapToStudentResponse();
+        return students;
     }
 
     public async Task<Result> RemoveFromCourse(Guid courseId, Guid studentId)

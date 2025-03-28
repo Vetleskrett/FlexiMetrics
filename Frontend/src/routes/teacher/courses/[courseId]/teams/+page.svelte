@@ -1,20 +1,18 @@
 <script lang="ts">
 	import { page } from '$app/stores';
-	import AllTeamCard from 'src/components/team/AllTeamCard.svelte';
-	import type { Team, Course, StudentToTeam } from 'src/types/';
-	import EllipsisVertical from 'lucide-svelte/icons/ellipsis-vertical';
-	import Trash2 from 'lucide-svelte/icons/trash-2';
-	import * as DropdownMenu from '$lib/components/ui/dropdown-menu';
+	import type { Team, Course, StudentToTeam, Progress } from 'src/types/';
 	import * as Breadcrumb from '$lib/components/ui/breadcrumb';
 	import AddTeamMembersCard from 'src/components/team/AddTeamMembersCard.svelte';
 	import SimpleAddCard from 'src/components/SimpleAddCard.svelte';
 	import { postStudentsTeam, postTeams } from 'src/api';
+	import TeacherAllTeamsCard from 'src/components/team/TeacherAllTeamsCard.svelte';
 
 	const courseId = $page.params.courseId;
 
 	export let data: {
 		course: Course;
 		teams: Team[];
+		teamsProgress: Progress[];
 	};
 
 	async function addTeams(input: number) {
@@ -89,29 +87,15 @@
 			</Breadcrumb.Item>
 		</Breadcrumb.List>
 	</Breadcrumb.Root>
-	<div class="flex w-full items-center justify-between">
-		<div class="flex items-center">
-			<img width="60" height="60" src="https://img.icons8.com/fluency/480/group.png" alt="group" />
-			<div>
-				<h1 class="ml-4 text-4xl font-semibold">Teams</h1>
-			</div>
+	<div class="flex w-full items-center">
+		<img width="60" height="60" src="https://img.icons8.com/fluency/480/group.png" alt="group" />
+		<div>
+			<h1 class="ml-4 text-4xl font-semibold">Teams</h1>
 		</div>
-
-		<DropdownMenu.Root>
-			<DropdownMenu.Trigger>
-				<EllipsisVertical size={32} />
-			</DropdownMenu.Trigger>
-			<DropdownMenu.Content>
-				<DropdownMenu.Item>
-					<Trash2 class="h-4" />
-					<p>Delete All Teams</p>
-				</DropdownMenu.Item>
-			</DropdownMenu.Content>
-		</DropdownMenu.Root>
 	</div>
 	<div class="flex flex-row gap-8">
 		<div class="flex w-[700px] flex-col gap-8">
-			<AllTeamCard teams={data.teams} {courseId} />
+			<TeacherAllTeamsCard teams={data.teams} teamsProgress={data.teamsProgress} {courseId} />
 		</div>
 		<div class="flex w-[400px] flex-col gap-8">
 			<SimpleAddCard

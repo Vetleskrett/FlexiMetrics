@@ -155,9 +155,9 @@
 			</Breadcrumb.Item>
 			<Breadcrumb.Separator />
 			<Breadcrumb.Item>
-				<Breadcrumb.Link href="/teacher/courses/{courseId}"
-					>{data.course.code} - {data.course.name}</Breadcrumb.Link
-				>
+				<Breadcrumb.Link href="/teacher/courses/{courseId}">
+					{data.course.code} - {data.course.name}
+				</Breadcrumb.Link>
 			</Breadcrumb.Item>
 			<Breadcrumb.Separator />
 			<Breadcrumb.Link href="/teacher/courses/{courseId}/assignments/{assignmentId}">
@@ -169,6 +169,7 @@
 			</Breadcrumb.Item>
 		</Breadcrumb.List>
 	</Breadcrumb.Root>
+
 	<div class="flex w-full items-center justify-between">
 		<div class="flex items-center">
 			<img

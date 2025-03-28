@@ -22,7 +22,7 @@ public static class StudentEndpoints
             var result = await studentService.GetAllByCourse(courseId);
             return result.MapToResponse(students => Results.Ok(students));
         })
-        .Produces<IEnumerable<StudentResponse>>()
+        .Produces<IEnumerable<CourseStudentResponse>>()
         .WithName("GetAllStudentsByCourse")
         .RequireAuthorization("Course")
         .WithSummary("Get all students by course id");
@@ -32,7 +32,7 @@ public static class StudentEndpoints
             var result = await studentService.AddToCourse(courseId, request);
             return result.MapToResponse(students => Results.Ok(students));
         })
-        .Produces<IEnumerable<StudentResponse>>()
+        .Produces<IEnumerable<CourseStudentResponse>>()
         .WithName("AddStudentsToCourse")
         .RequireAuthorization("TeacherInCourse")
         .WithSummary("Add students to course");

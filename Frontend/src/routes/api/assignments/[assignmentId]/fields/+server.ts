@@ -5,5 +5,7 @@ import { api } from 'src/api.server';
 export const PUT: RequestHandler = async ({ params, request }) => {
   const payload: UpdateAssignmentFields = await request.json()
   const response = await api.put(`assignments/${params.assignmentId}/fields`, payload);
-  return json(response.data)
+  return json(response.data, {
+    status: response.status
+  });
 }

@@ -1,11 +1,11 @@
 <script lang="ts">
 	import { page } from '$app/stores';
-	import AllTeamCard from 'src/components/team/AllTeamCard.svelte';
 	import { type Team, type Course, type StudentToTeam, Role } from 'src/types/';
 	import * as Breadcrumb from '$lib/components/ui/breadcrumb';
 	import { studentId } from 'src/store';
 	import { goto } from '$app/navigation';
 	import { postStudentTeam } from 'src/api';
+	import StudentAllTeamsCard from 'src/components/team/StudentAllTeamsCard.svelte';
 
 	const courseId = $page.params.courseId;
 
@@ -52,7 +52,7 @@
 	</div>
 	<div class="flex flex-row gap-8">
 		<div class="flex w-[700px] flex-col gap-8">
-			<AllTeamCard teams={data.teams} {courseId} onJoin={joinTeam} userRole={Role.Student} />
+			<StudentAllTeamsCard teams={data.teams} onJoin={joinTeam} />
 		</div>
 	</div>
 </div>

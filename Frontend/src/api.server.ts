@@ -7,15 +7,18 @@ import type {
   Team,
   Student,
   Delivery,
+  Progress,
   Feedback,
   Teacher,
   Analyzer,
   AnalyzerAnalyses,
   StudentAnalysis,
+  CourseStudent,
 } from "./types/";
 
 export const api = axios.create({
-  baseURL: 'http://localhost:5041'
+  baseURL: 'http://localhost:5041',
+  validateStatus: () => true
 })
 
 export async function setAuthToken(token: string){
@@ -78,6 +81,14 @@ export async function getDeliveryFieldFile(deliveryFieldId: string): Promise<Axi
   return api.get(`delivery-fields/${deliveryFieldId}`, { responseType: 'stream' });
 }
 
+export async function getStudentsProgress(courseId: string) : Promise<AxiosResponse<Progress[]>> {
+  return api.get(`courses/${courseId}/progress/students`)
+}
+
+export async function getTeamsProgress(courseId: string) : Promise<AxiosResponse<Progress[]>> {
+  return api.get(`courses/${courseId}/progress/teams`)
+}
+
 export async function getFeedbacks(assignmentId: string) : Promise<AxiosResponse<Feedback[]>> {
   return api.get(`assignments/${assignmentId}/feedbacks`)
 }
@@ -102,7 +113,7 @@ export async function getStudent(studentId: string): Promise<AxiosResponse<Stude
   return api.get(`students/${studentId}`)
 }
 
-export async function getStudents(courseId: string): Promise<AxiosResponse<Student[]>> {
+export async function getStudents(courseId: string): Promise<AxiosResponse<CourseStudent[]>> {
   return api.get(`courses/${courseId}/students`)
 }
 

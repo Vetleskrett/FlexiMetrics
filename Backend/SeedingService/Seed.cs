@@ -6,7 +6,7 @@ using System.Net.Mime;
 using System.Text;
 using System.Text.Json;
 
-namespace Database;
+namespace SeedingService;
 
 public static class Seed
 {

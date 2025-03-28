@@ -26,8 +26,8 @@ public class UserAuthorizationHandler : AuthorizationHandler<UserRequirement>
     protected override async Task HandleRequirementAsync(AuthorizationHandlerContext context, UserRequirement requirement)
     {
         // For development purposes
-        // context.Succeed(requirement);
-        // return;
+        context.Succeed(requirement);
+        return;
 
         var claimedId = context.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
 

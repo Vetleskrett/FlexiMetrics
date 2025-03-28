@@ -43,7 +43,7 @@
 {:else if type == 'List' && subType}
 	<ul>
 		{#each value as item}
-			<li>
+			<li class="flex gap-2">
 				• <DeliveryFieldValue {id} value={item} type={subType} />
 			</li>
 		{/each}

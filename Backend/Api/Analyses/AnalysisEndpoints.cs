@@ -35,6 +35,7 @@ public static class AnalysisEndpoints
         })
         .Produces<AnalyzerAnalysesResponse>()
         .WithName("GetAllAnalysesByAnalyzer")
+        .RequireAuthorization("TeacherForAnalyzer")
         .WithSummary("Get all analyses by analyzer id");
 
         group.MapGet("students/{studentId:guid}/assignments/{assignmentId:guid}/analyses", async (IAnalysisService analysisService, Guid studentId, Guid assignmentId) =>

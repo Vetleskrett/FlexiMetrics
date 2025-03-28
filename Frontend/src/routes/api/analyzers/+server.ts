@@ -5,5 +5,7 @@ import { api } from 'src/api.server';
 export const POST: RequestHandler = async ({ request }) => {
   const payload: CreateAnalyzer = await request.json()
   const response = await api.post(`/analyzers`, payload)
-  return json(response.data)
+  return json(response.data, {
+    status: response.status
+  });
 }

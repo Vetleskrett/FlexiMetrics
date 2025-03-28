@@ -9,6 +9,13 @@ export type Student = {
     email: string;
 }
 
+export type CourseStudent = {
+    id: string;
+    name: string;
+    email: string;
+    teamNr?: number;
+}
+
 export type Teacher = {
     id: string;
     email: string;

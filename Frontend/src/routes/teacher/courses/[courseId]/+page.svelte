@@ -9,7 +9,7 @@
 	import TeamsCard from 'src/components/team/TeamsCard.svelte';
 	import TeachersCard from 'src/components/teacher/TeachersCard.svelte';
 	import * as Breadcrumb from '$lib/components/ui/breadcrumb';
-	import type { Course, Assignment, Teacher, Student, Team } from 'src/types/';
+	import type { Course, Assignment, Teacher, Team, CourseStudent } from 'src/types/';
 	import { Role } from 'src/types/';
 	import { goto } from '$app/navigation';
 	import { deleteCourse } from 'src/api';
@@ -20,7 +20,7 @@
 		course: Course;
 		assignments: Assignment[];
 		teachers: Teacher[];
-		students: Student[];
+		students: CourseStudent[];
 		teams: Team[];
 	};
 
