@@ -1,11 +1,11 @@
 <script lang="ts">
-	import type { Progress, Team } from 'src/types/';
+	import type { SlimProgress, Team } from 'src/types/';
 	import * as Card from '$lib/components/ui/card';
 	import * as Table from '$lib/components/ui/table';
-	import { Check, CircleCheck, CircleX } from 'lucide-svelte';
+	import { CircleCheck, CircleX } from 'lucide-svelte';
 
 	export let teams: Team[];
-	export let teamsProgress: Progress[];
+	export let teamsProgress: SlimProgress[];
 	export let courseId: string;
 </script>
 
@@ -18,7 +18,7 @@
 						Team
 					</Table.Head>
 					<Table.Head class="h-8 px-6 font-bold text-black">Members</Table.Head>
-					<Table.Head class="h-8 w-[250px] px-6 font-bold text-black">Progress</Table.Head>
+					<Table.Head class="h-8 px-6 font-bold text-black">Assignments Delivered</Table.Head>
 				</Table.Row>
 			</Table.Header>
 			<Table.Body>

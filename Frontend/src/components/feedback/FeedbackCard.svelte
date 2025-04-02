@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { type Assignment, type Feedback, type GradingType } from 'src/types/';
+	import type { Assignment, Feedback } from 'src/types/';
 	import * as Card from '$lib/components/ui/card';
 	import { Separator } from '$lib/components/ui/separator';
 	import Check from 'lucide-svelte/icons/check';
@@ -7,20 +7,6 @@
 
 	export let assignment: Assignment;
 	export let feedback: Feedback | null;
-
-	const getGradingString = (gradingType: GradingType, feedback: Feedback) => {
-		switch (gradingType) {
-			case 'ApprovalGrading':
-				return feedback!.isApproved! ? 'Approved' : 'Not approved';
-
-			case 'LetterGrading':
-				return feedback!.letterGrade;
-
-			case 'PointsGrading':
-				return feedback?.points?.toString() + ' / ' + assignment.maxPoints!.toString();
-		}
-		return null;
-	};
 </script>
 
 <Card.Root class="w-full overflow-hidden p-0">

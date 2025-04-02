@@ -6,7 +6,8 @@ import type {
   Team,
   Student,
   Delivery,
-  Progress,
+  SlimProgress,
+  SlimAssignmentProgress,
   AssignmentProgress,
   Feedback,
   Teacher,
@@ -77,11 +78,11 @@ export async function getDeliveryFieldFile(deliveryFieldId: string): Promise<Axi
   return api.get(`delivery-fields/${deliveryFieldId}`, { responseType: 'stream' });
 }
 
-export async function getStudentsProgress(courseId: string) : Promise<AxiosResponse<Progress[]>> {
+export async function getStudentsProgress(courseId: string) : Promise<AxiosResponse<SlimProgress[]>> {
   return api.get(`courses/${courseId}/progress/students`)
 }
 
-export async function getTeamsProgress(courseId: string) : Promise<AxiosResponse<Progress[]>> {
+export async function getTeamsProgress(courseId: string) : Promise<AxiosResponse<SlimProgress[]>> {
   return api.get(`courses/${courseId}/progress/teams`)
 }
 

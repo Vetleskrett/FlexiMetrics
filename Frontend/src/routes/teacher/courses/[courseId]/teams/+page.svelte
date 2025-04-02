@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { page } from '$app/stores';
-	import type { Team, Course, StudentToTeam, Progress } from 'src/types/';
+	import type { Team, Course, StudentToTeam, SlimProgress } from 'src/types/';
 	import * as Breadcrumb from '$lib/components/ui/breadcrumb';
 	import AddTeamMembersCard from 'src/components/team/AddTeamMembersCard.svelte';
 	import SimpleAddCard from 'src/components/SimpleAddCard.svelte';
@@ -12,7 +12,7 @@
 	export let data: {
 		course: Course;
 		teams: Team[];
-		teamsProgress: Progress[];
+		teamsProgress: SlimProgress[];
 	};
 
 	async function addTeams(input: number) {

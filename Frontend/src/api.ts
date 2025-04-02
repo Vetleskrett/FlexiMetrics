@@ -76,6 +76,10 @@ export async function deleteStudentTeam(teamId: string, studentId: string) : Pro
   return axios.delete(`/api/teams/${teamId}/students/${studentId}`)
 }
 
+export async function deleteTeam(teamId: string) : Promise<AxiosResponse> {
+  return axios.delete(`/api/teams/${teamId}`)
+}
+
 export async function postCourse(course: CreateCourse) : Promise<AxiosResponse<Course>> {
   return axios.post(`/api/courses`, course)
 }

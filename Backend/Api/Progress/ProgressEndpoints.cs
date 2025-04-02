@@ -13,7 +13,7 @@ public static class ProgressEndpoints
             var result = await progressService.GetCourseStudentsProgress(courseId);
             return result.MapToResponse(progress => Results.Ok(progress));
         })
-        .Produces<IEnumerable<ProgressResponse>>()
+        .Produces<IEnumerable<SlimProgressResponse>>()
         .WithName("GetStudentsProgressByCourse")
         .RequireAuthorization("TeacherInCourse")
         .WithSummary("Get students progress by course id");
@@ -23,7 +23,7 @@ public static class ProgressEndpoints
             var result = await progressService.GetCourseTeamsProgress(courseId);
             return result.MapToResponse(progress => Results.Ok(progress));
         })
-        .Produces<IEnumerable<ProgressResponse>>()
+        .Produces<IEnumerable<SlimProgressResponse>>()
         .WithName("GetTeamsProgressByCourse")
         .RequireAuthorization("TeacherInCourse")
         .WithSummary("Get teams progress by course id");

@@ -1,4 +1,6 @@
-﻿using Api.Progress.Contracts;
+﻿using Api.Assignments;
+using Api.Feedbacks;
+using Api.Progress.Contracts;
 using Api.Validation;
 using Database;
 using Database.Models;
@@ -8,8 +10,8 @@ namespace Api.Progress;
 
 public interface IProgressService
 {
-    Task<Result<IEnumerable<ProgressResponse>>> GetCourseStudentsProgress(Guid courseId);
-    Task<Result<IEnumerable<ProgressResponse>>> GetCourseTeamsProgress(Guid courseId);
+    Task<Result<IEnumerable<SlimProgressResponse>>> GetCourseStudentsProgress(Guid courseId);
+    Task<Result<IEnumerable<SlimProgressResponse>>> GetCourseTeamsProgress(Guid courseId);
     Task<Result<IEnumerable<AssignmentProgressResponse>>> GetCourseStudentProgress(Guid courseId, Guid studentId);
     Task<Result<IEnumerable<AssignmentProgressResponse>>> GetCourseTeamProgress(Guid courseId, Guid teamId);
 }
@@ -23,7 +25,7 @@ public class ProgressService : IProgressService
         _dbContext = dbContext;
     }
 
-    public async Task<Result<IEnumerable<ProgressResponse>>> GetCourseStudentsProgress(Guid courseId)
+    public async Task<Result<IEnumerable<SlimProgressResponse>>> GetCourseStudentsProgress(Guid courseId)
     {
         var course = await _dbContext.Courses
             .Include(c => c.CourseStudents!)
@@ -32,7 +34,7 @@ public class ProgressService : IProgressService
 
         if (course is null)
         {
-            return Result<IEnumerable<ProgressResponse>>.NotFound();
+            return Result<IEnumerable<SlimProgressResponse>>.NotFound();
         }
 
         var assignments = await _dbContext.Assignments
@@ -48,11 +50,11 @@ public class ProgressService : IProgressService
         var progress = course.CourseStudents!
             .Select(cs => cs.Student!)
             .Select(student =>
-                new ProgressResponse
+                new SlimProgressResponse
                 {
                     Id = student.Id,
                     AssignmentsProgress = assignments.Select(assignment =>
-                        new AssignmentProgressResponse
+                        new SlimAssignmentProgressResponse
                         {
                             Id = assignment.Id,
                             IsDelivered = deliveries
@@ -68,7 +70,7 @@ public class ProgressService : IProgressService
         return progress;
     }
 
-    public async Task<Result<IEnumerable<ProgressResponse>>> GetCourseTeamsProgress(Guid courseId)
+    public async Task<Result<IEnumerable<SlimProgressResponse>>> GetCourseTeamsProgress(Guid courseId)
     {
         var course = await _dbContext.Courses
             .Include(c => c.Teams)
@@ -76,7 +78,7 @@ public class ProgressService : IProgressService
 
         if (course is null)
         {
-            return Result<IEnumerable<ProgressResponse>>.NotFound();
+            return Result<IEnumerable<SlimProgressResponse>>.NotFound();
         }
 
         var assignments = await _dbContext.Assignments
@@ -89,11 +91,11 @@ public class ProgressService : IProgressService
 
         var progress = course.Teams!
             .Select(team =>
-                new ProgressResponse
+                new SlimProgressResponse
                 {
                     Id = team.Id,
                     AssignmentsProgress = assignments.Select(assignment =>
-                        new AssignmentProgressResponse
+                        new SlimAssignmentProgressResponse
                         {
                             Id = assignment.Id,
                             IsDelivered = deliveries.Any(d => d.AssignmentId == assignment.Id && d.TeamId == team.Id)
@@ -129,19 +131,30 @@ public class ProgressService : IProgressService
             return new ValidationError("Student is not enrolled in the course").MapToResponse();
         }
 
+        var team = await _dbContext.Teams
+            .FirstOrDefaultAsync(t => t.CourseId == courseId && t.Students.Any(s => s.Id == studentId));
+
         var assignments = await _dbContext.Assignments
             .Where(a => a.CourseId == courseId)
             .ToListAsync();
 
         var deliveries = await _dbContext.Deliveries
             .Where(d => d.Assignment!.CourseId == courseId)
-            .Where(d => d.StudentId == studentId || d.Team != null && d.Team.Students.Any(s => s.Id == studentId))
+            .Where(d => d.StudentId == studentId || team != null && d.TeamId == team.Id)
+            .ToListAsync();
+
+        var feedbacks = await _dbContext.Feedbacks
+            .Where(f => f.Assignment!.CourseId == courseId)
+            .Where(d => d.StudentId == studentId || team != null && d.TeamId == team.Id)
             .ToListAsync();
 
         return assignments.Select(assignment =>
             new AssignmentProgressResponse
             {
-                Id = assignment.Id,
+                Assignment = assignment.MapToResponse(),
+                Feedback = feedbacks.FirstOrDefault(f => f.AssignmentId == assignment.Id)?.MapToResponse(),
+                StudentId = assignment.CollaborationType == CollaborationType.Individual ? studentId : null,
+                TeamId = assignment.CollaborationType == CollaborationType.Teams ? team?.Id : null,
                 IsDelivered = deliveries.Any(d => d.AssignmentId == assignment.Id),
             }
         )
@@ -175,10 +188,17 @@ public class ProgressService : IProgressService
             .Where(d => d.Assignment!.CourseId == courseId && d.TeamId == teamId)
             .ToListAsync();
 
+        var feedbacks = await _dbContext.Feedbacks
+            .Where(f => f.Assignment!.CourseId == courseId && f.TeamId == teamId)
+            .ToListAsync();
+
         return assignments.Select(assignment =>
             new AssignmentProgressResponse
             {
-                Id = assignment.Id,
+                Assignment = assignment.MapToResponse(),
+                Feedback = feedbacks.FirstOrDefault(f => f.AssignmentId == assignment.Id)?.MapToResponse(),
+                StudentId = null,
+                TeamId = teamId,
                 IsDelivered = deliveries.Any(d => d.AssignmentId == assignment.Id),
             }
         )

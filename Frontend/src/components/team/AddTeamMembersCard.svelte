@@ -31,12 +31,12 @@
 		<div class="flex flex-col items-center gap-2">
 			<div class="flex w-full flex-col gap-4">
 				<div>
-					<p>Requires the student in the format:</p>
+					<p>Required format:</p>
 					<b>teamNr, email1, email2, ...</b>
 				</div>
 
-				<div>
-					<p>Copy and Paste, Drag and Drop file, or</p>
+				<div class="flex gap-1">
+					<p>Copy and Paste or</p>
 					<button on:click={openFileExplorer} class="text-blue-500 hover:text-blue-700">
 						Browse Files
 					</button>

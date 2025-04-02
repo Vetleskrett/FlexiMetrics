@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { page } from '$app/stores';
-	import type { Course, CourseStudent, Progress } from 'src/types/';
+	import type { Course, CourseStudent, SlimProgress } from 'src/types/';
 	import * as Breadcrumb from '$lib/components/ui/breadcrumb';
 	import AllStudentsCard from 'src/components/student/AllStudentsCard.svelte';
 	import AddStudentsCard from 'src/components/student/AddStudentsCard.svelte';
@@ -11,7 +11,7 @@
 	export let data: {
 		course: Course;
 		students: CourseStudent[];
-		studentsProgress: Progress[];
+		studentsProgress: SlimProgress[];
 	};
 
 	async function addStudents(input: string, file: File | null) {

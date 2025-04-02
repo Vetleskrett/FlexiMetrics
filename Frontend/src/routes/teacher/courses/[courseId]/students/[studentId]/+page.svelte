@@ -1,44 +1,31 @@
 <script lang="ts">
 	import { page } from '$app/stores';
-	import type { Team, Course, AssignmentProgress } from 'src/types/';
+	import type { Student, Course, AssignmentProgress, Team } from 'src/types/';
 	import EllipsisVertical from 'lucide-svelte/icons/ellipsis-vertical';
 	import Trash2 from 'lucide-svelte/icons/trash-2';
 	import * as DropdownMenu from '$lib/components/ui/dropdown-menu';
 	import * as Breadcrumb from '$lib/components/ui/breadcrumb';
 	import CompletedTotalCard from 'src/components/CompletedTotalCard.svelte';
-	import SimpleAddCard from 'src/components/SimpleAddCard.svelte';
-	import TeacherTeamCard from 'src/components/team/TeacherTeamCard.svelte';
 	import AssignmentsProgressCard from 'src/components/assignment/AssignmentsProgressCard.svelte';
-	import { postStudentEmailTeam, deleteTeam } from 'src/api';
+	import { deleteStudentCourse } from 'src/api';
 	import { goto } from '$app/navigation';
+	import StudentTeamCard from 'src/components/team/StudentTeamCard.svelte';
 
 	const courseId = $page.params.courseId;
-	const teamId = $page.params.teamId;
+	const studentId = $page.params.studentId;
 
 	export let data: {
 		course: Course;
-		team: Team;
+		student: Student;
 		assignmentsProgress: AssignmentProgress[];
+		team?: Team;
 	};
 
 	const completed = data.assignmentsProgress.filter((item) => item.isDelivered).length;
 
-	async function addStudent(input: string) {
-		if (input && input.trim().length > 0) {
-			try {
-				const result = await postStudentEmailTeam(data.team.id, {
-					email: input
-				});
-				data.team = result.data;
-			} catch (error) {
-				console.error('Could not add student!');
-			}
-		}
-	}
-
-	const onDeleteTeam = async () => {
+	const onRemoveStudent = async () => {
 		try {
-			await deleteTeam(teamId);
+			await deleteStudentCourse(courseId, studentId);
 			goto('./');
 		} catch (error) {
 			console.error(error);
@@ -60,19 +47,29 @@
 			</Breadcrumb.Item>
 			<Breadcrumb.Separator />
 			<Breadcrumb.Item>
-				<Breadcrumb.Link href="/teacher/courses/{courseId}/teams">Teams</Breadcrumb.Link>
+				<Breadcrumb.Link href="/teacher/courses/{courseId}/students">Students</Breadcrumb.Link>
 			</Breadcrumb.Item>
 			<Breadcrumb.Separator />
 			<Breadcrumb.Item>
-				<Breadcrumb.Page>Team {data.team.teamNr}</Breadcrumb.Page>
+				<Breadcrumb.Page>{data.student.name}</Breadcrumb.Page>
 			</Breadcrumb.Item>
 		</Breadcrumb.List>
 	</Breadcrumb.Root>
 	<div class="flex w-full items-center justify-between">
 		<div class="flex items-center">
-			<img width="60" height="60" src="https://img.icons8.com/fluency/480/group.png" alt="group" />
+			<img
+				width="60"
+				height="60"
+				src="https://img.icons8.com/fluency/480/student-male.png"
+				alt="group"
+			/>
 			<div>
-				<h1 class="ml-4 text-4xl font-semibold">Team {data.team.teamNr}</h1>
+				<h1 class="ml-4 text-4xl font-semibold">
+					{data.student.name}
+				</h1>
+				<p class="ml-4 font-semibold text-gray-500">
+					{data.student.email}
+				</p>
 			</div>
 		</div>
 
@@ -81,26 +78,19 @@
 				<EllipsisVertical size={32} />
 			</DropdownMenu.Trigger>
 			<DropdownMenu.Content>
-				<DropdownMenu.Item on:click={onDeleteTeam}>
+				<DropdownMenu.Item on:click={onRemoveStudent}>
 					<Trash2 class="h-4" />
-					<p>Delete Team</p>
+					<p>Remove Student</p>
 				</DropdownMenu.Item>
 			</DropdownMenu.Content>
 		</DropdownMenu.Root>
 	</div>
 	<div class="flex flex-row gap-8">
 		<div class="flex w-[700px] flex-col gap-8">
-			<TeacherTeamCard team={data.team} />
 			<AssignmentsProgressCard assignmentsProgress={data.assignmentsProgress} />
 		</div>
 		<div class="flex w-[400px] flex-col gap-8">
-			<SimpleAddCard
-				headline="Add Member"
-				actionString="Add"
-				inputString="Email"
-				inputType="String"
-				addFunction={addStudent}
-			/>
+			<StudentTeamCard team={data.team} />
 			<CompletedTotalCard
 				{completed}
 				total={data.assignmentsProgress.length}
