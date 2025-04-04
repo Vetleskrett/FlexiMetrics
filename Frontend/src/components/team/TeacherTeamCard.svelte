@@ -6,10 +6,21 @@
 	import Trash2 from 'lucide-svelte/icons/trash-2';
 	import { deleteStudentTeam } from 'src/api';
 	import * as Table from '$lib/components/ui/table';
+	import { handleErrors } from 'src/utils';
+	import CustomAlertDialog from '../CustomAlertDialog.svelte';
 
 	export let team: Team;
 
 	let students = team.students;
+
+	let showRemove = false;
+	let studentToRemove: Student | undefined = undefined;
+	async function removeTeamMember() {
+		await handleErrors(async () => {
+			await deleteStudentTeam(team.id, studentToRemove!.id);
+			deleteStudentFromList(studentToRemove!);
+		});
+	}
 
 	function deleteStudentFromList(student: Student) {
 		const index = students.indexOf(student, 0);
@@ -18,16 +29,14 @@
 			students = students;
 		}
 	}
-
-	async function removeTeamMember(student: Student) {
-		try {
-			await deleteStudentTeam(team.id, student.id);
-			deleteStudentFromList(student);
-		} catch {
-			console.error('Could not remove team member');
-		}
-	}
 </script>
+
+<CustomAlertDialog
+	bind:show={showRemove}
+	description={`This will remove ${studentToRemove?.name} from the team.`}
+	onConfirm={removeTeamMember}
+	action="Remove"
+/>
 
 <Card.Root class="w-full overflow-hidden p-0">
 	<Card.Header class="mb-6 flex flex-row items-center justify-between">
@@ -65,7 +74,12 @@
 									<Ellipsis />
 								</DropdownMenu.Trigger>
 								<DropdownMenu.Content>
-									<DropdownMenu.Item on:click={() => removeTeamMember(student)}>
+									<DropdownMenu.Item
+										on:click={() => {
+											studentToRemove = student;
+											showRemove = true;
+										}}
+									>
 										<Trash2 class="h-4" />
 										<p>Remove member</p>
 									</DropdownMenu.Item>

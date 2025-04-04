@@ -1,17 +1,18 @@
 <script lang="ts">
 	import { page } from '$app/stores';
-	import type { Course, CourseStudent, Progress } from 'src/types/';
+	import type { Course, CourseStudent, SlimProgress } from 'src/types/';
 	import * as Breadcrumb from '$lib/components/ui/breadcrumb';
 	import AllStudentsCard from 'src/components/student/AllStudentsCard.svelte';
 	import AddStudentsCard from 'src/components/student/AddStudentsCard.svelte';
 	import { postStudentsCourse } from 'src/api';
+	import { handleErrors } from 'src/utils';
 
 	const courseId = $page.params.courseId;
 
 	export let data: {
 		course: Course;
 		students: CourseStudent[];
-		studentsProgress: Progress[];
+		studentsProgress: SlimProgress[];
 	};
 
 	async function addStudents(input: string, file: File | null) {
@@ -19,15 +20,13 @@
 			input = await file.text();
 		}
 		const studentEmails = handleInput(input);
-		try {
-			if (studentEmails) {
+		if (studentEmails) {
+			await handleErrors(async () => {
 				var response = await postStudentsCourse(courseId, {
 					emails: studentEmails
 				});
 				data.students = response.data;
-			}
-		} catch (error) {
-			console.error('Something went wrong!');
+			});
 		}
 	}
 

@@ -1,9 +1,20 @@
-export type Progress = {
+import type { Assignment } from "./assignment";
+import type { Feedback } from "./feedback";
+
+export type SlimProgress = {
     id: string;
-    assignmentsProgress: AssignmentProgress[];
+    assignmentsProgress: SlimAssignmentProgress[];
+}
+
+export type SlimAssignmentProgress = {
+    id: string;
+    isDelivered: boolean;
 }
 
 export type AssignmentProgress = {
-    id: string;
+    assignment: Assignment;
+    feedback?: Feedback;
+    studentId?: string;
+    teamId?: string;
     isDelivered: boolean;
 }

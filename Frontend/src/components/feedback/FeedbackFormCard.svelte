@@ -15,6 +15,7 @@
 	import X from 'lucide-svelte/icons/x';
 	import Check from 'lucide-svelte/icons/check';
 	import { postFeedback, putFeedback } from 'src/api';
+	import { handleFormErrors } from 'src/utils';
 
 	export let assignment: Assignment;
 	export let feedback: Feedback | null;
@@ -96,33 +97,13 @@
 
 	const onSubmit = async (formEvent: any) => {
 		formEvent.cancel();
-		var promise = feedback != null ? onSubmitEdit() : onSubmitCreate();
 
-		promise
-			.then((response) => {
-				feedback = response.data;
-				edit = false;
-			})
-			.catch((exception) => {
-				const fieldErrors = exception?.response?.data?.errors?.filter(
-					(error: any) => error?.propertyName != undefined
-				);
-				if (fieldErrors) {
-					const validationErrors = Object.fromEntries(
-						fieldErrors.map((error: any) => [error.propertyName.toLowerCase(), [error.message]])
-					);
-					errors.set(validationErrors);
-				}
-
-				const otherErrors = exception?.response?.data?.errors?.filter(
-					(error: any) => error?.propertyName == undefined
-				);
-				if (otherErrors) {
-					for (let error of otherErrors) {
-						console.error(error?.message);
-					}
-				}
-			});
+		await handleFormErrors(errors, async () => {
+			const promise = feedback != null ? onSubmitEdit() : onSubmitCreate();
+			const response = await promise;
+			feedback = response.data;
+			edit = false;
+		});
 	};
 
 	const form = superForm(feedbackFormData, {

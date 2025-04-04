@@ -1,31 +1,30 @@
 <script lang="ts">
 	import { page } from '$app/stores';
-	import type { Team, Course, StudentToTeam, Progress } from 'src/types/';
+	import type { Team, Course, StudentToTeam, SlimProgress } from 'src/types/';
 	import * as Breadcrumb from '$lib/components/ui/breadcrumb';
 	import AddTeamMembersCard from 'src/components/team/AddTeamMembersCard.svelte';
 	import SimpleAddCard from 'src/components/SimpleAddCard.svelte';
 	import { postStudentsTeam, postTeams } from 'src/api';
 	import TeacherAllTeamsCard from 'src/components/team/TeacherAllTeamsCard.svelte';
+	import { handleErrors } from 'src/utils';
 
 	const courseId = $page.params.courseId;
 
 	export let data: {
 		course: Course;
 		teams: Team[];
-		teamsProgress: Progress[];
+		teamsProgress: SlimProgress[];
 	};
 
 	async function addTeams(input: number) {
 		if (input && input > 0) {
-			try {
+			await handleErrors(async () => {
 				const result = await postTeams({
 					courseId: courseId,
 					numTeams: input
 				});
 				data.teams = result.data;
-			} catch (error) {
-				console.error('Something went wrong!');
-			}
+			});
 		}
 	}
 
@@ -44,15 +43,13 @@
 			const info = rawInfo.map((i) => i.trim());
 			allTeams.push({ teamNr: Number(info[0].trim()), emails: info.slice(1) });
 		}
-		try {
+		await handleErrors(async () => {
 			const result = await postStudentsTeam({
 				courseId: courseId,
 				teams: allTeams
 			});
 			data.teams = result.data;
-		} catch (error) {
-			console.error('Something went wrong!');
-		}
+		});
 	}
 
 	function checkInfo(info: string[]): boolean {

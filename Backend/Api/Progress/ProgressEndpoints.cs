@@ -13,7 +13,7 @@ public static class ProgressEndpoints
             var result = await progressService.GetCourseStudentsProgress(courseId);
             return result.MapToResponse(progress => Results.Ok(progress));
         })
-        .Produces<IEnumerable<ProgressResponse>>()
+        .Produces<IEnumerable<SlimProgressResponse>>()
         .WithName("GetStudentsProgressByCourse")
         .RequireAuthorization("TeacherInCourse")
         .WithSummary("Get students progress by course id");
@@ -23,9 +23,29 @@ public static class ProgressEndpoints
             var result = await progressService.GetCourseTeamsProgress(courseId);
             return result.MapToResponse(progress => Results.Ok(progress));
         })
-        .Produces<IEnumerable<ProgressResponse>>()
+        .Produces<IEnumerable<SlimProgressResponse>>()
         .WithName("GetTeamsProgressByCourse")
         .RequireAuthorization("TeacherInCourse")
         .WithSummary("Get teams progress by course id");
+
+        group.MapGet("courses/{courseId:guid}/progress/students/{studentId:guid}", async (IProgressService progressService, Guid courseId, Guid studentId) =>
+        {
+            var result = await progressService.GetCourseStudentProgress(courseId, studentId);
+            return result.MapToResponse(progress => Results.Ok(progress));
+        })
+        .Produces<IEnumerable<AssignmentProgressResponse>>()
+        .WithName("GetStudentProgressByCourse")
+        .RequireAuthorization("Course")
+        .WithSummary("Get student progress by course id and student id");
+
+        group.MapGet("courses/{courseId:guid}/progress/teams/{teamId:guid}", async (IProgressService progressService, Guid courseId, Guid teamId) =>
+        {
+            var result = await progressService.GetCourseTeamProgress(courseId, teamId);
+            return result.MapToResponse(progress => Results.Ok(progress));
+        })
+        .Produces<IEnumerable<AssignmentProgressResponse>>()
+        .WithName("GetTeamProgressByCourse")
+        .RequireAuthorization("Course")
+        .WithSummary("Get team progress by course id and team id");
     }
 }

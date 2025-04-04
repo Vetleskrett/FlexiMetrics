@@ -2,12 +2,13 @@ import axios, { type AxiosResponse } from 'axios';
 import type {
   Course,
   Assignment,
-  StudentAssignment,
   AssignmentField,
   Team,
   Student,
   Delivery,
-  Progress,
+  SlimProgress,
+  SlimAssignmentProgress,
+  AssignmentProgress,
   Feedback,
   Teacher,
   Analyzer,
@@ -45,16 +46,12 @@ export async function getCourse(courseId: string) : Promise<AxiosResponse<Course
   return api.get(`courses/${courseId}`)
 }
 
-export async function getAssignments(courseId: string) : Promise<AxiosResponse<Assignment[]>> {
-  return api.get(`course/${courseId}/assignments`)
+export async function getTeacherAssignments(courseId: string) : Promise<AxiosResponse<Assignment[]>> {
+  return api.get(`teacher/courses/${courseId}/assignments`)
 }
 
-export async function getStudentAssignments(studentId: string, courseId: string) : Promise<AxiosResponse<StudentAssignment[]>> {
-  return api.get(`students/${studentId}/course/${courseId}/assignments`)
-}
-
-export async function getTeamAssignments(courseId: string, teamId: string) : Promise<AxiosResponse<StudentAssignment[]>> {
-  return api.get(`courses/${courseId}/teams/${teamId}/assignments`)
+export async function getStudentAssignments(courseId: string) : Promise<AxiosResponse<Assignment[]>> {
+  return api.get(`student/courses/${courseId}/assignments`)
 }
 
 export async function getAssignment(assignmentId: string): Promise<AxiosResponse<Assignment>> {
@@ -81,12 +78,20 @@ export async function getDeliveryFieldFile(deliveryFieldId: string): Promise<Axi
   return api.get(`delivery-fields/${deliveryFieldId}`, { responseType: 'stream' });
 }
 
-export async function getStudentsProgress(courseId: string) : Promise<AxiosResponse<Progress[]>> {
+export async function getStudentsProgress(courseId: string) : Promise<AxiosResponse<SlimProgress[]>> {
   return api.get(`courses/${courseId}/progress/students`)
 }
 
-export async function getTeamsProgress(courseId: string) : Promise<AxiosResponse<Progress[]>> {
+export async function getTeamsProgress(courseId: string) : Promise<AxiosResponse<SlimProgress[]>> {
   return api.get(`courses/${courseId}/progress/teams`)
+}
+
+export async function getStudentAssignmentsProgress(courseId: string, studentId: string) : Promise<AxiosResponse<AssignmentProgress[]>> {
+  return api.get(`courses/${courseId}/progress/students/${studentId}`)
+}
+
+export async function getTeamAssignmentsProgress(courseId: string, teamId: string) : Promise<AxiosResponse<AssignmentProgress[]>> {
+  return api.get(`courses/${courseId}/progress/teams/${teamId}`)
 }
 
 export async function getFeedbacks(assignmentId: string) : Promise<AxiosResponse<Feedback[]>> {

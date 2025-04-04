@@ -1,4 +1,4 @@
-import { getCourse, getAssignments, getTeachers, getStudents, getTeams } from "src/api.server";
+import { getCourse, getTeacherAssignments, getTeachers, getStudents, getTeams } from "src/api.server";
 import type { PageServerLoad } from "./$types";
 
 export const load: PageServerLoad = async ({ params }: {params: {courseId: string}}) => {
@@ -10,7 +10,7 @@ export const load: PageServerLoad = async ({ params }: {params: {courseId: strin
         teamsResponse
     ] = await Promise.all([
         getCourse(params.courseId),
-        getAssignments(params.courseId),
+        getTeacherAssignments(params.courseId),
         getTeachers(params.courseId),
         getStudents(params.courseId),
         getTeams(params.courseId)

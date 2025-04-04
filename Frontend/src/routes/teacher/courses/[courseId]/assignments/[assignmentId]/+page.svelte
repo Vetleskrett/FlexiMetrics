@@ -23,6 +23,8 @@
 	import { Role } from 'src/types/';
 	import { goto } from '$app/navigation';
 	import { deleteAssigment, putAssignment } from 'src/api';
+	import { handleErrors } from 'src/utils';
+	import CustomAlertDialog from 'src/components/CustomAlertDialog.svelte';
 
 	const courseId = $page.params.courseId;
 	const assignmentId = $page.params.assignmentId;
@@ -38,26 +40,30 @@
 	};
 
 	async function publishAssignmentButton() {
-		try {
+		await handleErrors(async () => {
 			const response = await putAssignment(assignmentId, {
 				...data.assignment,
 				published: true
 			});
 			data.assignment = response.data;
-		} catch (exception) {
-			console.error('Something Went Wrong!');
-		}
+		});
 	}
 
-	async function deleteAssignmentButton() {
-		try {
+	let showDelete = false;
+	async function onDeleteAssigment() {
+		await handleErrors(async () => {
 			await deleteAssigment(assignmentId);
 			goto(`/teacher/courses/${courseId}`);
-		} catch (exception) {
-			console.error('Something Went Wrong!');
-		}
+		});
 	}
 </script>
+
+<CustomAlertDialog
+	bind:show={showDelete}
+	description="This action cannot be undone. This will permanently delete the assignment."
+	onConfirm={onDeleteAssigment}
+	action="Delete"
+/>
 
 <div class="m-auto mt-4 flex w-max flex-col items-center justify-center gap-10">
 	<Breadcrumb.Root class="self-start">
@@ -107,7 +113,7 @@
 						<Pencil class="h-4" />
 						<p>Edit assignment</p>
 					</DropdownMenu.Item>
-					<DropdownMenu.Item on:click={deleteAssignmentButton}>
+					<DropdownMenu.Item on:click={() => (showDelete = true)}>
 						<Trash2 class="h-4" />
 						<p>Delete assignment</p>
 					</DropdownMenu.Item>

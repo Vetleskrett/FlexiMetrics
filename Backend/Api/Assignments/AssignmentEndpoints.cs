@@ -17,35 +17,25 @@ public static class AssignmentEndpoints
         .WithName("GetAllAssignments")
         .WithSummary("Get all assignments");
 
-        group.MapGet("course/{courseId:guid}/assignments", async (IAssignmentService assignmentService, Guid courseId) =>
+        group.MapGet("teacher/courses/{courseId:guid}/assignments", async (IAssignmentService assignmentService, Guid courseId) =>
         {
-            var result = await assignmentService.GetAllByCourse(courseId);
+            var result = await assignmentService.GetAllByCourse(courseId, true);
             return result.MapToResponse(assignments => Results.Ok(assignments));
         })
         .Produces<IEnumerable<AssignmentResponse>>()
-        .WithName("GetAllAssignmentsByCourse")
-        .RequireAuthorization("Course")
-        .WithSummary("Get all assignments by course id");
+        .WithName("GetAllTeacherAssignmentsByCourse")
+        .RequireAuthorization("TeacherInCourse")
+        .WithSummary("Get all teacher assignments by course id");
 
-        group.MapGet("students/{studentId:guid}/course/{courseId:guid}/assignments", async (IAssignmentService assignmentService, Guid studentId, Guid courseId) =>
+        group.MapGet("student/courses/{courseId:guid}/assignments", async (IAssignmentService assignmentService, Guid courseId) =>
         {
-            var result = await assignmentService.GetAllByStudentCourse(studentId, courseId);
+            var result = await assignmentService.GetAllByCourse(courseId, false);
             return result.MapToResponse(assignments => Results.Ok(assignments));
         })
-        .Produces<IEnumerable<StudentAssignmentResponse>>()
-        .WithName("GetAllAssignmentsByStudentCourse")
-        .RequireAuthorization("Course")
-        .WithSummary("Get all assignments by student id and course id");
-
-        group.MapGet("courses/{courseId:guid}/teams/{teamId:guid}/assignments", async (IAssignmentService assignmentService, Guid courseId, Guid teamId) =>
-        {
-            var result = await assignmentService.GetAllByTeamCourse(courseId, teamId);
-            return result.MapToResponse(assignments => Results.Ok(assignments));
-        })
-        .Produces<IEnumerable<StudentAssignmentResponse>>()
-        .WithName("GetAllAssignmentsByTeamCourse")
-        .RequireAuthorization("Course")
-        .WithSummary("Get all assignments by team id and course id");
+        .Produces<IEnumerable<AssignmentResponse>>()
+        .WithName("GetAllStudentAssignmentsByCourse")
+        .RequireAuthorization("StudentInCourse")
+        .WithSummary("Get all student assignments by course id");
 
         group.MapGet("assignments/{assignmentId:guid}", async (IAssignmentService assignmentService, Guid assignmentId) =>
         {

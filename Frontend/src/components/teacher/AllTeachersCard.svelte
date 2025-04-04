@@ -5,15 +5,18 @@
 	import CustomButton from '../CustomButton.svelte';
 	import Trash_2 from 'lucide-svelte/icons/trash-2';
 	import { removeTeacherFromCourse } from 'src/api';
+	import { handleErrors } from 'src/utils';
+	import CustomAlertDialog from '../CustomAlertDialog.svelte';
 
 	export let teachers: Teacher[], courseId: string;
-	async function removeTeacher(teacher: Teacher) {
-		try {
-			await removeTeacherFromCourse(courseId, teacher.id);
-			deleteTeacherFromList(teacher);
-		} catch {
-			console.error('Could not delete student');
-		}
+
+	let showRemove = false;
+	let teacherToRemove: Teacher | undefined = undefined;
+	async function removeTeacher() {
+		await handleErrors(async () => {
+			await removeTeacherFromCourse(courseId, teacherToRemove!.id);
+			deleteTeacherFromList(teacherToRemove!);
+		});
 	}
 
 	function deleteTeacherFromList(teacher: Teacher) {
@@ -24,6 +27,13 @@
 		}
 	}
 </script>
+
+<CustomAlertDialog
+	bind:show={showRemove}
+	description={`This will remove ${teacherToRemove?.name} from the course.`}
+	onConfirm={removeTeacher}
+	action="Remove"
+/>
 
 <Card.Root class="w-full overflow-hidden p-0">
 	<Card.Content class="p-0">
@@ -44,7 +54,14 @@
 							<p>{teacher.email}</p>
 						</Table.Cell>
 						<Table.Cell>
-							<CustomButton color="red" outline={true} on:click={() => removeTeacher(teacher)}>
+							<CustomButton
+								color="red"
+								outline={true}
+								on:click={() => {
+									teacherToRemove = teacher;
+									showRemove = true;
+								}}
+							>
 								<Trash_2 size="16" />
 							</CustomButton>
 						</Table.Cell>

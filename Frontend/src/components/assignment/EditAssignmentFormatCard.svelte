@@ -6,7 +6,7 @@
 	import Undo_2 from 'lucide-svelte/icons/undo-2';
 	import { superForm } from 'sveltekit-superforms';
 	import AssignmentFieldsForm from './AssignmentFieldsForm.svelte';
-	import { cleanOptional, transformErrors } from 'src/utils';
+	import { cleanOptional, handleFormErrors } from 'src/utils';
 	import { goto } from '$app/navigation';
 	import { putAssignmentFields } from 'src/api';
 
@@ -36,32 +36,24 @@
 
 	const onSubmit = async (formEvent: any) => {
 		formEvent.cancel();
-		console.log(formData);
-		putAssignmentFields(assignmentId, {
-			fields: formData.fields.map((fieldFormData) => {
-				return {
-					...fieldFormData,
-					type: fieldFormData.type.value,
-					min: cleanOptional(fieldFormData.min),
-					max: cleanOptional(fieldFormData.max),
-					regex: cleanOptional(fieldFormData.regex),
-					subType: cleanOptional(fieldFormData.subType?.value)
-				};
-			})
-		})
-			.then((response: any) => {
-				fields = response.data;
-				goto(`/teacher/courses/${courseId}/assignments/${assignmentId}`);
-			})
-			.catch((exception) => {
-				if (exception?.response?.data?.errors) {
-					const validationErrors = transformErrors(exception.response.data.errors);
-					console.error(validationErrors);
-					errors.set(validationErrors);
-				} else {
-					console.error(exception);
-				}
+
+		await handleFormErrors(errors, async () => {
+			const promise = putAssignmentFields(assignmentId, {
+				fields: formData.fields.map((fieldFormData) => {
+					return {
+						...fieldFormData,
+						type: fieldFormData.type.value,
+						min: cleanOptional(fieldFormData.min),
+						max: cleanOptional(fieldFormData.max),
+						regex: cleanOptional(fieldFormData.regex),
+						subType: cleanOptional(fieldFormData.subType?.value)
+					};
+				})
 			});
+			const response = await promise;
+			fields = response.data;
+			goto(`/teacher/courses/${courseId}/assignments/${assignmentId}`);
+		});
 	};
 
 	const form = superForm(formData, {

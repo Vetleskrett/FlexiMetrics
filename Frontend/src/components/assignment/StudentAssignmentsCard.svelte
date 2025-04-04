@@ -1,11 +1,12 @@
 <script lang="ts">
-	import type { StudentAssignment } from 'src/types/';
+	import type { Assignment, AssignmentProgress } from 'src/types/';
 	import * as Card from '$lib/components/ui/card';
 	import * as Table from '$lib/components/ui/table';
 	import Check from 'lucide-svelte/icons/check';
 	import X from 'lucide-svelte/icons/x';
 
-	export let assignments: StudentAssignment[];
+	export let assignments: Assignment[];
+	export let assignmentsProgress: AssignmentProgress[];
 	export let courseId: string;
 </script>
 
@@ -33,6 +34,7 @@
 				</Table.Header>
 				<Table.Body>
 					{#each assignments as assignment}
+						{@const assignmentProgress = assignmentsProgress.find((x) => x.id == assignment.id)}
 						<a
 							href="/student/courses/{courseId}/assignments/{assignment.id}"
 							class="table-row h-20 hover:bg-blue-50"
@@ -44,7 +46,7 @@
 								<p>{new Date(assignment?.dueDate).toLocaleDateString()}</p>
 							</Table.Cell>
 							<Table.Cell class="flex h-full items-center justify-center px-6">
-								{#if assignment.isDelivered}
+								{#if assignmentProgress && assignmentProgress.isDelivered}
 									<Check color="green" />
 								{:else}
 									<X color="red" />

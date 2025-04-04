@@ -1,5 +1,4 @@
 ﻿using Api.Analyzers.Contracts;
-using Database.Models;
 using Microsoft.AspNetCore.Http.HttpResults;
 using System.Text.Json;
 using System.Text.Json.Serialization;
