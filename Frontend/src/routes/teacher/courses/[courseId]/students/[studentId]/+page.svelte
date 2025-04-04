@@ -11,6 +11,7 @@
 	import { goto } from '$app/navigation';
 	import StudentTeamCard from 'src/components/team/StudentTeamCard.svelte';
 	import { handleErrors } from 'src/utils';
+	import CustomAlertDialog from 'src/components/CustomAlertDialog.svelte';
 
 	const courseId = $page.params.courseId;
 	const studentId = $page.params.studentId;
@@ -24,6 +25,7 @@
 
 	const completed = data.assignmentsProgress.filter((item) => item.isDelivered).length;
 
+	let showRemove = false;
 	const onRemoveStudent = async () => {
 		await handleErrors(async () => {
 			await deleteStudentCourse(courseId, studentId);
@@ -31,6 +33,13 @@
 		});
 	};
 </script>
+
+<CustomAlertDialog
+	bind:show={showRemove}
+	description={`This will remove ${data.student.name} from the course.`}
+	onConfirm={onRemoveStudent}
+	action="Remove"
+/>
 
 <div class="m-auto mt-4 flex w-max flex-col items-center justify-center gap-10">
 	<Breadcrumb.Root class="self-start">
@@ -77,7 +86,7 @@
 				<EllipsisVertical size={32} />
 			</DropdownMenu.Trigger>
 			<DropdownMenu.Content>
-				<DropdownMenu.Item on:click={onRemoveStudent}>
+				<DropdownMenu.Item on:click={() => (showRemove = true)}>
 					<Trash2 class="h-4" />
 					<p>Remove Student</p>
 				</DropdownMenu.Item>

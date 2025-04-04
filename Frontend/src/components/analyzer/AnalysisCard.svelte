@@ -18,6 +18,7 @@
 	import { getCell } from './cells/cells';
 	import { EllipsisVertical, Trash2 } from 'lucide-svelte';
 	import { ScrollArea } from 'src/lib/components/ui/scroll-area';
+	import CustomAlertDialog from '../CustomAlertDialog.svelte';
 
 	export let analyses: SlimAnalysis[];
 	export let analysis: Analysis;
@@ -142,7 +143,16 @@
 			order: 'asc'
 		}
 	]);
+
+	let showDelete = false;
 </script>
+
+<CustomAlertDialog
+	bind:show={showDelete}
+	description="This action cannot be undone. This will permanently delete the analysis."
+	onConfirm={onDeleteAnalysis}
+	action="Delete"
+/>
 
 <Card.Root class="w-[1080px]">
 	<Card.Header class="px-4 py-2">
@@ -232,7 +242,7 @@
 							<EllipsisVertical size={24} />
 						</DropdownMenu.Trigger>
 						<DropdownMenu.Content>
-							<DropdownMenu.Item on:click={onDeleteAnalysis}>
+							<DropdownMenu.Item on:click={() => (showDelete = true)}>
 								<Trash2 class="h-4" />
 								<p>Delete analysis</p>
 							</DropdownMenu.Item>

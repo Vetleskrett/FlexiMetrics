@@ -14,6 +14,7 @@
 	import { goto } from '$app/navigation';
 	import { deleteCourse } from 'src/api';
 	import { handleErrors } from 'src/utils';
+	import CustomAlertDialog from 'src/components/CustomAlertDialog.svelte';
 
 	const courseId = $page.params.courseId;
 
@@ -25,13 +26,21 @@
 		teams: Team[];
 	};
 
-	async function deleteCoursePage() {
+	let showDelete = false;
+	const onDeleteCoursePage = async () => {
 		await handleErrors(async () => {
 			await deleteCourse(courseId);
 			goto('/teacher/courses');
 		});
-	}
+	};
 </script>
+
+<CustomAlertDialog
+	bind:show={showDelete}
+	description="This action cannot be undone. This will permanently delete the course."
+	onConfirm={onDeleteCoursePage}
+	action="Delete"
+/>
 
 <div class="m-auto mt-4 flex w-max flex-col items-center justify-center gap-10">
 	<Breadcrumb.Root class="self-start">
@@ -73,7 +82,8 @@
 					<Pencil class="h-4" />
 					<p>Edit course</p>
 				</DropdownMenu.Item>
-				<DropdownMenu.Item on:click={deleteCoursePage}>
+
+				<DropdownMenu.Item on:click={() => (showDelete = true)}>
 					<Trash2 class="h-4" />
 					<p>Delete course</p>
 				</DropdownMenu.Item>

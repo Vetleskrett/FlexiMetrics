@@ -12,6 +12,7 @@
 	import { postStudentEmailTeam, deleteTeam } from 'src/api';
 	import { goto } from '$app/navigation';
 	import { handleErrors } from 'src/utils';
+	import CustomAlertDialog from 'src/components/CustomAlertDialog.svelte';
 
 	const courseId = $page.params.courseId;
 	const teamId = $page.params.teamId;
@@ -35,6 +36,7 @@
 		}
 	}
 
+	let showDelete = false;
 	const onDeleteTeam = async () => {
 		await handleErrors(async () => {
 			await deleteTeam(teamId);
@@ -42,6 +44,13 @@
 		});
 	};
 </script>
+
+<CustomAlertDialog
+	bind:show={showDelete}
+	description="This action cannot be undone. This will permanently delete the team."
+	onConfirm={onDeleteTeam}
+	action="Delete"
+/>
 
 <div class="m-auto mt-4 flex w-max flex-col items-center justify-center gap-10">
 	<Breadcrumb.Root class="self-start">
@@ -78,7 +87,7 @@
 				<EllipsisVertical size={32} />
 			</DropdownMenu.Trigger>
 			<DropdownMenu.Content>
-				<DropdownMenu.Item on:click={onDeleteTeam}>
+				<DropdownMenu.Item on:click={() => (showDelete = true)}>
 					<Trash2 class="h-4" />
 					<p>Delete Team</p>
 				</DropdownMenu.Item>

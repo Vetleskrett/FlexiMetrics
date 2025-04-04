@@ -3,7 +3,7 @@
 	import { Toaster } from '$lib/components/ui/sonner';
 </script>
 
-<div class="fixed z-50 flex h-16 w-full flex-row bg-[#1D6F8B] text-white">
+<nav class="fixed z-50 flex h-16 w-full flex-row bg-[#1D6F8B] text-white">
 	<a
 		href="/teacher/courses"
 		class="flex h-full w-28 items-center justify-center text-center hover:bg-black hover:bg-opacity-10"
@@ -22,7 +22,7 @@
 	>
 		<h2 class="text-lg font-semibold">Sign Out</h2>
 	</a>
-</div>
+</nav>
 <div class="py-16">
 	<Toaster />
 	<slot />
