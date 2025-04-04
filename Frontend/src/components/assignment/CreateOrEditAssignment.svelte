@@ -20,7 +20,7 @@
 	import { CalendarDate } from '@internationalized/date';
 	import DatePicker from '../inputs/DatePicker.svelte';
 	import AssignmentFieldsForm from './AssignmentFieldsForm.svelte';
-	import { cleanOptional, transformErrors } from 'src/utils';
+	import { cleanOptional, handleFormErrors } from 'src/utils';
 	import { postAssignment, putAssignment } from 'src/api';
 
 	const today = new Date();
@@ -112,22 +112,13 @@
 
 	const onSubmit = async (formEvent: any) => {
 		formEvent.cancel();
-		var promise = edit ? onSubmitEdit() : onSubmitCreate();
 
-		promise
-			.then((response) => {
-				var assignment = response.data;
-				goto(`/teacher/courses/${course.id}/assignments/${assignment.id}`);
-			})
-			.catch((exception) => {
-				if (exception?.response?.data?.errors) {
-					const validationErrors = transformErrors(exception.response.data.errors);
-					console.error(validationErrors);
-					errors.set(validationErrors);
-				} else {
-					console.error(exception);
-				}
-			});
+		await handleFormErrors(errors, async () => {
+			const promise = edit ? onSubmitEdit() : onSubmitCreate();
+			const response = await promise;
+			var assignment = response.data;
+			goto(`/teacher/courses/${course.id}/assignments/${assignment.id}`);
+		});
 	};
 
 	const form = superForm(assignmentFormData, {

@@ -5,6 +5,7 @@
 	import SimpleAddCard from 'src/components/SimpleAddCard.svelte';
 	import AllTeachersCard from 'src/components/teacher/AllTeachersCard.svelte';
 	import { addTeacherToCourse } from 'src/api';
+	import { handleErrors } from 'src/utils';
 
 	const courseId = $page.params.courseId;
 
@@ -15,15 +16,14 @@
 
 	async function addTeacher(input: string) {
 		const teacherEmail = checkTeacher(input);
-		try {
-			if (teacherEmail) {
+
+		if (teacherEmail) {
+			await handleErrors(async () => {
 				var response = await addTeacherToCourse(courseId, {
 					email: input.trim()
 				});
 				data.teachers = response.data;
-			}
-		} catch (error) {
-			console.error('Something went wrong!');
+			});
 		}
 	}
 

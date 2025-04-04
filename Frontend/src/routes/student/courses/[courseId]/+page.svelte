@@ -18,8 +18,6 @@
 		teams: Team[] | null;
 		teachers: Teacher[];
 	};
-
-	console.log(data);
 </script>
 
 <div class="m-auto mt-4 flex w-max flex-col items-center justify-center gap-10">

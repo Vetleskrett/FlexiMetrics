@@ -6,6 +6,7 @@
 	import Trash2 from 'lucide-svelte/icons/trash-2';
 	import { deleteStudentTeam } from 'src/api';
 	import * as Table from '$lib/components/ui/table';
+	import { handleErrors } from 'src/utils';
 
 	export let team: Team;
 
@@ -20,12 +21,10 @@
 	}
 
 	async function removeTeamMember(student: Student) {
-		try {
+		await handleErrors(async () => {
 			await deleteStudentTeam(team.id, student.id);
 			deleteStudentFromList(student);
-		} catch {
-			console.error('Could not remove team member');
-		}
+		});
 	}
 </script>
 

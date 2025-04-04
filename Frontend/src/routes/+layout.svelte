@@ -1,5 +1,6 @@
 <script lang="ts">
 	import 'src/app.css';
+	import { Toaster } from '$lib/components/ui/sonner';
 </script>
 
 <div class="fixed z-50 flex h-16 w-full flex-row bg-[#1D6F8B] text-white">
@@ -23,5 +24,6 @@
 	</a>
 </div>
 <div class="py-16">
+	<Toaster />
 	<slot />
 </div>

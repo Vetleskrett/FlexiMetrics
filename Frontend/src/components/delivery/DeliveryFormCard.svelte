@@ -14,6 +14,7 @@
 	import Undo_2 from 'lucide-svelte/icons/undo-2';
 	import DeliveryFieldInput from '../inputs/DeliveryFieldInput.svelte';
 	import { postDelivery, postDeliveryFieldFile, putDelivery } from 'src/api';
+	import { handleErrors } from 'src/utils';
 
 	export let assignment: Assignment;
 	export let assignmentFields: AssignmentField[];
@@ -87,6 +88,19 @@
 		delivery = response.data;
 	};
 
+	const onSubmitFiles = async (fileFields: FileField[]) => {
+		for (let fileField of fileFields) {
+			const deliveryField = delivery!.fields.find(
+				(f) => f.assignmentFieldId == fileField.assignmentFieldId
+			);
+			if (deliveryField) {
+				var formData = new FormData();
+				formData.append('file', fileField.file);
+				await postDeliveryFieldFile(deliveryField.id, formData);
+			}
+		}
+	};
+
 	const onSubmit = async () => {
 		const fileFields: FileField[] = [];
 
@@ -100,23 +114,11 @@
 			}
 		}
 
-		if (delivery == null) {
-			await onSubmitCreate();
-		} else {
-			await onSubmitEdit();
-		}
-
-		for (let fileField of fileFields) {
-			const deliveryField = delivery!.fields.find(
-				(f) => f.assignmentFieldId == fileField.assignmentFieldId
-			);
-			if (deliveryField) {
-				var formData = new FormData();
-				formData.append('file', fileField.file);
-				await postDeliveryFieldFile(deliveryField.id, formData);
-			}
-		}
-		goto('./');
+		await handleErrors(async () => {
+			const promise = delivery == null ? onSubmitCreate() : onSubmitEdit();
+			await promise;
+			await onSubmitFiles(fileFields);
+		});
 	};
 </script>
 

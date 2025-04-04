@@ -10,6 +10,7 @@
 	import { deleteStudentCourse } from 'src/api';
 	import { goto } from '$app/navigation';
 	import StudentTeamCard from 'src/components/team/StudentTeamCard.svelte';
+	import { handleErrors } from 'src/utils';
 
 	const courseId = $page.params.courseId;
 	const studentId = $page.params.studentId;
@@ -24,12 +25,10 @@
 	const completed = data.assignmentsProgress.filter((item) => item.isDelivered).length;
 
 	const onRemoveStudent = async () => {
-		try {
+		await handleErrors(async () => {
 			await deleteStudentCourse(courseId, studentId);
 			goto('./');
-		} catch (error) {
-			console.error(error);
-		}
+		});
 	};
 </script>
 

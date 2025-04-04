@@ -23,6 +23,7 @@
 	import { Role } from 'src/types/';
 	import { goto } from '$app/navigation';
 	import { deleteAssigment, putAssignment } from 'src/api';
+	import { handleErrors } from 'src/utils';
 
 	const courseId = $page.params.courseId;
 	const assignmentId = $page.params.assignmentId;
@@ -38,24 +39,20 @@
 	};
 
 	async function publishAssignmentButton() {
-		try {
+		await handleErrors(async () => {
 			const response = await putAssignment(assignmentId, {
 				...data.assignment,
 				published: true
 			});
 			data.assignment = response.data;
-		} catch (exception) {
-			console.error('Something Went Wrong!');
-		}
+		});
 	}
 
 	async function deleteAssignmentButton() {
-		try {
+		await handleErrors(async () => {
 			await deleteAssigment(assignmentId);
 			goto(`/teacher/courses/${courseId}`);
-		} catch (exception) {
-			console.error('Something Went Wrong!');
-		}
+		});
 	}
 </script>
 

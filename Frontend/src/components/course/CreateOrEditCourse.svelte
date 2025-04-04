@@ -10,8 +10,8 @@
 	import { teacherId } from 'src/store';
 	import * as Form from 'src/lib/components/ui/form';
 	import { superForm } from 'sveltekit-superforms';
-	import { transformErrors } from 'src/utils';
 	import { postCourse, putCourse } from 'src/api';
+	import { handleFormErrors } from 'src/utils';
 
 	export let edit: boolean;
 	export let course: Course = {
@@ -43,23 +43,13 @@
 
 	const onSubmit = async (formEvent: any) => {
 		formEvent.cancel();
-		var promise = edit ? onSubmitEdit() : onSubmitCreate();
 
-		promise
-			.then((response) => {
-				var course = response.data;
-				console.log(response);
-				goto(`/teacher/courses/${course.id}`);
-			})
-			.catch((exception) => {
-				if (exception?.response?.data?.errors) {
-					const validationErrors = transformErrors(exception.response.data.errors);
-					console.error(validationErrors);
-					errors.set(validationErrors);
-				} else {
-					console.error(exception);
-				}
-			});
+		await handleFormErrors(errors, async () => {
+			const promise = edit ? onSubmitEdit() : onSubmitCreate();
+			const response = await promise;
+			var course = response.data;
+			goto(`/teacher/courses/${course.id}`);
+		});
 	};
 
 	const form = superForm(course, {

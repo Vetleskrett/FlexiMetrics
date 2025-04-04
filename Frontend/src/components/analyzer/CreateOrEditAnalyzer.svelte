@@ -10,7 +10,7 @@
 	import * as Form from 'src/lib/components/ui/form';
 	import { superForm } from 'sveltekit-superforms';
 	import FileUpload from '../inputs/FileUpload.svelte';
-	import { transformErrors } from 'src/utils';
+	import { handleFormErrors } from 'src/utils';
 	import { ArrowDownToLine } from 'lucide-svelte';
 	import { postAnalyzer, postAnalyzerScript, putAnalyzer } from 'src/api';
 
@@ -59,29 +59,20 @@
 
 	const onSubmit = async (formEvent: any) => {
 		formEvent.cancel();
-		var promise = edit ? onSubmitEdit() : onSubmitCreate();
 
-		promise
-			.then(async (response) => {
-				var analyzer = response.data;
+		await handleFormErrors(errors, async () => {
+			const promise = edit ? onSubmitEdit() : onSubmitCreate();
+			const response = await promise;
+			const analyzer = response.data;
 
-				var formData = new FormData();
-				formData.append('script', analyzerFormData.script!);
-				await postAnalyzerScript(analyzer.id, formData);
+			const formData = new FormData();
+			formData.append('script', analyzerFormData.script!);
+			await postAnalyzerScript(analyzer.id, formData);
 
-				goto(`/teacher/courses/${courseId}/assignments/${assignmentId}/analyzers/${analyzer.id}`, {
-					invalidateAll: true
-				});
-			})
-			.catch((exception) => {
-				if (exception?.response?.data?.errors) {
-					const validationErrors = transformErrors(exception.response.data.errors);
-					console.error(validationErrors);
-					errors.set(validationErrors);
-				} else {
-					console.error(exception);
-				}
+			goto(`/teacher/courses/${courseId}/assignments/${assignmentId}/analyzers/${analyzer.id}`, {
+				invalidateAll: true
 			});
+		});
 	};
 
 	const form = superForm(analyzerFormData, {

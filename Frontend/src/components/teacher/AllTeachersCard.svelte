@@ -5,15 +5,14 @@
 	import CustomButton from '../CustomButton.svelte';
 	import Trash_2 from 'lucide-svelte/icons/trash-2';
 	import { removeTeacherFromCourse } from 'src/api';
+	import { handleErrors } from 'src/utils';
 
 	export let teachers: Teacher[], courseId: string;
 	async function removeTeacher(teacher: Teacher) {
-		try {
+		await handleErrors(async () => {
 			await removeTeacherFromCourse(courseId, teacher.id);
 			deleteTeacherFromList(teacher);
-		} catch {
-			console.error('Could not delete student');
-		}
+		});
 	}
 
 	function deleteTeacherFromList(teacher: Teacher) {

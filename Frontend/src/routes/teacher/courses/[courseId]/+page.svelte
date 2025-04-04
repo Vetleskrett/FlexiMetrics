@@ -13,6 +13,7 @@
 	import { Role } from 'src/types/';
 	import { goto } from '$app/navigation';
 	import { deleteCourse } from 'src/api';
+	import { handleErrors } from 'src/utils';
 
 	const courseId = $page.params.courseId;
 
@@ -25,12 +26,10 @@
 	};
 
 	async function deleteCoursePage() {
-		try {
+		await handleErrors(async () => {
 			await deleteCourse(courseId);
 			goto('/teacher/courses');
-		} catch (error) {
-			console.error(error);
-		}
+		});
 	}
 </script>
 

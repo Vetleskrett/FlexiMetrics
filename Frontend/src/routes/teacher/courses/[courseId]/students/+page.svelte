@@ -5,6 +5,7 @@
 	import AllStudentsCard from 'src/components/student/AllStudentsCard.svelte';
 	import AddStudentsCard from 'src/components/student/AddStudentsCard.svelte';
 	import { postStudentsCourse } from 'src/api';
+	import { handleErrors } from 'src/utils';
 
 	const courseId = $page.params.courseId;
 
@@ -19,15 +20,13 @@
 			input = await file.text();
 		}
 		const studentEmails = handleInput(input);
-		try {
-			if (studentEmails) {
+		if (studentEmails) {
+			await handleErrors(async () => {
 				var response = await postStudentsCourse(courseId, {
 					emails: studentEmails
 				});
 				data.students = response.data;
-			}
-		} catch (error) {
-			console.error('Something went wrong!');
+			});
 		}
 	}
 

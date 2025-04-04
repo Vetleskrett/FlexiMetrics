@@ -11,6 +11,7 @@
 	import AssignmentsProgressCard from 'src/components/assignment/AssignmentsProgressCard.svelte';
 	import { postStudentEmailTeam, deleteTeam } from 'src/api';
 	import { goto } from '$app/navigation';
+	import { handleErrors } from 'src/utils';
 
 	const courseId = $page.params.courseId;
 	const teamId = $page.params.teamId;
@@ -25,24 +26,20 @@
 
 	async function addStudent(input: string) {
 		if (input && input.trim().length > 0) {
-			try {
+			await handleErrors(async () => {
 				const result = await postStudentEmailTeam(data.team.id, {
 					email: input
 				});
 				data.team = result.data;
-			} catch (error) {
-				console.error('Could not add student!');
-			}
+			});
 		}
 	}
 
 	const onDeleteTeam = async () => {
-		try {
+		await handleErrors(async () => {
 			await deleteTeam(teamId);
 			goto('./');
-		} catch (error) {
-			console.error(error);
-		}
+		});
 	};
 </script>
 

@@ -6,16 +6,15 @@
 	import { goto } from '$app/navigation';
 	import { postStudentTeam } from 'src/api';
 	import StudentAllTeamsCard from 'src/components/team/StudentAllTeamsCard.svelte';
+	import { handleErrors } from 'src/utils';
 
 	const courseId = $page.params.courseId;
 
 	async function joinTeam(teamId: string) {
-		try {
+		await handleErrors(async () => {
 			await postStudentTeam(teamId, studentId);
 			goto(`/student/courses/${courseId}`);
-		} catch {
-			console.error('Could not join team');
-		}
+		});
 	}
 
 	export let data: {

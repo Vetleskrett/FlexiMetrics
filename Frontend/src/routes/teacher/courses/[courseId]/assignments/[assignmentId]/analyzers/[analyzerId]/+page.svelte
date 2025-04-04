@@ -24,6 +24,7 @@
 	import * as Card from '$lib/components/ui/card';
 	import { onDestroy, afterUpdate } from 'svelte';
 	import { goto } from '$app/navigation';
+	import { handleErrors } from 'src/utils';
 
 	const courseId = $page.params.courseId;
 	const assignmentId = $page.params.assignmentId;
@@ -94,9 +95,13 @@
 
 	const update = async () => {
 		closeEventSource();
-		const response = await getAnalyzerAnalyses($page.params.analyzerId);
-		data.analyses = response.data;
-		analysis = data.analyses.latest;
+
+		await handleErrors(async () => {
+			const response = await getAnalyzerAnalyses($page.params.analyzerId);
+			data.analyses = response.data;
+			analysis = data.analyses.latest;
+		});
+
 		subscribeToEventSource();
 	};
 
@@ -113,38 +118,44 @@
 	});
 
 	const onCancel = async () => {
-		await cancelAnalyzer($page.params.analyzerId);
+		await handleErrors(async () => {
+			await cancelAnalyzer($page.params.analyzerId);
+		});
 	};
 
 	const onRun = async () => {
-		await runAnalyzer($page.params.analyzerId);
-		await update();
+		await handleErrors(async () => {
+			await runAnalyzer($page.params.analyzerId);
+			await update();
+		});
 	};
 
 	const onSetAnalysis = async (analysisId: string) => {
 		if (analysisId == runningAnalyzerInfo?.analysis.id) {
 			analysis = runningAnalyzerInfo.analysis;
 		} else {
-			const analysisResponse = await getAnalysis(analysisId);
-			analysis = analysisResponse.data;
+			await handleErrors(async () => {
+				const analysisResponse = await getAnalysis(analysisId);
+				analysis = analysisResponse.data;
+			});
 		}
 	};
 
 	const onDeleteAnalysis = async () => {
-		await deleteAnalysis(analysis!.id);
-		await update();
+		await handleErrors(async () => {
+			await deleteAnalysis(analysis!.id);
+			await update();
+		});
 	};
 
-	async function onDeleteAnalyzer() {
-		try {
+	const onDeleteAnalyzer = async () => {
+		await handleErrors(async () => {
 			await deleteAnalyzer($page.params.analyzerId);
 			goto(`/teacher/courses/${courseId}/assignments/${assignmentId}`, {
 				invalidateAll: true
 			});
-		} catch (exception) {
-			console.error(exception);
-		}
-	}
+		});
+	};
 </script>
 
 <div class="m-auto mt-4 flex w-max flex-col items-center justify-center gap-10">
