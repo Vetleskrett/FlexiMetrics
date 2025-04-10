@@ -12,7 +12,6 @@ public class AnalysisResponse
     public required AnalysisStatus Status { get; init; }
     public required Guid AnalyzerId { get; init; }
     public required List<AnalysisEntryResponse> AnalysisEntries { get; init; }
-    public required int TotalNumEntries { get; init; }
 }
 
 public class AnalysisEntryResponse
@@ -22,7 +21,5 @@ public class AnalysisEntryResponse
     public required TeamResponse? Team { get; init; }
     public required StudentResponse? Student { get; init; }
     public required List<AnalysisFieldResponse> Fields { get; init; }
-    public required string LogInformation { get; init; }
-    public required string LogError { get; init; }
-    public required DateTime CompletedAt { get; init; }
+    public required DateTime? CompletedAt { get; init; }
 }

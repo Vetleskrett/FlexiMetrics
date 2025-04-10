@@ -10,13 +10,13 @@ public class AssignmentEntryDTO
     public required TeamDTO? team { get; init; }
     public required DeliveryDTO? delivery { get; init; }
 
-    public static AssignmentEntryDTO MapFrom(AssignmentEntry entry)
+    public static AssignmentEntryDTO Create(User? student, Team? team, Delivery? delivery)
     {
         return new AssignmentEntryDTO
         {
-            student = entry.Student is not null ? StudentDTO.MapFrom(entry.Student) : null,
-            team = entry.Team is not null ? TeamDTO.MapFrom(entry.Team) : null,
-            delivery = entry.Delivery is not null ? DeliveryDTO.MapFrom(entry.Delivery) : null,
+            student = student is not null ? StudentDTO.MapFrom(student) : null,
+            team = team is not null ? TeamDTO.MapFrom(team) : null,
+            delivery = delivery is not null ? DeliveryDTO.MapFrom(delivery) : null
         };
     }
 }

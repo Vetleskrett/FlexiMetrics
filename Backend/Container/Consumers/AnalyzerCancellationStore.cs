@@ -1,6 +1,6 @@
 ﻿using System.Collections.Concurrent;
 
-namespace Container;
+namespace Container.Consumers;
 
 public interface IAnalyzerCancellationStore
 {

@@ -15,6 +15,7 @@ public static class AnalyzerMapping
             Name = request.Name,
             Requirements = request.Requirements,
             AptPackages = request.AptPackages,
+            State = AnalyzerState.Building,
             FileName = request.FileName
         };
     }
@@ -28,6 +29,7 @@ public static class AnalyzerMapping
             Name = analyzer.Name,
             Requirements = analyzer.Requirements,
             AptPackages = analyzer.AptPackages,
+            State = analyzer.State,
             FileName = analyzer.FileName
         };
     }

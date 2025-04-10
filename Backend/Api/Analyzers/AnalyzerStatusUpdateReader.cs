@@ -1,4 +1,4 @@
-﻿using Container.Models;
+﻿using Container.Contracts;
 using MassTransit;
 using System.Collections.Concurrent;
 using System.Runtime.CompilerServices;

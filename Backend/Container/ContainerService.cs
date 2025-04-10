@@ -9,7 +9,7 @@ namespace Container;
 
 public interface IContainerService
 {
-    Task CreateImage(Analyzer analyzer, string script, CancellationToken cancellationToken);
+    Task CreateImage(Analyzer analyzer, CancellationToken cancellationToken);
     Task DeleteImage(Guid analyzerId);
     Task<string> CreateContainer(Guid analyzerId, Guid entryId, CancellationToken cancellationToken);
     Task<(string LogInformation, string LogError)> GetLogs(string container, CancellationToken cancellationToken);
@@ -36,7 +36,7 @@ public class ContainerService : IContainerService
         _logger = logger;
     }
 
-    public async Task CreateImage(Analyzer analyzer, string script, CancellationToken cancellationToken)
+    public async Task CreateImage(Analyzer analyzer, CancellationToken cancellationToken)
     {
         var dockerfile = await File.ReadAllTextAsync(DOCKERFILE_PATH, cancellationToken);
         var fleximetrics = await File.ReadAllTextAsync(FLEXIMETRICS_PATH, cancellationToken);
@@ -45,7 +45,6 @@ public class ContainerService : IContainerService
         (
             new TextFile("Dockerfile", dockerfile),
             new TextFile("fleximetrics.py", fleximetrics),
-            new TextFile("script.py", script),
             new TextFile("requirements.txt", analyzer.Requirements),
             new TextFile("packages-list.txt", analyzer.AptPackages)
         );

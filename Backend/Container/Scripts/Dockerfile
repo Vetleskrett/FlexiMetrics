@@ -1,10 +1,8 @@
-FROM python:3.13-slim
+FROM python:3.13
 
 WORKDIR /app
 
 COPY fleximetrics.py ./
-
-COPY script.py ./
 
 COPY requirements.txt ./
 

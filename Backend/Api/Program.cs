@@ -11,6 +11,7 @@ using Api.Students;
 using Api.Teachers;
 using Api.Teams;
 using Container;
+using Container.Consumers;
 using Database;
 using FileStorage;
 using FluentValidation;
@@ -36,6 +37,7 @@ builder.AddNpgsqlDbContext<AppDbContext>("postgresdb");
 
 builder.Services.AddMassTransit(options =>
 {
+    options.AddConsumer<BuildAnalyzerConsumer>();
     options.AddConsumer<RunAnalyzerConsumer>();
     options.AddConsumer<CancelAnalyzerConsumer>();
     options.AddConsumer<DeleteAnalyzerConsumer>();

@@ -7,10 +7,13 @@ export type Analyzer = {
     requirements: string;
     aptPackages: string;
     fileName: string;
+    state: AnalyzerState;
     assignmentId: string;
 }
 
-export type AnalysisStatus = 'Started' | 'Running' | 'Completed' | 'Canceled' | 'Failed';
+export type AnalyzerState = 'Building' | 'Standby' | 'Running';
+
+export type AnalysisStatus = 'Running' | 'Completed' | 'Canceled' | 'Failed';
 
 export type AnalyzerAnalyses = {
     analyses: SlimAnalysis[];
@@ -43,7 +46,12 @@ export type AnalysisEntry = {
     fields: AnalysisField[];
     logInformation: string;
     logError: string;
-    completedAt: Date;
+    completedAt?: Date;
+}
+
+export type AnalyzerStatusUpdate = {
+    analyzer: Analyzer;
+    analysis?: Analysis;
 }
 
 export type StudentAnalysis = {

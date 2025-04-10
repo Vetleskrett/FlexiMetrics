@@ -99,24 +99,7 @@
 				},
 				cell: getCell(header.type, header.subType)
 			})
-		),
-		table.column({
-			id: 'Logs',
-			accessor: (analysisEntry) => {
-				return {
-					value:
-						analysisEntry.logInformation +
-						(analysisEntry.logError ? '\n' + analysisEntry.logError : '')
-				};
-			},
-			header: 'Logs',
-			plugins: {
-				sort: {
-					compareFn: (a: any, b: any) => a.value - b.value
-				}
-			},
-			cell: getCell('Json')
-		})
+		)
 	]);
 
 	const { headerRows, pageRows, tableAttrs, tableBodyAttrs, pluginStates, flatColumns } =
@@ -124,8 +107,6 @@
 
 	const { hiddenColumnIds } = pluginStates.hide;
 	let showColumnForId = Object.fromEntries(flatColumns.map((col) => [col.id, true]));
-
-	showColumnForId['Logs'] = false;
 
 	$: $hiddenColumnIds = Object.entries(showColumnForId)
 		.filter(([, show]) => !show)
@@ -203,15 +184,6 @@
 									{header.name}
 								</DropdownMenu.CheckboxItem>
 							{/each}
-							<DropdownMenu.CheckboxItem
-								bind:checked={showColumnForId['Logs']}
-								on:click={(e) => {
-									e.preventDefault();
-									showColumnForId['Logs'] = !showColumnForId['Logs'];
-								}}
-							>
-								Logs
-							</DropdownMenu.CheckboxItem>
 						</DropdownMenu.Content>
 					</DropdownMenu.Root>
 					<DropdownMenu.Root>

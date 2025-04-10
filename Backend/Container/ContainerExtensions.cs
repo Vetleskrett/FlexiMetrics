@@ -1,4 +1,5 @@
-﻿using Docker.DotNet;
+﻿using Container.Consumers;
+using Docker.DotNet;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Container;

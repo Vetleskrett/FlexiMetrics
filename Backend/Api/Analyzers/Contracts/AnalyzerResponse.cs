@@ -1,4 +1,6 @@
-﻿namespace Api.Analyzers.Contracts;
+﻿using Database.Models;
+
+namespace Api.Analyzers.Contracts;
 
 public class AnalyzerResponse
 {
@@ -7,5 +9,6 @@ public class AnalyzerResponse
     public required string Requirements { get; init; }
     public required string AptPackages { get; init; }
     public required string FileName { get; init; }
+    public required AnalyzerState State { get; init; }
     public required Guid AssignmentId { get; init; }
 }

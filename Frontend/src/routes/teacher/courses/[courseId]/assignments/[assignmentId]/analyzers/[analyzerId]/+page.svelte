@@ -9,8 +9,14 @@
 	import Play from 'lucide-svelte/icons/play';
 	import X from 'lucide-svelte/icons/x';
 	import CustomButton from 'src/components/CustomButton.svelte';
-	import AnalyzerRunningCard from 'src/components/analyzer/AnalyzerRunningCard.svelte';
-	import type { Analysis, Analyzer, AnalyzerAnalyses, Assignment, Course } from 'src/types/';
+	import type {
+		Analysis,
+		Analyzer,
+		AnalyzerAnalyses,
+		AnalyzerStatusUpdate,
+		Assignment,
+		Course
+	} from 'src/types/';
 	import { ArrowDownToLine } from 'lucide-svelte';
 	import {
 		deleteAnalyzer,
@@ -51,7 +57,7 @@
 		if (!analysis) {
 			return;
 		}
-		if (analysis.status != 'Started' && analysis.status != 'Running') {
+		if (analysis.status != 'Running') {
 			return;
 		}
 		if (runningAnalyzerInfo) {
@@ -67,14 +73,16 @@
 		};
 
 		runningAnalyzerInfo.eventSource.onmessage = async (event) => {
-			const upatedAnalysis = JSON.parse(event.data) as Analysis | null;
+			const statusUpdate = JSON.parse(event.data) as AnalyzerStatusUpdate;
 
-			if (upatedAnalysis == null) {
+			data.analyzer = statusUpdate.analyzer;
+
+			if (statusUpdate.analysis == null) {
 				update();
 				return;
 			}
 
-			runningAnalyzerInfo!.analysis = upatedAnalysis;
+			runningAnalyzerInfo!.analysis = statusUpdate.analysis;
 
 			if (runningAnalyzerInfo!.analysis.id == analysis?.id) {
 				analysis = runningAnalyzerInfo!.analysis;
@@ -201,21 +209,20 @@
 			<h1 class="ml-4 text-4xl font-semibold">{data.analyzer.name}</h1>
 		</div>
 		<div class="flex items-center gap-2">
-			{#if runningAnalyzerInfo}
-				{#if runningAnalyzerInfo.analysis.status == 'Canceled'}
-					<p>Cancelling...</p>
-				{:else}
-					<CustomButton color="red" on:click={onCancel}>
-						<X size="20" />
-						<p>Cancel</p>
-					</CustomButton>
-				{/if}
+			{#if data.analyzer.state == 'Building'}
+				<p>building...</p>
+			{:else if data.analyzer.state == 'Running'}
+				<CustomButton color="red" on:click={onCancel}>
+					<X size="20" />
+					<p>Cancel</p>
+				</CustomButton>
 			{:else}
 				<CustomButton color="blue" on:click={onRun}>
 					<Play size="20" />
 					<p>Run</p>
 				</CustomButton>
 			{/if}
+
 			<DropdownMenu.Root>
 				<DropdownMenu.Trigger>
 					<EllipsisVertical size={32} />
@@ -241,12 +248,8 @@
 		</div>
 	</div>
 
-	{#key analysis}
-		{#if analysis && runningAnalyzerInfo?.analysis.id == analysis.id}
-			<AnalyzerRunningCard {analysis} />
-		{/if}
-
-		{#if analysis}
+	{#if analysis}
+		{#key analysis}
 			<AnalysisCard
 				{analysis}
 				analyses={data.analyses.analyses}
@@ -254,12 +257,12 @@
 				{onSetAnalysis}
 				{onDeleteAnalysis}
 			/>
-		{:else}
-			<Card.Root class="w-[1080px]">
-				<Card.Content class="text-center">
-					<p>No analyses</p>
-				</Card.Content>
-			</Card.Root>
-		{/if}
-	{/key}
+		{/key}
+	{:else}
+		<Card.Root class="w-[1080px]">
+			<Card.Content class="text-center">
+				<p>No analyses</p>
+			</Card.Content>
+		</Card.Root>
+	{/if}
 </div>

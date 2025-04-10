@@ -1,7 +1,7 @@
-﻿using Container.Models;
+﻿using Container.Contracts;
 using MassTransit;
 
-namespace Container;
+namespace Container.Consumers;
 
 public class DeleteAnalyzerConsumer : IConsumer<DeleteAnalyzerRequest>
 {
