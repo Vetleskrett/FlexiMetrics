@@ -53,7 +53,7 @@ public partial class AnalyzerExecutor : IAnalyzerExecutor
 
             var script = await _fileStorage.GetAnalyzerScript(request.CourseId, request.AssignmentId, request.AnalyzerId);
 
-            await _containerService.CreateImage(analyzer!.Id, script, analyzer.Requirements, cancellationToken);
+            await _containerService.CreateImage(analyzer!, script, cancellationToken);
 
             await Parallel.ForEachAsync(entries, cancellationToken, async (entry, cancellationToken) =>
             {
@@ -101,11 +101,14 @@ public partial class AnalyzerExecutor : IAnalyzerExecutor
             var entryJson = JsonSerializer.Serialize(entryDTO, _jsonOptions);
             await _containerService.CopyFileToContainer(container, entryJson, "input.json", cancellationToken);
 
-            foreach (var fileField in entry.Delivery!.Fields!.Where(f => f.AssignmentField!.Type == AssignmentDataType.File))
+            if (entry.Delivery?.Fields is not null)
             {
-                var fileMetadata = fileField.GetValue<FileMetadata>();
-                var fileStream = _fileStorage.GetDeliveryField(request.CourseId, request.AssignmentId, fileField.DeliveryId, fileField.Id);
-                await _containerService.CopyFileToContainer(container, fileStream, fileMetadata.FileName, cancellationToken);
+                foreach (var fileField in entry.Delivery.Fields.Where(f => f.AssignmentField!.Type == AssignmentDataType.File))
+                {
+                    var fileMetadata = fileField.GetValue<FileMetadata>();
+                    var fileStream = _fileStorage.GetDeliveryField(request.CourseId, request.AssignmentId, fileField.DeliveryId, fileField.Id);
+                    await _containerService.CopyFileToContainer(container, fileStream, fileMetadata.FileName, cancellationToken);
+                }
             }
 
             await _containerService.StartContainer(container, cancellationToken);

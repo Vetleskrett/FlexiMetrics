@@ -5,6 +5,7 @@ export type Analyzer = {
     id: string;
     name: string;
     requirements: string;
+    aptPackages: string;
     fileName: string;
     assignmentId: string;
 }
@@ -65,6 +66,7 @@ export type AnalysisField = {
 export type CreateAnalyzer = {
     name: string;
     requirements: string;
+    aptPackages: string;
     fileName: string;
     assignmentId: string;
 }
@@ -72,5 +74,6 @@ export type CreateAnalyzer = {
 export type EditAnalyzer = {
     name: string;
     requirements: string;
+    aptPackages: string;
     fileName: string;
 }

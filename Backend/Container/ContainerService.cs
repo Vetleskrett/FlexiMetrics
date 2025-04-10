@@ -1,4 +1,6 @@
-﻿using Docker.DotNet;
+﻿using Database.Migrations;
+using Database.Models;
+using Docker.DotNet;
 using Docker.DotNet.Models;
 using Microsoft.Extensions.Logging;
 using System.Text;
@@ -7,7 +9,7 @@ namespace Container;
 
 public interface IContainerService
 {
-    Task CreateImage(Guid analyzerId, string script, string requirements, CancellationToken cancellationToken);
+    Task CreateImage(Analyzer analyzer, string script, CancellationToken cancellationToken);
     Task DeleteImage(Guid analyzerId);
     Task<string> CreateContainer(Guid analyzerId, Guid entryId, CancellationToken cancellationToken);
     Task<(string LogInformation, string LogError)> GetLogs(string container, CancellationToken cancellationToken);
@@ -34,7 +36,7 @@ public class ContainerService : IContainerService
         _logger = logger;
     }
 
-    public async Task CreateImage(Guid analyzerId, string script, string requirements, CancellationToken cancellationToken)
+    public async Task CreateImage(Analyzer analyzer, string script, CancellationToken cancellationToken)
     {
         var dockerfile = await File.ReadAllTextAsync(DOCKERFILE_PATH, cancellationToken);
         var fleximetrics = await File.ReadAllTextAsync(FLEXIMETRICS_PATH, cancellationToken);
@@ -44,14 +46,15 @@ public class ContainerService : IContainerService
             new TextFile("Dockerfile", dockerfile),
             new TextFile("fleximetrics.py", fleximetrics),
             new TextFile("script.py", script),
-            new TextFile("requirements.txt", requirements)
+            new TextFile("requirements.txt", analyzer.Requirements),
+            new TextFile("packages-list.txt", analyzer.AptPackages)
         );
 
         await _dockerClient.Images.BuildImageFromDockerfileAsync
         (
             new ImageBuildParameters
             {
-                Tags = [$"analyzer-{analyzerId}"],
+                Tags = [$"analyzer-{analyzer.Id}"],
                 Remove = true,
                 ForceRemove = true,
             },
@@ -62,11 +65,11 @@ public class ContainerService : IContainerService
             {
                 if (message.Error is not null)
                 {
-                    _logger.LogError("CreateImage analyzer-{ID}:\n{MSG}", analyzerId, message.ErrorMessage.Trim());
+                    _logger.LogError("CreateImage analyzer-{ID}:\n{MSG}", analyzer.Id, message.ErrorMessage.Trim());
                 }
                 else if (!string.IsNullOrWhiteSpace(message.Stream))
                 {
-                    _logger.LogInformation("CreateImage analyzer-{ID}:\n{MSG}", analyzerId, message.Stream.Trim());
+                    _logger.LogInformation("CreateImage analyzer-{ID}:\n{MSG}", analyzer.Id, message.Stream.Trim());
                 }
             }),
             cancellationToken

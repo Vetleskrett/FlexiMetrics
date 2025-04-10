@@ -398,6 +398,14 @@ public static class Seed
                 numpy==2.2.3
                 """;
             })
+            .RuleFor(x => x.AptPackages, f =>
+            {
+                return
+                """
+                npm
+                chromium
+                """;
+            })
             .RuleFor(x => x.FileName, "analyzer.py");
 
         var analyzers = assignments.Select(assignment =>

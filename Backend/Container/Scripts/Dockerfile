@@ -8,6 +8,14 @@ COPY script.py ./
 
 COPY requirements.txt ./
 
+COPY packages-list.txt ./
+
+RUN apt update
+
+RUN while read -r package; do \
+    apt install -y "$package"; \
+  done < packages-list.txt
+
 RUN pip install --disable-pip-version-check --root-user-action=ignore --no-cache-dir dataclass-wizard
 
 RUN pip install --disable-pip-version-check --root-user-action=ignore --no-cache-dir -r requirements.txt

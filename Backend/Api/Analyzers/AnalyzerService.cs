@@ -122,6 +122,7 @@ public class AnalyzerService : IAnalyzerService
 
         analyzer.Name = request.Name;
         analyzer.Requirements = request.Requirements;
+        analyzer.AptPackages = request.AptPackages;
         analyzer.FileName = request.FileName;
 
         var validationResult = await _validator.ValidateAsync(analyzer);

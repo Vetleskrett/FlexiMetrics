@@ -14,6 +14,7 @@ public static class AnalyzerMapping
             AssignmentId = request.AssignmentId,
             Name = request.Name,
             Requirements = request.Requirements,
+            AptPackages = request.AptPackages,
             FileName = request.FileName
         };
     }
@@ -26,6 +27,7 @@ public static class AnalyzerMapping
             AssignmentId = analyzer.AssignmentId,
             Name = analyzer.Name,
             Requirements = analyzer.Requirements,
+            AptPackages = analyzer.AptPackages,
             FileName = analyzer.FileName
         };
     }
