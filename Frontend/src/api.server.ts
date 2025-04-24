@@ -7,7 +7,7 @@ import type {
   Student,
   Delivery,
   SlimProgress,
-  SlimAssignmentProgress,
+  AnalyzerLog,
   AssignmentProgress,
   Feedback,
   Teacher,
@@ -140,6 +140,10 @@ export async function getAnalyzers(assignmentId: string) : Promise<AxiosResponse
 
 export async function getAnalyzerScript(analyzerId: string, stream: boolean = true) : Promise<AxiosResponse>{
   return api.get(`analyzers/${analyzerId}/script`, { responseType: stream ? 'stream' : undefined })
+}
+
+export async function getAnalyzerLogs(analyzerId: string) : Promise<AxiosResponse<AnalyzerLog[]>>{
+  return api.get(`analyzers/${analyzerId}/logs`)
 }
 
 export async function getAnalyzerAnalyses(analyzerId: string) : Promise<AxiosResponse<AnalyzerAnalyses>>{

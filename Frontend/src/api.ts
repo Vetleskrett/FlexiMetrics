@@ -26,6 +26,7 @@ import type {
   Analysis,
   AnalyzerAnalyses,
   CourseStudent,
+  AnalyzerLog,
 } from "./types/";
 
 export async function postFeedback(feedback: CreateFeedback) : Promise<AxiosResponse<Feedback>> {
@@ -146,6 +147,10 @@ export async function cancelAnalyzer(analyzerId: string) : Promise<AxiosResponse
   return axios.post(`/api/analyzers/${analyzerId}/action`, {
     action: 'Cancel'
   });
+}
+
+export async function getAnalyzerLogs(analyzerId: string) : Promise<AxiosResponse<AnalyzerLog[]>>{
+  return axios.get(`/api/analyzers/${analyzerId}/logs`)
 }
 
 export async function getAnalyzerAnalyses(analyzerId: string) : Promise<AxiosResponse<AnalyzerAnalyses>> {

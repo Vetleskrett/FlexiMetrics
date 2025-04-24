@@ -23,7 +23,7 @@
 		<h2 class="text-lg font-semibold">Sign Out</h2>
 	</a>
 </nav>
-<div class="py-16">
+<div class="pt-16">
 	<Toaster />
 	<slot />
 </div>

@@ -32,6 +32,30 @@
 		subType?: AnalysisFieldType;
 	};
 
+	const getSorter = (type: AnalysisFieldType) => {
+		switch(type){
+			case 'Integer':
+			case 'Float':
+			case 'Boolean':
+				return (a: any, b: any) => a?.value - b?.value;
+
+			case 'String':
+			case 'URL':
+			case 'Json':
+			case 'DateTime':
+				return (a: any, b: any) => a?.value?.localeCompare(b?.value);
+
+			case 'Range':
+				return (a: any, b: any) => a?.value?.Value - b?.value?.Value;
+
+			case 'File':
+				return (a: any, b: any) => a?.value?.FileName?.localeCompare(b?.value?.FileName);
+
+			case 'List':
+				return (a: any, b: any) => a?.value?.length - b?.value?.length;
+		}
+	}
+
 	const headers: Header[] = [];
 
 	for (let field of analysis.analysisEntries.flatMap((d) => d.fields)) {
@@ -62,7 +86,7 @@
 					header: 'Student',
 					plugins: {
 						sort: {
-							compareFn: (a: any, b: any) => a.value - b.value
+							compareFn: getSorter('String')
 						}
 					},
 					cell: getCell('String')
@@ -77,7 +101,7 @@
 					header: 'Team',
 					plugins: {
 						sort: {
-							compareFn: (a: any, b: any) => a.value - b.value
+							compareFn: getSorter('Integer')
 						}
 					},
 					cell: getCell('String')
@@ -94,7 +118,7 @@
 				plugins: {
 					filter: getFilter(header.type),
 					sort: {
-						compareFn: (a: any, b: any) => a?.value - b?.value
+						compareFn: getSorter(header.type)
 					}
 				},
 				cell: getCell(header.type, header.subType)

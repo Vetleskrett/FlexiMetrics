@@ -25,6 +25,7 @@ public interface IAnalyzerService
     Task<Result<AnalyzerResponse>> Update(UpdateAnalyzerRequest request, Guid id);
     Task<Result> UploadScript(IFormFile script, Guid analyzerFieldId);
     Task<Result<FileResponse>> DownloadScript(Guid analyzerFieldId);
+    Task<Result<IEnumerable<AnalyzerLogResponse>>> GetLogsById(Guid analyzerId);
     Task<Result> StartAction(AnalyzerActionRequest request, Guid id);
     IAsyncEnumerable<AnalyzerStatusUpdateResponse?> GetStatusEventsById(Guid id, CancellationToken cancellationToken);
     Task<Result> DeleteById(Guid id);
@@ -234,6 +235,23 @@ public class AnalyzerService : IAnalyzerService
         {
             return new ValidationError($"Could not read file: {e.Message}").MapToResponse();
         }
+    }
+
+    public async Task<Result<IEnumerable<AnalyzerLogResponse>>> GetLogsById(Guid analyzerId)
+    {
+        var analyzer = await _dbContext.Analyzers.FindAsync(analyzerId);
+
+        if (analyzer is null)
+        {
+            return Result<IEnumerable<AnalyzerLogResponse>>.NotFound();
+        }
+
+        var logs = await _dbContext.AnalyzerLogs
+            .Where(al => al.AnalyzerId == analyzerId)
+            .OrderBy(al => al.Timestamp)
+            .ToListAsync();
+
+        return logs.MapToResponse();
     }
 
     public async Task<Result> StartAction(AnalyzerActionRequest request, Guid id)

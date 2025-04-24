@@ -17,7 +17,7 @@
 		Assignment,
 		Course
 	} from 'src/types/';
-	import { ArrowDownToLine } from 'lucide-svelte';
+	import { ArrowDownToLine, Cog, Text } from 'lucide-svelte';
 	import {
 		deleteAnalyzer,
 		cancelAnalyzer,
@@ -32,6 +32,7 @@
 	import { goto } from '$app/navigation';
 	import { handleErrors } from 'src/utils';
 	import CustomAlertDialog from 'src/components/CustomAlertDialog.svelte';
+	import { Badge } from 'src/lib/components/ui/badge';
 
 	const courseId = $page.params.courseId;
 	const assignmentId = $page.params.assignmentId;
@@ -42,6 +43,12 @@
 		analyzer: Analyzer;
 		analyses: AnalyzerAnalyses;
 	};
+
+	// TODO:
+	// While Building: Poll every 2s for analyzer until finished building
+	// While Running: Poll every 2s for analysis until not running
+	// Use intervalls like the logs page
+	// Clear intervalls in onDestroy	
 
 	$: analysis = data.analyses.latest;
 
@@ -57,7 +64,7 @@
 		if (!analysis) {
 			return;
 		}
-		if (analysis.status != 'Running') {
+		if (data.analyzer.state == 'Standby') {
 			return;
 		}
 		if (runningAnalyzerInfo) {
@@ -175,7 +182,7 @@
 	action="Delete"
 />
 
-<div class="m-auto mt-4 flex w-max flex-col items-center justify-center gap-10">
+<div class="m-auto mt-4 mb-16 flex w-max flex-col items-center justify-center gap-10">
 	<Breadcrumb.Root class="self-start">
 		<Breadcrumb.List>
 			<Breadcrumb.Item>
@@ -208,20 +215,37 @@
 			/>
 			<h1 class="ml-4 text-4xl font-semibold">{data.analyzer.name}</h1>
 		</div>
+
 		<div class="flex items-center gap-2">
 			{#if data.analyzer.state == 'Building'}
-				<p>building...</p>
+				<Badge variant="outline">
+					<Cog class="animate-[spin_3000ms_linear_infinite] size-5"/>
+					<span class="px-1">Building</span>
+				</Badge>
+				<CustomButton color="green" disabled={true}>
+					<Play size="20" />
+					<p>Run</p>
+				</CustomButton>
 			{:else if data.analyzer.state == 'Running'}
+				<Badge variant="outline">
+					<Cog class="animate-[spin_3000ms_linear_infinite] size-5"/>
+					<span class="px-1">Running</span>
+				</Badge>
 				<CustomButton color="red" on:click={onCancel}>
 					<X size="20" />
 					<p>Cancel</p>
 				</CustomButton>
 			{:else}
-				<CustomButton color="blue" on:click={onRun}>
+				<CustomButton color="green" on:click={onRun}>
 					<Play size="20" />
 					<p>Run</p>
 				</CustomButton>
 			{/if}
+
+			<CustomButton color="blue" href="/teacher/courses/{courseId}/assignments/{assignmentId}/analyzers/{$page.params.analyzerId}/logs">
+				<Text/>
+				<p>View Logs</p>
+			</CustomButton>
 
 			<DropdownMenu.Root>
 				<DropdownMenu.Trigger>

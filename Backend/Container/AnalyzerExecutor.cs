@@ -2,9 +2,13 @@
 using Container.Models;
 using Database;
 using Database.Models;
+using Docker.DotNet.Models;
 using FileStorage;
 using MassTransit;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
+using System.ComponentModel;
+using System.Diagnostics;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
@@ -15,13 +19,14 @@ public interface IAnalyzerExecutor
     Task RunAnalyzer(RunAnalyzerRequest request, CancellationToken cancellationToken);
 }
 
-public partial class AnalyzerExecutor : IAnalyzerExecutor
+public class AnalyzerExecutor : IAnalyzerExecutor
 {
     private readonly AppDbContext _dbContext;
     private readonly IContainerService _containerService;
     private readonly IFileStorage _fileStorage;
     private readonly SemaphoreSlim _dbLock = new(1);
     private readonly IBus _bus;
+    private readonly ILogger<IAnalyzerExecutor> _logger;
 
     private readonly JsonSerializerOptions _jsonOptions = new()
     {
@@ -30,12 +35,13 @@ public partial class AnalyzerExecutor : IAnalyzerExecutor
         WriteIndented = true
     };
 
-    public AnalyzerExecutor(AppDbContext dbContext, IContainerService containerService, IFileStorage fileStorage, IBus bus)
+    public AnalyzerExecutor(AppDbContext dbContext, IContainerService containerService, IFileStorage fileStorage, IBus bus, ILogger<IAnalyzerExecutor> logger)
     {
         _dbContext = dbContext;
         _containerService = containerService;
         _fileStorage = fileStorage;
         _bus = bus;
+        _logger = logger;
     }
 
     public async Task RunAnalyzer(RunAnalyzerRequest request, CancellationToken cancellationToken)
@@ -122,6 +128,8 @@ public partial class AnalyzerExecutor : IAnalyzerExecutor
 
             await _containerService.StartContainer(container, cancellationToken);
 
+            await SaveLogs(container, request, analysisEntry, cancellationToken);
+
             await _containerService.WaitForContainerCompletion(container, cancellationToken);
 
             await OnAnalysisEntryFinished(container, analysisEntry, request, cancellationToken);
@@ -134,6 +142,51 @@ public partial class AnalyzerExecutor : IAnalyzerExecutor
             {
                 await _containerService.RemoveContainer(container);
             }
+        }
+    }
+
+    private async Task SaveLogs(string container, RunAnalyzerRequest request, AnalysisEntry analysisEntry, CancellationToken cancellationToken)
+    {
+        var (stdout, stderr) = await _containerService.GetLogStream(container, cancellationToken);
+
+        var category = analysisEntry.Student?.Name ?? $"Team {analysisEntry.Team!.TeamNr}";
+
+        var logOut = string.IsNullOrWhiteSpace(stdout) ? null : new AnalyzerLog
+        {
+            Id = Guid.NewGuid(),
+            Timestamp = DateTime.UtcNow,
+            Type = AnalyzerLogType.Information,
+            Category = category,
+            Text = stdout,
+            AnalyzerId = request.AnalyzerId
+        };
+
+        var logErr = string.IsNullOrWhiteSpace(stderr) ? null : new AnalyzerLog
+        {
+            Id = Guid.NewGuid(),
+            Timestamp = DateTime.UtcNow,
+            Type = AnalyzerLogType.Error,
+            Category = category,
+            Text = stderr,
+            AnalyzerId = request.AnalyzerId
+        };
+
+        await _dbLock.WaitAsync(cancellationToken);
+        try
+        {
+            if (logErr is not null)
+            {
+                _dbContext.AnalyzerLogs.Add(logErr);
+            }
+            if (logOut is not null)
+            {
+                _dbContext.AnalyzerLogs.Add(logOut);
+            }
+            await _dbContext.SaveChangesAsync(cancellationToken);
+        }
+        finally
+        {
+            _dbLock.Release();
         }
     }
 
@@ -174,6 +227,7 @@ public partial class AnalyzerExecutor : IAnalyzerExecutor
         await _dbLock.WaitAsync(cancellationToken);
         try
         {
+            analysisEntry.CompletedAt = DateTime.UtcNow;
             _dbContext.AnalysisFields.AddRange(analysisFields);
             await _dbContext.SaveChangesAsync(cancellationToken);
         }

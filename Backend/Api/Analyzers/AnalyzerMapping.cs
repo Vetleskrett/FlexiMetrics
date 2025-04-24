@@ -38,4 +38,21 @@ public static class AnalyzerMapping
     {
         return analyzers.Select(analyzer => analyzer.MapToResponse()).ToList();
     }
+
+    public static AnalyzerLogResponse MapToResponse(this AnalyzerLog analyzerlog)
+    {
+        return new AnalyzerLogResponse
+        {
+            Id = analyzerlog.Id,
+            Timestamp = analyzerlog.Timestamp,
+            Type = analyzerlog.Type,
+            Category = analyzerlog.Category,
+            Text = analyzerlog.Text
+        };
+    }
+
+    public static List<AnalyzerLogResponse> MapToResponse(this IEnumerable<AnalyzerLog> analyzers)
+    {
+        return analyzers.Select(analyzer => analyzer.MapToResponse()).ToList();
+    }
 }

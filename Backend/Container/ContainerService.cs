@@ -1,18 +1,21 @@
-﻿using Database.Migrations;
-using Database.Models;
+﻿using Database.Models;
 using Docker.DotNet;
 using Docker.DotNet.Models;
 using Microsoft.Extensions.Logging;
+using Npgsql.EntityFrameworkCore.PostgreSQL.Storage.Internal.Mapping;
+using System.Diagnostics;
 using System.Text;
+using System.Text.Unicode;
+using System.Threading.Channels;
 
 namespace Container;
 
 public interface IContainerService
 {
-    Task CreateImage(Analyzer analyzer, CancellationToken cancellationToken);
+    Task CreateImage(Analyzer analyzer, ChannelWriter<AnalyzerLog> logsWritter, CancellationToken cancellationToken);
     Task DeleteImage(Guid analyzerId);
     Task<string> CreateContainer(Guid analyzerId, Guid entryId, CancellationToken cancellationToken);
-    Task<(string LogInformation, string LogError)> GetLogs(string container, CancellationToken cancellationToken);
+    Task<(string stdout, string stderr)> GetLogStream(string container, CancellationToken cancellationToken);
     Task RemoveContainer(string container);
     Task StartContainer(string container, CancellationToken cancellationToken);
     Task WaitForContainerCompletion(string container, CancellationToken cancellationToken);
@@ -36,43 +39,73 @@ public class ContainerService : IContainerService
         _logger = logger;
     }
 
-    public async Task CreateImage(Analyzer analyzer, CancellationToken cancellationToken)
+    public async Task CreateImage(Analyzer analyzer, ChannelWriter<AnalyzerLog> logsWritter, CancellationToken cancellationToken)
     {
-        var dockerfile = await File.ReadAllTextAsync(DOCKERFILE_PATH, cancellationToken);
-        var fleximetrics = await File.ReadAllTextAsync(FLEXIMETRICS_PATH, cancellationToken);
+        try
+        {
+            var dockerfile = await File.ReadAllTextAsync(DOCKERFILE_PATH, cancellationToken);
+            var fleximetrics = await File.ReadAllTextAsync(FLEXIMETRICS_PATH, cancellationToken);
 
-        var tarStream = TarArchive.CreateAll
-        (
-            new TextFile("Dockerfile", dockerfile),
-            new TextFile("fleximetrics.py", fleximetrics),
-            new TextFile("requirements.txt", analyzer.Requirements),
-            new TextFile("packages-list.txt", analyzer.AptPackages)
-        );
+            var tarStream = TarArchive.CreateAll
+            (
+                new TextFile("Dockerfile", dockerfile),
+                new TextFile("fleximetrics.py", fleximetrics),
+                new TextFile("requirements.txt", analyzer.Requirements),
+                new TextFile("packages-list.txt", analyzer.AptPackages)
+            );
 
-        await _dockerClient.Images.BuildImageFromDockerfileAsync
-        (
-            new ImageBuildParameters
-            {
-                Tags = [$"analyzer-{analyzer.Id}"],
-                Remove = true,
-                ForceRemove = true,
-            },
-            tarStream,
-            null,
-            null,
-            new Progress<JSONMessage>(message =>
+            var progress = new Progress<JSONMessage>(message =>
             {
                 if (message.Error is not null)
                 {
-                    _logger.LogError("CreateImage analyzer-{ID}:\n{MSG}", analyzer.Id, message.ErrorMessage.Trim());
+                    var log = new AnalyzerLog
+                    {
+                        Id = Guid.NewGuid(),
+                        Timestamp = DateTime.UtcNow,
+                        Type = AnalyzerLogType.Error,
+                        Category = analyzer.Name,
+                        Text = message.ErrorMessage.Trim(),
+                        AnalyzerId = analyzer.Id
+                    };
+
+                    while (!logsWritter.TryWrite(log)) { }
                 }
-                else if (!string.IsNullOrWhiteSpace(message.Stream))
+                else if (message.Stream is not null)
                 {
-                    _logger.LogInformation("CreateImage analyzer-{ID}:\n{MSG}", analyzer.Id, message.Stream.Trim());
+                    var log = new AnalyzerLog
+                    {
+                        Id = Guid.NewGuid(),
+                        Timestamp = DateTime.UtcNow,
+                        Type = AnalyzerLogType.Information,
+                        Category = analyzer.Name,
+                        Text = message.Stream,
+                        AnalyzerId = analyzer.Id
+                    };
+
+                    while (!logsWritter.TryWrite(log)) { }
                 }
-            }),
-            cancellationToken
-        );
+            });
+
+            await _dockerClient.Images.BuildImageFromDockerfileAsync
+            (
+                new ImageBuildParameters
+                {
+                    Tags = [$"analyzer-{analyzer.Id}"],
+                    Remove = true,
+                    ForceRemove = true,
+                    NoCache = true
+                },
+                tarStream,
+                null,
+                null,
+                progress,
+                cancellationToken
+            );
+        }
+        finally
+        {
+            logsWritter.Complete();
+        }
     }
 
     public async Task DeleteImage(Guid analyzerId)
@@ -99,7 +132,7 @@ public class ContainerService : IContainerService
                 HostConfig = new HostConfig
                 {
                     AutoRemove = false,
-                }
+                },
             },
             cancellationToken
         );
@@ -107,16 +140,16 @@ public class ContainerService : IContainerService
         return container.ID;
     }
 
-    public async Task<(string LogInformation, string LogError)> GetLogs(string container, CancellationToken cancellationToken)
+    public async Task<(string stdout, string stderr)> GetLogStream(string container, CancellationToken cancellationToken)
     {
-        var logsStream = await _dockerClient.Containers.GetContainerLogsAsync(container, false, new ContainerLogsParameters
+        var logStream = await _dockerClient.Containers.GetContainerLogsAsync(container, false, new ContainerLogsParameters
         {
             ShowStdout = true,
             ShowStderr = true,
             Follow = true
         }, cancellationToken);
 
-        return await logsStream.ReadOutputToEndAsync(cancellationToken);
+        return await logStream.ReadOutputToEndAsync(cancellationToken);
     }
 
     public async Task StartContainer(string container, CancellationToken cancellationToken)

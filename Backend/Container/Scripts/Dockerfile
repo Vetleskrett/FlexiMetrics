@@ -10,9 +10,9 @@ COPY packages-list.txt ./
 
 RUN apt update
 
-RUN while read -r package; do \
-    apt install -y "$package"; \
-  done < packages-list.txt
+RUN apt upgrade -y
+
+RUN xargs apt install -y < packages-list.txt
 
 RUN pip install --disable-pip-version-check --root-user-action=ignore --no-cache-dir dataclass-wizard
 

@@ -4,7 +4,6 @@ import { sequence } from '@sveltejs/kit/hooks';
 import { hasToken } from './api.server';
  
 const authorizationHandle: Handle = async ({ event, resolve }) => {
-  console.log(import.meta.env.VITE_FEIDE_CLIENT_ID,)
   if (event.url.pathname.startsWith('/')) {
     const session = await event.locals.auth();
     if (!session || !hasToken()) {

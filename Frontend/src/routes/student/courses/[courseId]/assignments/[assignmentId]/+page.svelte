@@ -31,7 +31,7 @@
 	};
 </script>
 
-<div class="m-auto mt-4 flex w-[1080px] flex-col items-center justify-center gap-10">
+<div class="m-auto mt-4 mb-16 flex w-[1080px] flex-col items-center justify-center gap-10">
 	<Breadcrumb.Root class="self-start">
 		<Breadcrumb.List>
 			<Breadcrumb.Item>

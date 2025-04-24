@@ -71,6 +71,14 @@ export type AnalysisField = {
     value: any;
 }
 
+export type AnalyzerLog = {
+    id: string;
+    timestamp: string;
+    type: 'Information' | 'Error';
+    category: string;
+    text: string;
+}
+
 export type CreateAnalyzer = {
     name: string;
     requirements: string;

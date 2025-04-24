@@ -95,6 +95,16 @@ public static class AnalyzerEndpoints
         .RequireAuthorization("TeacherForAnalyzer")
         .WithSummary("Upload analyzer script");
 
+        group.MapGet("analyzers/{analyzerId:guid}/logs", async (IAnalyzerService analyzerService, Guid analyzerId) =>
+        {
+            var result = await analyzerService.GetLogsById(analyzerId);
+            return result.MapToResponse(logs => Results.Ok(logs));
+        })
+        .Produces<IEnumerable<AnalyzerLogResponse>>()
+        .WithName("GetAnalyzerLogs")
+        .RequireAuthorization("TeacherForAnalyzer")
+        .WithSummary("Get analyzer logs by analyzer id");
+
         group.MapGet("analyzers/{analyzerId:guid}/status", async (HttpContext context, IAnalyzerService analyzerService, Guid analyzerId) =>
         {
             var jsonOptions = new JsonSerializerOptions

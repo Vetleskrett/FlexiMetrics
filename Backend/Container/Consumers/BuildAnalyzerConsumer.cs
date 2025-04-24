@@ -1,6 +1,8 @@
 ﻿using Container.Contracts;
 using Database;
+using Database.Models;
 using MassTransit;
+using System.Threading.Channels;
 
 namespace Container.Consumers;
 
@@ -27,9 +29,23 @@ public class BuildAnalyzerConsumer : IConsumer<BuildAnalyzerRequest>
             return;
         }
 
-        await _containerService.CreateImage(analyzer, context.CancellationToken);
+        var channel = Channel.CreateUnbounded<AnalyzerLog>(new UnboundedChannelOptions
+        {
+            SingleReader = true,
+            SingleWriter = false
+        });
 
-        analyzer.State = Database.Models.AnalyzerState.Standby;
+        var createImageTask = _containerService.CreateImage(analyzer, channel.Writer, context.CancellationToken);
+
+        await foreach(var log in channel.Reader.ReadAllAsync(context.CancellationToken))
+        {
+            _dbContext.AnalyzerLogs.Add(log);
+            await _dbContext.SaveChangesAsync();
+        }
+
+        await createImageTask;
+
+        analyzer.State = AnalyzerState.Standby;
         await _dbContext.SaveChangesAsync();
 
         await _bus.Publish(new AnalyzerStatusUpdate(request.AnalyzerId));
