@@ -10,10 +10,8 @@
 	import X from 'lucide-svelte/icons/x';
 	import CustomButton from 'src/components/CustomButton.svelte';
 	import type {
-		Analysis,
 		Analyzer,
 		AnalyzerAnalyses,
-		AnalyzerStatusUpdate,
 		Assignment,
 		Course
 	} from 'src/types/';
@@ -23,16 +21,20 @@
 		cancelAnalyzer,
 		deleteAnalysis,
 		getAnalysis,
-		getAnalyzerStatusEventSource,
-		getAnalyzerAnalyses,
-		runAnalyzer
+		runAnalyzer,
+
+		getAnalyzer,
+
+		getAnalyzerAnalyses
+
+
 	} from 'src/api';
 	import * as Card from '$lib/components/ui/card';
-	import { onDestroy, afterUpdate } from 'svelte';
 	import { goto } from '$app/navigation';
 	import { handleErrors } from 'src/utils';
 	import CustomAlertDialog from 'src/components/CustomAlertDialog.svelte';
 	import { Badge } from 'src/lib/components/ui/badge';
+	import { onMount } from 'svelte';
 
 	const courseId = $page.params.courseId;
 	const assignmentId = $page.params.assignmentId;
@@ -50,117 +52,73 @@
 	// Use intervalls like the logs page
 	// Clear intervalls in onDestroy	
 
-	$: analysis = data.analyses.latest;
+	let analyses = data.analyses;
+	let analyzer = data.analyzer;
+	let analysis = analyses.latest;
 
-	type RunningAnalyzerInfo = {
-		eventSource: EventSource;
-		analyzerId: string;
-		analysis: Analysis;
-	};
+	let interval: ReturnType<typeof setInterval>;
 
-	let runningAnalyzerInfo: RunningAnalyzerInfo | undefined = undefined;
+	const updateAnalysis = async () => {
+		const analysisResponse = await getAnalysis(analysis!.id);
+		analysis = analysisResponse.data;
+	}
 
-	const subscribeToEventSource = () => {
-		if (!analysis) {
-			return;
-		}
-		if (data.analyzer.state == 'Standby') {
-			return;
-		}
-		if (runningAnalyzerInfo) {
-			return;
-		}
+	const updateAnalyzer = async () => {
+		const response = await getAnalyzer($page.params.analyzerId);
+		analyzer = response.data;
+	}
 
-		console.log('Subscribing to event source');
-
-		runningAnalyzerInfo = {
-			eventSource: getAnalyzerStatusEventSource($page.params.analyzerId),
-			analyzerId: $page.params.analyzerId,
-			analysis: analysis
-		};
-
-		runningAnalyzerInfo.eventSource.onmessage = async (event) => {
-			const statusUpdate = JSON.parse(event.data) as AnalyzerStatusUpdate;
-
-			data.analyzer = statusUpdate.analyzer;
-
-			if (statusUpdate.analysis == null) {
-				update();
-				return;
-			}
-
-			runningAnalyzerInfo!.analysis = statusUpdate.analysis;
-
-			if (runningAnalyzerInfo!.analysis.id == analysis?.id) {
-				analysis = runningAnalyzerInfo!.analysis;
-			}
-		};
-
-		runningAnalyzerInfo.eventSource.onerror = async () => {
-			closeEventSource();
-		};
-	};
-
-	const closeEventSource = () => {
-		if (runningAnalyzerInfo) {
-			console.log('Closing event source');
-			runningAnalyzerInfo.eventSource.close();
-			runningAnalyzerInfo = undefined;
-		}
-	};
+	const updateAnalyses = async () => {
+		const response = await getAnalyzerAnalyses($page.params.analyzerId);
+		analyses = response.data;
+		analysis = analyses.latest;
+	}
 
 	const update = async () => {
-		closeEventSource();
-
-		await handleErrors(async () => {
-			const response = await getAnalyzerAnalyses($page.params.analyzerId);
-			data.analyses = response.data;
-			analysis = data.analyses.latest;
-		});
-
-		subscribeToEventSource();
-	};
-
-	onDestroy(() => {
-		closeEventSource();
-	});
-
-	afterUpdate(() => {
-		if (runningAnalyzerInfo?.analyzerId != $page.params.analyzerId) {
-			closeEventSource();
+		if (analysis?.status == 'Running') {
+			await updateAnalysis();
 		}
 
-		subscribeToEventSource();
-	});
+		if (analyzer.state != 'Standby') {
+			await updateAnalyzer();
+		}
+	}
+
+	onMount(() => {
+		interval = setInterval(update, 2000);
+
+		return () => {
+			clearInterval(interval);
+		};
+  	});
 
 	const onCancel = async () => {
 		await handleErrors(async () => {
 			await cancelAnalyzer($page.params.analyzerId);
+			await updateAnalyzer();
+			await updateAnalyses();
 		});
 	};
 
 	const onRun = async () => {
 		await handleErrors(async () => {
 			await runAnalyzer($page.params.analyzerId);
-			await update();
+			await updateAnalyzer();
+			await updateAnalyses();
 		});
 	};
 
 	const onSetAnalysis = async (analysisId: string) => {
-		if (analysisId == runningAnalyzerInfo?.analysis.id) {
-			analysis = runningAnalyzerInfo.analysis;
-		} else {
-			await handleErrors(async () => {
-				const analysisResponse = await getAnalysis(analysisId);
-				analysis = analysisResponse.data;
-			});
-		}
+		await handleErrors(async () => {
+			const analysisResponse = await getAnalysis(analysisId);
+			analysis = analysisResponse.data;
+		});
 	};
 
 	const onDeleteAnalysis = async () => {
 		await handleErrors(async () => {
 			await deleteAnalysis(analysis!.id);
-			await update();
+			await updateAnalyses();
 		});
 	};
 
@@ -200,7 +158,7 @@
 			</Breadcrumb.Link>
 			<Breadcrumb.Separator />
 			<Breadcrumb.Item>
-				<Breadcrumb.Page>{data.analyzer.name}</Breadcrumb.Page>
+				<Breadcrumb.Page>{analyzer.name}</Breadcrumb.Page>
 			</Breadcrumb.Item>
 		</Breadcrumb.List>
 	</Breadcrumb.Root>
@@ -213,11 +171,11 @@
 				src="https://img.icons8.com/fluency/480/artificial-intelligence--v2.png"
 				alt="knowledge-sharing"
 			/>
-			<h1 class="ml-4 text-4xl font-semibold">{data.analyzer.name}</h1>
+			<h1 class="ml-4 text-4xl font-semibold">{analyzer.name}</h1>
 		</div>
 
 		<div class="flex items-center gap-2">
-			{#if data.analyzer.state == 'Building'}
+			{#if analyzer.state == 'Building'}
 				<Badge variant="outline">
 					<Cog class="animate-[spin_3000ms_linear_infinite] size-5"/>
 					<span class="px-1">Building</span>
@@ -226,7 +184,7 @@
 					<Play size="20" />
 					<p>Run</p>
 				</CustomButton>
-			{:else if data.analyzer.state == 'Running'}
+			{:else if analyzer.state == 'Running'}
 				<Badge variant="outline">
 					<Cog class="animate-[spin_3000ms_linear_infinite] size-5"/>
 					<span class="px-1">Running</span>
@@ -276,7 +234,7 @@
 		{#key analysis}
 			<AnalysisCard
 				{analysis}
-				analyses={data.analyses.analyses}
+				analyses={analyses.analyses}
 				isIndividual={data.assignment.collaborationType == 'Individual'}
 				{onSetAnalysis}
 				{onDeleteAnalysis}

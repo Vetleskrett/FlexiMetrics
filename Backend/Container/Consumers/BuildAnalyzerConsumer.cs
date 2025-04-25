@@ -47,7 +47,5 @@ public class BuildAnalyzerConsumer : IConsumer<BuildAnalyzerRequest>
 
         analyzer.State = AnalyzerState.Standby;
         await _dbContext.SaveChangesAsync();
-
-        await _bus.Publish(new AnalyzerStatusUpdate(request.AnalyzerId));
     }
 }

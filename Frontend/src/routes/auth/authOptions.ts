@@ -3,10 +3,12 @@ import { FEIDE_PROVIDER } from "./providers/feide";
 
 export const authOptions : SvelteKitAuthConfig = {
     providers: [FEIDE_PROVIDER],
+    pages: {
+        signIn: '/sign-in'
+    },
     callbacks: {
         async session(params: any) {
             if(params.token){
-                //const JWT = (token.token as { token: {sub: string}}).token
                 return {...params};
             }
             return params.session
@@ -15,8 +17,8 @@ export const authOptions : SvelteKitAuthConfig = {
             return token
         }
     },
-    secret: "ANYSECRET",
+    secret: import.meta.env.VITE_AUTH_SECRET,
     session:{
-        strategy: 'jwt',
+        strategy: 'jwt'
     },
 }

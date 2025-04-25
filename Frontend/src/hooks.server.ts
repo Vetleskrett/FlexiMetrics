@@ -1,18 +1,18 @@
 import { redirect, type Handle } from '@sveltejs/kit';
 import { handle as authenticationHandle } from './routes/auth/route';
 import { sequence } from '@sveltejs/kit/hooks';
-import { hasToken } from './api.server';
  
 const authorizationHandle: Handle = async ({ event, resolve }) => {
-  if (event.url.pathname.startsWith('/')) {
+  const path = event.url.pathname
+
+  if (path.startsWith('/teacher') || path.startsWith('/student')) {
     const session = await event.locals.auth();
-    if (!session || !hasToken()) {
-      // Redirect to the signin page
-      throw redirect(303, '/auth/signin');
+
+    if (!session) {
+      throw redirect(303, '/auth/signin?callbackUrl=' + path);
     }
   }
  
-  // If the request is still here, just proceed as normally
   return resolve(event);
 }
 

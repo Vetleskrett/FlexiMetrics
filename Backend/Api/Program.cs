@@ -41,13 +41,11 @@ builder.Services.AddMassTransit(options =>
     options.AddConsumer<RunAnalyzerConsumer>();
     options.AddConsumer<CancelAnalyzerConsumer>();
     options.AddConsumer<DeleteAnalyzerConsumer>();
-    options.AddConsumer<AnalyzerStatusUpdateConsumer>();
     options.UsingInMemory((context, config) =>
     {
         config.ConfigureEndpoints(context);
     });
 });
-builder.Services.AddSingleton<IAnalyzerStatusUpdateReader, AnalyzerStatusUpdateReader>();
 
 builder.Services.AddScoped<ICourseService, CourseService>();
 builder.Services.AddScoped<ITeacherService, TeacherService>();

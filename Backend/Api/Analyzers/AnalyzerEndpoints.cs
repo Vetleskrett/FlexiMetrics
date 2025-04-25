@@ -1,7 +1,5 @@
 ﻿using Api.Analyzers.Contracts;
 using Microsoft.AspNetCore.Http.HttpResults;
-using System.Text.Json;
-using System.Text.Json.Serialization;
 
 namespace Api.Analyzers;
 
@@ -104,27 +102,6 @@ public static class AnalyzerEndpoints
         .WithName("GetAnalyzerLogs")
         .RequireAuthorization("TeacherForAnalyzer")
         .WithSummary("Get analyzer logs by analyzer id");
-
-        group.MapGet("analyzers/{analyzerId:guid}/status", async (HttpContext context, IAnalyzerService analyzerService, Guid analyzerId) =>
-        {
-            var jsonOptions = new JsonSerializerOptions
-            {
-                PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
-                Converters = { new JsonStringEnumConverter() }
-            };
-
-            context.Response.Headers.Append("Content-Type", "text/event-stream");
-            await foreach (var statusUpdate in analyzerService.GetStatusEventsById(analyzerId, context.RequestAborted))
-            {
-                var json = JsonSerializer.Serialize(statusUpdate, jsonOptions);
-                await context.Response.WriteAsync($"data: {json}\n\n");
-                await context.Response.Body.FlushAsync();
-            }
-        })
-        .Produces(StatusCodes.Status200OK, contentType: "text/event-stream")
-        .WithName("GetAnalyzerStatus")
-        .RequireAuthorization("TeacherForAnalyzer")
-        .WithSummary("Get analyzer status by id");
 
         group.MapDelete("analyzers/{analyzerId:guid}", async (IAnalyzerService analyzerService, Guid analyzerId) =>
         {

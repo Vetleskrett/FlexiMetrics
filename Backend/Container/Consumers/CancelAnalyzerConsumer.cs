@@ -39,7 +39,5 @@ public class CancelAnalyzerConsumer : IConsumer<CancelAnalyzerRequest>
 
             await _dbContext.Analyses.Where(a => a.Id == analysis.Id).ExecuteDeleteAsync();
         }
-
-        await _bus.Publish(new AnalyzerStatusUpdate(request.AnalyzerId));
     }
 }

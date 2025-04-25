@@ -27,7 +27,6 @@ public interface IAnalyzerService
     Task<Result<FileResponse>> DownloadScript(Guid analyzerFieldId);
     Task<Result<IEnumerable<AnalyzerLogResponse>>> GetLogsById(Guid analyzerId);
     Task<Result> StartAction(AnalyzerActionRequest request, Guid id);
-    IAsyncEnumerable<AnalyzerStatusUpdateResponse?> GetStatusEventsById(Guid id, CancellationToken cancellationToken);
     Task<Result> DeleteById(Guid id);
 }
 
@@ -36,15 +35,13 @@ public class AnalyzerService : IAnalyzerService
     private readonly AppDbContext _dbContext;
     private readonly IValidator<Analyzer> _validator;
     private readonly IFileStorage _fileStorage;
-    private readonly IAnalyzerStatusUpdateReader _statusUpdateReader;
     private readonly IBus _bus;
 
-    public AnalyzerService(AppDbContext dbContext, IValidator<Analyzer> validator, IFileStorage fileStorage, IAnalyzerStatusUpdateReader statusUpdateReader, IBus bus)
+    public AnalyzerService(AppDbContext dbContext, IValidator<Analyzer> validator, IFileStorage fileStorage, IBus bus)
     {
         _dbContext = dbContext;
         _validator = validator;
         _fileStorage = fileStorage;
-        _statusUpdateReader = statusUpdateReader;
         _bus = bus;
     }
 
@@ -290,7 +287,6 @@ public class AnalyzerService : IAnalyzerService
         analyzer.State = AnalyzerState.Standby;
         await _dbContext.SaveChangesAsync();
 
-        await _bus.Publish(new AnalyzerStatusUpdate(analyzer.Id));
         await _bus.Publish(new CancelAnalyzerRequest(analyzer.Id));
 
         return Result.Success();
@@ -364,73 +360,6 @@ public class AnalyzerService : IAnalyzerService
                     }
                 )
                 .ToListAsync();
-        }
-    }
-
-    public async IAsyncEnumerable<AnalyzerStatusUpdateResponse?> GetStatusEventsById(Guid id, [EnumeratorCancellation] CancellationToken cancellationToken)
-    {
-        var analysis = await _dbContext.Analyses
-            .AsNoTracking()
-            .Include(a => a.Analyzer)
-            .Include(a => a.AnalysisEntries!.OrderBy(ae => ae.CompletedAt))
-            .ThenInclude(ae => ae.Fields)
-            .Include(a => a.AnalysisEntries!)
-            .ThenInclude(ae => ae.Student)
-            .Include(a => a.AnalysisEntries!)
-            .ThenInclude(ae => ae.Team!)
-            .ThenInclude(t => t.Students)
-            .Where(a => a.AnalyzerId == id)
-            .OrderByDescending(a => a.StartedAt)
-            .FirstAsync();
-
-        yield return new AnalyzerStatusUpdateResponse
-        {
-            Analyzer = analysis.Analyzer!.MapToResponse(),
-            Analysis = analysis.MapToResponse()
-        };
-
-        if (analysis.Status is AnalysisStatus.Completed or AnalysisStatus.Failed)
-        {
-            yield break;
-        }
-
-        await foreach (var statusUpdate in _statusUpdateReader.ReadAllAsync(id, cancellationToken))
-        {
-            analysis = await _dbContext.Analyses
-                .AsNoTracking()
-                .Include(a => a.Analyzer)
-                .Include(a => a.AnalysisEntries!.OrderBy(ae => ae.CompletedAt))
-                .ThenInclude(ae => ae.Fields)
-                .Include(a => a.AnalysisEntries!)
-                .ThenInclude(ae => ae.Student)
-                .Include(a => a.AnalysisEntries!)
-                .ThenInclude(ae => ae.Team!)
-                .ThenInclude(t => t.Students)
-                .FirstOrDefaultAsync(a => a.Id == analysis.Id);
-
-            if (analysis is not null)
-            {
-                yield return new AnalyzerStatusUpdateResponse
-                {
-                    Analyzer = analysis.Analyzer!.MapToResponse(),
-                    Analysis = analysis.MapToResponse()
-                };
-
-                if (analysis.Status != AnalysisStatus.Running || analysis.Analyzer!.State != AnalyzerState.Running)
-                {
-                    yield break;
-                }
-            }
-            else
-            {
-                var analyzer = await _dbContext.Analyzers.FindAsync(id);
-                yield return new AnalyzerStatusUpdateResponse
-                {
-                    Analyzer = analyzer!.MapToResponse(),
-                    Analysis = null
-                };
-                yield break;
-            }
         }
     }
 

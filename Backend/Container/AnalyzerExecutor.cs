@@ -79,8 +79,6 @@ public class AnalyzerExecutor : IAnalyzerExecutor
             await _dbContext.Analyzers
                 .Where(a => a.Id == request.AnalyzerId)
                 .ExecuteUpdateAsync(x => x.SetProperty(a => a.State, AnalyzerState.Standby), cancellationToken);
-
-            await _bus.Publish(new AnalyzerStatusUpdate(request.AnalyzerId), cancellationToken);
         }
         catch (OperationCanceledException)
         {
@@ -91,9 +89,6 @@ public class AnalyzerExecutor : IAnalyzerExecutor
             await _dbContext.Analyses
                 .Where(a => a.Id == request.AnalysisId)
                 .ExecuteUpdateAsync(setter => setter.SetProperty(a => a.Status, AnalysisStatus.Failed), cancellationToken);
-
-            await _bus.Publish(new AnalyzerStatusUpdate(request.AnalyzerId), cancellationToken);
-
             throw;
         }
     }
@@ -132,10 +127,7 @@ public class AnalyzerExecutor : IAnalyzerExecutor
 
             await _containerService.WaitForContainerCompletion(container, cancellationToken);
 
-            await OnAnalysisEntryFinished(container, analysisEntry, request, cancellationToken);
-
-            await _bus.Publish(new AnalyzerStatusUpdate(request.AnalyzerId), cancellationToken);
-        }
+            await OnAnalysisEntryFinished(container, analysisEntry, request, cancellationToken);        }
         finally
         {
             if (!cancellationToken.IsCancellationRequested)

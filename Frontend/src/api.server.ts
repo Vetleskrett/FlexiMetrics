@@ -26,10 +26,6 @@ export async function setAuthToken(token: string){
   api.defaults.headers.common["Authorization"] = `Bearer ${token}`
 }
 
-export async function hasToken(){
-  return api.defaults.headers.common["Authorization"]
-}
-
 export async function getCourses() : Promise<AxiosResponse<Course[]>> {
   return api.get(`courses`)
 }

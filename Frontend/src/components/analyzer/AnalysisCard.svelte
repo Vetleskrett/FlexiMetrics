@@ -187,7 +187,7 @@
 					{/each}
 				</DropdownMenu.Content>
 			</DropdownMenu.Root>
-			{#if analysis.status == 'Completed'}
+			{#if analysis.status != 'Running'}
 				<div class="flex items-center gap-4">
 					<DropdownMenu.Root>
 						<DropdownMenu.Trigger asChild let:builder>
@@ -264,17 +264,24 @@
 														<Render of={props.filter.render} />
 													</div>
 												{/if}
-												<Button variant="ghost" on:click={props.sort.toggle} class="px-2">
-													<Render of={cell.render()} />
+												{#if analysis.status != 'Running'}
+													<Button variant="ghost" on:click={props.sort.toggle} class="px-2">
+														<Render of={cell.render()} />
 
-													{#if sortColumn?.id == cell.id && sortColumn?.order == 'asc'}
-														<ChevronUp class="ml-1 h-4 w-4" />
-													{:else if sortColumn?.id == cell.id && sortColumn?.order == 'desc'}
-														<ChevronDown class="ml-1 h-4 w-4" />
-													{:else}
-														<ChevronsUpDown class="ml-1 h-4 w-4" />
-													{/if}
-												</Button>
+														{#if sortColumn?.id == cell.id && sortColumn?.order == 'asc'}
+															<ChevronUp class="ml-1 h-4 w-4" />
+														{:else if sortColumn?.id == cell.id && sortColumn?.order == 'desc'}
+															<ChevronDown class="ml-1 h-4 w-4" />
+														{:else}
+															<ChevronsUpDown class="ml-1 h-4 w-4" />
+														{/if}
+													</Button>
+												{:else}
+													<Button variant="ghost" class="px-2">
+														<Render of={cell.render()} />
+														<div class="ml-1 h-4 w-4" />
+													</Button>
+												{/if}
 											</div>
 										</Table.Head>
 									</Subscribe>
