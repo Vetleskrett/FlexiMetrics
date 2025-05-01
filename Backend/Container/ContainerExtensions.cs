@@ -12,5 +12,6 @@ public static class ContainerExtensions
         services.AddSingleton<IContainerService, ContainerService>();
         services.AddSingleton<IAnalyzerCancellationStore, AnalyzerCancellationStore>();
         services.AddScoped<IAnalyzerExecutor, AnalyzerExecutor>();
+        services.AddHostedService<StartupBuildWorker>();
     }
 }

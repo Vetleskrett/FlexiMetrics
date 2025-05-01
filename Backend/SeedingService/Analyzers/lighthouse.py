@@ -2,14 +2,25 @@ from fleximetrics import *
 import json
 import subprocess
 
+def run_command(command):
+    result = subprocess.run(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+    if result.stdout:
+        print("STDOUT:")
+        print(result.stdout)
+    if result.stderr:
+        print("STDERR:")
+        print(result.stderr)
+    return result
+
+
 def install_lighthouse():
     command = [
         "npm",
         "install",
         "-g",
-        "lighthouse"
+        "lighthouse@12.5.1"
     ]
-    subprocess.run(command, stdout=subprocess.PIPE, stderr=subprocess.DEVNULL)
+    run_command(command)
 
 def run_lighthouse(url: str, output_path: str):
     command = [
@@ -20,7 +31,7 @@ def run_lighthouse(url: str, output_path: str):
         f"--output-path={output_path}",
         '--chrome-flags="--headless --no-sandbox"',
     ]
-    subprocess.run(command, stdout=subprocess.PIPE, stderr=subprocess.DEVNULL)
+    run_command(command)
 
 
 def read_lighthouse_report(file_path: str):

@@ -214,13 +214,13 @@ public static class WebDevelopment
             Requirements = "",
             AptPackages = "npm\nchromium",
             FileName = "lighthouse.py",
-            State = AnalyzerState.Standby,
+            State = AnalyzerState.Building,
         };
         dbContext.Add(analyzer);
 
         await dbContext.SaveChangesAsync();
 
-        var script = File.OpenRead("Scripts/lighthouse.py");
+        var script = File.OpenRead("Analyzers/lighthouse.py");
         await fileStorage.WriteAnalyzerScript(course.Id, assignment.Id, analyzer.Id, script);
     }
 }

@@ -44,5 +44,9 @@ public static class Seed
         await dbContext.SaveChangesAsync();
 
         await WebDevelopment.Seed(dbContext, fileStorage, teachers, students);
+        await AlgorithmsAndDataStructures.Seed(dbContext, fileStorage, teachers, students);
+        await CppIntroductoryProgramming.Seed(dbContext, fileStorage, teachers, students);
+        await Databases.Seed(dbContext, fileStorage, teachers, students);
+        await SystemDevelopment.Seed(dbContext, fileStorage, teachers, students);
     }
 }

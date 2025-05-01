@@ -205,7 +205,7 @@ public class AnalyzerExecutor : IAnalyzerExecutor
             }
         ).ToList();
 
-        foreach (var fileField in analysisFields.Where(f => f.Type == AnalysisFieldType.File))
+        foreach (var fileField in analysisFields.Where(f => f.Type == AnalysisFieldType.File || f.Type == AnalysisFieldType.Image))
         {
             cancellationToken.ThrowIfCancellationRequested();
             var fileMetadata = fileField.GetValue<FileMetadata>();

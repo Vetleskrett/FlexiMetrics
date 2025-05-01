@@ -11,5 +11,6 @@ public enum AnalysisFieldType
     URL,
     Json,
     List,
-    File
+    File,
+    Image
 }

@@ -61,7 +61,7 @@ export type StudentAnalysis = {
     fields: AnalysisField[];
 }
 
-export type AnalysisFieldType = 'String' | 'Integer' | 'Float' | 'Boolean' | 'Range' | 'DateTime' | 'URL' | 'Json' | 'File' | 'List';
+export type AnalysisFieldType = 'String' | 'Integer' | 'Float' | 'Boolean' | 'Range' | 'DateTime' | 'URL' | 'Json' | 'File' | 'List' | 'Image';
 
 export type AnalysisField = {
     id: string;

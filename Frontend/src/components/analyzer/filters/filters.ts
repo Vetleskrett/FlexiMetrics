@@ -82,6 +82,7 @@ export const getFilter = (type: AnalysisFieldType) => {
                     createRender(DateFilter, { filterValue })
             };
         case 'List':
+        case 'Image':
             return undefined;
         default:
             return {

@@ -9,6 +9,7 @@ import BoolCell from './BoolCell.svelte';
 import DateCell from './DateCell.svelte';
 import UrlCell from './UrlCell.svelte';
 import NumberCell from './NumberCell.svelte';
+import ImageCell from './ImageCell.svelte';
 
 export const getCell = (type: AnalysisFieldType, subType: AnalysisFieldType | undefined = undefined) => {
     return ({ value }: any) => {
@@ -35,6 +36,8 @@ export const getCell = (type: AnalysisFieldType, subType: AnalysisFieldType | un
                 return createRender(JsonCell, { field: value });
             case 'File':
                 return createRender(FileCell, { field: value });
+            case 'Image':
+                return createRender(ImageCell, { field: value });
             case 'List':
                 return createRender(ListCell, { field: value, subType:subType! });
             default:

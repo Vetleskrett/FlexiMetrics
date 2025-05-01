@@ -17,7 +17,7 @@
 			<Card.Title class="m-0 ml-2 text-2xl">Description</Card.Title>
 		</div>
 	</Card.Header>
-	<Card.Content class="py-6">
+	<Card.Content class="py-6" style="white-space: pre-wrap">
 		<p>{assignment?.description}</p>
 	</Card.Content>
 </Card.Root>

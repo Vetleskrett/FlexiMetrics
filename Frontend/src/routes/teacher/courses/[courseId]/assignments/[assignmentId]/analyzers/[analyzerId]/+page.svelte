@@ -46,15 +46,9 @@
 		analyses: AnalyzerAnalyses;
 	};
 
-	// TODO:
-	// While Building: Poll every 2s for analyzer until finished building
-	// While Running: Poll every 2s for analysis until not running
-	// Use intervalls like the logs page
-	// Clear intervalls in onDestroy	
-
-	let analyses = data.analyses;
-	let analyzer = data.analyzer;
-	let analysis = analyses.latest;
+	$: analyses = data.analyses;
+	$: analyzer = data.analyzer;
+	$: analysis = analyses.latest;
 
 	let interval: ReturnType<typeof setInterval>;
 
