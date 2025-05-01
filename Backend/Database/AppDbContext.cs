@@ -20,6 +20,7 @@ public class AppDbContext : DbContext
     public DbSet<DeliveryField> DeliveryFields { get; set; }
     public DbSet<Feedback> Feedbacks { get; set; }
     public DbSet<Analyzer> Analyzers { get; set; }
+    public DbSet<AnalyzerLog> AnalyzerLogs { get; set; }
     public DbSet<Analysis> Analyses { get; set; }
     public DbSet<AnalysisEntry> AnalysisEntries { get; set; }
     public DbSet<AnalysisField> AnalysisFields { get; set; }
@@ -82,6 +83,8 @@ public class AppDbContext : DbContext
 
         var analyzer = modelBuilder.Entity<Analyzer>();
         analyzer.HasOne(a => a.Assignment).WithMany();
+
+        modelBuilder.Entity<AnalyzerLog>().HasOne(al => al.Analyzer).WithMany();
 
         var analysis = modelBuilder.Entity<Analysis>();
         analysis.HasOne(a => a.Analyzer).WithMany();

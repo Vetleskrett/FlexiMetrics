@@ -1,12 +1,18 @@
-FROM python:3.13-slim
+FROM python:3.13
 
 WORKDIR /app
 
 COPY fleximetrics.py ./
 
-COPY script.py ./
-
 COPY requirements.txt ./
+
+COPY packages-list.txt ./
+
+RUN apt update
+
+RUN apt upgrade -y
+
+RUN xargs apt install -y < packages-list.txt
 
 RUN pip install --disable-pip-version-check --root-user-action=ignore --no-cache-dir dataclass-wizard
 

@@ -3,7 +3,7 @@ using Api.Analyses.Contracts;
 using Api.Analyzers.Contracts;
 using Api.Common;
 using Api.Validation;
-using Container.Models;
+using Container.Contracts;
 using Database;
 using Database.Models;
 using FileStorage;
@@ -25,8 +25,8 @@ public interface IAnalyzerService
     Task<Result<AnalyzerResponse>> Update(UpdateAnalyzerRequest request, Guid id);
     Task<Result> UploadScript(IFormFile script, Guid analyzerFieldId);
     Task<Result<FileResponse>> DownloadScript(Guid analyzerFieldId);
+    Task<Result<IEnumerable<AnalyzerLogResponse>>> GetLogsById(Guid analyzerId);
     Task<Result> StartAction(AnalyzerActionRequest request, Guid id);
-    IAsyncEnumerable<AnalysisResponse?> GetStatusEventsById(Guid id, CancellationToken cancellationToken);
     Task<Result> DeleteById(Guid id);
 }
 
@@ -35,18 +35,14 @@ public class AnalyzerService : IAnalyzerService
     private readonly AppDbContext _dbContext;
     private readonly IValidator<Analyzer> _validator;
     private readonly IFileStorage _fileStorage;
-    private readonly IAnalyzerStatusUpdateReader _statusUpdateReader;
     private readonly IBus _bus;
-    private readonly ILogger<AnalyzerService> _logger;
 
-    public AnalyzerService(AppDbContext dbContext, IValidator<Analyzer> validator, IFileStorage fileStorage, IAnalyzerStatusUpdateReader statusUpdateReader, IBus bus, ILogger<AnalyzerService> logger)
+    public AnalyzerService(AppDbContext dbContext, IValidator<Analyzer> validator, IFileStorage fileStorage, IBus bus)
     {
         _dbContext = dbContext;
         _validator = validator;
         _fileStorage = fileStorage;
-        _statusUpdateReader = statusUpdateReader;
         _bus = bus;
-        _logger = logger;
     }
 
     public async Task<Result<IEnumerable<AnalyzerResponse>>> GetAll()
@@ -107,6 +103,8 @@ public class AnalyzerService : IAnalyzerService
         _dbContext.Analyzers.Add(analyzer);
         await _dbContext.SaveChangesAsync();
 
+        await _bus.Publish(new BuildAnalyzerRequest(analyzer.Id));
+
         return analyzer.MapToResponse();
     }
 
@@ -120,9 +118,30 @@ public class AnalyzerService : IAnalyzerService
             return Result<AnalyzerResponse>.NotFound();
         }
 
+        if (analyzer.State != AnalyzerState.Standby)
+        {
+            return new ValidationError("Cannot edit analyzer in current state").MapToResponse();
+        }
+
         analyzer.Name = request.Name;
-        analyzer.Requirements = request.Requirements;
         analyzer.FileName = request.FileName;
+
+        var rebuild = false;
+        if (request.Requirements != analyzer.Requirements)
+        {
+            analyzer.Requirements = request.Requirements;
+            rebuild = true;
+        }
+        if (analyzer.AptPackages != request.AptPackages)
+        {
+            analyzer.AptPackages = request.AptPackages;
+            rebuild = true;
+        }
+
+        if (rebuild)
+        {
+            analyzer.State = AnalyzerState.Building;
+        }
 
         var validationResult = await _validator.ValidateAsync(analyzer);
         if (!validationResult.IsValid)
@@ -131,6 +150,11 @@ public class AnalyzerService : IAnalyzerService
         }
 
         await _dbContext.SaveChangesAsync();
+
+        if (rebuild)
+        {
+            await _bus.Publish(new BuildAnalyzerRequest(analyzer.Id));
+        }
 
         return analyzer.MapToResponse();
     }
@@ -144,6 +168,11 @@ public class AnalyzerService : IAnalyzerService
         if (analyzer is null)
         {
             return Result.NotFound();
+        }
+
+        if (analyzer.State == AnalyzerState.Running)
+        {
+            return new ValidationError("Cannot edit script while analyzer is running").MapToResponse();
         }
 
         if (script.FileName != analyzer.FileName)
@@ -205,6 +234,23 @@ public class AnalyzerService : IAnalyzerService
         }
     }
 
+    public async Task<Result<IEnumerable<AnalyzerLogResponse>>> GetLogsById(Guid analyzerId)
+    {
+        var analyzer = await _dbContext.Analyzers.FindAsync(analyzerId);
+
+        if (analyzer is null)
+        {
+            return Result<IEnumerable<AnalyzerLogResponse>>.NotFound();
+        }
+
+        var logs = await _dbContext.AnalyzerLogs
+            .Where(al => al.AnalyzerId == analyzerId)
+            .OrderBy(al => al.Timestamp)
+            .ToListAsync();
+
+        return logs.MapToResponse();
+    }
+
     public async Task<Result> StartAction(AnalyzerActionRequest request, Guid id)
     {
         var analyzer = await _dbContext.Analyzers
@@ -216,95 +262,104 @@ public class AnalyzerService : IAnalyzerService
             return Result.NotFound();
         }
 
-        var runningAnalysis = await _dbContext.Analyses
-            .Where(a => a.AnalyzerId == id)
-            .Where(a => a.Status == AnalysisStatus.Started || a.Status == AnalysisStatus.Running)
-            .FirstOrDefaultAsync();
-
         if (request.Action == AnalyzerAction.Run)
         {
-            if (runningAnalysis is not null)
-            {
-                return new ValidationError("Analyzer already running").MapToResponse();
-            }
-
-            var totalNumEntries = analyzer.Assignment!.CollaborationType == CollaborationType.Individual ?
-                await _dbContext.CourseStudents.Where(cs => cs.CourseId == analyzer.Assignment.CourseId).CountAsync() :
-                await _dbContext.Teams.Where(t => t.CourseId == analyzer.Assignment.CourseId).CountAsync();
-
-            var analysis = new Analysis
-            {
-                Id = Guid.NewGuid(),
-                Status = AnalysisStatus.Started,
-                StartedAt = DateTime.UtcNow,
-                CompletedAt = null,
-                AnalyzerId = id,
-                AnalysisEntries = [],
-                TotalNumEntries = totalNumEntries
-            };
-            _dbContext.Analyses.Add(analysis);
-            await _dbContext.SaveChangesAsync();
-
-            await _bus.Publish(new RunAnalyzerRequest(analyzer.Assignment!.CourseId, analyzer.AssignmentId, analyzer.Id, analysis.Id));
-            return Result.Success();
+            return await RunAnalyzer(analyzer);
         }
         else
         {
-            if (runningAnalysis is null)
-            {
-                return new ValidationError("Analyzer not running").MapToResponse();
-            }
-
-            runningAnalysis.Status = AnalysisStatus.Canceled;
-            await _dbContext.SaveChangesAsync();
-            await _bus.Publish(new AnalyzerStatusUpdate(id));
-
-            await _bus.Publish(new CancelAnalyzerRequest(id));
-            return Result.Success();
+            return await CancelAnalyzer(analyzer);
         }
     }
 
-    public async IAsyncEnumerable<AnalysisResponse?> GetStatusEventsById(Guid id, [EnumeratorCancellation] CancellationToken cancellationToken)
+    private async Task<Result> CancelAnalyzer(Analyzer analyzer)
     {
-        var analysis = await _dbContext.Analyses
-            .AsNoTracking()
-            .Include(a => a.AnalysisEntries!.OrderBy(ae => ae.CompletedAt))
-            .ThenInclude(ae => ae.Fields)
-            .Include(a => a.AnalysisEntries!)
-            .ThenInclude(ae => ae.Student)
-            .Include(a => a.AnalysisEntries!)
-            .ThenInclude(ae => ae.Team!)
-            .ThenInclude(t => t.Students)
-            .Where(a => a.AnalyzerId == id)
-            .OrderByDescending(a => a.StartedAt)
-            .FirstAsync();
-
-        yield return analysis.MapToResponse();
-
-        if (analysis.Status is AnalysisStatus.Completed or AnalysisStatus.Failed)
+        if (analyzer.State != AnalyzerState.Running)
         {
-            yield break;
+            return new ValidationError("Analyzer not running").MapToResponse();
         }
 
-        await foreach (var statusUpdate in _statusUpdateReader.ReadAllAsync(id, cancellationToken))
+        await _dbContext.Analyses
+            .Where(a => a.AnalyzerId == analyzer.Id)
+            .Where(a => a.Status == AnalysisStatus.Running)
+            .ExecuteUpdateAsync(x => x.SetProperty(a => a.Status, AnalysisStatus.Canceled));
+
+        analyzer.State = AnalyzerState.Standby;
+        await _dbContext.SaveChangesAsync();
+
+        await _bus.Publish(new CancelAnalyzerRequest(analyzer.Id));
+
+        return Result.Success();
+    }
+
+    private async Task<Result> RunAnalyzer(Analyzer analyzer)
+    {
+        if (analyzer.State != AnalyzerState.Standby)
         {
-            analysis = await _dbContext.Analyses
-                .AsNoTracking()
-                .Include(a => a.AnalysisEntries!.OrderBy(ae => ae.CompletedAt))
-                .ThenInclude(ae => ae.Fields)
-                .Include(a => a.AnalysisEntries!)
-                .ThenInclude(ae => ae.Student)
-                .Include(a => a.AnalysisEntries!)
-                .ThenInclude(ae => ae.Team!)
-                .ThenInclude(t => t.Students)
-                .FirstOrDefaultAsync(a => a.Id == analysis.Id);
+            return new ValidationError("Cannot run analyzer in the current state").MapToResponse();
+        }
 
-            yield return analysis?.MapToResponse();
+        analyzer.State = AnalyzerState.Running;
 
-            if (analysis is null || analysis.Status is AnalysisStatus.Completed or AnalysisStatus.Failed)
-            {
-                yield break;
-            }
+        var analysis = new Analysis
+        {
+            Id = Guid.NewGuid(),
+            Status = AnalysisStatus.Running,
+            StartedAt = DateTime.UtcNow,
+            CompletedAt = null,
+            AnalyzerId = analyzer.Id,
+            AnalysisEntries = [],
+        };
+        _dbContext.Analyses.Add(analysis);
+
+        var entries = await GetEntries(analyzer, analysis);
+        _dbContext.AnalysisEntries.AddRange(entries);
+
+        await _dbContext.SaveChangesAsync();
+
+        await _bus.Publish(new RunAnalyzerRequest(analyzer.Assignment!.CourseId, analyzer.AssignmentId, analyzer.Id, analysis.Id));
+
+        return Result.Success();
+    }
+
+    private async Task<List<AnalysisEntry>> GetEntries(Analyzer analyzer, Analysis analysis)
+    {
+        var assignment = await _dbContext.Assignments.FindAsync(analyzer.AssignmentId);
+
+        if (assignment!.CollaborationType == CollaborationType.Individual)
+        {
+            return await _dbContext.CourseStudents
+                .Where(cs => cs.CourseId == assignment.CourseId)
+                .Select(cs => cs.Student!)
+                .Select(student =>
+                    new AnalysisEntry
+                    {
+                        Id = Guid.NewGuid(),
+                        AnalysisId = analysis.Id,
+                        StudentId = student.Id,
+                        TeamId = null,
+                        Fields = new(),
+                        CompletedAt = null
+                    }
+                )
+                .ToListAsync();
+        }
+        else
+        {
+            return await _dbContext.Teams
+                .Where(t => t.CourseId == assignment.CourseId)
+                .Select(team =>
+                    new AnalysisEntry
+                    {
+                        Id = Guid.NewGuid(),
+                        AnalysisId = analysis.Id,
+                        StudentId = null,
+                        TeamId = team.Id,
+                        Fields = new(),
+                        CompletedAt = null
+                    }
+                )
+                .ToListAsync();
         }
     }
 

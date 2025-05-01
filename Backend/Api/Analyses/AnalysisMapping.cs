@@ -34,7 +34,6 @@ public static class AnalysisMapping
             Status = analysis.Status,
             AnalyzerId = analysis.AnalyzerId,
             AnalysisEntries = analysis.AnalysisEntries!.MapToResponse(),
-            TotalNumEntries = analysis.TotalNumEntries
         };
     }
 
@@ -52,8 +51,6 @@ public static class AnalysisMapping
             Team = analysisEntry.Team?.MapToResponse(),
             Student = analysisEntry.Student?.MapToStudentResponse(),
             Fields = analysisEntry.Fields!.MapToResponse(),
-            LogInformation = analysisEntry.LogInformation,
-            LogError = analysisEntry.LogError,
             CompletedAt = analysisEntry.CompletedAt,
         };
     }
@@ -70,7 +67,7 @@ public static class AnalysisMapping
             Id = analysisEntry.Id,
             AnalyzerName = analysisEntry.Analysis!.Analyzer!.Name,
             Fields = analysisEntry.Fields!.MapToResponse(),
-            CompletedAt = analysisEntry.CompletedAt,
+            CompletedAt = analysisEntry.CompletedAt!.Value,
         };
     }
 

@@ -120,6 +120,7 @@ public class AnalysisService : IAnalysisService
                 .ThenInclude(a => a.Analyzer)
                 .Where(ae => ae.Analysis!.Analyzer!.AssignmentId == assignmentId)
                 .Where(ae => ae.StudentId == studentId)
+                .Where(ae => ae.Analysis!.Status == AnalysisStatus.Completed)
                 .GroupBy(ae => ae.Analysis!.AnalyzerId)
                 .Select(group => group.OrderByDescending(ae => ae.CompletedAt).First())
                 .ToListAsync();
@@ -134,6 +135,7 @@ public class AnalysisService : IAnalysisService
                 .ThenInclude(a => a.Analyzer)
                 .Where(ae => ae.Analysis!.Analyzer!.AssignmentId == assignmentId)
                 .Where(ae => ae.Team!.Students.Any(s => s.Id == studentId))
+                .Where(ae => ae.Analysis!.Status == AnalysisStatus.Completed)
                 .GroupBy(ae => ae.Analysis!.AnalyzerId)
                 .Select(group => group.OrderByDescending(ae => ae.CompletedAt).First())
                 .ToListAsync();
@@ -166,6 +168,7 @@ public class AnalysisService : IAnalysisService
             .Include(ae => ae.Analysis!)
             .ThenInclude(a => a.Analyzer)
             .Where(ae => ae.Analysis!.Analyzer!.AssignmentId == assignmentId)
+            .Where(ae => ae.Analysis!.Status == AnalysisStatus.Completed)
             .Where(ae => ae.TeamId == teamId)
             .GroupBy(ae => ae.Analysis!.AnalyzerId)
             .Select(group => group.OrderByDescending(ae => ae.CompletedAt).First())

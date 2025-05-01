@@ -23,12 +23,14 @@
 	type AnalyzerFormData = {
 		name: string;
 		requirements: string;
+		aptPackages: string;
 		script?: File;
 	};
 
 	let analyzerFormData: AnalyzerFormData = {
 		name: '',
 		requirements: '',
+		aptPackages: '',
 		script: undefined
 	};
 
@@ -36,6 +38,7 @@
 		analyzerFormData = {
 			name: analyzer!.name,
 			requirements: analyzer!.requirements,
+			aptPackages: analyzer!.aptPackages,
 			script: new File([new Blob([script!], { type: 'plain/text' })], analyzer!.fileName)
 		};
 	}
@@ -44,6 +47,7 @@
 		return putAnalyzer(analyzer!.id, {
 			name: analyzerFormData.name,
 			requirements: analyzerFormData.requirements,
+			aptPackages: analyzerFormData.aptPackages,
 			fileName: analyzerFormData.script?.name ?? ''
 		});
 	};
@@ -52,6 +56,7 @@
 		return postAnalyzer({
 			name: analyzerFormData.name,
 			requirements: analyzerFormData.requirements,
+			aptPackages: analyzerFormData.aptPackages,
 			fileName: analyzerFormData.script?.name ?? '',
 			assignmentId: assignmentId
 		});
@@ -106,8 +111,15 @@
 				</Form.Field>
 				<Form.Field {form} name="requirements">
 					<Form.Control let:attrs>
-						<Form.Label for="requirements">requirements.txt</Form.Label>
+						<Form.Label for="requirements">pip requirements.txt</Form.Label>
 						<Textarea {...attrs} id="requirements" bind:value={analyzerFormData.requirements} />
+					</Form.Control>
+					<Form.FieldErrors />
+				</Form.Field>
+				<Form.Field {form} name="aptPackages">
+					<Form.Control let:attrs>
+						<Form.Label for="aptPackages">APT Packages</Form.Label>
+						<Textarea {...attrs} id="aptPackages" bind:value={analyzerFormData.aptPackages} />
 					</Form.Control>
 					<Form.FieldErrors />
 				</Form.Field>

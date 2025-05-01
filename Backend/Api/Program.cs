@@ -11,12 +11,16 @@ using Api.Students;
 using Api.Teachers;
 using Api.Teams;
 using Container;
+using Container.Consumers;
+using Container.Contracts;
 using Database;
+using Database.Models;
 using FileStorage;
 using FluentValidation;
 using MassTransit;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Any;
 using Microsoft.OpenApi.Interfaces;
 using Microsoft.OpenApi.Models;
@@ -36,16 +40,15 @@ builder.AddNpgsqlDbContext<AppDbContext>("postgresdb");
 
 builder.Services.AddMassTransit(options =>
 {
+    options.AddConsumer<BuildAnalyzerConsumer>();
     options.AddConsumer<RunAnalyzerConsumer>();
     options.AddConsumer<CancelAnalyzerConsumer>();
     options.AddConsumer<DeleteAnalyzerConsumer>();
-    options.AddConsumer<AnalyzerStatusUpdateConsumer>();
     options.UsingInMemory((context, config) =>
     {
         config.ConfigureEndpoints(context);
     });
 });
-builder.Services.AddSingleton<IAnalyzerStatusUpdateReader, AnalyzerStatusUpdateReader>();
 
 builder.Services.AddScoped<ICourseService, CourseService>();
 builder.Services.AddScoped<ITeacherService, TeacherService>();

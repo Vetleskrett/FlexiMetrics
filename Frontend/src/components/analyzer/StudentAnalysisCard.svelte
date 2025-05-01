@@ -16,16 +16,18 @@
 	</Card.Header>
 	<Card.Content class="p-0">
 		<div class="flex flex-col">
-			{#each studentAnalysis.fields as field}
-				{@const renderer = getCell(field.type, field.subType)}
-				<Separator class="w-full" />
-				<div class="px-6 py-4">
-					<h1 class="font-semibold">
-						{field.name}
-					</h1>
-					<Render of={renderer({ value: field })} />
-				</div>
-			{/each}
+			{#if studentAnalysis.fields}
+				{#each studentAnalysis.fields as field}
+					{@const renderer = getCell(field.type, field.subType)}
+					<Separator class="w-full" />
+					<div class="px-6 py-4">
+						<h1 class="font-semibold">
+							{field.name}
+						</h1>
+						<Render of={renderer({ value: field })} />
+					</div>
+				{/each}
+			{/if}
 		</div>
 	</Card.Content>
 </Card.Root>

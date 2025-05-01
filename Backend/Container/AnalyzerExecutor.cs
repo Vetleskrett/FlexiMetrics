@@ -1,9 +1,14 @@
-﻿using Container.Models;
+﻿using Container.Contracts;
+using Container.Models;
 using Database;
 using Database.Models;
+using Docker.DotNet.Models;
 using FileStorage;
 using MassTransit;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
+using System.ComponentModel;
+using System.Diagnostics;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
@@ -14,13 +19,14 @@ public interface IAnalyzerExecutor
     Task RunAnalyzer(RunAnalyzerRequest request, CancellationToken cancellationToken);
 }
 
-public partial class AnalyzerExecutor : IAnalyzerExecutor
+public class AnalyzerExecutor : IAnalyzerExecutor
 {
     private readonly AppDbContext _dbContext;
     private readonly IContainerService _containerService;
     private readonly IFileStorage _fileStorage;
     private readonly SemaphoreSlim _dbLock = new(1);
     private readonly IBus _bus;
+    private readonly ILogger<IAnalyzerExecutor> _logger;
 
     private readonly JsonSerializerOptions _jsonOptions = new()
     {
@@ -29,45 +35,50 @@ public partial class AnalyzerExecutor : IAnalyzerExecutor
         WriteIndented = true
     };
 
-    public AnalyzerExecutor(AppDbContext dbContext, IContainerService containerService, IFileStorage fileStorage, IBus bus)
+    public AnalyzerExecutor(AppDbContext dbContext, IContainerService containerService, IFileStorage fileStorage, IBus bus, ILogger<IAnalyzerExecutor> logger)
     {
         _dbContext = dbContext;
         _containerService = containerService;
         _fileStorage = fileStorage;
         _bus = bus;
+        _logger = logger;
     }
 
     public async Task RunAnalyzer(RunAnalyzerRequest request, CancellationToken cancellationToken)
     {
         try
         {
-            await _dbContext.Analyses
-                .Where(a => a.Id == request.AnalysisId)
-                .ExecuteUpdateAsync(setter => setter.SetProperty(a => a.Status, AnalysisStatus.Running), cancellationToken);
+            var analysisEntries = await _dbContext.AnalysisEntries
+                .Include(ae => ae.Student)
+                .Include(ae => ae.Team)
+                .ThenInclude(t => t!.Students)
+                .Where(ae => ae.AnalysisId == request.AnalysisId)
+                .ToListAsync(cancellationToken);
 
-            await _bus.Publish(new AnalyzerStatusUpdate(request.AnalyzerId), cancellationToken);
-
-            var entries = await GetEntries(request);
-
-            var analyzer = await _dbContext.Analyzers.FindAsync(request.AnalyzerId);
+            var deliveries = await _dbContext.Deliveries
+                .Include(d => d.Fields!)
+                .ThenInclude(f => f.AssignmentField)
+                .Where(d => d.AssignmentId == request.AssignmentId)
+                .ToListAsync(cancellationToken);
 
             var script = await _fileStorage.GetAnalyzerScript(request.CourseId, request.AssignmentId, request.AnalyzerId);
 
-            await _containerService.CreateImage(analyzer!.Id, script, analyzer.Requirements, cancellationToken);
-
-            await Parallel.ForEachAsync(entries, cancellationToken, async (entry, cancellationToken) =>
+            await Parallel.ForEachAsync(analysisEntries, cancellationToken, async (analysisEntry, cancellationToken) =>
             {
-                await RunAnalysisEntry(entry, request, cancellationToken);
+                var delivery = deliveries.FirstOrDefault(d => d.StudentId == analysisEntry.StudentId && d.TeamId == analysisEntry.TeamId);
+                await RunAnalysisEntry(analysisEntry, delivery, request, script, cancellationToken);
             });
 
             await _dbContext.Analyses
                 .Where(a => a.Id == request.AnalysisId)
-                .ExecuteUpdateAsync(setter => setter
+                .ExecuteUpdateAsync(x => x
                     .SetProperty(a => a.Status, AnalysisStatus.Completed)
                     .SetProperty(a => a.CompletedAt, DateTime.UtcNow)
                 , cancellationToken);
 
-            await _bus.Publish(new AnalyzerStatusUpdate(request.AnalyzerId), cancellationToken);
+            await _dbContext.Analyzers
+                .Where(a => a.Id == request.AnalyzerId)
+                .ExecuteUpdateAsync(x => x.SetProperty(a => a.State, AnalyzerState.Standby), cancellationToken);
         }
         catch (OperationCanceledException)
         {
@@ -78,17 +89,14 @@ public partial class AnalyzerExecutor : IAnalyzerExecutor
             await _dbContext.Analyses
                 .Where(a => a.Id == request.AnalysisId)
                 .ExecuteUpdateAsync(setter => setter.SetProperty(a => a.Status, AnalysisStatus.Failed), cancellationToken);
-
-            await _bus.Publish(new AnalyzerStatusUpdate(request.AnalyzerId), cancellationToken);
-
             throw;
         }
     }
 
-    private async Task RunAnalysisEntry(AssignmentEntry entry, RunAnalyzerRequest request, CancellationToken cancellationToken)
+    private async Task RunAnalysisEntry(AnalysisEntry analysisEntry, Delivery? delivery, RunAnalyzerRequest request, string script, CancellationToken cancellationToken)
     {
         cancellationToken.ThrowIfCancellationRequested();
-        var container = await _containerService.CreateContainer(request.AnalyzerId, entry.Id, CancellationToken.None);
+        var container = await _containerService.CreateContainer(request.AnalyzerId, analysisEntry.Id, CancellationToken.None);
 
         cancellationToken.Register(async () =>
         {
@@ -97,25 +105,29 @@ public partial class AnalyzerExecutor : IAnalyzerExecutor
 
         try
         {
-            var entryDTO = AssignmentEntryDTO.MapFrom(entry);
-            var entryJson = JsonSerializer.Serialize(entryDTO, _jsonOptions);
+            await _containerService.CopyFileToContainer(container, script, "script.py", cancellationToken);
+
+            var assignmentEntryDTO = AssignmentEntryDTO.Create(analysisEntry.Student, analysisEntry.Team, delivery);
+            var entryJson = JsonSerializer.Serialize(assignmentEntryDTO, _jsonOptions);
             await _containerService.CopyFileToContainer(container, entryJson, "input.json", cancellationToken);
 
-            foreach (var fileField in entry.Delivery!.Fields!.Where(f => f.AssignmentField!.Type == AssignmentDataType.File))
+            if (delivery?.Fields is not null)
             {
-                var fileMetadata = fileField.GetValue<FileMetadata>();
-                var fileStream = _fileStorage.GetDeliveryField(request.CourseId, request.AssignmentId, fileField.DeliveryId, fileField.Id);
-                await _containerService.CopyFileToContainer(container, fileStream, fileMetadata.FileName, cancellationToken);
+                foreach (var fileField in delivery.Fields.Where(f => f.AssignmentField!.Type == AssignmentDataType.File))
+                {
+                    var fileMetadata = fileField.GetValue<FileMetadata>();
+                    var fileStream = _fileStorage.GetDeliveryField(request.CourseId, request.AssignmentId, fileField.DeliveryId, fileField.Id);
+                    await _containerService.CopyFileToContainer(container, fileStream, fileMetadata.FileName, cancellationToken);
+                }
             }
 
             await _containerService.StartContainer(container, cancellationToken);
 
+            await SaveLogs(container, request, analysisEntry, cancellationToken);
+
             await _containerService.WaitForContainerCompletion(container, cancellationToken);
 
-            await OnAnalysisEntryFinished(container, entry, request, cancellationToken);
-
-            await _bus.Publish(new AnalyzerStatusUpdate(request.AnalyzerId), cancellationToken);
-        }
+            await OnAnalysisEntryFinished(container, analysisEntry, request, cancellationToken);        }
         finally
         {
             if (!cancellationToken.IsCancellationRequested)
@@ -125,52 +137,43 @@ public partial class AnalyzerExecutor : IAnalyzerExecutor
         }
     }
 
-    private async Task OnAnalysisEntryFinished(string container, AssignmentEntry entry, RunAnalyzerRequest request, CancellationToken cancellationToken)
+    private async Task SaveLogs(string container, RunAnalyzerRequest request, AnalysisEntry analysisEntry, CancellationToken cancellationToken)
     {
-        var (logInformation, logError) = await _containerService.GetLogs(container, cancellationToken);
+        var (stdout, stderr) = await _containerService.GetLogStream(container, cancellationToken);
 
-        var analysisEntry = new AnalysisEntry
+        var category = analysisEntry.Student?.Name ?? $"Team {analysisEntry.Team!.TeamNr}";
+
+        var logOut = string.IsNullOrWhiteSpace(stdout) ? null : new AnalyzerLog
         {
             Id = Guid.NewGuid(),
-            AnalysisId = request.AnalysisId,
-            StudentId = entry.Student?.Id,
-            TeamId = entry.Team?.Id,
-            Fields = [],
-            LogInformation = logInformation,
-            LogError = logError,
-            CompletedAt = DateTime.UtcNow
+            Timestamp = DateTime.UtcNow,
+            Type = AnalyzerLogType.Information,
+            Category = category,
+            Text = stdout,
+            AnalyzerId = request.AnalyzerId
         };
 
-        using var outputStream = await _containerService.CopyFileFromContainer(container, "output.json");
-
-        if (outputStream is not null)
+        var logErr = string.IsNullOrWhiteSpace(stderr) ? null : new AnalyzerLog
         {
-            var outputFields = await JsonSerializer.DeserializeAsync<Dictionary<string, OutputField>>(outputStream, _jsonOptions, cancellationToken);
-            analysisEntry.Fields = outputFields!.Select(pair =>
-                new AnalysisField
-                {
-                    Id = Guid.NewGuid(),
-                    AnalysisEntryId = analysisEntry.Id,
-                    Name = pair.Key,
-                    Type = pair.Value.Type,
-                    SubType = pair.Value.SubType,
-                    Value = pair.Value.Value,
-                }
-            ).ToList();
-
-            foreach (var fileField in analysisEntry.Fields.Where(f => f.Type == AnalysisFieldType.File))
-            {
-                cancellationToken.ThrowIfCancellationRequested();
-                var fileMetadata = fileField.GetValue<FileMetadata>();
-                using var fileStream = await _containerService.CopyFileFromContainer(container, fileMetadata.FileName);
-                await _fileStorage.WriteAnalysisField(request.CourseId, request.AssignmentId, request.AnalyzerId, request.AnalysisId, analysisEntry.Id, fileField.Id, fileStream);
-            }
-        }
+            Id = Guid.NewGuid(),
+            Timestamp = DateTime.UtcNow,
+            Type = AnalyzerLogType.Error,
+            Category = category,
+            Text = stderr,
+            AnalyzerId = request.AnalyzerId
+        };
 
         await _dbLock.WaitAsync(cancellationToken);
         try
         {
-            _dbContext.AnalysisEntries.Add(analysisEntry);
+            if (logErr is not null)
+            {
+                _dbContext.AnalyzerLogs.Add(logErr);
+            }
+            if (logOut is not null)
+            {
+                _dbContext.AnalyzerLogs.Add(logOut);
+            }
             await _dbContext.SaveChangesAsync(cancellationToken);
         }
         finally
@@ -179,51 +182,50 @@ public partial class AnalyzerExecutor : IAnalyzerExecutor
         }
     }
 
-    private async Task<List<AssignmentEntry>> GetEntries(RunAnalyzerRequest request)
+    private async Task OnAnalysisEntryFinished(string container, AnalysisEntry analysisEntry, RunAnalyzerRequest request, CancellationToken cancellationToken)
     {
-        var assignment = await _dbContext.Assignments.FindAsync(request.AssignmentId);
+        using var outputStream = await _containerService.CopyFileFromContainer(container, "output.json");
 
-        if (assignment!.CollaborationType == CollaborationType.Individual)
+        if (outputStream is null)
         {
-            return await _dbContext.CourseStudents
-                .Where(cs => cs.CourseId == request.CourseId)
-                .Select(cs => cs.Student!)
-                .Select(student =>
-                    new AssignmentEntry
-                    {
-                        Student = student,
-                        Team = null,
-                        Delivery = _dbContext.Deliveries
-                            .Include(d => d.Fields!)
-                            .ThenInclude(f => f.AssignmentField)
-                            .FirstOrDefault(d =>
-                                d.StudentId == student.Id &&
-                                d.AssignmentId == request.AssignmentId
-                            )
-                    }
-                )
-                .ToListAsync();
+            return;
         }
-        else
+
+        var outputFields = await JsonSerializer.DeserializeAsync<Dictionary<string, OutputField>>(outputStream, _jsonOptions, cancellationToken);
+
+        var analysisFields = outputFields!.Select(pair =>
+            new AnalysisField
+            {
+                Id = Guid.NewGuid(),
+                AnalysisEntryId = analysisEntry.Id,
+                Name = pair.Key,
+                Type = pair.Value.Type,
+                SubType = pair.Value.SubType,
+                Value = pair.Value.Value,
+            }
+        ).ToList();
+
+        foreach (var fileField in analysisFields.Where(f => f.Type == AnalysisFieldType.File || f.Type == AnalysisFieldType.Image))
         {
-            return await _dbContext.Teams
-                .Where(t => t.CourseId == request.CourseId)
-                .Include(t => t.Students)
-                .Select(team =>
-                    new AssignmentEntry
-                    {
-                        Student = null,
-                        Team = team,
-                        Delivery = _dbContext.Deliveries
-                            .Include(d => d.Fields!)
-                            .ThenInclude(f => f.AssignmentField)
-                            .FirstOrDefault(d =>
-                                d.TeamId == team.Id &&
-                                d.AssignmentId == request.AssignmentId
-                            )
-                    }
-                )
-                .ToListAsync();
+            cancellationToken.ThrowIfCancellationRequested();
+            var fileMetadata = fileField.GetValue<FileMetadata>();
+            using var fileStream = await _containerService.CopyFileFromContainer(container, fileMetadata.FileName);
+            if (fileStream is not null)
+            {
+                await _fileStorage.WriteAnalysisField(request.CourseId, request.AssignmentId, request.AnalyzerId, request.AnalysisId, analysisEntry.Id, fileField.Id, fileStream);
+            }
+        }
+
+        await _dbLock.WaitAsync(cancellationToken);
+        try
+        {
+            analysisEntry.CompletedAt = DateTime.UtcNow;
+            _dbContext.AnalysisFields.AddRange(analysisFields);
+            await _dbContext.SaveChangesAsync(cancellationToken);
+        }
+        finally
+        {
+            _dbLock.Release();
         }
     }
 }

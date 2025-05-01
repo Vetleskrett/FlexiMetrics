@@ -18,7 +18,7 @@ namespace Database.Migrations
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "9.0.0")
+                .HasAnnotation("ProductVersion", "9.0.4")
                 .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
@@ -41,9 +41,6 @@ namespace Database.Migrations
                     b.Property<int>("Status")
                         .HasColumnType("integer");
 
-                    b.Property<int>("TotalNumEntries")
-                        .HasColumnType("integer");
-
                     b.HasKey("Id");
 
                     b.HasIndex("AnalyzerId");
@@ -60,16 +57,8 @@ namespace Database.Migrations
                     b.Property<Guid>("AnalysisId")
                         .HasColumnType("uuid");
 
-                    b.Property<DateTime>("CompletedAt")
+                    b.Property<DateTime?>("CompletedAt")
                         .HasColumnType("timestamp with time zone");
-
-                    b.Property<string>("LogError")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<string>("LogInformation")
-                        .IsRequired()
-                        .HasColumnType("text");
 
                     b.Property<Guid?>("StudentId")
                         .HasColumnType("uuid");
@@ -123,6 +112,10 @@ namespace Database.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
+                    b.Property<string>("AptPackages")
+                        .IsRequired()
+                        .HasColumnType("text");
+
                     b.Property<Guid>("AssignmentId")
                         .HasColumnType("uuid");
 
@@ -138,11 +131,44 @@ namespace Database.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
+                    b.Property<int>("State")
+                        .HasColumnType("integer");
+
                     b.HasKey("Id");
 
                     b.HasIndex("AssignmentId");
 
                     b.ToTable("Analyzers");
+                });
+
+            modelBuilder.Entity("Database.Models.AnalyzerLog", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("AnalyzerId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Category")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("Text")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<DateTime>("Timestamp")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<int>("Type")
+                        .HasColumnType("integer");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("AnalyzerId");
+
+                    b.ToTable("AnalyzerLogs");
                 });
 
             modelBuilder.Entity("Database.Models.Assignment", b =>
@@ -513,6 +539,17 @@ namespace Database.Migrations
                         .IsRequired();
 
                     b.Navigation("Assignment");
+                });
+
+            modelBuilder.Entity("Database.Models.AnalyzerLog", b =>
+                {
+                    b.HasOne("Database.Models.Analyzer", "Analyzer")
+                        .WithMany()
+                        .HasForeignKey("AnalyzerId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Analyzer");
                 });
 
             modelBuilder.Entity("Database.Models.Assignment", b =>

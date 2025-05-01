@@ -26,6 +26,7 @@ import type {
   Analysis,
   AnalyzerAnalyses,
   CourseStudent,
+  AnalyzerLog,
 } from "./types/";
 
 export async function postFeedback(feedback: CreateFeedback) : Promise<AxiosResponse<Feedback>> {
@@ -120,6 +121,10 @@ export async function deleteAssigmentField(assignmentFieldId: string) : Promise<
   return axios.delete(`/api/assignment-fields/${assignmentFieldId}`)
 }
 
+export async function getAnalyzer(analyzerId: string) : Promise<AxiosResponse<Analyzer>>{
+  return axios.get(`/api/analyzers/${analyzerId}`)
+}
+
 export async function postAnalyzer(request: CreateAnalyzer) : Promise<AxiosResponse<Analyzer>>{
   return axios.post(`/api/analyzers`,request)
 }
@@ -148,6 +153,10 @@ export async function cancelAnalyzer(analyzerId: string) : Promise<AxiosResponse
   });
 }
 
+export async function getAnalyzerLogs(analyzerId: string) : Promise<AxiosResponse<AnalyzerLog[]>>{
+  return axios.get(`/api/analyzers/${analyzerId}/logs`)
+}
+
 export async function getAnalyzerAnalyses(analyzerId: string) : Promise<AxiosResponse<AnalyzerAnalyses>> {
   return axios.get(`/api/analyzers/${analyzerId}/analyses`)
 }
@@ -158,8 +167,4 @@ export async function getAnalysis(analysisId: string) : Promise<AxiosResponse<An
 
 export async function deleteAnalysis(analysisId: string) : Promise<AxiosResponse> {
   return axios.delete(`/api/analyses/${analysisId}`)
-}
-
-export function getAnalyzerStatusEventSource(analyzerId: string) : EventSource {
-  return new EventSource(`/api/analyzers/${analyzerId}/status`);
 }

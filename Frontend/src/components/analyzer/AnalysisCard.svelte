@@ -32,6 +32,30 @@
 		subType?: AnalysisFieldType;
 	};
 
+	const getSorter = (type: AnalysisFieldType) => {
+		switch(type){
+			case 'Integer':
+			case 'Float':
+			case 'Boolean':
+				return (a: any, b: any) => a?.value - b?.value;
+
+			case 'String':
+			case 'URL':
+			case 'Json':
+			case 'DateTime':
+				return (a: any, b: any) => a?.value?.localeCompare(b?.value);
+
+			case 'Range':
+				return (a: any, b: any) => a?.value?.Value - b?.value?.Value;
+
+			case 'File':
+				return (a: any, b: any) => a?.value?.FileName?.localeCompare(b?.value?.FileName);
+
+			case 'List':
+				return (a: any, b: any) => a?.value?.length - b?.value?.length;
+		}
+	}
+
 	const headers: Header[] = [];
 
 	for (let field of analysis.analysisEntries.flatMap((d) => d.fields)) {
@@ -62,7 +86,7 @@
 					header: 'Student',
 					plugins: {
 						sort: {
-							compareFn: (a: any, b: any) => a.value - b.value
+							compareFn: getSorter('String')
 						}
 					},
 					cell: getCell('String')
@@ -77,7 +101,7 @@
 					header: 'Team',
 					plugins: {
 						sort: {
-							compareFn: (a: any, b: any) => a.value - b.value
+							compareFn: getSorter('Integer')
 						}
 					},
 					cell: getCell('String')
@@ -94,29 +118,12 @@
 				plugins: {
 					filter: getFilter(header.type),
 					sort: {
-						compareFn: (a: any, b: any) => a?.value - b?.value
+						compareFn: getSorter(header.type)
 					}
 				},
 				cell: getCell(header.type, header.subType)
 			})
-		),
-		table.column({
-			id: 'Logs',
-			accessor: (analysisEntry) => {
-				return {
-					value:
-						analysisEntry.logInformation +
-						(analysisEntry.logError ? '\n' + analysisEntry.logError : '')
-				};
-			},
-			header: 'Logs',
-			plugins: {
-				sort: {
-					compareFn: (a: any, b: any) => a.value - b.value
-				}
-			},
-			cell: getCell('Json')
-		})
+		)
 	]);
 
 	const { headerRows, pageRows, tableAttrs, tableBodyAttrs, pluginStates, flatColumns } =
@@ -124,8 +131,6 @@
 
 	const { hiddenColumnIds } = pluginStates.hide;
 	let showColumnForId = Object.fromEntries(flatColumns.map((col) => [col.id, true]));
-
-	showColumnForId['Logs'] = false;
 
 	$: $hiddenColumnIds = Object.entries(showColumnForId)
 		.filter(([, show]) => !show)
@@ -182,7 +187,7 @@
 					{/each}
 				</DropdownMenu.Content>
 			</DropdownMenu.Root>
-			{#if analysis.status == 'Completed'}
+			{#if analysis.status != 'Running'}
 				<div class="flex items-center gap-4">
 					<DropdownMenu.Root>
 						<DropdownMenu.Trigger asChild let:builder>
@@ -203,15 +208,6 @@
 									{header.name}
 								</DropdownMenu.CheckboxItem>
 							{/each}
-							<DropdownMenu.CheckboxItem
-								bind:checked={showColumnForId['Logs']}
-								on:click={(e) => {
-									e.preventDefault();
-									showColumnForId['Logs'] = !showColumnForId['Logs'];
-								}}
-							>
-								Logs
-							</DropdownMenu.CheckboxItem>
 						</DropdownMenu.Content>
 					</DropdownMenu.Root>
 					<DropdownMenu.Root>
@@ -268,17 +264,24 @@
 														<Render of={props.filter.render} />
 													</div>
 												{/if}
-												<Button variant="ghost" on:click={props.sort.toggle} class="px-2">
-													<Render of={cell.render()} />
+												{#if analysis.status != 'Running'}
+													<Button variant="ghost" on:click={props.sort.toggle} class="px-2">
+														<Render of={cell.render()} />
 
-													{#if sortColumn?.id == cell.id && sortColumn?.order == 'asc'}
-														<ChevronUp class="ml-1 h-4 w-4" />
-													{:else if sortColumn?.id == cell.id && sortColumn?.order == 'desc'}
-														<ChevronDown class="ml-1 h-4 w-4" />
-													{:else}
-														<ChevronsUpDown class="ml-1 h-4 w-4" />
-													{/if}
-												</Button>
+														{#if sortColumn?.id == cell.id && sortColumn?.order == 'asc'}
+															<ChevronUp class="ml-1 h-4 w-4" />
+														{:else if sortColumn?.id == cell.id && sortColumn?.order == 'desc'}
+															<ChevronDown class="ml-1 h-4 w-4" />
+														{:else}
+															<ChevronsUpDown class="ml-1 h-4 w-4" />
+														{/if}
+													</Button>
+												{:else}
+													<Button variant="ghost" class="px-2">
+														<Render of={cell.render()} />
+														<div class="ml-1 h-4 w-4" />
+													</Button>
+												{/if}
 											</div>
 										</Table.Head>
 									</Subscribe>

@@ -43,7 +43,7 @@ class Delivery(JSONWizard):
         return json.loads(self.fields[name])
 
     def get_filename(self, name: str) -> str:
-        return str(self.fields[name])
+        return str(self.fields[name]["FileName"])
 
     def get_str_list(self, name: str) -> List[str]:
         return [str(f) for f in self.fields[name]]
@@ -155,5 +155,12 @@ class Analysis:
         (content_type, _) = mimetypes.guess_type(value)
         self.__dict__[name] = {
             "Type": "File",
+            "Value": {"FileName": value, "ContentType": content_type},
+        }
+
+    def set_image(self, name: str, value: str):
+        (content_type, _) = mimetypes.guess_type(value)
+        self.__dict__[name] = {
+            "Type": "Image",
             "Value": {"FileName": value, "ContentType": content_type},
         }

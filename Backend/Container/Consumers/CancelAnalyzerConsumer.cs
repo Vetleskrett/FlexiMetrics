@@ -1,11 +1,11 @@
-﻿using Container.Models;
+﻿using Container.Contracts;
 using Database;
 using Database.Models;
 using FileStorage;
 using MassTransit;
 using Microsoft.EntityFrameworkCore;
 
-namespace Container;
+namespace Container.Consumers;
 
 public class CancelAnalyzerConsumer : IConsumer<CancelAnalyzerRequest>
 {
@@ -39,7 +39,5 @@ public class CancelAnalyzerConsumer : IConsumer<CancelAnalyzerRequest>
 
             await _dbContext.Analyses.Where(a => a.Id == analysis.Id).ExecuteDeleteAsync();
         }
-
-        await _bus.Publish(new AnalyzerStatusUpdate(request.AnalyzerId));
     }
 }

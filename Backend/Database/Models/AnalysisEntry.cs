@@ -13,7 +13,5 @@ public class AnalysisEntry
     public required Guid? TeamId { get; set; }
     public Team? Team { get; set; }
     public required List<AnalysisField> Fields { get; set; }
-    public required string LogInformation { get; set; }
-    public required string LogError { get; set; }
-    public required DateTime CompletedAt { get; set; }
+    public required DateTime? CompletedAt { get; set; }
 }

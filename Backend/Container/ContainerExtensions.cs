@@ -1,4 +1,5 @@
-﻿using Docker.DotNet;
+﻿using Container.Consumers;
+using Docker.DotNet;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Container;
@@ -11,5 +12,6 @@ public static class ContainerExtensions
         services.AddSingleton<IContainerService, ContainerService>();
         services.AddSingleton<IAnalyzerCancellationStore, AnalyzerCancellationStore>();
         services.AddScoped<IAnalyzerExecutor, AnalyzerExecutor>();
+        services.AddHostedService<StartupBuildWorker>();
     }
 }

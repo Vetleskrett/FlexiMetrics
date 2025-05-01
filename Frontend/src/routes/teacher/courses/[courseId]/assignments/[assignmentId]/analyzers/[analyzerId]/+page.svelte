@@ -9,23 +9,32 @@
 	import Play from 'lucide-svelte/icons/play';
 	import X from 'lucide-svelte/icons/x';
 	import CustomButton from 'src/components/CustomButton.svelte';
-	import AnalyzerRunningCard from 'src/components/analyzer/AnalyzerRunningCard.svelte';
-	import type { Analysis, Analyzer, AnalyzerAnalyses, Assignment, Course } from 'src/types/';
-	import { ArrowDownToLine } from 'lucide-svelte';
+	import type {
+		Analyzer,
+		AnalyzerAnalyses,
+		Assignment,
+		Course
+	} from 'src/types/';
+	import { ArrowDownToLine, Cog, Text } from 'lucide-svelte';
 	import {
 		deleteAnalyzer,
 		cancelAnalyzer,
 		deleteAnalysis,
 		getAnalysis,
-		getAnalyzerStatusEventSource,
-		getAnalyzerAnalyses,
-		runAnalyzer
+		runAnalyzer,
+
+		getAnalyzer,
+
+		getAnalyzerAnalyses
+
+
 	} from 'src/api';
 	import * as Card from '$lib/components/ui/card';
-	import { onDestroy, afterUpdate } from 'svelte';
 	import { goto } from '$app/navigation';
 	import { handleErrors } from 'src/utils';
 	import CustomAlertDialog from 'src/components/CustomAlertDialog.svelte';
+	import { Badge } from 'src/lib/components/ui/badge';
+	import { onMount } from 'svelte';
 
 	const courseId = $page.params.courseId;
 	const assignmentId = $page.params.assignmentId;
@@ -37,115 +46,73 @@
 		analyses: AnalyzerAnalyses;
 	};
 
-	$: analysis = data.analyses.latest;
+	$: analyses = data.analyses;
+	$: analyzer = data.analyzer;
+	$: analysis = analyses.latest;
 
-	type RunningAnalyzerInfo = {
-		eventSource: EventSource;
-		analyzerId: string;
-		analysis: Analysis;
-	};
+	let interval: ReturnType<typeof setInterval>;
 
-	let runningAnalyzerInfo: RunningAnalyzerInfo | undefined = undefined;
+	const updateAnalysis = async () => {
+		const analysisResponse = await getAnalysis(analysis!.id);
+		analysis = analysisResponse.data;
+	}
 
-	const subscribeToEventSource = () => {
-		if (!analysis) {
-			return;
-		}
-		if (analysis.status != 'Started' && analysis.status != 'Running') {
-			return;
-		}
-		if (runningAnalyzerInfo) {
-			return;
-		}
+	const updateAnalyzer = async () => {
+		const response = await getAnalyzer($page.params.analyzerId);
+		analyzer = response.data;
+	}
 
-		console.log('Subscribing to event source');
-
-		runningAnalyzerInfo = {
-			eventSource: getAnalyzerStatusEventSource($page.params.analyzerId),
-			analyzerId: $page.params.analyzerId,
-			analysis: analysis
-		};
-
-		runningAnalyzerInfo.eventSource.onmessage = async (event) => {
-			const upatedAnalysis = JSON.parse(event.data) as Analysis | null;
-
-			if (upatedAnalysis == null) {
-				update();
-				return;
-			}
-
-			runningAnalyzerInfo!.analysis = upatedAnalysis;
-
-			if (runningAnalyzerInfo!.analysis.id == analysis?.id) {
-				analysis = runningAnalyzerInfo!.analysis;
-			}
-		};
-
-		runningAnalyzerInfo.eventSource.onerror = async () => {
-			closeEventSource();
-		};
-	};
-
-	const closeEventSource = () => {
-		if (runningAnalyzerInfo) {
-			console.log('Closing event source');
-			runningAnalyzerInfo.eventSource.close();
-			runningAnalyzerInfo = undefined;
-		}
-	};
+	const updateAnalyses = async () => {
+		const response = await getAnalyzerAnalyses($page.params.analyzerId);
+		analyses = response.data;
+		analysis = analyses.latest;
+	}
 
 	const update = async () => {
-		closeEventSource();
-
-		await handleErrors(async () => {
-			const response = await getAnalyzerAnalyses($page.params.analyzerId);
-			data.analyses = response.data;
-			analysis = data.analyses.latest;
-		});
-
-		subscribeToEventSource();
-	};
-
-	onDestroy(() => {
-		closeEventSource();
-	});
-
-	afterUpdate(() => {
-		if (runningAnalyzerInfo?.analyzerId != $page.params.analyzerId) {
-			closeEventSource();
+		if (analysis?.status == 'Running') {
+			await updateAnalysis();
 		}
 
-		subscribeToEventSource();
-	});
+		if (analyzer.state != 'Standby') {
+			await updateAnalyzer();
+		}
+	}
+
+	onMount(() => {
+		interval = setInterval(update, 2000);
+
+		return () => {
+			clearInterval(interval);
+		};
+  	});
 
 	const onCancel = async () => {
 		await handleErrors(async () => {
 			await cancelAnalyzer($page.params.analyzerId);
+			await updateAnalyzer();
+			await updateAnalyses();
 		});
 	};
 
 	const onRun = async () => {
 		await handleErrors(async () => {
 			await runAnalyzer($page.params.analyzerId);
-			await update();
+			await updateAnalyzer();
+			await updateAnalyses();
 		});
 	};
 
 	const onSetAnalysis = async (analysisId: string) => {
-		if (analysisId == runningAnalyzerInfo?.analysis.id) {
-			analysis = runningAnalyzerInfo.analysis;
-		} else {
-			await handleErrors(async () => {
-				const analysisResponse = await getAnalysis(analysisId);
-				analysis = analysisResponse.data;
-			});
-		}
+		await handleErrors(async () => {
+			const analysisResponse = await getAnalysis(analysisId);
+			analysis = analysisResponse.data;
+		});
 	};
 
 	const onDeleteAnalysis = async () => {
 		await handleErrors(async () => {
 			await deleteAnalysis(analysis!.id);
-			await update();
+			await updateAnalyses();
 		});
 	};
 
@@ -167,7 +134,7 @@
 	action="Delete"
 />
 
-<div class="m-auto mt-4 flex w-max flex-col items-center justify-center gap-10">
+<div class="m-auto mt-4 mb-16 flex w-max flex-col items-center justify-center gap-10">
 	<Breadcrumb.Root class="self-start">
 		<Breadcrumb.List>
 			<Breadcrumb.Item>
@@ -185,7 +152,7 @@
 			</Breadcrumb.Link>
 			<Breadcrumb.Separator />
 			<Breadcrumb.Item>
-				<Breadcrumb.Page>{data.analyzer.name}</Breadcrumb.Page>
+				<Breadcrumb.Page>{analyzer.name}</Breadcrumb.Page>
 			</Breadcrumb.Item>
 		</Breadcrumb.List>
 	</Breadcrumb.Root>
@@ -198,24 +165,40 @@
 				src="https://img.icons8.com/fluency/480/artificial-intelligence--v2.png"
 				alt="knowledge-sharing"
 			/>
-			<h1 class="ml-4 text-4xl font-semibold">{data.analyzer.name}</h1>
+			<h1 class="ml-4 text-4xl font-semibold">{analyzer.name}</h1>
 		</div>
+
 		<div class="flex items-center gap-2">
-			{#if runningAnalyzerInfo}
-				{#if runningAnalyzerInfo.analysis.status == 'Canceled'}
-					<p>Cancelling...</p>
-				{:else}
-					<CustomButton color="red" on:click={onCancel}>
-						<X size="20" />
-						<p>Cancel</p>
-					</CustomButton>
-				{/if}
+			{#if analyzer.state == 'Building'}
+				<Badge variant="outline">
+					<Cog class="animate-[spin_3000ms_linear_infinite] size-5"/>
+					<span class="px-1">Building</span>
+				</Badge>
+				<CustomButton color="green" disabled={true}>
+					<Play size="20" />
+					<p>Run</p>
+				</CustomButton>
+			{:else if analyzer.state == 'Running'}
+				<Badge variant="outline">
+					<Cog class="animate-[spin_3000ms_linear_infinite] size-5"/>
+					<span class="px-1">Running</span>
+				</Badge>
+				<CustomButton color="red" on:click={onCancel}>
+					<X size="20" />
+					<p>Cancel</p>
+				</CustomButton>
 			{:else}
-				<CustomButton color="blue" on:click={onRun}>
+				<CustomButton color="green" on:click={onRun}>
 					<Play size="20" />
 					<p>Run</p>
 				</CustomButton>
 			{/if}
+
+			<CustomButton color="blue" href="/teacher/courses/{courseId}/assignments/{assignmentId}/analyzers/{$page.params.analyzerId}/logs">
+				<Text/>
+				<p>View Logs</p>
+			</CustomButton>
+
 			<DropdownMenu.Root>
 				<DropdownMenu.Trigger>
 					<EllipsisVertical size={32} />
@@ -241,25 +224,21 @@
 		</div>
 	</div>
 
-	{#key analysis}
-		{#if analysis && runningAnalyzerInfo?.analysis.id == analysis.id}
-			<AnalyzerRunningCard {analysis} />
-		{/if}
-
-		{#if analysis}
+	{#if analysis}
+		{#key analysis}
 			<AnalysisCard
 				{analysis}
-				analyses={data.analyses.analyses}
+				analyses={analyses.analyses}
 				isIndividual={data.assignment.collaborationType == 'Individual'}
 				{onSetAnalysis}
 				{onDeleteAnalysis}
 			/>
-		{:else}
-			<Card.Root class="w-[1080px]">
-				<Card.Content class="text-center">
-					<p>No analyses</p>
-				</Card.Content>
-			</Card.Root>
-		{/if}
-	{/key}
+		{/key}
+	{:else}
+		<Card.Root class="w-[1080px]">
+			<Card.Content class="text-center">
+				<p>No analyses</p>
+			</Card.Content>
+		</Card.Root>
+	{/if}
 </div>
