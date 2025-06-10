@@ -7,7 +7,7 @@ public static class DeliveryEndpoints
 {
     public static void MapDeliveryEndpoints(this WebApplication app)
     {
-        var group = app.MapGroup("").WithTags("Deliveries").RequireAuthorization();
+        var group = app.MapGroup("").WithTags("Deliveries");
 
         group.MapGet("deliveries", async (IDeliveryService deliveryService) =>
         {
@@ -25,7 +25,6 @@ public static class DeliveryEndpoints
         })
         .Produces<DeliveryResponse>()
         .WithName("GetDelivery")
-        .RequireAuthorization("InDelivery")
         .WithSummary("Get delivery by id");
 
         group.MapGet("students/{studentId:guid}/assignments/{assignmentId:guid}/deliveries",
@@ -36,7 +35,6 @@ public static class DeliveryEndpoints
         })
         .Produces<DeliveryResponse>()
         .WithName("GetDeliveryByStudentAssignment")
-        .RequireAuthorization("TeacherForAssignmentOrStudent")
         .WithSummary("Get delivery by student id and assignment id");
 
         group.MapGet("teams/{teamId:guid}/assignments/{assignmentId:guid}/deliveries",
@@ -47,7 +45,6 @@ public static class DeliveryEndpoints
         })
         .Produces<DeliveryResponse>()
         .WithName("GetDeliveryByTeamAssignment")
-        .RequireAuthorization("TeacherForAssignmentOrTeam")
         .WithSummary("Get delivery by team id and assignment id");
 
         group.MapGet("assignments/{assignmentId:guid}/deliveries", async (IDeliveryService deliveryService, Guid assignmentId) =>
@@ -57,7 +54,6 @@ public static class DeliveryEndpoints
         })
         .Produces<IEnumerable<DeliveryResponse>>()
         .WithName("GetAllDeliveriesByAssignment")
-        .RequireAuthorization("TeacherForAssignment")
         .WithSummary("Get all deliveries by assignment id");
 
         group.MapPost("deliveries", async (IDeliveryService deliveryService, CreateDeliveryRequest request) =>
@@ -81,7 +77,6 @@ public static class DeliveryEndpoints
         })
         .Produces<DeliveryResponse>()
         .WithName("UpdateDelivery")
-        .RequireAuthorization("InDelivery")
         .WithSummary("Update delivery by id");
 
         group.MapGet("delivery-fields/{deliveryFieldId:guid}", async (IDeliveryService deliveryService, Guid deliveryFieldId) =>
@@ -91,7 +86,6 @@ public static class DeliveryEndpoints
         })
         .Produces<FileStreamHttpResult>()
         .WithName("DownloadDeliveryFile")
-        .RequireAuthorization("InDeliveryField")
         .WithSummary("Download delivery file");
 
         group.MapPost("delivery-fields/{deliveryFieldId:guid}", async (IDeliveryService deliveryService, IFormFile file, Guid deliveryFieldId) =>
@@ -102,7 +96,6 @@ public static class DeliveryEndpoints
         .Accepts<IFormFile>("multipart/form-data")
         .DisableAntiforgery()
         .WithName("UploadDeliveryFile")
-        .RequireAuthorization("InDeliveryField")
         .WithSummary("Upload delivery file");
 
         group.MapDelete("deliveries/{deliveryId:guid}", async (IDeliveryService deliveryService, Guid deliveryId) =>
@@ -111,7 +104,6 @@ public static class DeliveryEndpoints
             return result.MapToResponse(() => Results.Ok());
         })
         .WithName("DeleteDelivery")
-        .RequireAuthorization("InDelivery")
         .WithSummary("Delete delivery by id");
     }
 }

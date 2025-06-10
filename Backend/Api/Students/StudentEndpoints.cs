@@ -6,7 +6,7 @@ public static class StudentEndpoints
 {
     public static void MapStudentEndpoints(this WebApplication app)
     {
-        var group = app.MapGroup("").WithTags("Students").RequireAuthorization();
+        var group = app.MapGroup("").WithTags("Students");
 
         group.MapGet("students/{studentId:guid}", async (IStudentService studentService, Guid studentId) =>
         {
@@ -24,7 +24,6 @@ public static class StudentEndpoints
         })
         .Produces<IEnumerable<CourseStudentResponse>>()
         .WithName("GetAllStudentsByCourse")
-        .RequireAuthorization("Course")
         .WithSummary("Get all students by course id");
 
         group.MapPost("courses/{courseId:guid}/students", async (IStudentService studentService, Guid courseId, AddStudentsToCourseRequest request) =>
@@ -34,7 +33,6 @@ public static class StudentEndpoints
         })
         .Produces<IEnumerable<CourseStudentResponse>>()
         .WithName("AddStudentsToCourse")
-        .RequireAuthorization("TeacherInCourse")
         .WithSummary("Add students to course");
 
         group.MapDelete("courses/{courseId:guid}/students/{studentId:guid}", async (IStudentService studentService, Guid courseId, Guid studentId) =>
@@ -43,7 +41,6 @@ public static class StudentEndpoints
             return result.MapToResponse(() => Results.Ok());
         })
         .WithName("RemoveStudentFromCourse")
-        .RequireAuthorization("TeacherInCourse")
         .WithSummary("Remove student from course");
     }
 }

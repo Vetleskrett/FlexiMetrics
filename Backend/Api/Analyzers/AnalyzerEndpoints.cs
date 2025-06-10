@@ -7,7 +7,7 @@ public static class AnalyzerEndpoints
 {
     public static void MapAnalyzerEndpoints(this WebApplication app)
     {
-        var group = app.MapGroup("").WithTags("Analyzers").RequireAuthorization();
+        var group = app.MapGroup("").WithTags("Analyzers");
 
         group.MapGet("analyzers", async (IAnalyzerService analyzerService) =>
         {
@@ -25,7 +25,6 @@ public static class AnalyzerEndpoints
         })
         .Produces<AnalyzerResponse>()
         .WithName("GetAnalyzer")
-        .RequireAuthorization("TeacherForAnalyzer")
         .WithSummary("Get analyzer by id");
 
         group.MapPost("analyzers/{analyzerId:guid}/action", async (IAnalyzerService analyzerService, Guid analyzerId, AnalyzerActionRequest request) =>
@@ -34,7 +33,6 @@ public static class AnalyzerEndpoints
             return result.MapToResponse(() => Results.Ok());
         })
         .WithName("StartAnalyzerAction")
-        .RequireAuthorization("TeacherForAnalyzer")
         .WithSummary("Start analyzer action by id");
 
         group.MapGet("assignments/{assignmentId:guid}/analyzers", async (IAnalyzerService analyzerService, Guid assignmentId) =>
@@ -44,7 +42,6 @@ public static class AnalyzerEndpoints
         })
         .Produces<IEnumerable<AnalyzerResponse>>()
         .WithName("GetAllAnalyzersByAssignment")
-        .RequireAuthorization("TeacherForAssignment")
         .WithSummary("Get all analyzers by assignment id");
 
         group.MapPost("analyzers", async (IAnalyzerService analyzerService, CreateAnalyzerRequest request) =>
@@ -59,7 +56,6 @@ public static class AnalyzerEndpoints
         })
         .Produces<AnalyzerResponse>()
         .WithName("CreateAnalyzer")
-        .RequireAuthorization("Teacher")
         .WithSummary("Create new analyzer");
 
         group.MapPut("analyzers/{analyzerId}", async (IAnalyzerService analyzerService, Guid analyzerId, UpdateAnalyzerRequest request) =>
@@ -69,7 +65,6 @@ public static class AnalyzerEndpoints
         })
         .Produces<AnalyzerResponse>()
         .WithName("UpdateAnalyzer")
-        .RequireAuthorization("TeacherForAnalyzer")
         .WithSummary("Update analyzer by id");
 
         group.MapGet("analyzers/{analyzerId:guid}/script", async (IAnalyzerService analyzerService, Guid analyzerId) =>
@@ -79,7 +74,6 @@ public static class AnalyzerEndpoints
         })
         .Produces<FileStreamHttpResult>()
         .WithName("DownloadAnalyzerScript")
-        .RequireAuthorization("TeacherForAnalyzer")
         .WithSummary("Download analyzer script");
 
         group.MapPost("analyzers/{analyzerId:guid}/script", async (IAnalyzerService analyzerService, IFormFile script, Guid analyzerId) =>
@@ -90,7 +84,6 @@ public static class AnalyzerEndpoints
         .Accepts<IFormFile>("multipart/form-data")
         .DisableAntiforgery()
         .WithName("UploadAnalyzerScript")
-        .RequireAuthorization("TeacherForAnalyzer")
         .WithSummary("Upload analyzer script");
 
         group.MapGet("analyzers/{analyzerId:guid}/logs", async (IAnalyzerService analyzerService, Guid analyzerId) =>
@@ -100,7 +93,6 @@ public static class AnalyzerEndpoints
         })
         .Produces<IEnumerable<AnalyzerLogResponse>>()
         .WithName("GetAnalyzerLogs")
-        .RequireAuthorization("TeacherForAnalyzer")
         .WithSummary("Get analyzer logs by analyzer id");
 
         group.MapDelete("analyzers/{analyzerId:guid}", async (IAnalyzerService analyzerService, Guid analyzerId) =>
@@ -109,7 +101,6 @@ public static class AnalyzerEndpoints
             return result.MapToResponse(() => Results.Ok());
         })
         .WithName("DeleteAnalyzer")
-        .RequireAuthorization("TeacherForAnalyzer")
         .WithSummary("Delete analyzer by id");
     }
 }

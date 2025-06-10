@@ -7,7 +7,7 @@ public static class AnalysisEndpoints
 {
     public static void MapAnalysisEndpoints(this WebApplication app)
     {
-        var group = app.MapGroup("").WithTags("Analyses").RequireAuthorization();
+        var group = app.MapGroup("").WithTags("Analyses");
 
         group.MapGet("analyses", async (IAnalysisService analysisService) =>
         {
@@ -25,7 +25,6 @@ public static class AnalysisEndpoints
         })
         .Produces<AnalysisResponse>()
         .WithName("GetAnalysis")
-        .RequireAuthorization("TeacherForAnalysis")
         .WithSummary("Get analysis by id");
 
         group.MapGet("analyzers/{analyzerId:guid}/analyses", async (IAnalysisService analysisService, Guid analyzerId) =>
@@ -35,7 +34,6 @@ public static class AnalysisEndpoints
         })
         .Produces<AnalyzerAnalysesResponse>()
         .WithName("GetAllAnalysesByAnalyzer")
-        .RequireAuthorization("TeacherForAnalyzer")
         .WithSummary("Get all analyses by analyzer id");
 
         group.MapGet("students/{studentId:guid}/assignments/{assignmentId:guid}/analyses", async (IAnalysisService analysisService, Guid studentId, Guid assignmentId) =>
@@ -45,7 +43,6 @@ public static class AnalysisEndpoints
         })
         .Produces<IEnumerable<StudentAnalysisResponse>>()
         .WithName("GetAnalysesByStudentAssignment")
-        .RequireAuthorization("TeacherForAssignmentOrStudent")
         .WithSummary("Get analyses by student id and assignment id");
 
         group.MapGet("teams/{teamId:guid}/assignments/{assignmentId:guid}/analyses", async (IAnalysisService analysisService, Guid teamId, Guid assignmentId) =>
@@ -55,7 +52,6 @@ public static class AnalysisEndpoints
         })
         .Produces<IEnumerable<StudentAnalysisResponse>>()
         .WithName("GetAnalysesByTeamAssignment")
-        .RequireAuthorization("TeacherForAssignmentOrTeam")
         .WithSummary("Get analyses by team id and assignment id");
 
         group.MapGet("analysis-fields/{analysisFieldId:guid}", async (IAnalysisService analysisService, Guid analysisFieldId) =>
@@ -73,7 +69,6 @@ public static class AnalysisEndpoints
             return result.MapToResponse(() => Results.Ok());
         })
         .WithName("DeleteAnalysis")
-        .RequireAuthorization("TeacherForAnalysis")
         .WithSummary("Delete analysis by id");
     }
 }

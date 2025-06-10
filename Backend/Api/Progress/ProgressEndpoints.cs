@@ -6,7 +6,7 @@ public static class ProgressEndpoints
 {
     public static void MapProgressEndpoints(this WebApplication app)
     {
-        var group = app.MapGroup("").WithTags("Progress").RequireAuthorization();
+        var group = app.MapGroup("").WithTags("Progress");
 
         group.MapGet("courses/{courseId:guid}/progress/students", async (IProgressService progressService, Guid courseId) =>
         {
@@ -15,7 +15,6 @@ public static class ProgressEndpoints
         })
         .Produces<IEnumerable<SlimProgressResponse>>()
         .WithName("GetStudentsProgressByCourse")
-        .RequireAuthorization("TeacherInCourse")
         .WithSummary("Get students progress by course id");
 
         group.MapGet("courses/{courseId:guid}/progress/teams", async (IProgressService progressService, Guid courseId) =>
@@ -25,7 +24,6 @@ public static class ProgressEndpoints
         })
         .Produces<IEnumerable<SlimProgressResponse>>()
         .WithName("GetTeamsProgressByCourse")
-        .RequireAuthorization("TeacherInCourse")
         .WithSummary("Get teams progress by course id");
 
         group.MapGet("courses/{courseId:guid}/progress/students/{studentId:guid}", async (IProgressService progressService, Guid courseId, Guid studentId) =>
@@ -35,7 +33,6 @@ public static class ProgressEndpoints
         })
         .Produces<IEnumerable<AssignmentProgressResponse>>()
         .WithName("GetStudentProgressByCourse")
-        .RequireAuthorization("Course")
         .WithSummary("Get student progress by course id and student id");
 
         group.MapGet("courses/{courseId:guid}/progress/teams/{teamId:guid}", async (IProgressService progressService, Guid courseId, Guid teamId) =>
@@ -45,7 +42,6 @@ public static class ProgressEndpoints
         })
         .Produces<IEnumerable<AssignmentProgressResponse>>()
         .WithName("GetTeamProgressByCourse")
-        .RequireAuthorization("Course")
         .WithSummary("Get team progress by course id and team id");
     }
 }

@@ -22,10 +22,6 @@ export const api = axios.create({
   validateStatus: () => true
 })
 
-export async function setAuthToken(token: string){
-  api.defaults.headers.common["Authorization"] = `Bearer ${token}`
-}
-
 export async function getCourses() : Promise<AxiosResponse<Course[]>> {
   return api.get(`courses`)
 }

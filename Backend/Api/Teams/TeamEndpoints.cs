@@ -6,7 +6,7 @@ public static class TeamEndpoints
 {
     public static void MapTeamEndpoints(this WebApplication app)
     {
-        var group = app.MapGroup("").WithTags("Teams").RequireAuthorization();
+        var group = app.MapGroup("").WithTags("Teams");
 
         group.MapGet("teams", async (ITeamService teamService) =>
         {
@@ -15,7 +15,6 @@ public static class TeamEndpoints
         })
         .Produces<IEnumerable<TeamResponse>>()
         .WithName("GetAllTeams")
-        .RequireAuthorization("Admin")
         .WithSummary("Get all teams");
 
         group.MapGet("courses/{courseId:guid}/teams", async (ITeamService teamService, Guid courseId) =>
@@ -25,7 +24,6 @@ public static class TeamEndpoints
         })
         .Produces<IEnumerable<TeamResponse>>()
         .WithName("GetAllTeamsByCourse")
-        .RequireAuthorization("Course")
         .WithSummary("Get all teams by course id");
 
         group.MapGet("teams/{teamId:guid}", async (ITeamService teamService, Guid teamId) =>
@@ -44,7 +42,6 @@ public static class TeamEndpoints
         })
         .Produces<TeamResponse>()
         .WithName("GetTeamByStudentCourse")
-        .RequireAuthorization("Course")
         .WithSummary("Get team by student id and course id");
 
         group.MapPost("teams", async (ITeamService teamService, CreateTeamsRequest request) =>
@@ -59,7 +56,6 @@ public static class TeamEndpoints
         })
         .Produces<IEnumerable<TeamResponse>>()
         .WithName("CreateTeams")
-        .RequireAuthorization("Teacher")
         .WithSummary("Create new teams");
 
         group.MapPost("teams/bulk", async (ITeamService teamService, BulkAddStudentsToTeamsRequest request) =>
@@ -69,7 +65,6 @@ public static class TeamEndpoints
         })
         .Produces<IEnumerable<TeamResponse>>()
         .WithName("BulkAddStudentsToTeams")
-        .RequireAuthorization("Teacher")
         .WithSummary("Bulk add students to teams");
 
         group.MapPost("teams/{teamId:guid}/students", async (ITeamService teamService, Guid teamId, AddStudentToTeamRequest request) =>
@@ -79,7 +74,6 @@ public static class TeamEndpoints
         })
         .Produces<TeamResponse>()
         .WithName("AddStudentEmailToTeam")
-        .RequireAuthorization("TeacherForTeam")
         .WithSummary("Add student to team");
 
         group.MapPost("teams/{teamId:guid}/students/{studentId:guid}", async (ITeamService teamService, Guid teamId, Guid studentId) =>
@@ -98,7 +92,6 @@ public static class TeamEndpoints
         })
         .Produces<TeamResponse>()
         .WithName("RemoveStudentFromTeam")
-        .RequireAuthorization("TeacherForTeam")
         .WithSummary("Remove student from team");
 
         group.MapDelete("teams/{teamId:guid}", async (ITeamService teamService, Guid teamId) =>
@@ -107,7 +100,6 @@ public static class TeamEndpoints
             return result.MapToResponse(() => Results.Ok());
         })
         .WithName("DeleteTeam")
-        .RequireAuthorization("TeacherForTeam")
         .WithSummary("Delete team by id");
     }
 }

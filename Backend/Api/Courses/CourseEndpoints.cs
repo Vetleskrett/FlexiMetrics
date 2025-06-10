@@ -6,7 +6,7 @@ public static class CourseEndpoints
 {
     public static void MapCourseEndpoints(this WebApplication app)
     {
-        var group = app.MapGroup("").WithTags("Courses").RequireAuthorization();
+        var group = app.MapGroup("").WithTags("Courses");
 
         group.MapGet("courses", async (ICourseService courseService) =>
         {
@@ -24,7 +24,6 @@ public static class CourseEndpoints
         })
         .Produces<IEnumerable<CourseResponse>>()
         .WithName("GetAllCoursesByTeacher")
-        .RequireAuthorization("TeacherId")
         .WithSummary("Get all courses by teacher id");
 
         group.MapGet("students/{studentId:guid}/courses", async (ICourseService courseService, Guid studentId) =>
@@ -34,7 +33,6 @@ public static class CourseEndpoints
         })
         .Produces<IEnumerable<CourseResponse>>()
         .WithName("GetAllCoursesByStudent")
-        .RequireAuthorization("StudentId")
         .WithSummary("Get all courses by student id");
 
         group.MapGet("/courses/{courseId:guid}", async (ICourseService courseService, Guid courseId) =>
@@ -44,7 +42,6 @@ public static class CourseEndpoints
         })
         .Produces<CourseResponse>()
         .WithName("GetCourse")
-        .RequireAuthorization("Course")
         .WithSummary("Get course by id");
 
         group.MapPost("courses", async (ICourseService courseService, CreateCourseRequest request) =>
@@ -59,7 +56,6 @@ public static class CourseEndpoints
         })
         .Produces<CourseResponse>()
         .WithName("CreateCourse")
-        .RequireAuthorization("Teacher")
         .WithSummary("Create new course");
 
         group.MapPut("courses/{courseId:guid}", async (ICourseService courseService, Guid courseId, UpdateCourseRequest request) =>
@@ -69,7 +65,6 @@ public static class CourseEndpoints
         })
         .Produces<CourseResponse>()
         .WithName("UpdateCourse")
-        .RequireAuthorization("TeacherInCourse")
         .WithSummary("Update course by id");
 
         group.MapDelete("courses/{courseId:guid}", async (ICourseService courseService, Guid courseId) =>
@@ -78,7 +73,6 @@ public static class CourseEndpoints
             return result.MapToResponse(() => Results.Ok());
         })
         .WithName("DeleteCourse")
-        .RequireAuthorization("TeacherInCourse")
         .WithSummary("Delete course by id");
     }
 }
