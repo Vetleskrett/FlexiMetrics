@@ -48,7 +48,7 @@ public static class WebDevelopment
             Id = Guid.NewGuid(),
             CourseId = course.Id,
             Name = "Web application",
-            DueDate = DateTime.UtcNow + TimeSpan.FromDays(7),
+            DueDate = DateTime.UtcNow - TimeSpan.FromDays(7),
             Published = true,
             CollaborationType = CollaborationType.Teams,
             Mandatory = true,

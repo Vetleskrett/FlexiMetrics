@@ -35,7 +35,7 @@ public static class CppIntroductoryProgramming
             Id = Guid.NewGuid(),
             CourseId = course.Id,
             Name = "HTTP Server",
-            DueDate = DateTime.UtcNow + TimeSpan.FromDays(7),
+            DueDate = DateTime.UtcNow - TimeSpan.FromDays(7),
             Published = true,
             CollaborationType = CollaborationType.Individual,
             Mandatory = true,

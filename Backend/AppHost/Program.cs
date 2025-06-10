@@ -9,23 +9,23 @@ var migrationService = builder.AddProject<Projects.MigrationService>("migrations
     .WithReference(postgresdb)
     .WaitFor(postgresdb);
 
-var api = builder.AddProject<Projects.Api>("api")
-    .WithReference(postgresdb)
-    .WaitForCompletion(migrationService);
-
-#if DEBUG
-
 var seedingService = builder.AddProject<Projects.SeedingService>("seedingservice")
     .WithReference(postgresdb)
     .WaitFor(postgresdb)
     .WaitForCompletion(migrationService);
 
-api.WaitForCompletion(seedingService);
+var api = builder.AddProject<Projects.Api>("api")
+    .WithReference(postgresdb)
+    .WaitForCompletion(migrationService)
+    .WaitForCompletion(seedingService);
+
+#if DEBUG
 
 builder.AddNpmApp("frontend", "../../Frontend", "dev")
     .WithReference(api)
     .WaitFor(api)
     .WithHttpEndpoint(5173, isProxied: false);
+
 #else
 
 builder.AddNpmApp("frontend", "../../Frontend", "start")
