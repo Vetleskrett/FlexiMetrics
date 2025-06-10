@@ -33,7 +33,7 @@ public static class AlgorithmsAndDataStructures
             Id = Guid.NewGuid(),
             CourseId = course.Id,
             Name = "Compression",
-            DueDate = DateTime.UtcNow + TimeSpan.FromDays(7),
+            DueDate = DateTime.UtcNow - TimeSpan.FromDays(7),
             Published = true,
             CollaborationType = CollaborationType.Individual,
             Mandatory = true,
